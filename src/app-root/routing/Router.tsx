@@ -6,9 +6,9 @@ import { LoginPage } from "../../pages/auth/LoginPage";
 import { SignUpPage } from "../../pages/auth/SignUpPage";
 import { OverviewPage } from "../../pages/overview/OverviewPage";
 import { ShipmentPage } from "../../pages/shipment/ShipmentPage";
-import { SettingsPage } from "../../pages/settings/SettingsPage";
-import { UsersPage } from "../../pages/users/UsersPage";
-import { BillingPage } from "../../pages/billing/BillingPage";
+import { LocalCompaniesPage } from "../../pages/LocalCompanies/LocalCompianiesPage";
+import { DriversPage } from "../../pages/Drivers/DriversPage";
+import { FinancePage } from "../../pages/finance/FinancePage";
 
 const router = createBrowserRouter([
   {
@@ -19,9 +19,9 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <DashboardPage /> },
       { path: "overview", element: <OverviewPage /> },
       { path: "shipments", element: <ShipmentPage /> },
-      { path: "settings", element: <SettingsPage /> },
-      { path: "users", element: <UsersPage /> },
-      { path: "billing", element: <BillingPage /> },
+      { path: "local-companies", element: <LocalCompaniesPage /> },
+      { path: "drivers", element: <DriversPage /> },
+      { path: "finance", element: <FinancePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "sign-up", element: <SignUpPage /> },
     ],

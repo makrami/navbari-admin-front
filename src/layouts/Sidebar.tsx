@@ -69,7 +69,7 @@ export function Sidebar() {
 
           {/* Gear */}
           <NavLink
-            to="/settings"
+            to="/local-companies"
             className={({ isActive }) =>
               `relative grid h-12 w-full place-items-center ${
                 isActive ? "" : ""
@@ -88,9 +88,9 @@ export function Sidebar() {
             )}
           </NavLink>
 
-          {/* Users */}
+          {/* Drivers */}
           <NavLink
-            to="/users"
+            to="/drivers"
             className={({ isActive }) =>
               `relative grid h-12 w-full place-items-center ${
                 isActive ? "" : ""
@@ -111,7 +111,7 @@ export function Sidebar() {
 
           {/* Dollar */}
           <NavLink
-            to="/billing"
+            to="/finance"
             className={({ isActive }) =>
               `relative grid h-12 w-full place-items-center ${
                 isActive ? "" : ""

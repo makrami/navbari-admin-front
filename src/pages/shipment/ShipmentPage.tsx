@@ -1,10 +1,6 @@
 import { useState } from "react";
-import {
-  Shipment,
-  SearchShipment,
-  AddShipment,
-  ShipmentItem,
-} from "../../components";
+import { SearchShipment, AddShipment, ShipmentItem } from "../../components";
+import { ListPanel } from "../../shared/components/ui/ListPanel";
 import { DetailsPanel } from "./details/DetailsPanel";
 import { Segments } from "./segments/Segments";
 import { ShipmentInfoCard } from "./details/components/ShipmentInfoCard";
@@ -177,7 +173,7 @@ export function ShipmentPage() {
 
   return (
     <div className="flex w-full h-screen overflow-hidden">
-      <Shipment title="Shipment">
+      <ListPanel title="Shipment">
         <SearchShipment />
         <AddShipment />
         <div className="grid gap-4">
@@ -198,10 +194,10 @@ export function ShipmentPage() {
             />
           ))}
         </div>
-      </Shipment>
+      </ListPanel>
 
       {/* Right-side details layout container with independent scroll */}
-      <div className="flex-1 h-screen  max-w-5xl mx-auto overflow-hidden">
+      <div className="flex-1 h-screen bg-slate-100 max-w-5xl mx-auto overflow-hidden">
         <div className="h-full overflow-y-auto no-scrollbar">
           <div className="p-9 flex flex-col gap-4">
             <DetailsPanel className="min-h-0 p-0" title="Details">
