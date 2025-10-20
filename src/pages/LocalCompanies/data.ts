@@ -1,9 +1,9 @@
 import type { Company } from "./types";
-import comppanielogo1 from "../../assets/images/companieslogo/com1.png";
-import comppanielogo2 from "../../assets/images/companieslogo/com2.png";
-import comppanielogo3 from "../../assets/images/companieslogo/com3.png";
-import comppanielogo4 from "../../assets/images/companieslogo/com4.png";
-import comppanielogo5 from "../../assets/images/companieslogo/com5.png";
+import comppanielogo1 from "../../assets/images/companieslogo/company1.png";
+import comppanielogo2 from "../../assets/images/companieslogo/company2.png";
+import comppanielogo3 from "../../assets/images/companieslogo/company3.png";
+import comppanielogo4 from "../../assets/images/companieslogo/company4.png";
+import comppanielogo5 from "../../assets/images/companieslogo/company5.png";
 export const COMPANIES: Company[] = [
   {
     id: "c1",
