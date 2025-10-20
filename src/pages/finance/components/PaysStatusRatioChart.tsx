@@ -22,7 +22,7 @@ export function PaysStatusRatioChart() {
                 data={statusData}
                 cx="50%"
                 cy="50%"
-                innerRadius={750}
+                innerRadius={70}
                 outerRadius={110}
                 paddingAngle={0}
                 dataKey="value"
