@@ -1,5 +1,6 @@
 export type DriverStatus = "pending" | "active" | "rejected" | "inactive";
 
+
 export type Driver = {
   id: string;
   name: string;

@@ -1,12 +1,20 @@
 import ReactCountryFlag from "react-country-flag";
 import { ArrowRight, UsersIcon, Star } from "lucide-react";
 import { cn } from "../../shared/utils/cn";
+import imgAvatar from "../../assets/images/avatar.png";
+
+export type ShipmentStatus =
+  | "In Origin"
+  | "Delivered"
+  | "Loading"
+  | "In Transit"
+  | "Customs";
 
 type ShipmentItemProps = {
   className?: string;
   title?: string;
   id?: string;
-  status?: "In Origin" | "Delivered" | "Loading";
+  status?: ShipmentStatus;
   fromCountryCode?: string; // ISO 3166-1 alpha-2, e.g., "CN"
   toCountryCode?: string; // ISO 3166-1 alpha-2, e.g., "RU"
   progressPercent?: number; // 0-100
@@ -21,7 +29,6 @@ type ShipmentItemProps = {
     isCompleted?: boolean;
   }[];
 };
-import imgAvatar from "../../assets/images/avatar.png";
 
 export function ShipmentItem({
   className,

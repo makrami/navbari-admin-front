@@ -9,11 +9,11 @@ import {
   CalendarRange,
   Clock3,
   Building2,
+  UserRoundIcon,
 } from "lucide-react";
 import { InfoCard } from "../../../../shared/components/ui/InfoCard";
 import FinancialSection from "./FinancialSection";
 import DocumentsSection from "./DocumentsSection";
-import avatar from "../../../../assets/images/avatar.png";
 export type SegmentData = {
   step: number;
   place: string;
@@ -147,9 +147,19 @@ export function SegmentDetails({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="relative inline-flex items-center justify-center rounded-full bg-slate-200 size-4 overflow-hidden">
-            <img alt="" src={avatar} className="block size-full object-cover" />
-          </span>
+          {data.assigneeAvatarUrl ? (
+            <span className="relative inline-flex items-center justify-center rounded-full bg-slate-200 size-4 overflow-hidden">
+              <img
+                alt=""
+                src={data.assigneeAvatarUrl}
+                className="block size-full object-cover"
+              />
+            </span>
+          ) : (
+            <span className="relative inline-flex items-center justify-center rounded-full bg-slate-200 size-4">
+              <UserRoundIcon className="size-2.5 text-slate-500" />
+            </span>
+          )}
 
           {data.assigneeName ? (
             <span className="text-sm font-medium text-slate-900">

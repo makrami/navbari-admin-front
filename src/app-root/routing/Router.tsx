@@ -1,4 +1,8 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 import { AppLayout } from "../../layouts/AppLayout";
 import { DashboardPage } from "../../pages/dashboard/DashboardPage";
 import { NotFoundPage } from "../../pages/misc/NotFoundPage";
@@ -9,21 +13,82 @@ import { ShipmentPage } from "../../pages/shipment/ShipmentPage";
 import { LocalCompaniesPage } from "../../pages/LocalCompanies/LocalCompianiesPage";
 import { DriversPage } from "../../pages/Drivers/DriversPage";
 import { FinancePage } from "../../pages/finance/FinancePage";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PublicRoute } from "./PublicRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
     children: [
-      { index: true, element: <LoginPage /> },
-      { path: "dashboard", element: <DashboardPage /> },
-      { path: "overview", element: <OverviewPage /> },
-      { path: "shipments", element: <ShipmentPage /> },
-      { path: "local-companies", element: <LocalCompaniesPage /> },
-      { path: "drivers", element: <DriversPage /> },
-      { path: "finance", element: <FinancePage /> },
-      { path: "login", element: <LoginPage /> },
-      { path: "sign-up", element: <SignUpPage /> },
+      {
+        index: true,
+        element: <Navigate to="/login" replace />,
+      },
+      {
+        path: "login",
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "sign-up",
+        element: (
+          <PublicRoute>
+            <SignUpPage />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "dashboard",
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "overview",
+        element: (
+          <ProtectedRoute>
+            <OverviewPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "shipments",
+        element: (
+          <ProtectedRoute>
+            <ShipmentPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "local-companies",
+        element: (
+          <ProtectedRoute>
+            <LocalCompaniesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "drivers",
+        element: (
+          <ProtectedRoute>
+            <DriversPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "finance",
+        element: (
+          <ProtectedRoute>
+            <FinancePage />
+          </ProtectedRoute>
+        ),
+      },
     ],
     errorElement: <NotFoundPage />,
   },

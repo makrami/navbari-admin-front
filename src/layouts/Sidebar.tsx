@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // Figma-exported assets (from the currently selected node)
 import imgLogo from "../assets/images/truck.svg";
@@ -11,10 +11,19 @@ import {
   UsersIcon,
   DollarSignIcon,
   BellIcon,
+  LogOutIcon,
 } from "lucide-react";
 import { ActiveIndicator } from "../shared/components";
+import { logout } from "../services/auth.service";
 
 export function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <aside className="fixed left-0 top-0 hidden h-screen w-24 shrink-0 border-r border-slate-200 bg-white md:block">
       <div className="flex h-full flex-col items-center gap-4 px-0 py-7">
@@ -27,7 +36,7 @@ export function Sidebar() {
         <nav className="flex w-full flex-1 flex-col items-center gap-4 pt-12">
           {/* Overview */}
           <NavLink
-            to="/overview"
+            to="/dashboard"
             className={({ isActive }) =>
               `relative grid h-12 w-full place-items-center ${
                 isActive ? "" : ""
@@ -146,6 +155,15 @@ export function Sidebar() {
           <div className="grid h-12 w-full place-items-center">
             <BellIcon className="h-6 w-6 text-slate-400" />
           </div>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="grid h-12 w-full place-items-center hover:bg-slate-50 transition-colors"
+            title="Logout"
+          >
+            <LogOutIcon className="h-6 w-6 text-slate-400 hover:text-red-500" />
+          </button>
         </nav>
       </div>
     </aside>

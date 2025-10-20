@@ -31,6 +31,7 @@ export type EntityCardData = {
   id: string;
   name: string;
   logoUrl?: string;
+  avatarUrl?: string;
   status: EntityStatus;
   country: string;
   city: string;
@@ -100,11 +101,14 @@ export function EntityCard({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            {entity.logoUrl ? (
+            {entity.logoUrl || entity.avatarUrl ? (
               <img
-                src={entity.logoUrl}
-                alt="logo"
-                className="h-8 w-8 rounded"
+                src={entity.logoUrl || entity.avatarUrl}
+                alt={entity.logoUrl ? "logo" : "avatar"}
+                className={cn(
+                  "h-8 w-8",
+                  entity.avatarUrl ? "rounded-full object-cover" : "rounded"
+                )}
               />
             ) : (
               <div className="h-8 w-8 rounded bg-slate-200 grid place-items-center text-xs font-semibold"></div>

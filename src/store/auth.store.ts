@@ -3,17 +3,16 @@ import { create } from "zustand";
 type AuthState = {
   token: string | null;
   setToken: (token: string | null) => void;
-  isAuthenticated: boolean;
   logout: () => void;
 };
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>()((set) => ({
   token: null,
   setToken: (token) => set({ token }),
-  get isAuthenticated() {
-    return !!get().token;
-  },
   logout: () => set({ token: null }),
 }));
+
+// Helper to check if user is authenticated
+export const isAuthenticated = () => !!useAuthStore.getState().token;
 
 

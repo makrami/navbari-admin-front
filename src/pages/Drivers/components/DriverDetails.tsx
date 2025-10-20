@@ -33,9 +33,13 @@ export function DriverDetails({ driver }: Props) {
       <div className="flex items-start justify-between gap-4">
         {/* Left: Avatar + Info */}
         <div className="flex items-center gap-4 min-w-0">
-          <div className="h-24 w-24 rounded-lg bg-slate-50 overflow-hidden grid place-items-center">
+          <div className="h-24 w-24 rounded-full bg-slate-50 overflow-hidden grid place-items-center">
             {driver.avatarUrl ? (
-              <img src={driver.avatarUrl} alt="avatar" className="max-h-14" />
+              <img
+                src={driver.avatarUrl}
+                alt="avatar"
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="h-10 w-10 rounded bg-slate-200" />
             )}

@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from "react";
 import { cn } from "../../../../shared/utils/cn";
-import avatar from "../../../../assets/images/avatar.png";
 import {
   MapPinIcon,
   MessagesSquareIcon,
@@ -12,11 +11,20 @@ import {
   PlusIcon,
   MinusIcon,
   PlaneIcon,
+  UserRoundIcon,
 } from "lucide-react";
 
 type NavigatingInfoProps = PropsWithChildren<{
   className?: string;
-  selectedId?: string | null;
+  driverName: string;
+  driverPhoto?: string; // Optional - if not provided, show user icon
+  rating: number;
+  vehicle: string;
+  weight: string;
+  localCompany: string;
+  destination: string;
+  lastActivity: string;
+  lastActivityTime: string;
 }>;
 
 // Figma snapshot image URLs (used as static assets to match design)
@@ -24,7 +32,18 @@ type NavigatingInfoProps = PropsWithChildren<{
 const VEHICLE_OVERLAY =
   "http://localhost:3845/assets/65cc805484da3e9e7174da6ce649b827e18e363d.png";
 
-export function NavigatingInfo({ className }: NavigatingInfoProps) {
+export function NavigatingInfo({
+  className,
+  driverName,
+  driverPhoto,
+  rating,
+  vehicle,
+  weight,
+  localCompany,
+  destination,
+  lastActivity,
+  lastActivityTime,
+}: NavigatingInfoProps) {
   return (
     <section className="flex gap-4 p-4 bg-white rounded-[16px]">
       <div
@@ -34,17 +53,23 @@ export function NavigatingInfo({ className }: NavigatingInfoProps) {
         {/* Header: Driver name, rating, quick chat */}
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-4 min-w-0">
-            <img
-              src={avatar}
-              alt="Driver avatar"
-              className="size-7 rounded-full object-cover"
-            />
-            <p className="text-slate-900 font-medium">Xin Zhao</p>
+            {driverPhoto ? (
+              <img
+                src={driverPhoto}
+                alt="Driver avatar"
+                className="size-7 rounded-full object-cover"
+              />
+            ) : (
+              <div className="size-7 rounded-full bg-slate-200 flex items-center justify-center">
+                <UserRoundIcon className="size-4 text-slate-500" />
+              </div>
+            )}
+            <p className="text-slate-900 font-medium">{driverName}</p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-slate-900">
-              <span className="text-sm font-medium">4.5</span>
+              <span className="text-sm font-medium">{rating.toFixed(1)}</span>
               <StarIcon className="size-4 text-yellow-500 fill-yellow-500" />
             </div>
             <button
@@ -61,9 +86,9 @@ export function NavigatingInfo({ className }: NavigatingInfoProps) {
         <div className="bg-slate-50 rounded-[8px] px-3 py-[6px] flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-900">
             <MapPinIcon className="size-[14px] text-slate-400" />
-            <span className="text-[12px]">Turned their GPS on.</span>
+            <span className="text-[12px]">{lastActivity}</span>
           </div>
-          <span className="text-[12px] text-slate-400">2m ago</span>
+          <span className="text-[12px] text-slate-400">{lastActivityTime}</span>
         </div>
 
         <div className="border-t border-slate-200" />
@@ -79,7 +104,7 @@ export function NavigatingInfo({ className }: NavigatingInfoProps) {
                   Vehicle
                 </span>
               </div>
-              <p className="text-[12px] text-slate-900">Cargo Truck HD320</p>
+              <p className="text-[12px] text-slate-900">{vehicle}</p>
             </div>
 
             <div className="flex flex-col gap-3 px-1">
@@ -89,9 +114,7 @@ export function NavigatingInfo({ className }: NavigatingInfoProps) {
                   Weight
                 </span>
               </div>
-              <p className="text-[12px] text-slate-900">
-                146.5 <span className="font-bold">KG</span>
-              </p>
+              <p className="text-[12px] text-slate-900">{weight}</p>
             </div>
 
             <div className="flex flex-col gap-3 px-1">
@@ -102,7 +125,7 @@ export function NavigatingInfo({ className }: NavigatingInfoProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <p className="text-[12px] text-slate-900">Sendm Co.</p>
+                <p className="text-[12px] text-slate-900">{localCompany}</p>
                 <span className="inline-flex items-center justify-center p-1 rounded-full bg-blue-600">
                   <PlaneIcon className="size-3 text-white" />
                 </span>
@@ -116,7 +139,7 @@ export function NavigatingInfo({ className }: NavigatingInfoProps) {
                   Destination
                 </span>
               </div>
-              <p className="text-[12px] text-slate-900">Bratsk, Russia</p>
+              <p className="text-[12px] text-slate-900">{destination}</p>
             </div>
           </div>
 

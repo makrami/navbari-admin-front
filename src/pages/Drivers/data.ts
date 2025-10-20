@@ -1,9 +1,13 @@
 import type { Driver } from "./types";
-
+import driver1 from "../../assets/images/drivers/driver1.png";
+import driver2 from "../../assets/images/drivers/driver2.png";
+import driver3 from "../../assets/images/drivers/driver3.png";
+import driver4 from "../../assets/images/drivers/driver4.png";
 export const DRIVERS: Driver[] = [
   {
     id: "d1",
     name: "Ahmed Hassan",
+    avatarUrl: driver1,
     status: "pending",
     country: "Egypt",
     city: "Cairo",
@@ -17,6 +21,7 @@ export const DRIVERS: Driver[] = [
   {
     id: "d2",
     name: "John Smith",
+    avatarUrl: driver2,
     status: "active",
     country: "USA",
     city: "New York",
@@ -30,6 +35,7 @@ export const DRIVERS: Driver[] = [
   {
     id: "d3",
     name: "Maria Garcia",
+    avatarUrl: driver3,
     status: "active",
     country: "Spain",
     city: "Madrid",
@@ -43,6 +49,7 @@ export const DRIVERS: Driver[] = [
   {
     id: "d4",
     name: "Li Wei",
+    avatarUrl: driver4,
     status: "inactive",
     country: "China",
     city: "Beijing",
@@ -56,6 +63,7 @@ export const DRIVERS: Driver[] = [
   {
     id: "d5",
     name: "Pierre Dubois",
+    avatarUrl: driver1,
     status: "rejected",
     country: "France",
     city: "Paris",
@@ -69,6 +77,7 @@ export const DRIVERS: Driver[] = [
   {
     id: "d6",
     name: "Anna Kowalski",
+    avatarUrl: driver2,
     status: "active",
     country: "Poland",
     city: "Warsaw",
@@ -78,5 +87,61 @@ export const DRIVERS: Driver[] = [
     numShipments: 31,
     numActiveVehicles: 3,
     lastActivity: "6h ago",
+  },
+  {
+    id: "d7",
+    name: "Hans Müller",
+    avatarUrl: driver3,
+    status: "active",
+    country: "Germany",
+    city: "Berlin",
+    countryCode: "DE",
+    managerName: "Klaus Schmidt",
+    phone: "+49 30 1234 5678",
+    numShipments: 47,
+    numActiveVehicles: 6,
+    lastActivity: "30m ago",
+  },
+  {
+    id: "d8",
+    name: "Sofia Rossi",
+    avatarUrl: driver4,
+    status: "pending",
+    country: "Italy",
+    city: "Rome",
+    countryCode: "IT",
+    managerName: "Giuseppe Bianchi",
+    phone: "+39 06 5555 4321",
+    numShipments: 19,
+    numActiveVehicles: 2,
+    lastActivity: "5h ago",
+  },
+  {
+    id: "d9",
+    name: "Olaf Andersen",
+    avatarUrl: driver1,
+    status: "active",
+    country: "Norway",
+    city: "Oslo",
+    countryCode: "NO",
+    managerName: "Erik Hansen",
+    phone: "+47 22 12 34 56",
+    numShipments: 35,
+    numActiveVehicles: 4,
+    lastActivity: "3h ago",
+  },
+  {
+    id: "d10",
+    name: "Yuki Tanaka",
+    avatarUrl: driver2,
+    status: "inactive",
+    country: "Japan",
+    city: "Tokyo",
+    countryCode: "JP",
+    managerName: "Hiroshi Sato",
+    phone: "+81 3 5555 6789",
+    numShipments: 12,
+    numActiveVehicles: 1,
+    lastActivity: "2w ago",
   },
 ];

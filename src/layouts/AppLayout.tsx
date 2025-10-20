@@ -4,7 +4,9 @@ import { Sidebar } from "./Sidebar";
 export function AppLayout() {
   const location = useLocation();
   const isAuthRoute =
-    location.pathname === "/login" || location.pathname === "/sign-up";
+    location.pathname === "/login" ||
+    location.pathname === "/sign-up" ||
+    location.pathname === "/";
   return (
     <div
       className={`min-h-screen bg-slate-100 text-slate-900 ${

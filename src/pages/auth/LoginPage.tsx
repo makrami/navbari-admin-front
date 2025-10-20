@@ -1,11 +1,12 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../shared/components/ui/Button";
 import { loginDemo } from "../../services/auth.service";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +18,11 @@ export function LoginPage() {
     setLoading(true);
     try {
       await loginDemo(username, password);
-      navigate("/dashboard");
+      // Redirect to the page they were trying to access, or dashboard
+      const from =
+        (location.state as { from?: { pathname: string } })?.from?.pathname ||
+        "/dashboard";
+      navigate(from, { replace: true });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
