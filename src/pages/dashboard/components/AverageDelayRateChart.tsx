@@ -14,7 +14,7 @@ export function AverageDelayRateChart() {
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
 
   return (
-    <div className="bg-white h-1/2 rounded-2xl p-5 shadow-sm border  border-slate-200">
+    <div className="bg-white flex-1 flex flex-col rounded-2xl p-5  border  border-slate-200">
       <h3 className="text-sm font-semibold text-slate-900 mb-4">
         Average Delay Rate by Country
       </h3>

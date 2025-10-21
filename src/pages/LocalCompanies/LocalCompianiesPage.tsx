@@ -11,13 +11,26 @@ import { PanelRightClose } from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
+import { LocalCompaniesPageSkeleton } from "./components/LocalCompaniesSkeleton";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
 export function LocalCompaniesPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    COMPANIES[0]?.id || null
+  );
   const [isActive, setIsActive] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading for 2 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredCompanies = useMemo(() => {
     if (activeFilter === "all") return COMPANIES;
@@ -45,6 +58,10 @@ export function LocalCompaniesPage() {
       setIsActive(selectedCompany.status !== "inactive");
     }
   }, [selectedCompany]);
+
+  if (isLoading) {
+    return <LocalCompaniesPageSkeleton />;
+  }
 
   // Default list view
   if (!selectedId) {
@@ -107,7 +124,7 @@ export function LocalCompaniesPage() {
         </div>
       </ListPanel>
 
-      <div className="flex-1 h-screen max-w-5xl mx-auto overflow-hidden">
+      <div className="flex-1 h-screen max-w-4xl mx-auto overflow-hidden">
         <div className="h-full overflow-y-auto no-scrollbar">
           <div className="p-9 flex flex-col gap-4">
             <DetailsPanel className="min-h-0 p-0 " title="">

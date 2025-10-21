@@ -93,8 +93,8 @@ export function FinancialOverviewCard() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-5 border flex flex-col flex-1 h-full overflow-auto no-scrollbar  border-slate-200 shadow-sm">
-      <h3 className="text-sm font-semibold text-slate-9000 mb-4">
+    <div className="bg-white rounded-2xl p-5 border flex flex-col flex-1 h-full overflow-auto no-scrollbar  border-slate-200">
+      <h3 className="text-sm font-semibold text-slate-900 mb-4">
         Financial Overview
       </h3>
       <div className="grid grid-cols-2 gap-4">

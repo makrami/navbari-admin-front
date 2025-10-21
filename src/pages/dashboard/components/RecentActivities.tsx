@@ -61,7 +61,7 @@ export function RecentActivities({
 }: RecentActivitiesProps) {
   return (
     <section className={cn("space-y-4", className)}>
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <div className="bg-white rounded-xl border border-slate-200  p-5">
         <h2 className="text-sm mb-4 font-semibold text-slate-900">
           Recent Activities
         </h2>

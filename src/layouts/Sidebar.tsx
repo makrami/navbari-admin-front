@@ -25,33 +25,40 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 hidden h-screen w-24 shrink-0 border-r border-slate-200 bg-white md:block">
+    <aside className="fixed left-0 top-0 hidden h-screen w-48 shrink-0 border-r border-slate-200 bg-white md:block">
       <div className="flex h-full flex-col items-center gap-4 px-0 py-7">
         {/* Brand icon */}
         <div className="grid size-16 place-items-center rounded-2xl bg-[#1b54fe]">
           <img src={imgLogo} alt="Brand" className="h-9 w-9" />
         </div>
 
-        {/* Nav icons */}
-        <nav className="flex w-full flex-1 flex-col items-center gap-4 pt-12">
+        {/* Nav items */}
+        <nav className="flex w-full flex-1 flex-col items-center  gap-1 pt-12">
           {/* Overview */}
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `relative grid h-12 w-full place-items-center ${
+              `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
             {({ isActive }) => (
-              <>
+              <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <LayoutGridIcon
-                  className={`h-6 w-6 ${
+                  className={`size-5 ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 />
-              </>
+                <span
+                  className={`text-xs font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  Dashboard
+                </span>
+              </div>
             )}
           </NavLink>
 
@@ -59,20 +66,27 @@ export function Sidebar() {
           <NavLink
             to="/shipments"
             className={({ isActive }) =>
-              `relative grid h-12 w-full place-items-center ${
+              `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
             {({ isActive }) => (
-              <>
+              <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <TruckIcon
-                  className={`h-6 w-6 ${
+                  className={`size-5 ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 />
-              </>
+                <span
+                  className={`text-xs font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  Shipment
+                </span>
+              </div>
             )}
           </NavLink>
 
@@ -80,20 +94,27 @@ export function Sidebar() {
           <NavLink
             to="/local-companies"
             className={({ isActive }) =>
-              `relative grid h-12 w-full place-items-center ${
+              `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
             {({ isActive }) => (
-              <>
+              <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <BoxesIcon
-                  className={`h-6 w-6 ${
+                  className={`size-5 ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 />
-              </>
+                <span
+                  className={`text-xs font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  Local Companies
+                </span>
+              </div>
             )}
           </NavLink>
 
@@ -101,20 +122,27 @@ export function Sidebar() {
           <NavLink
             to="/drivers"
             className={({ isActive }) =>
-              `relative grid h-12 w-full place-items-center ${
+              `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
             {({ isActive }) => (
-              <>
+              <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <UsersIcon
-                  className={`h-6 w-6 ${
+                  className={`size-5 ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 />
-              </>
+                <span
+                  className={`text-xs font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  Drivers
+                </span>
+              </div>
             )}
           </NavLink>
 
@@ -122,47 +150,63 @@ export function Sidebar() {
           <NavLink
             to="/finance"
             className={({ isActive }) =>
-              `relative grid h-12 w-full place-items-center ${
+              `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
             {({ isActive }) => (
-              <>
+              <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <DollarSignIcon
-                  className={`h-6 w-6 ${
+                  className={`size-5 ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 />
-              </>
+                <span
+                  className={`text-sm font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  Finance
+                </span>
+              </div>
             )}
           </NavLink>
 
           {/* Spacer to push bottom actions */}
           <div className="flex-1" />
 
-          {/* Avatar */}
-          <div className="grid h-12 w-full place-items-center">
+          {/* Avatar + name */}
+          <div className="flex h-12 w-full items-center gap-3 px-5">
             <img
               src={imgAvatar}
               alt="Profile"
-              className="size-9 rounded-full object-cover"
+              className="size-7 rounded-full object-cover"
             />
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Xin Zhao
+            </span>
           </div>
 
-          {/* Bell */}
-          <div className="grid h-12 w-full place-items-center">
-            <BellIcon className="h-6 w-6 text-slate-400" />
+          {/* Notifs row */}
+          <div className="flex h-12 w-full items-center gap-2 px-5">
+            <BellIcon className="size-5 text-slate-400" />
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              Notif
+            </span>
           </div>
 
           {/* Logout */}
           <button
+            className="flex h-12 w-full items-center gap-2 px-5 text-slate-400 hover:text-red-500"
             onClick={handleLogout}
-            className="grid h-12 w-full place-items-center hover:bg-slate-50 transition-colors"
             title="Logout"
           >
-            <LogOutIcon className="h-6 w-6 text-slate-400 hover:text-red-500" />
+            <LogOutIcon className="size-5 " />
+            <span className="text-xs font-medium uppercase tracking-wide ">
+              Logout
+            </span>
           </button>
         </nav>
       </div>

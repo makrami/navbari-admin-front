@@ -134,57 +134,6 @@ export function ShipmentItem({
       />
 
       {/* Expanded details (selected) */}
-      {selected && (
-        <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] sm:text-xs text-white/90">
-          <div>
-            <span className="font-medium">Shipment ID:</span> {id}
-          </div>
-          <div>
-            <span className="font-medium">Status:</span> {status}
-          </div>
-          <div>
-            <span className="font-medium">Assignee:</span> {userName}
-          </div>
-          <div>
-            <span className="font-medium">Rating:</span> {rating}
-          </div>
-        </div>
-      )}
-
-      {/* Segments timeline (selected) */}
-      {selected && segments && segments.length > 0 && (
-        <div className="mt-4 grid gap-3">
-          {segments.map((seg, idx) => (
-            <div
-              key={`${seg.step}-${seg.place}`}
-              className="grid grid-cols-[14px_1fr_auto] items-start gap-2"
-            >
-              {/* Timeline column */}
-              <div className="relative flex justify-center">
-                <div
-                  className={cn(
-                    "mt-0.5 h-2 w-2 rounded-full",
-                    seg.isCompleted ? "bg-white" : "border border-white/80"
-                  )}
-                />
-                {idx !== segments.length - 1 && (
-                  <div className="absolute left-1/2 top-2 -translate-x-1/2 h-6 w-px bg-white/40" />
-                )}
-              </div>
-
-              {/* Title column */}
-              <div className="truncate text-xs text-white/90">
-                <span className="font-medium">#{seg.step}</span> {seg.place}
-              </div>
-
-              {/* Date/time column */}
-              <div className="text-[11px] text-white/80">{seg.datetime}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Footer */}
       <div className="mt-4 flex items-center justify-between">
         <div
           className={cn(
@@ -220,6 +169,40 @@ export function ShipmentItem({
           <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
         </div>
       </div>
+      {/* Segments timeline (selected) */}
+      {selected && segments && segments.length > 0 && (
+        <div className="mt-4 grid gap-3">
+          {segments.map((seg, idx) => (
+            <div
+              key={`${seg.step}-${seg.place}`}
+              className="grid grid-cols-[14px_1fr_auto] items-start gap-2"
+            >
+              {/* Timeline column */}
+              <div className="relative flex justify-center">
+                <div
+                  className={cn(
+                    "mt-0.5 h-2 w-2 rounded-full",
+                    seg.isCompleted ? "bg-white" : "border border-white/80"
+                  )}
+                />
+                {idx !== segments.length - 1 && (
+                  <div className="absolute left-1/2 top-2 -translate-x-1/2 h-6 w-px bg-white/40" />
+                )}
+              </div>
+
+              {/* Title column */}
+              <div className="truncate text-xs text-white/90">
+                <span className="font-medium">#{seg.step}</span> {seg.place}
+              </div>
+
+              {/* Date/time column */}
+              <div className="text-[11px] text-white/80">{seg.datetime}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
     </button>
   );
 }

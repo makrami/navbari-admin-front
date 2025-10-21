@@ -82,19 +82,19 @@ export default function RecentActivities({
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-2xl p-4  border border-slate-100">
           <h3 className="text-sm font-medium text-slate-400 mb-2">
             Total Missions Completed
           </h3>
           <p className="text-2xl font-bold text-slate-900">128 Missions</p>
         </div>
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-2xl p-4  border border-slate-100">
           <h3 className="text-sm font-medium text-slate-400 mb-2">
             Average Delay Time
           </h3>
           <p className="text-2xl font-bold text-slate-900">13 min</p>
         </div>
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-2xl p-4  border border-slate-100">
           <h3 className="text-sm font-medium text-slate-400 mb-2">
             GPS Warnings
           </h3>

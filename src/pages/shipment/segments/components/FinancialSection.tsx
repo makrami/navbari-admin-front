@@ -20,7 +20,7 @@ export function FinancialSection() {
       <header className="px-3 pt-3 pb-2 text-xs  text-slate-900">
         Financial
       </header>
-      <div className="p-4 grid gap-3 bg-slate-50 rounded-xl">
+      <div className="p-4 grid gap-3 bg-slate-100 rounded-xl">
         <div className="rounded-xl">
           <div className=" font-medium  text-xs text-slate-900  ">Base Fee</div>
           <div className="px-3 py-2">

@@ -1,5 +1,4 @@
 import { FileClock, Check, X } from "lucide-react";
-import avatar from "../../../../assets/images/avatar.png";
 
 type DocumentCardProps = {
   authorName: string;
@@ -15,7 +14,6 @@ export function DocumentCard({
   fileName,
   sizeLabel,
   status,
-  avatarUrl,
   className,
 }: DocumentCardProps) {
   const statusStyles =
@@ -29,28 +27,21 @@ export function DocumentCard({
 
   return (
     <div
-      className={`rounded-xl border flex items-center flex-col border-slate-200 p-3 bg-white ${
+      className={`rounded-xl border flex items-center flex-col gap-2 border-slate-200 p-3 bg-white ${
         className ?? ""
       }`}
     >
-      <div className="flex  items-center  justify-start gap-2">
-        <span className="inline-flex items-center justify-center rounded-full bg-slate-200 size-5 overflow-hidden">
-          {avatarUrl ? (
-            <img alt="" src={avatar} className="block size-full object-cover" />
-          ) : null}
-        </span>
-        <div className="text-xs font-medium text-slate-900">{authorName}</div>
-      </div>
-
-      <div className="mt-3 flex items-center justify-center">
+      <div className="3 flex items-center justify-center">
         <span
           className={`inline-flex items-center justify-center size-12 rounded-full ${statusStyles.circle}`}
         >
           <IconComp className={`size-5 ${statusStyles.icon}`} />
         </span>
       </div>
-
-      <div className="mt-3 text-center">
+      <div className="flex  items-center  justify-start gap-2">
+        <div className="text-xs font-bold text-slate-900">{authorName}</div>
+      </div>
+      <div className=" text-center">
         <div
           className="text-xs font-medium text-slate-900 truncate"
           title={fileName}

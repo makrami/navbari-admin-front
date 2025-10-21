@@ -32,7 +32,7 @@ export function Segments({
         {/* Vertical spine linking the segment cards visually */}
         <div
           aria-hidden="true"
-          className="absolute left-8 top-5 bottom-5 w-[12px] bg-slate-200 rounded-full z-0"
+          className="absolute left-8 top-5 bottom-5 w-3 bg-slate-200 rounded-full z-0"
         />
         <div className="grid gap-4 relative z-10">{children}</div>
       </div>

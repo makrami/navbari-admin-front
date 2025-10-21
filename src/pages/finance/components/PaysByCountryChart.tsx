@@ -7,7 +7,8 @@ export function PaysByCountryChart() {
     { country: "Nauru", code: "NR", amount: 30000, label: "$30k" },
     { country: "Egypt", code: "EG", amount: 59492.1, label: "$59,492.10" },
     { country: "Japan", code: "JP", amount: 30000, label: "$30k" },
-    { country: "United States", code: "US", amount: 8000, label: "$8k" },
+    { country: "France", code: "FR", amount: 8000, label: "$8k" },
+    { country: "Germany", code: "DE", amount: 8000, label: "$8k" },
   ];
 
   const maxAmount = 60000; // Set max to $60k as shown in image

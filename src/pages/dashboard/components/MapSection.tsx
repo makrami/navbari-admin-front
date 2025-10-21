@@ -8,7 +8,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { useState } from "react";
-
+import worldmap from "../../../assets/images/worldmap.png";
 export function MapSection() {
   const [selectedFilter] = useState("All");
 
@@ -48,18 +48,18 @@ export function MapSection() {
   ];
 
   return (
-    <div className="relative w-full h-[600px] rounded-2xl overflow-hidden bg-white  shadow-lg">
+    <div className="relative w-full h-[600px] rounded-2xl overflow-hidden bg-white">
       {/* Map Background */}
       <div
         className="absolute top-5 left-5 right-5 bottom-5 bg-cover bg-center bg-no-repeat rounded-2xl "
         style={{
-          backgroundImage: `url('/src/assets/images/worldmap.png')`,
+          backgroundImage: `url(${worldmap})`,
         }}
       />
 
       {/* Dropdown Button - Top Left */}
       <div className="absolute top-8 left-8 ">
-        <button className="bg-white gap-10 rounded-xl px-4 py-2 shadow-lg hover:shadow-xl transition-shadow duration-200 flex items-center ">
+        <button className="bg-white gap-10 rounded-xl px-4 py-2 duration-200 flex items-center ">
           <span className="text-slate-700 font-medium">{selectedFilter}</span>
           <ChevronDownIcon className="size-4 text-slate-600" />
         </button>
@@ -67,7 +67,7 @@ export function MapSection() {
 
       {/* Legend Card - Below Dropdown */}
       <div className="absolute bottom-8 left-8">
-        <div className="bg-white rounded-xl p-3 shadow-lg hover:shadow-xl transition-shadow duration-200">
+        <div className="bg-white rounded-xl p-3   duration-200">
           <div className="space-y-2">
             {legendItems.map((item, index) => (
               <div key={index} className="flex items-center gap-4">
@@ -85,7 +85,7 @@ export function MapSection() {
 
       {/* Zoom Controls - Right Side */}
       <div className="absolute top-8 right-8">
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200 overflow-hidden">
+        <div className="bg-white rounded-xl duration-200 overflow-hidden">
           <button className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 transition-colors duration-200">
             <PlusIcon />
           </button>
@@ -98,7 +98,7 @@ export function MapSection() {
 
       {/* Refresh Button - Below Zoom Controls */}
       <div className="absolute top-30 right-8">
-        <button className="w-10 h-10 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow duration-200 flex items-center justify-center">
+        <button className="w-10 h-10 bg-white rounded-full duration-200 flex items-center justify-center">
           <RefreshCcwIcon className="size-4 text-blue-600" />
         </button>
       </div>

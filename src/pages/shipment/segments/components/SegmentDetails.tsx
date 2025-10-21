@@ -10,6 +10,7 @@ import {
   Clock3,
   Building2,
   UserRoundIcon,
+  ArrowRight,
 } from "lucide-react";
 import { InfoCard } from "../../../../shared/components/ui/InfoCard";
 import FinancialSection from "./FinancialSection";
@@ -28,6 +29,8 @@ export type SegmentData = {
   estFinishAt?: string;
   localCompany?: string;
   baseFeeUsd?: number;
+  /** Title helper: start of the next segment (if any). If undefined, treated as destination. */
+  nextPlace?: string;
   documents?: Array<{
     id: string | number;
     name: string;
@@ -97,7 +100,7 @@ export function SegmentDetails({
   return (
     <div
       className={cn(
-        "relative bg-white border border-slate-200 rounded-[12px] shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
+        "relative bg-white border-3 border-slate-200 rounded-[12px] shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
         className
       )}
       data-name="Segment Item"
@@ -140,6 +143,10 @@ export function SegmentDetails({
               </span>
             )}
             <span className="text-sm font-medium text-slate-900 ">{place}</span>
+            <ArrowRight className="size-3.5 text-slate-300" />
+            <span className="text-sm text-slate-400 truncate">
+              {data.nextPlace ? data.nextPlace : "(DESTINATION)"}
+            </span>
             {data.isCompleted ? (
               <Check className="size-[14px] text-green-600 shrink-0" />
             ) : null}
@@ -237,7 +244,7 @@ export function SegmentDetails({
       {data.isCurrent ? (
         <span
           aria-hidden="true"
-          className="absolute -left-[4px] top-0 size-[10px] rounded-full bg-red-500 border-2 border-white"
+          className="absolute -left-[4px] -top-1 -bg-conic-150  size-[10px] rounded-full bg-red-500 border-2 border-white"
         />
       ) : null}
     </div>

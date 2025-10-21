@@ -19,8 +19,7 @@ export function ActivitySection({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <section className={`rounded-xl bg-white ${className ?? ""}`}>
-      <header className="flex items-center justify-between px-3 py-2">
-        <h2 className="font-bold text-slate-900">All Activities</h2>
+      <header className="flex items-center gap-2  px-5 py-2">
         <button
           type="button"
           aria-expanded={open}
@@ -40,6 +39,7 @@ export function ActivitySection({
             }`}
           />
         </button>
+        <h2 className="font-bold text-slate-900">All Activities</h2>
       </header>
       <div
         id="activity-content"

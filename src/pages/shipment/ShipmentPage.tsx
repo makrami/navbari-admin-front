@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   SearchShipment,
   AddShipment,
@@ -6,13 +6,12 @@ import {
   type ShipmentStatus,
 } from "../../components";
 import { ListPanel } from "../../shared/components/ui/ListPanel";
-import { DetailsPanel } from "./details/DetailsPanel";
 import { Segments } from "./segments/Segments";
-import { ShipmentInfoCard } from "./details/components/ShipmentInfoCard";
 import NavigatingInfo from "./details/components/NavigatingInfo";
 import SegmentDetails from "./segments/components/SegmentDetails";
 import ActivitySection from "./Activity/components/ActivitySection";
 import type { ActivityItemData } from "./Activity/types";
+import { ShipmentPageSkeleton } from "./components/ShipmentSkeleton";
 import avatar from "../../assets/images/avatar.png";
 import driver1 from "../../assets/images/drivers/driver1.png";
 import driver2 from "../../assets/images/drivers/driver2.png";
@@ -49,6 +48,20 @@ type ShipmentData = {
 
 export function ShipmentPage() {
   const [selectedId, setSelectedId] = useState<string | null>("#6c23m68");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading for 2 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ShipmentPageSkeleton />;
+  }
 
   const items: ShipmentData[] = [
     {
@@ -506,16 +519,12 @@ export function ShipmentPage() {
 
       {/* Right-side details layout container with independent scroll */}
       {selectedShipment && currentSegment && (
-        <div className="flex-1 h-screen bg-slate-100 max-w-5xl mx-auto overflow-hidden">
+        <div className="flex-1 h-screen bg-slate-100 max-w-4xl mx-auto overflow-hidden">
           <div className="h-full overflow-y-auto no-scrollbar">
             <div className="p-9 flex flex-col gap-4">
-              <DetailsPanel className="min-h-0 p-0" title="Details">
-                <ShipmentInfoCard
-                  title={selectedShipment.title}
-                  shipmentId={selectedShipment.id}
-                />
-              </DetailsPanel>
               <NavigatingInfo
+                title={selectedShipment.title}
+                shipmentId={selectedShipment.id}
                 driverName={currentSegment.driverName}
                 driverPhoto={currentSegment.driverPhoto}
                 rating={currentSegment.driverRating}
@@ -567,6 +576,12 @@ export function ShipmentPage() {
                   }
                   // Future segments have no progressStage (will be undefined)
 
+                  // Determine title helper: next segment start or destination
+                  const nextPlace =
+                    idx < selectedShipment.segments.length - 1
+                      ? selectedShipment.segments[idx + 1]?.place
+                      : undefined; // undefined => Destination
+
                   return (
                     <SegmentDetails
                       key={seg.step}
@@ -577,13 +592,17 @@ export function ShipmentPage() {
                         assigneeName: seg.driverName,
                         assigneeAvatarUrl: seg.driverPhoto,
                         progressStage,
+                        nextPlace,
                       }}
-                      defaultOpen={isCurrent}
+                      defaultOpen={false}
                     />
                   );
                 })}
               </Segments>
-              <ActivitySection items={selectedShipment.activities} />
+              <ActivitySection
+                items={selectedShipment.activities}
+                defaultOpen={false}
+              />
             </div>
           </div>
         </div>

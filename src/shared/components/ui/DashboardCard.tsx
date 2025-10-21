@@ -21,7 +21,7 @@ export function DashboardCard({
 }: DashboardCardProps) {
   return (
     <div
-      className={`flex flex-col bg-white rounded-lg border border-slate-200 shadow-sm p-6  items-start gap-4 ${
+      className={`flex flex-col bg-white rounded-2xl border border-slate-300  p-6  items-start gap-4 ${
         className ?? ""
       }`}
     >

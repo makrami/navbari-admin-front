@@ -1,14 +1,29 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FilterSearchSection } from "./components/FilterSearchSection";
 import { SummaryCards } from "./components/SummaryCards";
 import { PaysByCountryChart } from "./components/PaysByCountryChart";
 import { PaysStatusRatioChart } from "./components/PaysStatusRatioChart";
 import { ActivitySection } from "./components/ActivitySection";
 import { AddPaymentDrawer } from "./components/AddPaymentDrawer";
+import { FinancePageSkeleton } from "./components/FinanceSkeleton";
 
 export function FinancePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading for 2 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <FinancePageSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-200">
