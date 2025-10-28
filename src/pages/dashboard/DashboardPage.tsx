@@ -1,12 +1,30 @@
 import { useState, useEffect } from "react";
-import { DashboardCards } from "./components/DashboardCards";
-import { MapSection } from "./components/MapSection";
-import { FinanceDashboardSections } from "./components/FinanceDashboardSections";
-import { RecentActivities } from "./components/RecentActivities";
+// import { DashboardCards } from "./components/DashboardCards";
+// import { FinanceDashboardSections } from "./components/FinanceDashboardSections";
+// import { RecentActivities } from "./components/RecentActivities";
 import { DashboardSkeleton } from "./components/DashboardSkeleton";
+import CargoMap, { type Segment } from "../../components/CargoMap";
 
 export function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const segments = [
+    {
+      color: "#ff0000",
+      path: [
+        [2.3522, 48.8566], // Paris
+        [4.8357, 45.764], // Lyon
+      ],
+      meta: { vehicleId: "TRK-101", driverId: "DRV-1" },
+    },
+    {
+      color: "#00aa55",
+      path: [
+        [4.8357, 45.764], // Lyon
+        [13.405, 52.52], // Berlin
+      ],
+      meta: { vehicleId: "TRK-101", driverId: "DRV-1" },
+    },
+  ] satisfies Segment[];
 
   useEffect(() => {
     // Simulate loading for 2 seconds
@@ -32,15 +50,18 @@ export function DashboardPage() {
         </div>
 
         {/* Dashboard Cards */}
-        <DashboardCards />
+        {/* <DashboardCards /> */}
 
-        {/* Map Section */}
-        <MapSection />
+        {/* Live Map Demo */}
+        <CargoMap
+          segments={segments}
+          initialView={{ longitude: 7.5, latitude: 49.0, zoom: 4 }}
+        />
 
         {/* Finance Sections */}
-        <FinanceDashboardSections />
+        {/* <FinanceDashboardSections /> */}
         {/* Recent Activities */}
-        <RecentActivities />
+        {/* <RecentActivities /> */}
       </div>
     </div>
   );

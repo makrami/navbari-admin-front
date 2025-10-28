@@ -36,6 +36,7 @@ type NavigatingInfoProps = PropsWithChildren<{
   destination: string;
   lastActivity: string;
   lastActivityTime: string;
+  onClose?: () => void;
 }>;
 
 // Figma snapshot image URLs (used as static assets to match design)
@@ -55,6 +56,7 @@ export function NavigatingInfo({
   destination,
   lastActivity,
   lastActivityTime,
+  onClose,
 }: NavigatingInfoProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
@@ -251,6 +253,7 @@ export function NavigatingInfo({
             type="button"
             className="bg-red-500/10 hover:scale-105 transition-all duration-300 rounded-[8px] p-2 size-auto"
             aria-label="Close"
+            onClick={onClose}
           >
             <XIcon className="block size-5 text-red-500" />
           </button>
@@ -324,16 +327,6 @@ export function NavigatingInfo({
 
               <div className="flex flex-col gap-3 px-1">
                 <div className="flex items-center gap-2">
-                  <WeightIcon className="size-[14px] text-slate-300" />
-                  <span className="uppercase text-[10px] text-slate-400">
-                    Weight
-                  </span>
-                </div>
-                <p className="text-[12px] text-slate-900">{weight}</p>
-              </div>
-
-              <div className="flex flex-col gap-3 px-1">
-                <div className="flex items-center gap-2">
                   <Building2Icon className="size-[14px] text-slate-300" />
                   <span className="uppercase text-[10px] text-slate-400">
                     Local Company
@@ -346,7 +339,15 @@ export function NavigatingInfo({
                   </span>
                 </div>
               </div>
-
+              <div className="flex flex-col gap-3 px-1">
+                <div className="flex items-center gap-2">
+                  <WeightIcon className="size-[14px] text-slate-300" />
+                  <span className="uppercase text-[10px] text-slate-400">
+                    Weight
+                  </span>
+                </div>
+                <p className="text-[12px] text-slate-900">{weight}</p>
+              </div>
               <div className="flex flex-col gap-3 px-1">
                 <div className="flex items-center gap-2">
                   <LocateFixedIcon className="size-[14px] text-slate-300" />

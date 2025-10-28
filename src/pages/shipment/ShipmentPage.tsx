@@ -47,7 +47,7 @@ type ShipmentData = {
 };
 
 export function ShipmentPage() {
-  const [selectedId, setSelectedId] = useState<string | null>("#6c23m68");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -492,6 +492,41 @@ export function ShipmentPage() {
   const currentSegment =
     selectedShipment?.segments[selectedShipment.currentSegmentIndex];
 
+  // If nothing is selected yet, show a centered, wrapped list of shipments
+  if (!selectedId) {
+    return (
+      <div className="flex w-full h-screen bg-slate-100 overflow-y-auto">
+        <div className="max-w-6xl w-full mx-auto p-9">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex-1">
+              <SearchShipment />
+            </div>
+            <AddShipment />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((item) => (
+              <ShipmentItem
+                key={item.id}
+                title={item.title}
+                id={item.id}
+                status={item.status}
+                fromCountryCode={item.fromCountryCode}
+                toCountryCode={item.toCountryCode}
+                progressPercent={item.progressPercent}
+                userName={item.userName}
+                rating={item.rating}
+                segments={item.segments}
+                selected={false}
+                onClick={() => setSelectedId(item.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Once a shipment is selected, show the existing left-list/right-details layout
   return (
     <div className="flex w-full h-screen overflow-hidden">
       <ListPanel title="Shipment">
@@ -534,6 +569,7 @@ export function ShipmentPage() {
                 destination={selectedShipment.destination}
                 lastActivity={selectedShipment.lastActivity}
                 lastActivityTime={selectedShipment.lastActivityTime}
+                onClose={() => setSelectedId(null)}
               />
               <Segments
                 title="Segments"

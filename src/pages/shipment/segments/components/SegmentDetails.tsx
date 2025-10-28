@@ -100,7 +100,9 @@ export function SegmentDetails({
   return (
     <div
       className={cn(
-        "relative bg-white border-3 border-slate-200 rounded-[12px] shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
+        "relative bg-white border-2 border-slate-200 rounded-xl shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
+        data.isCurrent &&
+          "border-blue-200 shadow-[0_0_0_3px_rgba(59,130,246,0.08)]",
         className
       )}
       data-name="Segment Item"
@@ -108,7 +110,10 @@ export function SegmentDetails({
       <button
         type="button"
         id={headerId}
-        className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+        className={cn(
+          "w-full px-3 py-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors",
+          data.isCurrent && "py-3"
+        )}
         aria-label={open ? "Collapse segment" : "Expand segment"}
         aria-expanded={open}
         aria-controls={`segment-content-${step}`}
@@ -120,17 +125,17 @@ export function SegmentDetails({
           });
         }}
       >
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex flex-1 items-center gap-3 min-w-0">
           <ChevronDown
             className={cn(
               "size-4 text-blue-600 transition-transform",
               open && "rotate-180"
             )}
           />
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex flex-1  items-center gap-3 min-w-0">
             {data.isCurrent ? (
               <div className="flex items-center gap-2 max-w-16">
-                <span className="bg-green-600 text-white text-[12px] font-black leading-none px-1 py-1 rounded-[2px]">
+                <span className="bg-green-600 text-white text-xs font-black leading-none px-1 py-1 rounded-[2px]">
                   #{step}
                 </span>
                 <span className="text-[8px] text-green-600 font-bold leading-none">
@@ -138,22 +143,24 @@ export function SegmentDetails({
                 </span>
               </div>
             ) : (
-              <span className="text-[12px] text-slate-400 font-black">
-                #{step}
-              </span>
+              <span className="text-xs text-slate-400 font-black">#{step}</span>
             )}
-            <span className="text-sm font-medium text-slate-900 ">{place}</span>
-            <ArrowRight className="size-3.5 text-slate-300" />
-            <span className="text-sm text-slate-400 truncate">
-              {data.nextPlace ? data.nextPlace : "(DESTINATION)"}
-            </span>
-            {data.isCompleted ? (
-              <Check className="size-[14px] text-green-600 shrink-0" />
-            ) : null}
+            <div className="flex-1 flex items-center justify-center gap-2 min-w-0">
+              <span className="text-sm font-medium text-slate-900">
+                {place}
+              </span>
+              <ArrowRight className="size-3.5 text-slate-300" />
+              <span className="text-sm text-slate-400 truncate">
+                {data.nextPlace ? data.nextPlace : "(DESTINATION)"}
+              </span>
+              {data.isCompleted ? (
+                <Check className="size-[14px] text-green-600 shrink-0" />
+              ) : null}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex  items-center gap-3">
           {data.assigneeAvatarUrl ? (
             <span className="relative inline-flex items-center justify-center rounded-full bg-slate-200 size-4 overflow-hidden">
               <img
@@ -178,6 +185,13 @@ export function SegmentDetails({
         </div>
       </button>
 
+      {/* Inline progress just below header when this is the current segment */}
+      {data.isCurrent && data.progressStage ? (
+        <div className="px-3 pb-3">
+          <SegmentProgress current={data.progressStage} />
+        </div>
+      ) : null}
+
       {/* Expandable content container */}
       <div
         id={`segment-content-${step}`}
@@ -191,10 +205,10 @@ export function SegmentDetails({
       >
         <div className={cn("overflow-hidden", open)}>
           <div className="px-3 py-3 grid gap-6">
-            {/* Segment progress */}
+            {/* Segment progress appears here only for non-current segments */}
             {children ? (
               <div>{children}</div>
-            ) : data.progressStage ? (
+            ) : !data.isCurrent && data.progressStage ? (
               <SegmentProgress current={data.progressStage} />
             ) : null}
 

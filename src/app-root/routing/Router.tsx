@@ -15,6 +15,7 @@ import { DriversPage } from "../../pages/Drivers/DriversPage";
 import { FinancePage } from "../../pages/finance/FinancePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
+import { MapDemoPage } from "../../pages/map-demo/MapDemoPage";
 
 const router = createBrowserRouter([
   {
@@ -86,6 +87,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <FinancePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "map-demo",
+        element: (
+          <ProtectedRoute>
+            <MapDemoPage />
           </ProtectedRoute>
         ),
       },

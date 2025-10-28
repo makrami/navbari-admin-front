@@ -4,9 +4,11 @@ import { AverageDelayRateChart } from "./AverageDelayRateChart";
 
 export function FinanceDashboardSections() {
   return (
-    <div className="flex gap-4 w-full h-[520px]">
-      <FinancialOverviewCard />
-      <div className="flex flex-col gap-4 w-1/2 ">
+    <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full h-auto md:h-[520px]">
+      <div className="w-full md:w-1/2">
+        <FinancialOverviewCard />
+      </div>
+      <div className="flex flex-col gap-3 md:gap-4 w-full md:w-1/2">
         <AverageDelayRateChart />
 
         <OnTimeDeliveryCard />
