@@ -1,20 +1,17 @@
 import { useMemo, useState, type ReactNode } from "react";
 import SegmentProgress, { type SegmentProgressStage } from "./SegmentProgress";
 import { cn } from "../../../../shared/utils/cn";
-import {
-  ChevronDown,
-  Check,
-  MoreVertical,
-  Car,
-  CalendarRange,
-  Clock3,
-  Building2,
-  UserRoundIcon,
-  ArrowRight,
-} from "lucide-react";
-import { InfoCard } from "../../../../shared/components/ui/InfoCard";
-import FinancialSection from "./FinancialSection";
-import DocumentsSection from "./DocumentsSection";
+import { CITY_OPTIONS } from "../../data/cities";
+import CargoDeclarationModal, {
+  type CargoCompany,
+} from "../../components/CargoDeclarationModal";
+import FieldBoxSelect from "./fields/FieldBoxSelect";
+import DateTimePickerField from "./fields/DateTimePickerField";
+import BaseFeeField from "./fields/BaseFeeField";
+import SegmentActions from "./SegmentActions";
+import SegmentHeader from "./SegmentHeader";
+import SegmentInfoSummary from "./SegmentInfoSummary";
+import CargoAssignmentsList from "./CargoAssignmentsList";
 export type SegmentData = {
   step: number;
   place: string;
@@ -22,6 +19,8 @@ export type SegmentData = {
   isCompleted?: boolean;
   progressStage?: SegmentProgressStage;
   isCurrent?: boolean;
+  /** When true, render a minimal placeholder row like in the reference */
+  isPlaceholder?: boolean;
   assigneeName?: string;
   assigneeAvatarUrl?: string;
   vehicleLabel?: string;
@@ -39,6 +38,8 @@ export type SegmentData = {
     author?: string;
     thumbnailUrl?: string;
   }>;
+  /** Selected cargo companies for this segment */
+  cargoCompanies?: CargoCompany[];
 };
 
 type DocumentItem = NonNullable<SegmentData["documents"]>[number];
@@ -48,7 +49,9 @@ type SegmentDetailsProps = {
   data: SegmentData;
   defaultOpen?: boolean;
   children?: ReactNode;
-  onToggle?: (open: boolean) => void;
+  onSave?: (update: Partial<SegmentData>) => void;
+  editable?: boolean;
+  locked?: boolean;
 };
 
 export function SegmentDetails({
@@ -56,137 +59,68 @@ export function SegmentDetails({
   data,
   defaultOpen = false,
   children,
-  onToggle,
+  onSave,
+  editable = false,
+  locked = false,
 }: SegmentDetailsProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const [toValue, setToValue] = useState<string>(data.nextPlace ?? "");
+  const [fromValue, setFromValue] = useState<string>(data.place ?? "");
+  const [startAt, setStartAt] = useState<string>(data.startAt ?? "");
+  const [estFinishAt, setEstFinishAt] = useState<string>(
+    data.estFinishAt ?? ""
+  );
+  const [baseFee, setBaseFee] = useState<string>(
+    typeof data.baseFeeUsd === "number" ? String(data.baseFeeUsd) : ""
+  );
+  const [showErrors, setShowErrors] = useState(false);
+  const [showCargoModal, setShowCargoModal] = useState(false);
+  const [pendingUpdate, setPendingUpdate] =
+    useState<Partial<SegmentData> | null>(null);
+  // helper state derived inline by Field components when needed
   const { step, place } = data;
   const headerId = `segment-header-${step}`;
 
-  const documents = useMemo<DocumentItem[]>(() => {
-    if (data.documents && data.documents.length) return data.documents;
-    // Fallback sample items
-    return [
-      {
-        id: 1,
-        name: "photo_af1.jpg",
-        sizeLabel: "1.2MB",
-        status: "ok" as const,
-        author: data.assigneeName,
-      },
-      {
-        id: 2,
-        name: "photo_af2.jpg",
-        sizeLabel: "1.2MB",
-        status: "error" as const,
-        author: data.assigneeName,
-      },
-      {
-        id: 3,
-        name: "photo_af3.jpg",
-        sizeLabel: "1.3MB",
-        status: "info" as const,
-        author: data.assigneeName,
-      },
-      {
-        id: 4,
-        name: "photo_af4.jpg",
-        sizeLabel: "1.2MB",
-        status: "ok" as const,
-        author: data.assigneeName,
-      },
-    ];
-  }, [data.documents, data.assigneeName]);
+  useMemo<DocumentItem[]>(() => {
+    return data.documents ?? [];
+  }, [data.documents]);
 
   return (
     <div
       className={cn(
-        "relative bg-white border-2 border-slate-200 rounded-xl shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
-        data.isCurrent &&
-          "border-blue-200 shadow-[0_0_0_3px_rgba(59,130,246,0.08)]",
+        "relative border-2 rounded-xl shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
+        locked ? "bg-slate-50 border-transparent" : "bg-white",
+        !locked && editable
+          ? "border-dotted border-blue-500"
+          : !locked
+          ? "border-slate-200"
+          : null,
         className
       )}
       data-name="Segment Item"
     >
-      <button
-        type="button"
-        id={headerId}
-        className={cn(
-          "w-full px-3 py-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors",
-          data.isCurrent && "py-3"
-        )}
-        aria-label={open ? "Collapse segment" : "Expand segment"}
-        aria-expanded={open}
-        aria-controls={`segment-content-${step}`}
-        onClick={() => {
-          setOpen((prev) => {
-            const next = !prev;
-            onToggle?.(next);
-            return next;
-          });
+      <SegmentHeader
+        step={step}
+        place={place}
+        nextPlace={data.isPlaceholder ? undefined : data.nextPlace}
+        isCompleted={data.isCompleted}
+        open={open}
+        locked={locked}
+        editable={editable}
+        headerId={headerId}
+        onToggle={() => setOpen((v) => !v)}
+        showCargoButton={
+          !open && editable && Boolean(data.nextPlace) && !data.isCompleted
+        }
+        onCargoClick={(e) => {
+          e.stopPropagation();
+          setPendingUpdate({});
+          setShowCargoModal(true);
         }}
-      >
-        <div className="flex flex-1 items-center gap-3 min-w-0">
-          <ChevronDown
-            className={cn(
-              "size-4 text-blue-600 transition-transform",
-              open && "rotate-180"
-            )}
-          />
-          <div className="flex flex-1  items-center gap-3 min-w-0">
-            {data.isCurrent ? (
-              <div className="flex items-center gap-2 max-w-16">
-                <span className="bg-green-600 text-white text-xs font-black leading-none px-1 py-1 rounded-[2px]">
-                  #{step}
-                </span>
-                <span className="text-[8px] text-green-600 font-bold leading-none">
-                  CURRENT SEGMENT
-                </span>
-              </div>
-            ) : (
-              <span className="text-xs text-slate-400 font-black">#{step}</span>
-            )}
-            <div className="flex-1 flex items-center justify-center gap-2 min-w-0">
-              <span className="text-sm font-medium text-slate-900">
-                {place}
-              </span>
-              <ArrowRight className="size-3.5 text-slate-300" />
-              <span className="text-sm text-slate-400 truncate">
-                {data.nextPlace ? data.nextPlace : "(DESTINATION)"}
-              </span>
-              {data.isCompleted ? (
-                <Check className="size-[14px] text-green-600 shrink-0" />
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex  items-center gap-3">
-          {data.assigneeAvatarUrl ? (
-            <span className="relative inline-flex items-center justify-center rounded-full bg-slate-200 size-4 overflow-hidden">
-              <img
-                alt=""
-                src={data.assigneeAvatarUrl}
-                className="block size-full object-cover"
-              />
-            </span>
-          ) : (
-            <span className="relative inline-flex items-center justify-center rounded-full bg-slate-200 size-4">
-              <UserRoundIcon className="size-2.5 text-slate-500" />
-            </span>
-          )}
-
-          {data.assigneeName ? (
-            <span className="text-sm font-medium text-slate-900">
-              {data.assigneeName}
-            </span>
-          ) : null}
-
-          <MoreVertical className="size-5 text-slate-400" />
-        </div>
-      </button>
+      />
 
       {/* Inline progress just below header when this is the current segment */}
-      {data.isCurrent && data.progressStage ? (
+      {data.isCurrent && data.progressStage && !locked ? (
         <div className="px-3 pb-3">
           <SegmentProgress current={data.progressStage} />
         </div>
@@ -208,42 +142,101 @@ export function SegmentDetails({
             {/* Segment progress appears here only for non-current segments */}
             {children ? (
               <div>{children}</div>
-            ) : !data.isCurrent && data.progressStage ? (
+            ) : !data.isCurrent && data.progressStage && !locked ? (
               <SegmentProgress current={data.progressStage} />
             ) : null}
-
-            {/* Info */}
-            <div className="h-px bg-slate-100" />
-            <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <InfoCard
-                icon={<Car className="size-4 text-slate-400" />}
-                title="Driver Vehicle"
-                value={data.vehicleLabel ?? "Cargo Truck HD320"}
+            {editable && !locked ? (
+              <div className=" rounded-xl  grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FieldBoxSelect
+                  label="FROM"
+                  value={fromValue}
+                  onChange={setFromValue}
+                  options={CITY_OPTIONS}
+                />
+                <FieldBoxSelect
+                  label="TO"
+                  value={toValue}
+                  onChange={setToValue}
+                  options={CITY_OPTIONS}
+                />
+                <DateTimePickerField
+                  label="START"
+                  value={startAt}
+                  onChange={setStartAt}
+                  error={showErrors && !startAt.trim()}
+                />
+                <DateTimePickerField
+                  label="EST. FINISH"
+                  value={estFinishAt}
+                  onChange={setEstFinishAt}
+                  error={showErrors && !estFinishAt.trim()}
+                />
+                <BaseFeeField
+                  value={baseFee}
+                  onChange={setBaseFee}
+                  error={showErrors && !baseFee.trim()}
+                />
+                <SegmentActions
+                  onReset={() => {
+                    setToValue("");
+                    setStartAt("");
+                    setEstFinishAt("");
+                    setBaseFee("");
+                    setShowErrors(false);
+                  }}
+                  onSave={() => {
+                    const valid =
+                      toValue.trim() &&
+                      startAt.trim() &&
+                      estFinishAt.trim() &&
+                      baseFee.trim();
+                    if (!valid) {
+                      setShowErrors(true);
+                      return;
+                    }
+                    onSave?.({
+                      place: fromValue.trim(),
+                      nextPlace: toValue.trim(),
+                      startAt: startAt.trim(),
+                      estFinishAt: estFinishAt.trim(),
+                      baseFeeUsd: parseFloat(baseFee),
+                      isPlaceholder: false,
+                    });
+                    setOpen(false);
+                  }}
+                  onSaveDeclare={() => {
+                    const valid =
+                      toValue.trim() &&
+                      startAt.trim() &&
+                      estFinishAt.trim() &&
+                      baseFee.trim();
+                    if (!valid) {
+                      setShowErrors(true);
+                      return;
+                    }
+                    setPendingUpdate({
+                      place: fromValue.trim(),
+                      nextPlace: toValue.trim(),
+                      startAt: startAt.trim(),
+                      estFinishAt: estFinishAt.trim(),
+                      baseFeeUsd: parseFloat(baseFee),
+                      isPlaceholder: false,
+                    });
+                    setShowCargoModal(true);
+                  }}
+                />
+              </div>
+            ) : data.cargoCompanies && data.cargoCompanies.length ? (
+              <CargoAssignmentsList companies={data.cargoCompanies} />
+            ) : (
+              <SegmentInfoSummary
+                vehicleLabel={data.vehicleLabel}
+                startAt={data.startAt}
+                localCompany={data.localCompany}
+                estFinishAt={data.estFinishAt}
+                documents={data.documents}
               />
-              <InfoCard
-                icon={<CalendarRange className="size-4 text-slate-400" />}
-                title="Start"
-                value={data.startAt ?? "13 Aug · 13:04"}
-              />
-              <InfoCard
-                icon={<Building2 className="size-4 text-slate-400" />}
-                title="Local Company"
-                value={data.localCompany ?? "Sendm Co."}
-              />
-              <InfoCard
-                icon={<Clock3 className="size-4 text-slate-400" />}
-                title="Est. Finish"
-                value={data.estFinishAt ?? "14 Aug · 03:45"}
-              />
-            </section>
-            <div className="h-px bg-slate-100" />
-
-            {/* Financial */}
-            <FinancialSection />
-            <div className="h-px bg-slate-100" />
-
-            {/* Documents */}
-            <DocumentsSection documents={documents} />
+            )}
           </div>
         </div>
       </div>
@@ -261,6 +254,23 @@ export function SegmentDetails({
           className="absolute -left-[4px] -top-1 -bg-conic-150  size-[10px] rounded-full bg-red-500 border-2 border-white"
         />
       ) : null}
+
+      {/* Cargo Declaration Modal */}
+      <CargoDeclarationModal
+        open={showCargoModal}
+        onClose={() => setShowCargoModal(false)}
+        onSelect={(companies) => {
+          const update: Partial<SegmentData> = {
+            ...(pendingUpdate ?? {}),
+            localCompany: companies.map((c) => c.name).join(", "),
+            cargoCompanies: companies,
+          };
+          onSave?.(update);
+          setShowCargoModal(false);
+          setOpen(false);
+          setPendingUpdate(null);
+        }}
+      />
     </div>
   );
 }

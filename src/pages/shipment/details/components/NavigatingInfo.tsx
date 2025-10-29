@@ -60,6 +60,14 @@ export function NavigatingInfo({
 }: NavigatingInfoProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
+  const hasDetails = Boolean(
+    (driverName && driverName.trim()) ||
+      (vehicle && vehicle.trim()) ||
+      (weight && weight.trim()) ||
+      (localCompany && localCompany.trim()) ||
+      (destination && destination.trim()) ||
+      (lastActivity && lastActivity.trim())
+  );
 
   useEffect(() => {
     if (!showNotifications) return;
@@ -259,132 +267,136 @@ export function NavigatingInfo({
           </button>
         </div>
       </div>
-      <div className="flex gap-4">
-        <div
-          data-name="Navigating Info"
-          className={cn(" w-1/2 flex flex-col gap-4", className)}
-        >
-          {/* Shipment Header */}
+      {hasDetails ? (
+        <div className="flex gap-4">
+          <div
+            data-name="Navigating Info"
+            className={cn(" w-1/2 flex flex-col gap-4", className)}
+          >
+            {/* Shipment Header */}
 
-          {/* Header: Driver name, rating, quick chat */}
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-4 min-w-0">
-              {driverPhoto ? (
-                <img
-                  src={driverPhoto}
-                  alt="Driver avatar"
-                  className="size-7 rounded-full object-cover"
-                />
-              ) : (
-                <div className="size-7 rounded-full bg-slate-200 flex items-center justify-center">
-                  <UserRoundIcon className="size-4 text-slate-500" />
+            {/* Header: Driver name, rating, quick chat */}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-4 min-w-0">
+                {driverPhoto ? (
+                  <img
+                    src={driverPhoto}
+                    alt="Driver avatar"
+                    className="size-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="size-7 rounded-full bg-slate-200 flex items-center justify-center">
+                    <UserRoundIcon className="size-4 text-slate-500" />
+                  </div>
+                )}
+                <p className="text-slate-900 font-medium">{driverName}</p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 text-slate-900">
+                  <span className="text-sm font-medium">
+                    {rating.toFixed(1)}
+                  </span>
+                  <StarIcon className="size-4 text-yellow-500 fill-yellow-500" />
                 </div>
-              )}
-              <p className="text-slate-900 font-medium">{driverName}</p>
+                <button
+                  type="button"
+                  aria-label="Open chat"
+                  className="bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform"
+                >
+                  <MessagesSquareIcon className="size-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-slate-900">
-                <span className="text-sm font-medium">{rating.toFixed(1)}</span>
-                <StarIcon className="size-4 text-yellow-500 fill-yellow-500" />
+            {/* Activity chip */}
+            <div className="bg-slate-50 rounded-[8px] px-3 py-[6px] flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-900">
+                <MapPinIcon className="size-[14px] text-slate-400" />
+                <span className="text-[12px]">{lastActivity}</span>
               </div>
-              <button
-                type="button"
-                aria-label="Open chat"
-                className="bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform"
-              >
-                <MessagesSquareIcon className="size-4" />
+              <span className="text-[12px] text-slate-400">
+                {lastActivityTime}
+              </span>
+            </div>
+
+            <div className="border-t border-slate-200" />
+
+            {/* Content: left details + right image */}
+            <div className="grid gap-4 md:grid-cols-[1fr,320px] items-start">
+              {/* Left info columns */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <CarIcon className="size-[14px] text-slate-300" />
+                    <span className="uppercase text-[10px] text-slate-400">
+                      Vehicle
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-slate-900">{vehicle}</p>
+                </div>
+
+                <div className="flex flex-col gap-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <Building2Icon className="size-[14px] text-slate-300" />
+                    <span className="uppercase text-[10px] text-slate-400">
+                      Local Company
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[12px] text-slate-900">{localCompany}</p>
+                    <span className="inline-flex items-center justify-center p-1 rounded-full bg-blue-600">
+                      <PlaneIcon className="size-3 text-white" />
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <WeightIcon className="size-[14px] text-slate-300" />
+                    <span className="uppercase text-[10px] text-slate-400">
+                      Weight
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-slate-900">{weight}</p>
+                </div>
+                <div className="flex flex-col gap-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <LocateFixedIcon className="size-[14px] text-slate-300" />
+                    <span className="uppercase text-[10px] text-slate-400">
+                      Destination
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-slate-900">{destination}</p>
+                </div>
+              </div>
+
+              {/* Right vehicle image with controls */}
+            </div>
+          </div>
+          <div className=" relative h-auto max-h-[240px] w-1/2">
+            <img
+              src={navigatemap}
+              alt="Overlay"
+              className="size-full object-cover rounded-2xl"
+            />
+
+            {/* Zoom & locate controls */}
+            <div className="absolute top-4 right-4 flex flex-col gap-2 w-[30px]">
+              <div className="flex flex-col overflow-hidden rounded-[8px] shadow-sm">
+                <button className="bg-white p-2">
+                  <PlusIcon className="size-[14px] text-slate-500" />
+                </button>
+                <button className="bg-white border-t border-slate-300 p-2">
+                  <MinusIcon className="size-[14px] text-slate-500" />
+                </button>
+              </div>
+              <button className="bg-white rounded-[8px] p-2">
+                <LocateFixedIcon className="size-[14px] text-slate-500" />
               </button>
             </div>
-          </div>
-
-          {/* Activity chip */}
-          <div className="bg-slate-50 rounded-[8px] px-3 py-[6px] flex items-center justify-between">
-            <div className="flex items-center gap-2 text-slate-900">
-              <MapPinIcon className="size-[14px] text-slate-400" />
-              <span className="text-[12px]">{lastActivity}</span>
-            </div>
-            <span className="text-[12px] text-slate-400">
-              {lastActivityTime}
-            </span>
-          </div>
-
-          <div className="border-t border-slate-200" />
-
-          {/* Content: left details + right image */}
-          <div className="grid gap-4 md:grid-cols-[1fr,320px] items-start">
-            {/* Left info columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3 px-1">
-                <div className="flex items-center gap-2">
-                  <CarIcon className="size-[14px] text-slate-300" />
-                  <span className="uppercase text-[10px] text-slate-400">
-                    Vehicle
-                  </span>
-                </div>
-                <p className="text-[12px] text-slate-900">{vehicle}</p>
-              </div>
-
-              <div className="flex flex-col gap-3 px-1">
-                <div className="flex items-center gap-2">
-                  <Building2Icon className="size-[14px] text-slate-300" />
-                  <span className="uppercase text-[10px] text-slate-400">
-                    Local Company
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-[12px] text-slate-900">{localCompany}</p>
-                  <span className="inline-flex items-center justify-center p-1 rounded-full bg-blue-600">
-                    <PlaneIcon className="size-3 text-white" />
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 px-1">
-                <div className="flex items-center gap-2">
-                  <WeightIcon className="size-[14px] text-slate-300" />
-                  <span className="uppercase text-[10px] text-slate-400">
-                    Weight
-                  </span>
-                </div>
-                <p className="text-[12px] text-slate-900">{weight}</p>
-              </div>
-              <div className="flex flex-col gap-3 px-1">
-                <div className="flex items-center gap-2">
-                  <LocateFixedIcon className="size-[14px] text-slate-300" />
-                  <span className="uppercase text-[10px] text-slate-400">
-                    Destination
-                  </span>
-                </div>
-                <p className="text-[12px] text-slate-900">{destination}</p>
-              </div>
-            </div>
-
-            {/* Right vehicle image with controls */}
           </div>
         </div>
-        <div className=" relative h-auto max-h-[240px] w-1/2">
-          <img
-            src={navigatemap}
-            alt="Overlay"
-            className="size-full object-cover rounded-2xl"
-          />
-
-          {/* Zoom & locate controls */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2 w-[30px]">
-            <div className="flex flex-col overflow-hidden rounded-[8px] shadow-sm">
-              <button className="bg-white p-2">
-                <PlusIcon className="size-[14px] text-slate-500" />
-              </button>
-              <button className="bg-white border-t border-slate-300 p-2">
-                <MinusIcon className="size-[14px] text-slate-500" />
-              </button>
-            </div>
-            <button className="bg-white rounded-[8px] p-2">
-              <LocateFixedIcon className="size-[14px] text-slate-500" />
-            </button>
-          </div>
-        </div>
-      </div>
+      ) : null}
     </section>
   );
 }

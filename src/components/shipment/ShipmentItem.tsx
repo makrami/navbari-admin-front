@@ -38,7 +38,7 @@ export function ShipmentItem({
   fromCountryCode = "CN",
   toCountryCode = "RU",
   progressPercent = 25,
-  userName = "Xin Zhao",
+  userName,
   rating = 4.5,
   selected = false,
   onClick,
@@ -91,43 +91,56 @@ export function ShipmentItem({
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="mt-4 flex w-full items-center gap-2">
-        <ReactCountryFlag
-          svg
-          countryCode={fromCountryCode}
-          style={{ width: 22, height: 16, borderRadius: 2 }}
-        />
-        <div
-          className={cn(
-            "h-[9px] flex-1 rounded-full",
-            selected ? "bg-white/30" : "bg-slate-100"
-          )}
-        >
+      {/* Progress or Not Assigned */}
+      {userName ? (
+        <div className="mt-4 flex w-full items-center gap-2">
+          <ReactCountryFlag
+            svg
+            countryCode={fromCountryCode}
+            style={{ width: 22, height: 16, borderRadius: 2 }}
+          />
           <div
             className={cn(
-              "h-[9px] rounded-full",
-              isDelivered
-                ? "bg-[#22c55e]"
-                : selected
-                ? "bg-white"
-                : "bg-[#1b54fe]"
+              "h-[9px] flex-1 rounded-full",
+              selected ? "bg-white/30" : "bg-slate-100"
             )}
-            style={{ width: `${clampedProgress}%` }}
+          >
+            <div
+              className={cn(
+                "h-[9px] rounded-full",
+                isDelivered
+                  ? "bg-[#22c55e]"
+                  : selected
+                  ? "bg-white"
+                  : "bg-[#1b54fe]"
+              )}
+              style={{ width: `${clampedProgress}%` }}
+            />
+          </div>
+          <ArrowRight
+            className={cn(
+              "h-3.5 w-3.5",
+              selected ? "text-white/60" : "text-slate-300"
+            )}
+          />
+          <ReactCountryFlag
+            svg
+            countryCode={toCountryCode}
+            style={{ width: 22, height: 16, borderRadius: 2 }}
           />
         </div>
-        <ArrowRight
-          className={cn(
-            "h-3.5 w-3.5",
-            selected ? "text-white/60" : "text-slate-300"
-          )}
-        />
-        <ReactCountryFlag
-          svg
-          countryCode={toCountryCode}
-          style={{ width: 22, height: 16, borderRadius: 2 }}
-        />
-      </div>
+      ) : (
+        <div className="mt-4 flex w-full items-center justify-center">
+          <span
+            className={cn(
+              "text-xs font-medium",
+              selected ? "text-white/80" : "text-slate-400"
+            )}
+          >
+            Not Assigned
+          </span>
+        </div>
+      )}
       {/* Divider */}
       <div
         className={cn("mt-4 h-px", selected ? "bg-white/20" : "bg-slate-100")}
@@ -147,15 +160,23 @@ export function ShipmentItem({
               selected ? "text-white/70" : "text-slate-400"
             )}
           />
-          <img src={imgAvatar} alt="Avatar" className="size-4 rounded-full" />
-          <span
-            className={cn(
-              "text-xs font-medium",
-              selected ? "text-white" : "text-slate-900"
-            )}
-          >
-            {userName}
-          </span>
+          {userName ? (
+            <>
+              <img
+                src={imgAvatar}
+                alt="Avatar"
+                className="size-4 rounded-full"
+              />
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  selected ? "text-white" : "text-slate-900"
+                )}
+              >
+                {userName}
+              </span>
+            </>
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
           <span

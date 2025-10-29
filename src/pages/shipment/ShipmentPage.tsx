@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   SearchShipment,
   AddShipment,
@@ -12,6 +12,10 @@ import SegmentDetails from "./segments/components/SegmentDetails";
 import ActivitySection from "./Activity/components/ActivitySection";
 import type { ActivityItemData } from "./Activity/types";
 import { ShipmentPageSkeleton } from "./components/ShipmentSkeleton";
+import AddShipmentModal, {
+  type AddShipmentInput as AddShipmentFormInput,
+} from "./components/AddShipmentModal";
+import type { CargoCompany } from "./components/CargoDeclarationModal";
 import avatar from "../../assets/images/avatar.png";
 import driver1 from "../../assets/images/drivers/driver1.png";
 import driver2 from "../../assets/images/drivers/driver2.png";
@@ -34,14 +38,23 @@ type ShipmentData = {
   lastActivity: string;
   lastActivityTime: string;
   currentSegmentIndex: number; // 0-based index of the current segment
+  isNew?: boolean; // newly created shipment - suppress progress UI
   segments: Array<{
     step: number;
     place: string;
     datetime: string;
     isCompleted?: boolean;
+    isPlaceholder?: boolean;
+    nextPlace?: string;
+    startAt?: string;
+    estFinishAt?: string;
+    vehicleLabel?: string;
+    localCompany?: string;
+    baseFeeUsd?: number;
     driverName: string;
     driverPhoto?: string; // Optional - if not provided, show user icon
     driverRating: number;
+    cargoCompanies?: CargoCompany[];
   }>;
   activities: ActivityItemData[];
 };
@@ -49,6 +62,13 @@ type ShipmentData = {
 export function ShipmentPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAddShipment, setShowAddShipment] = useState(false);
+  const [addedShipments, setAddedShipments] = useState<ShipmentData[]>([]);
+  const [editedSegmentsByShipmentId, setEditedSegmentsByShipmentId] = useState<
+    Record<string, ShipmentData["segments"]>
+  >({});
+  const [, setShipmentIsNewOverride] = useState<Record<string, boolean>>({});
+  const timeoutsRef = useRef<number[]>([]);
 
   useEffect(() => {
     // Simulate loading for 2 seconds
@@ -57,6 +77,14 @@ export function ShipmentPage() {
     }, 2000);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((id) => clearTimeout(id));
+      timeoutsRef.current = [];
+    };
   }, []);
 
   if (isLoading) {
@@ -486,25 +514,68 @@ export function ShipmentPage() {
     },
   ];
 
-  const selectedShipment = items.find((i) => i.id === selectedId);
+  const allItems = [...addedShipments, ...items];
+  const selectedShipment = allItems.find((i) => i.id === selectedId);
+  const renderSegments = selectedShipment
+    ? editedSegmentsByShipmentId[selectedShipment.id] ??
+      selectedShipment.segments
+    : [];
 
   // Get current segment's driver info
-  const currentSegment =
-    selectedShipment?.segments[selectedShipment.currentSegmentIndex];
+  const currentSegment = selectedShipment
+    ? renderSegments[selectedShipment.currentSegmentIndex]
+    : undefined;
 
   // If nothing is selected yet, show a centered, wrapped list of shipments
   if (!selectedId) {
     return (
       <div className="flex w-full h-screen bg-slate-100 overflow-y-auto">
         <div className="max-w-6xl w-full mx-auto p-9">
+          <AddShipmentModal
+            open={showAddShipment}
+            onClose={() => setShowAddShipment(false)}
+            onCreate={(data: AddShipmentFormInput) => {
+              const newShipment: ShipmentData = {
+                title: data.title,
+                id: data.id,
+                status: "In Origin",
+                fromCountryCode: "CN",
+                toCountryCode: "RU",
+                progressPercent: 0,
+                userName: data.driverName,
+                rating: data.driverRating || 0,
+                vehicle: "Unknown",
+                weight: "0 KG",
+                localCompany: "N/A",
+                destination: data.destination || "",
+                lastActivity: "Created",
+                lastActivityTime: "Just now",
+                currentSegmentIndex: 0,
+                segments: [
+                  {
+                    step: 1,
+                    place: data.place,
+                    datetime: data.datetime,
+                    isCompleted: false,
+                    driverName: data.driverName,
+                    driverPhoto: data.driverPhoto,
+                    driverRating: data.driverRating || 0,
+                  },
+                ],
+                activities: [],
+              };
+              setAddedShipments((prev) => [...prev, newShipment]);
+              setSelectedId(newShipment.id);
+            }}
+          />
           <div className="mb-4 flex items-center gap-3">
             <div className="flex-1">
               <SearchShipment />
             </div>
-            <AddShipment />
+            <AddShipment onClick={() => setShowAddShipment(true)} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((item) => (
+            {allItems.map((item) => (
               <ShipmentItem
                 key={item.id}
                 title={item.title}
@@ -531,9 +602,9 @@ export function ShipmentPage() {
     <div className="flex w-full h-screen overflow-hidden">
       <ListPanel title="Shipment">
         <SearchShipment />
-        <AddShipment />
+        <AddShipment onClick={() => setShowAddShipment(true)} />
         <div className="grid gap-4">
-          {items.map((item) => (
+          {allItems.map((item) => (
             <ShipmentItem
               key={item.id}
               title={item.title}
@@ -553,16 +624,57 @@ export function ShipmentPage() {
       </ListPanel>
 
       {/* Right-side details layout container with independent scroll */}
-      {selectedShipment && currentSegment && (
+      {selectedShipment && (
         <div className="flex-1 h-screen bg-slate-100 max-w-4xl mx-auto overflow-hidden">
           <div className="h-full overflow-y-auto no-scrollbar">
             <div className="p-9 flex flex-col gap-4">
+              <AddShipmentModal
+                open={showAddShipment}
+                onClose={() => setShowAddShipment(false)}
+                onCreate={(data: AddShipmentFormInput) => {
+                  const newShipment: ShipmentData = {
+                    title: data.title,
+                    id: data.id,
+                    status: "In Origin",
+                    fromCountryCode: "CN",
+                    toCountryCode: "RU",
+                    progressPercent: 0,
+                    userName: data.driverName || "",
+                    rating: data.driverRating || 0,
+                    vehicle: "Unknown",
+                    weight: `${data.cargoWeight ?? 0} KG`,
+                    localCompany: "N/A",
+                    destination: data.to || data.destination || "",
+                    lastActivity: "Created",
+                    lastActivityTime: "Just now",
+                    currentSegmentIndex: 0,
+                    isNew: true,
+                    segments: Array.from({
+                      length: Math.max(0, Number(data.segmentsAmount ?? 0)),
+                    }).map((_, i) => ({
+                      step: i + 1,
+                      place:
+                        i === 0
+                          ? data.from || ""
+                          : "Assign Previous Segment First",
+                      datetime: "",
+                      isCompleted: false,
+                      isPlaceholder: i > 0,
+                      driverName: "",
+                      driverRating: 0,
+                    })),
+                    activities: [],
+                  };
+                  setAddedShipments((prev) => [newShipment, ...prev]);
+                  setSelectedId(newShipment.id);
+                }}
+              />
               <NavigatingInfo
                 title={selectedShipment.title}
                 shipmentId={selectedShipment.id}
-                driverName={currentSegment.driverName}
-                driverPhoto={currentSegment.driverPhoto}
-                rating={currentSegment.driverRating}
+                driverName={currentSegment?.driverName || ""}
+                driverPhoto={currentSegment?.driverPhoto}
+                rating={currentSegment?.driverRating || 0}
                 vehicle={selectedShipment.vehicle}
                 weight={selectedShipment.weight}
                 localCompany={selectedShipment.localCompany}
@@ -571,18 +683,17 @@ export function ShipmentPage() {
                 lastActivityTime={selectedShipment.lastActivityTime}
                 onClose={() => setSelectedId(null)}
               />
-              <Segments
-                title="Segments"
-                onAddSegment={() => {
-                  /* hook up create segment flow later */
-                }}
-              >
-                {selectedShipment.segments.map((seg, idx) => {
+              <Segments title="Segments">
+                {renderSegments.map((seg, idx) => {
                   const isCurrent =
                     idx === selectedShipment.currentSegmentIndex;
-                  const isCompleted =
-                    idx < selectedShipment.currentSegmentIndex ||
-                    seg.isCompleted;
+                  const isCompleted = Boolean(seg.isCompleted);
+                  const prevCompleted =
+                    idx === 0
+                      ? true
+                      : Boolean(renderSegments[idx - 1]?.isCompleted);
+                  // Always enforce ordered unlocking: a segment is locked unless previous is completed
+                  const locked = idx === 0 ? false : !prevCompleted;
 
                   // Determine progress stage based on shipment status and position
                   let progressStage:
@@ -592,29 +703,34 @@ export function ShipmentPage() {
                     | "to_dest"
                     | "delivered"
                     | undefined;
-
-                  if (idx < selectedShipment.currentSegmentIndex) {
-                    // All previous segments are fully delivered
-                    progressStage = "delivered";
-                  } else if (isCurrent) {
-                    // Current segment progress depends on shipment status
-                    if (selectedShipment.status === "Loading") {
-                      progressStage = "loading";
-                    } else if (selectedShipment.status === "In Origin") {
-                      progressStage = "in_origin";
-                    } else if (selectedShipment.status === "Delivered") {
+                  if (!selectedShipment.isNew) {
+                    if (idx < selectedShipment.currentSegmentIndex) {
+                      // All previous segments are fully delivered
                       progressStage = "delivered";
-                    } else if (selectedShipment.status === "In Transit") {
-                      progressStage = "to_dest";
-                    } else if (selectedShipment.status === "Customs") {
-                      progressStage = "to_dest";
+                    } else if (isCurrent) {
+                      // Current segment progress depends on shipment status
+                      if (selectedShipment.status === "Loading") {
+                        progressStage = "loading";
+                      } else if (selectedShipment.status === "In Origin") {
+                        progressStage = "in_origin";
+                      } else if (selectedShipment.status === "Delivered") {
+                        progressStage = "delivered";
+                      } else if (selectedShipment.status === "In Transit") {
+                        progressStage = "to_dest";
+                      } else if (selectedShipment.status === "Customs") {
+                        progressStage = "to_dest";
+                      }
                     }
                   }
                   // Future segments have no progressStage (will be undefined)
 
                   // Determine title helper: next segment start or destination
                   const nextPlace =
-                    idx < selectedShipment.segments.length - 1
+                    seg.nextPlace !== undefined &&
+                    seg.nextPlace !== null &&
+                    seg.nextPlace !== ""
+                      ? seg.nextPlace
+                      : idx < selectedShipment.segments.length - 1
                       ? selectedShipment.segments[idx + 1]?.place
                       : undefined; // undefined => Destination
 
@@ -623,6 +739,10 @@ export function ShipmentPage() {
                       key={seg.step}
                       data={{
                         ...seg,
+                        // Only force placeholder for newly created shipments
+                        isPlaceholder: selectedShipment.isNew
+                          ? locked || seg.isPlaceholder
+                          : seg.isPlaceholder,
                         isCurrent,
                         isCompleted,
                         assigneeName: seg.driverName,
@@ -631,6 +751,101 @@ export function ShipmentPage() {
                         nextPlace,
                       }}
                       defaultOpen={false}
+                      editable={Boolean(
+                        !seg.isCompleted &&
+                          !locked &&
+                          // If cargo has been declared, show pending list instead of the editor
+                          !(seg.cargoCompanies && seg.cargoCompanies.length)
+                      )}
+                      locked={locked}
+                      onSave={(update) => {
+                        setEditedSegmentsByShipmentId((prev) => {
+                          const base = prev[selectedShipment.id]
+                            ? [...prev[selectedShipment.id]!]
+                            : [...selectedShipment.segments];
+                          const index = base.findIndex(
+                            (s) => s.step === seg.step
+                          );
+                          if (index >= 0) {
+                            base[index] = {
+                              ...base[index],
+                              place: update.place ?? base[index].place,
+                              nextPlace:
+                                update.nextPlace ?? base[index].nextPlace,
+                              startAt: update.startAt ?? base[index].startAt,
+                              estFinishAt:
+                                update.estFinishAt ?? base[index].estFinishAt,
+                              baseFeeUsd:
+                                update.baseFeeUsd ?? base[index].baseFeeUsd,
+                              cargoCompanies:
+                                update.cargoCompanies ??
+                                base[index].cargoCompanies,
+                              driverName:
+                                update.assigneeName ?? base[index].driverName,
+                              driverPhoto:
+                                update.assigneeAvatarUrl ??
+                                base[index].driverPhoto,
+                              isPlaceholder:
+                                update.isPlaceholder ??
+                                base[index].isPlaceholder,
+                              isCompleted:
+                                update.isCompleted ?? base[index].isCompleted,
+                            } as (typeof base)[number];
+                          }
+                          const next = { ...prev, [selectedShipment.id]: base };
+                          if (
+                            update.cargoCompanies &&
+                            update.cargoCompanies.length
+                          ) {
+                            const chosenCompany = update.cargoCompanies[0];
+                            const chosenDriver = chosenCompany.drivers?.[0];
+                            const timeoutId = window.setTimeout(() => {
+                              setEditedSegmentsByShipmentId((prev2) => {
+                                const base2 = prev2[selectedShipment.id]
+                                  ? [...prev2[selectedShipment.id]!]
+                                  : [...selectedShipment.segments];
+                                const idx2 = base2.findIndex(
+                                  (s) => s.step === seg.step
+                                );
+                                if (idx2 >= 0) {
+                                  base2[idx2] = {
+                                    ...base2[idx2],
+                                    driverName:
+                                      chosenDriver?.name ||
+                                      base2[idx2].driverName ||
+                                      "Xin Zhao",
+                                    driverPhoto:
+                                      chosenDriver?.avatarUrl ||
+                                      base2[idx2].driverPhoto,
+                                    driverRating:
+                                      base2[idx2].driverRating || 4.5,
+                                    // Resolve pending: assign driver, clear pending companies and mark completed
+                                    cargoCompanies: undefined,
+                                    isCompleted: true,
+                                  } as (typeof base2)[number];
+                                }
+                                const anyPending = base2.some((s) =>
+                                  Boolean(
+                                    s.cargoCompanies && s.cargoCompanies.length
+                                  )
+                                );
+                                if (!anyPending) {
+                                  setShipmentIsNewOverride((p) => ({
+                                    ...p,
+                                    [selectedShipment.id]: false,
+                                  }));
+                                }
+                                return {
+                                  ...prev2,
+                                  [selectedShipment.id]: base2,
+                                };
+                              });
+                            }, 10000);
+                            timeoutsRef.current.push(timeoutId);
+                          }
+                          return next;
+                        });
+                      }}
                     />
                   );
                 })}
