@@ -11,6 +11,10 @@ import BaseFeeField from "./fields/BaseFeeField";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
+import type {
+  SegmentAssignmentStatus,
+  SegmentLogisticsStatus,
+} from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
 export type SegmentData = {
   step: number;
@@ -40,6 +44,10 @@ export type SegmentData = {
   }>;
   /** Selected cargo companies for this segment */
   cargoCompanies?: CargoCompany[];
+  /** Assignment phase status (not mixed with logistics) */
+  assignmentStatus?: SegmentAssignmentStatus;
+  /** Logistics operation status */
+  logisticsStatus?: SegmentLogisticsStatus;
 };
 
 type DocumentItem = NonNullable<SegmentData["documents"]>[number];
@@ -52,6 +60,7 @@ type SegmentDetailsProps = {
   onSave?: (update: Partial<SegmentData>) => void;
   editable?: boolean;
   locked?: boolean;
+  showStatuses?: boolean;
 };
 
 export function SegmentDetails({
@@ -62,6 +71,7 @@ export function SegmentDetails({
   onSave,
   editable = false,
   locked = false,
+  showStatuses = true,
 }: SegmentDetailsProps) {
   const [open, setOpen] = useState(defaultOpen);
   const [toValue, setToValue] = useState<string>(data.nextPlace ?? "");
@@ -126,6 +136,22 @@ export function SegmentDetails({
         </div>
       ) : null}
 
+      {/* Assignment and Logistics statuses */}
+      {showStatuses && (data.assignmentStatus || data.logisticsStatus) && (
+        <div className="px-3 pb-2 flex items-center gap-2">
+          {data.assignmentStatus ? (
+            <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-medium">
+              Assignment: {data.assignmentStatus}
+            </span>
+          ) : null}
+          {data.logisticsStatus ? (
+            <span className="inline-flex items-center rounded-md bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
+              Logistics: {data.logisticsStatus}
+            </span>
+          ) : null}
+        </div>
+      )}
+
       {/* Expandable content container */}
       <div
         id={`segment-content-${step}`}
@@ -177,6 +203,7 @@ export function SegmentDetails({
                   error={showErrors && !baseFee.trim()}
                 />
                 <SegmentActions
+                  readOnly={locked || !editable}
                   onReset={() => {
                     setToValue("");
                     setStartAt("");

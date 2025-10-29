@@ -90,10 +90,19 @@ export function EntityCard({
     <div
       className={cn(
         "relative overflow-hidden p-2 rounded-2xl transition-shadow",
-        selected ? "bg-[#1b54fe] text-white shadow" : "bg-white",
+        selected ? "bg-[#1b54fe] text-white shadow" : "bg-white cursor-pointer",
         className
       )}
       aria-pressed={selected}
+      role="button"
+      tabIndex={0}
+      onClick={() => onView?.(entity.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onView?.(entity.id);
+        }
+      }}
     >
       <div className={cn("h-1.5 rounded-full", `${colors.bar}`)} />
 
@@ -229,7 +238,7 @@ export function EntityCard({
 
         {/* Actions */}
         {entity.status === "pending" ? (
-          <div className="mt-5 grid grid-cols-3 gap-2">
+          <div className="mt-5 grid grid-cols-2 gap-2">
             <Button
               variant="ghost"
               className={cn(
@@ -238,7 +247,10 @@ export function EntityCard({
                   ? "bg-white/15 text-white hover:bg-white/20"
                   : "bg-green-600/20 hover:!bg-green-600/30 text-green-600"
               )}
-              onClick={() => onApprove?.(entity.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onApprove?.(entity.id);
+              }}
             >
               {actionLabels.approveLabel}
               <CheckIcon className="size-3 " />
@@ -251,23 +263,13 @@ export function EntityCard({
                   ? "bg-white/15 text-white hover:bg-white/20"
                   : "bg-red-600/20 hover:!bg-red-600/30 text-red-600"
               )}
-              onClick={() => onReject?.(entity.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onReject?.(entity.id);
+              }}
             >
               {actionLabels.rejectLabel}
               <XIcon className="size-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              className={cn(
-                "!p-0 h-7 inline-flex items-center gap-1.5",
-                selected
-                  ? "bg-white/15 text-white hover:bg-white/20"
-                  : "bg-slate-100 hover:bg-slate-200"
-              )}
-              onClick={() => onView?.(entity.id)}
-            >
-              {actionLabels.viewLabel}
-              <EyeIcon className="h-4 w-4" />
             </Button>
           </div>
         ) : (
@@ -280,7 +282,10 @@ export function EntityCard({
                   ? "bg-white/15 text-white hover:bg-white/20"
                   : "bg-slate-100 hover:bg-slate-200"
               )}
-              onClick={() => onView?.(entity.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView?.(entity.id);
+              }}
             >
               {actionLabels.viewDetailsLabel}
               <EyeIcon className="h-4 w-4" />

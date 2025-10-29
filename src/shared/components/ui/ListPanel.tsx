@@ -14,7 +14,7 @@ export function ListPanel({
   return (
     <section
       className={cn(
-        "w-1/4 min-w-xs bg-slate-200 p-9 flex flex-col h-screen overflow-hidden space-y-4",
+        "w-1/4 min-w-sm bg-slate-200 p-9 flex flex-col h-screen overflow-hidden space-y-4",
         className
       )}
       data-name="List Panel"

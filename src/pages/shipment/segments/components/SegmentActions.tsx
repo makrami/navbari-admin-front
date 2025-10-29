@@ -2,13 +2,16 @@ type SegmentActionsProps = {
   onReset: () => void;
   onSave: () => void;
   onSaveDeclare: () => void;
+  readOnly?: boolean;
 };
 
 export default function SegmentActions({
   onReset,
   onSave,
   onSaveDeclare,
+  readOnly = false,
 }: SegmentActionsProps) {
+  if (readOnly) return null;
   return (
     <div className="md:col-span-2 flex items-center justify-end gap-2 pt-2">
       <button
