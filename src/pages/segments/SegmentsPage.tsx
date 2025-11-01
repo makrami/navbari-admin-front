@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { useShipments } from "../../services/shipment/hooks";
@@ -15,6 +16,7 @@ export function SegmentsPage() {
   const [expandedSegments, setExpandedSegments] = useState<Set<string>>(
     new Set()
   );
+  const { t } = useTranslation();
 
   const { filteredSegments, needActionCount, alertCount, allSegments } =
     useSegmentsData(serviceShipments ?? null, filter, searchQuery);
@@ -37,7 +39,7 @@ export function SegmentsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-slate-500">Loading segments...</div>
+        <div className="text-slate-500">{t("segments.page.loading")}</div>
       </div>
     );
   }
@@ -52,11 +54,13 @@ export function SegmentsPage() {
               type="button"
               onClick={() => navigate("/shipments")}
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Close"
+              aria-label={t("segments.page.closeLabel")}
             >
               <X className="h-5 w-5 text-slate-600" />
             </button>
-            <h1 className="text-2xl font-bold text-slate-900">Segments</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {t("segments.page.title")}
+            </h1>
           </div>
         </div>
 
@@ -76,7 +80,7 @@ export function SegmentsPage() {
         <div className="max-w-6xl mx-auto space-y-4 pb-6">
           {filteredSegments.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
-              No segments found
+              {t("segments.page.empty")}
             </div>
           ) : (
             filteredSegments.map((segment) => {

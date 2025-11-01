@@ -1,6 +1,158 @@
 {
-  "welcome": "Welcome",
-  "loading": "Loading...",
-  "language": "Language"
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "language": "Language",
+    "error": {
+      "unknown": "An unknown error occurred"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in to your account (demo mode).",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "jane.doe",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": {
+        "label": "Login",
+        "loading": "Logging in..."
+      },
+      "noAccount": "No account?",
+      "signUpLink": "Sign up"
+    },
+    "signUp": {
+      "title": "Create account",
+      "subtitle": "Sign up to get started (demo mode).",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "jane.doe",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmLabel": "Confirm password",
+      "confirmPlaceholder": "••••••••",
+      "submit": {
+        "label": "Create account",
+        "loading": "Creating account..."
+      },
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "errors": {
+        "mismatch": "Passwords do not match"
+      }
+    }
+  },
+  "dashboard": {
+    "header": {
+      "title": "Dashboard"
+    }
+  },
+  "segments": {
+    "cardHeader": {
+      "destinationFallback": "(DESTINATION)"
+    },
+    "infoBanner": {
+      "from": "From",
+      "to": "To",
+      "notSet": "Not Set"
+    },
+    "infoGrid": {
+      "startLabel": "START",
+      "finishLabel": "EST. FINISH",
+      "vehicleLabel": "DRIVER VEHICLE",
+      "localCompanyLabel": "LOCAL COMPANY",
+      "notSet": "Not set",
+      "notAssigned": "Not assigned"
+    },
+    "page": {
+      "title": "Segments",
+      "loading": "Loading segments...",
+      "closeLabel": "Close",
+      "empty": "No segments found"
+    }
+  },
+  "misc": {
+    "notFound": {
+      "title": "Not Found",
+      "description": "The page you're looking for doesn't exist.",
+      "link": "Go home"
+    }
+  },
+  "overview": {
+    "header": {
+      "title": "Overview",
+      "subtitle": "Quick summary of key metrics."
+    }
+  },
+  "mapDemo": {
+    "title": "Cargo Map Demo",
+    "segmentLabel": "{{vehicleId}} / {{driverId}}",
+    "selectedSegment": "Selected segment #{{index}}"
+  },
+  "drivers": {
+    "page": {
+      "title": "Drivers",
+      "stats": {
+        "shipments": "shipments",
+        "vehicles": "vehicles"
+      },
+      "closeDetails": "Close details panel",
+      "actions": {
+        "activate": "Activate",
+        "deactivate": "Deactivate"
+      }
+    }
+  },
+  "localCompanies": {
+    "page": {
+      "title": "Local Companies",
+      "stats": {
+        "drivers": "drivers",
+        "active": "active"
+      },
+      "closeDetails": "Close details panel",
+      "actions": {
+        "activate": "Activate",
+        "deactivate": "Deactivate"
+      }
+    }
+  },
+  "finance": {
+    "page": {
+      "title": "Finance",
+      "addPayment": "Add Payment"
+    }
+  },
+  "vehicles": {
+    "header": {
+      "title": "Vehicles",
+      "subtitle": "Manage your deliveries and vehicles."
+    }
+  },
+  "layout": {
+    "app": {
+      "openMenu": "Open menu",
+      "menuLabel": "Menu"
+    }
+  },
+  "sidebar": {
+    "brandAlt": "Brand",
+    "profileAlt": "Profile",
+    "profileName": "Xin Zhao",
+    "notifications": "Notifications",
+    "logout": "Logout",
+    "links": {
+      "dashboard": "Dashboard",
+      "shipment": "Shipment",
+      "localCompanies": "Local Companies",
+      "drivers": "Drivers",
+      "finance": "Finance"
+    },
+    "mobile": {
+      "navLabel": "Navigation menu",
+      "brand": "Navbari",
+      "closeMenu": "Close menu"
+    }
+  }
 }
 

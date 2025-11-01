@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { EntityCard } from "../../shared/components/ui/EntityCard";
 import { DRIVERS } from "./data";
 import { StatusFilterChips } from "./components/StatusFilterChips";
@@ -22,6 +23,7 @@ export function DriversPage() {
   );
   const [isActive, setIsActive] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Simulate loading for 2 seconds
@@ -69,7 +71,9 @@ export function DriversPage() {
       <div className="py-6 space-y-6 h-screen  max-w-7xl mx-auto  transition-all">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Drivers</h1>
+            <h1 className="text-2xl font-semibold">
+              {t("drivers.page.title")}
+            </h1>
           </div>
         </div>
 
@@ -87,8 +91,8 @@ export function DriversPage() {
               entity={d}
               onView={(id) => setSelectedId(id)}
               statsLabels={{
-                driversLabel: "shipments",
-                activeLabel: "vehicles",
+                driversLabel: t("drivers.page.stats.shipments"),
+                activeLabel: t("drivers.page.stats.vehicles"),
               }}
             />
           ))}
@@ -100,7 +104,7 @@ export function DriversPage() {
   // Split view matching left-side list panel layout
   return (
     <div className="flex w-full  overflow-hidden ">
-      <ListPanel title="Drivers">
+      <ListPanel title={t("drivers.page.title")}>
         <StatusFilterChips
           active={activeFilter}
           onChange={setActiveFilter}
@@ -116,8 +120,8 @@ export function DriversPage() {
               selected={selectedId === d.id}
               onView={(id) => setSelectedId(id)}
               statsLabels={{
-                driversLabel: "shipments",
-                activeLabel: "vehicles",
+                driversLabel: t("drivers.page.stats.shipments"),
+                activeLabel: t("drivers.page.stats.vehicles"),
               }}
             />
           ))}
@@ -135,7 +139,7 @@ export function DriversPage() {
                       type="button"
                       onClick={() => setSelectedId(null)}
                       className="grid h-9 w-9 place-items-center rounded-lg border border-slate-300 bg-white text-slate-400 hover:bg-slate-50 transition-colors"
-                      aria-label="Close details panel"
+                      aria-label={t("drivers.page.closeDetails")}
                     >
                       <PanelRightClose className="size-5" />
                     </button>
@@ -164,7 +168,9 @@ export function DriversPage() {
                           }
                         ></span>
                       </span>
-                      {isActive ? "Deactivate" : "Activate"}
+                      {isActive
+                        ? t("drivers.page.actions.deactivate")
+                        : t("drivers.page.actions.activate")}
                     </button>
                   </div>
                   <DriverDetails driver={selectedDriver} />

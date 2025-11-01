@@ -5,6 +5,7 @@ import {
   Check,
   UserRound,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../../shared/utils/cn";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
 import type { SegmentWithShipment } from "./SegmentCard";
@@ -22,6 +23,7 @@ export function SegmentCardHeader({
   isExpanded,
   onToggle,
 }: SegmentCardHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div
       className="bg-slate-50 px-4 py-3 border-b border-slate-200 cursor-pointer select-none"
@@ -60,7 +62,8 @@ export function SegmentCardHeader({
             <ArrowRight className="size-3.5 text-slate-400" />
 
             <span className="text-slate-900 font-semibold">
-              {segment.nextPlace || "(DESTINATION)"}
+              {segment.nextPlace ||
+                t("segments.cardHeader.destinationFallback")}
             </span>
             {segment.isCompleted && segment.progressStage === "delivered" ? (
               <Check className="size-[14px] text-green-600 shrink-0" />

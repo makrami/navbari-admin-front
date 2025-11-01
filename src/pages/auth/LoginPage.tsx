@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../shared/components/ui/Button";
 import { loginDemo } from "../../services/auth.service";
@@ -11,6 +12,7 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -27,7 +29,7 @@ export function LoginPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("An unknown error occurred");
+        setError(t("common.error.unknown"));
       }
     } finally {
       setLoading(false);
@@ -37,14 +39,14 @@ export function LoginPage() {
   return (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-sm bg-white rounded-md shadow border border-slate-200 p-6">
-        <h1 className="text-xl font-semibold mb-1">Welcome back</h1>
+        <h1 className="text-xl font-semibold mb-1">{t("auth.login.title")}</h1>
         <p className="text-sm text-slate-600 mb-6">
-          Log in to your account (demo mode).
+          {t("auth.login.subtitle")}
         </p>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-1.5">
             <label htmlFor="username" className="text-sm font-medium">
-              Username
+              {t("auth.login.usernameLabel")}
             </label>
             <input
               id="username"
@@ -52,13 +54,13 @@ export function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="jane.doe"
+              placeholder={t("auth.login.usernamePlaceholder")}
               required
             />
           </div>
           <div className="grid gap-1.5">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              {t("auth.login.passwordLabel")}
             </label>
             <input
               id="password"
@@ -66,7 +68,7 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="••••••••"
+              placeholder={t("auth.login.passwordPlaceholder")}
               required
               minLength={4}
             />
@@ -77,13 +79,15 @@ export function LoginPage() {
             </div>
           ) : null}
           <Button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading
+              ? t("auth.login.submit.loading")
+              : t("auth.login.submit.label")}
           </Button>
         </form>
         <div className="text-sm text-slate-600 mt-4">
-          No account?{" "}
+          {t("auth.login.noAccount")}{" "}
           <Link className="underline" to="/sign-up">
-            Sign up
+            {t("auth.login.signUpLink")}
           </Link>
         </div>
       </div>

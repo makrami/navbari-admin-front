@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { EntityCard } from "../../shared/components/ui/EntityCard";
 import { COMPANIES } from "./data";
 import { StatusFilterChips } from "./components/StatusFilterChips";
@@ -22,6 +23,7 @@ export function LocalCompaniesPage() {
   );
   const [isActive, setIsActive] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Simulate loading for 2 seconds
@@ -69,7 +71,9 @@ export function LocalCompaniesPage() {
       <div className="py-6 space-y-6 h-screen  max-w-7xl mx-auto  transition-all">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Local Companies</h1>
+            <h1 className="text-2xl font-semibold">
+              {t("localCompanies.page.title")}
+            </h1>
           </div>
         </div>
 
@@ -87,8 +91,8 @@ export function LocalCompaniesPage() {
               entity={c}
               onView={(id) => setSelectedId(id)}
               statsLabels={{
-                driversLabel: "drivers",
-                activeLabel: "active",
+                driversLabel: t("localCompanies.page.stats.drivers"),
+                activeLabel: t("localCompanies.page.stats.active"),
               }}
             />
           ))}
@@ -100,7 +104,7 @@ export function LocalCompaniesPage() {
   // Split view matching left-side list panel layout
   return (
     <div className="flex w-full  overflow-hidden ">
-      <ListPanel title="Local Companies">
+      <ListPanel title={t("localCompanies.page.title")}>
         <StatusFilterChips
           active={activeFilter}
           onChange={setActiveFilter}
@@ -116,8 +120,8 @@ export function LocalCompaniesPage() {
               selected={selectedId === c.id}
               onView={(id) => setSelectedId(id)}
               statsLabels={{
-                driversLabel: "drivers",
-                activeLabel: "active",
+                driversLabel: t("localCompanies.page.stats.drivers"),
+                activeLabel: t("localCompanies.page.stats.active"),
               }}
             />
           ))}
@@ -135,7 +139,7 @@ export function LocalCompaniesPage() {
                       type="button"
                       onClick={() => setSelectedId(null)}
                       className="grid h-9 w-9 place-items-center rounded-lg border border-slate-300 bg-white text-slate-400 hover:bg-slate-50 transition-colors"
-                      aria-label="Close details panel"
+                      aria-label={t("localCompanies.page.closeDetails")}
                     >
                       <PanelRightClose className="size-5" />
                     </button>
@@ -164,7 +168,9 @@ export function LocalCompaniesPage() {
                           }
                         ></span>
                       </span>
-                      {isActive ? "Deactivate" : "Activate"}
+                      {isActive
+                        ? t("localCompanies.page.actions.deactivate")
+                        : t("localCompanies.page.actions.activate")}
                     </button>
                   </div>
                   <CompanyDetails company={selectedCompany} />

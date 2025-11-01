@@ -1,5 +1,6 @@
 import ReactCountryFlag from "react-country-flag";
 import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
 import type { SegmentWithShipment } from "./SegmentCard";
@@ -14,11 +15,14 @@ export function SegmentInfoBanner({
   shipment,
 }: SegmentInfoBannerProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Get origin from first segment's place, destination from shipment.destination or last segment
   const originCity = segment.place;
   const destinationCity =
-    shipment?.destination || segment.nextPlace || "Not Set";
+    shipment?.destination ||
+    segment.nextPlace ||
+    t("segments.infoBanner.notSet");
 
   const handleShipmentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -47,7 +51,9 @@ export function SegmentInfoBanner({
         {/* Center: Origin and Destination */}
         <div className="flex flex-1 items-center justify-end gap-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-sm text-gray-600">From</span>
+            <span className="text-sm text-gray-600">
+              {t("segments.infoBanner.from")}
+            </span>
             {shipment?.fromCountryCode && (
               <ReactCountryFlag
                 svg
@@ -61,7 +67,9 @@ export function SegmentInfoBanner({
           </div>
           <ArrowRight className="size-3.5 text-gray-400" />
           <div className="flex items-center gap-1.5">
-            <span className="text-sm text-gray-600">To</span>
+            <span className="text-sm text-gray-600">
+              {t("segments.infoBanner.to")}
+            </span>
             {shipment?.toCountryCode && (
               <ReactCountryFlag
                 svg

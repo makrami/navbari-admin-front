@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../shared/components/ui/Button";
 import { registerDemo } from "../../services/auth.service";
@@ -11,12 +12,13 @@ export function SignUpPage() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     if (password !== confirm) {
-      setError("Passwords do not match");
+      setError(t("auth.signUp.errors.mismatch"));
       return;
     }
     setLoading(true);
@@ -27,7 +29,7 @@ export function SignUpPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("An unknown error occurred");
+        setError(t("common.error.unknown"));
       }
     } finally {
       setLoading(false);
@@ -37,14 +39,14 @@ export function SignUpPage() {
   return (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-sm bg-white rounded-md shadow border border-slate-200 p-6">
-        <h1 className="text-xl font-semibold mb-1">Create account</h1>
+        <h1 className="text-xl font-semibold mb-1">{t("auth.signUp.title")}</h1>
         <p className="text-sm text-slate-600 mb-6">
-          Sign up to get started (demo mode).
+          {t("auth.signUp.subtitle")}
         </p>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-1.5">
             <label htmlFor="username" className="text-sm font-medium">
-              Username
+              {t("auth.signUp.usernameLabel")}
             </label>
             <input
               id="username"
@@ -52,13 +54,13 @@ export function SignUpPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="jane.doe"
+              placeholder={t("auth.signUp.usernamePlaceholder")}
               required
             />
           </div>
           <div className="grid gap-1.5">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              {t("auth.signUp.passwordLabel")}
             </label>
             <input
               id="password"
@@ -66,14 +68,14 @@ export function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="••••••••"
+              placeholder={t("auth.signUp.passwordPlaceholder")}
               required
               minLength={4}
             />
           </div>
           <div className="grid gap-1.5">
             <label htmlFor="confirm" className="text-sm font-medium">
-              Confirm password
+              {t("auth.signUp.confirmLabel")}
             </label>
             <input
               id="confirm"
@@ -81,7 +83,7 @@ export function SignUpPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="••••••••"
+              placeholder={t("auth.signUp.confirmPlaceholder")}
               required
               minLength={4}
             />
@@ -92,13 +94,15 @@ export function SignUpPage() {
             </div>
           ) : null}
           <Button type="submit" disabled={loading}>
-            {loading ? "Creating account..." : "Create account"}
+            {loading
+              ? t("auth.signUp.submit.loading")
+              : t("auth.signUp.submit.label")}
           </Button>
         </form>
         <div className="text-sm text-slate-600 mt-4">
-          Already have an account?{" "}
+          {t("auth.signUp.haveAccount")}{" "}
           <Link className="underline" to="/login">
-            Log in
+            {t("auth.signUp.loginLink")}
           </Link>
         </div>
       </div>

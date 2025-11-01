@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Figma-exported assets (from the currently selected node)
 import imgLogo from "../assets/images/truck.svg";
@@ -18,6 +19,7 @@ import { logout } from "../services/auth.service";
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -29,7 +31,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col items-center gap-4 px-0 py-7">
         {/* Brand icon */}
         <div className="grid size-16 place-items-center rounded-2xl bg-[#1b54fe]">
-          <img src={imgLogo} alt="Brand" className="h-9 w-9" />
+          <img src={imgLogo} alt={t("sidebar.brandAlt")} className="h-9 w-9" />
         </div>
 
         {/* Nav items */}
@@ -56,7 +58,7 @@ export function Sidebar() {
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 >
-                  Dashboard
+                  {t("sidebar.links.dashboard")}
                 </span>
               </div>
             )}
@@ -84,7 +86,7 @@ export function Sidebar() {
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 >
-                  Shipment
+                  {t("sidebar.links.shipment")}
                 </span>
               </div>
             )}
@@ -112,7 +114,7 @@ export function Sidebar() {
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 >
-                  Local Companies
+                  {t("sidebar.links.localCompanies")}
                 </span>
               </div>
             )}
@@ -140,7 +142,7 @@ export function Sidebar() {
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 >
-                  Drivers
+                  {t("sidebar.links.drivers")}
                 </span>
               </div>
             )}
@@ -168,7 +170,7 @@ export function Sidebar() {
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
                   }`}
                 >
-                  Finance
+                  {t("sidebar.links.finance")}
                 </span>
               </div>
             )}
@@ -181,11 +183,11 @@ export function Sidebar() {
           <div className="flex h-12 w-full items-center gap-3 px-5">
             <img
               src={imgAvatar}
-              alt="Profile"
+              alt={t("sidebar.profileAlt")}
               className="size-7 rounded-full object-cover"
             />
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Xin Zhao
+              {t("sidebar.profileName")}
             </span>
           </div>
 
@@ -193,7 +195,7 @@ export function Sidebar() {
           <div className="flex h-12 w-full items-center gap-2 px-5">
             <BellIcon className="size-5 text-slate-400" />
             <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Notif
+              {t("sidebar.notifications")}
             </span>
           </div>
 
@@ -201,11 +203,11 @@ export function Sidebar() {
           <button
             className="flex h-12 w-full items-center gap-2 px-5 text-slate-400 hover:text-red-500"
             onClick={handleLogout}
-            title="Logout"
+            title={t("sidebar.logout")}
           >
             <LogOutIcon className="size-5 " />
             <span className="text-xs font-medium uppercase tracking-wide ">
-              Logout
+              {t("sidebar.logout")}
             </span>
           </button>
         </nav>

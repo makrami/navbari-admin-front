@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import CargoMap, { type Segment } from "../../components/CargoMap";
 
 const segments = [
@@ -25,23 +26,29 @@ export function MapDemoPage() {
     idx: number;
     label: string;
   } | null>(null);
+  const { t } = useTranslation();
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <h1 className="mb-4 text-lg font-bold text-slate-900">Cargo Map Demo</h1>
+      <h1 className="mb-4 text-lg font-bold text-slate-900">
+        {t("mapDemo.title")}
+      </h1>
       <CargoMap
         segments={segments}
         initialView={{ longitude: 7.5, latitude: 49.0, zoom: 4 }}
         onSegmentClick={(seg, idx) =>
           setSelected({
             idx,
-            label: `${seg.meta?.vehicleId} / ${seg.meta?.driverId}`,
+            label: t("mapDemo.segmentLabel", {
+              vehicleId: seg.meta?.vehicleId ?? "",
+              driverId: seg.meta?.driverId ?? "",
+            }),
           })
         }
       />
       {selected && (
         <div className="mt-3 rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">
           <div className="font-semibold">
-            Selected segment #{selected.idx + 1}
+            {t("mapDemo.selectedSegment", { index: selected.idx + 1 })}
           </div>
           <div>{selected.label}</div>
         </div>

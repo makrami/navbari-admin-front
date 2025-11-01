@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 // import { DashboardCards } from "./components/DashboardCards";
 // import { FinanceDashboardSections } from "./components/FinanceDashboardSections";
 // import { RecentActivities } from "./components/RecentActivities";
@@ -7,6 +8,7 @@ import CargoMap, { type Segment } from "../../components/CargoMap";
 
 export function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
   const segments = [
     {
       color: "#ff0000",
@@ -45,7 +47,9 @@ export function DashboardPage() {
         {/* Header Section */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="font-bold text-slate-900">Dashboard</h1>
+            <h1 className="font-bold text-slate-900">
+              {t("dashboard.header.title")}
+            </h1>
           </div>
         </div>
 
