@@ -38,7 +38,7 @@ export type SegmentData = {
     id: string | number;
     name: string;
     sizeLabel: string;
-    status: "ok" | "error" | "info";
+    status: "pending" | "approved" | "rejected";
     author?: string;
     thumbnailUrl?: string;
   }>;
@@ -164,7 +164,7 @@ export function SegmentDetails({
         aria-labelledby={headerId}
       >
         <div className={cn("overflow-hidden", open)}>
-          <div className="px-3 py-3 grid gap-6">
+          <div className="px-3 py-3 gap-6">
             {/* Segment progress appears here only for non-current segments */}
             {children ? (
               <div>{children}</div>

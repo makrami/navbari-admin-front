@@ -1,105 +1,155 @@
 import { useMemo, useState } from "react";
-import { Button } from "../../../../shared/components/ui/Button";
-import { DollarSign, Minus, Plus, Clock } from "lucide-react";
+import { Plus, MoreVertical, CoinsIcon } from "lucide-react";
 
 export function FinancialSection() {
-  const [costRows, setCostRows] = useState<
+  const [additionalCosts, setAdditionalCosts] = useState<
     Array<{ id: number; label: string; amount: number }>
-  >([{ id: 1, label: "", amount: 0 }]);
+  >([{ id: 1, label: "2 nights stay", amount: 15.8 }]);
+
+  const [currentInput, setCurrentInput] = useState<{
+    label: string;
+    amount: number;
+  }>({ label: "", amount: 0 });
+
+  const baseFee = 34.5;
 
   const total = useMemo(() => {
-    const add = costRows.reduce(
-      (sum, row) => sum + (Number.isFinite(row.amount) ? row.amount : 0),
+    const additionalTotal = additionalCosts.reduce(
+      (sum, cost) => sum + (Number.isFinite(cost.amount) ? cost.amount : 0),
       0
     );
-    return add + 34.5;
-  }, [costRows]);
+    return baseFee + additionalTotal;
+  }, [additionalCosts]);
+
+  const handleAddCost = () => {
+    if (currentInput.label.trim() && currentInput.amount > 0) {
+      const newId = Math.max(...additionalCosts.map((c) => c.id), 0) + 1;
+      setAdditionalCosts([
+        ...additionalCosts,
+        {
+          id: newId,
+          label: currentInput.label,
+          amount: currentInput.amount,
+        },
+      ]);
+      setCurrentInput({ label: "", amount: 0 });
+    }
+  };
+
+  const handleInputChange = (
+    field: "label" | "amount",
+    value: string | number
+  ) => {
+    setCurrentInput((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleRemoveCost = (id: number) => {
+    setAdditionalCosts(additionalCosts.filter((c) => c.id !== id));
+  };
 
   return (
     <section>
-      <header className="px-3 pt-3 pb-2 text-xs  text-slate-900">
+      <header className="px-3 pt-3 pb-2 text-xs text-slate-900 font-bold">
         Financial
       </header>
-      <div className="p-4 grid gap-3 bg-slate-100 rounded-xl">
-        <div className="rounded-xl">
-          <div className=" font-medium  text-xs text-slate-900  ">Base Fee</div>
-          <div className="px-3 py-2">
-            <div className="flex items-center gap-2 bg-white text-slate-900 rounded-lg p-2">
-              <DollarSign className="size-5 text-slate-500" /> 34.50 $
+      <div className="px-4 py-2 bg-slate-50 rounded-xl">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Base Fee */}
+          <div className="flex flex-1 gap-2">
+            <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2">
+              <span className="text-xs text-slate-900">Base Fee:</span>
+              <span className="text-xs font-bold text-slate-900">$34.5</span>
             </div>
-          </div>
-        </div>
 
-        <div className="">
-          <div className="font-medium  text-xs text-slate-900 ">
-            Additional Costs
-          </div>
-          <div className="px-3 py-2 grid gap-2">
-            {costRows.map((row, idx) => (
-              <div key={row.id} className="flex items-center gap-2">
+            {/* Additional Costs */}
+            {additionalCosts.map((cost) => (
+              <div key={cost.id} className="flex items-center gap-2">
+                <Plus className="size-4 text-slate-400" />
+                <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2">
+                  <span className="text-xs text-slate-900">{cost.label}</span>
+                  <span className="text-xs font-bold text-slate-900">
+                    ${cost.amount.toFixed(1)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCost(cost.id)}
+                    className="ml-1"
+                  >
+                    <MoreVertical className="size-4 text-slate-400 cursor-pointer hover:text-slate-600" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Input Card - Always visible */}
+            <div className="flex items-center gap-2">
+              <Plus className="size-4 text-slate-400" />
+              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2">
                 <input
-                  aria-label={`Cost for interval ${idx + 1}`}
-                  placeholder="Cost for..."
-                  className="h-8 flex-1 rounded px-2 text-xs font-normal text-slate-400 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  value={row.label}
-                  onChange={(e) =>
-                    setCostRows((rows) =>
-                      rows.map((r) =>
-                        r.id === row.id ? { ...r, label: e.target.value } : r
-                      )
-                    )
-                  }
+                  type="text"
+                  placeholder="Cost label"
+                  value={currentInput.label}
+                  onChange={(e) => handleInputChange("label", e.target.value)}
+                  className="text-xs text-slate-900 bg-transparent outline-none w-16"
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Enter" &&
+                      currentInput.label.trim() &&
+                      currentInput.amount > 0
+                    ) {
+                      handleAddCost();
+                    }
+                  }}
                 />
+                <div className="h-4 w-px bg-slate-300 mx-2" />
+
                 <input
-                  aria-label={`Amount for interval ${idx + 1}`}
                   type="number"
-                  className="h-8 flex-1 rounded px-2 text-xs font-normal text-slate-400 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  value={row.amount}
+                  placeholder="0"
+                  value={currentInput.amount || ""}
                   onChange={(e) =>
-                    setCostRows((rows) =>
-                      rows.map((r) =>
-                        r.id === row.id
-                          ? { ...r, amount: parseFloat(e.target.value) || 0 }
-                          : r
-                      )
-                    )
+                    handleInputChange("amount", parseFloat(e.target.value) || 0)
                   }
+                  className="text-xs font-bold text-slate-900 bg-transparent outline-none w-8"
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Enter" &&
+                      currentInput.label.trim() &&
+                      currentInput.amount > 0
+                    ) {
+                      handleAddCost();
+                    }
+                  }}
                 />
                 <button
                   type="button"
-                  aria-label="Remove interval"
-                  className="inline-flex items-center bg-white justify-center size-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+                  onClick={handleAddCost}
+                  disabled={
+                    !currentInput.label.trim() || currentInput.amount <= 0
+                  }
+                  className="flex items-center justify-center rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Minus className="size-4" />
+                  <Plus className="size-4 text-slate-400" />
                 </button>
               </div>
-            ))}
-            <div className=" flex itmes-start  mt-2 gap-2 text-xs text-slate-900 ">
-              <Plus className="size-4" /> Add Interval
             </div>
           </div>
-        </div>
-        <div className="h-px bg-slate-100" />
 
-        <div className="flex items-center justify-between px-1">
-          <div className="text-xs flex flex-col items-center gap-2">
-            <div className="text-slate-500 flex items-center gap-2">
-              <Clock className="size-3" /> Total
+          {/* Vertical Separator */}
+          <div className="h-12 w-px bg-slate-300 mx-2" />
+
+          {/* Total Section */}
+          <div className="flex w-20 flex-col justify-between items-center gap-1">
+            <div className="flex items-center gap-1 text-xs text-slate-500">
+              <CoinsIcon className="size-3 text-slate-400" />
+              <span className="uppercase">TOTAL</span>
             </div>
-            <div className="text-slate-900  font-semibold">
-              {total.toFixed(2)} USD
+            <div className="flex items-center gap-1">
+              <div className="text-sm font-bold text-slate-900">
+                {total.toFixed(2)}$
+              </div>
+              <div className="text-xs text-slate-500">USD</div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" className="h-8 px-3 text-[12px]">
-              Reset
-            </Button>
-            <Button
-              variant="ghost"
-              className=" rounded-lg bg-white  text-slate-900 border border-slate-300"
-            >
-              Apply
-            </Button>
           </div>
         </div>
       </div>

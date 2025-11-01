@@ -13,7 +13,7 @@ export function AddShipment({ className, onClick }: AddShipmentProps) {
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center justify-center gap-2 rounded-2xl bg-[rgba(27,84,254,0.1)] p-4",
+        "flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[rgba(27,84,254,0.1)] p-4",
         "text-[#1b54fe] transition-transform duration-150 ease-in-out",
         "hover:scale-101 active:scale-99",
         className
