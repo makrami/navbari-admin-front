@@ -46,7 +46,12 @@ export function useShipmentData(
       })
     );
 
-    return itemsFromService.length ? itemsFromService : DEMO_SHIPMENTS;
+    // Always include demo shipments for now (demo mode), while keeping
+    // service-provided shipments when available. Service items appear after
+    // demo items to make new demos visible immediately.
+    return itemsFromService.length
+      ? [...DEMO_SHIPMENTS, ...itemsFromService]
+      : DEMO_SHIPMENTS;
   }, [serviceShipments]);
 }
 

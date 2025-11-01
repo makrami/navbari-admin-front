@@ -45,6 +45,46 @@
   "dashboard": {
     "header": {
       "title": "Dashboard"
+    },
+    "kpiCards": {
+      "totalShipments": {
+        "title": "Total Shipments",
+        "metaTop": "76 active, 538 delivered",
+        "metaBottom": "614 total"
+      },
+      "segmentsAwaitingDriver": {
+        "title": "Segments Awaiting Driver",
+        "metaTop": "6 arriving soon, 9 unassigned",
+        "metaBottom": "6 countries impacted"
+      },
+      "newAwaitingRegistrations": {
+        "title": "New Awaiting Registrations",
+        "metaTop": "6 new drivers, 9 new companies",
+        "metaBottom": "last request: 2h ago"
+      },
+      "unreadMessages": {
+        "title": "Unread Messages",
+        "metaTop": "6 unread, 9 waiting response",
+        "metaBottom": "last message: 25m ago"
+      }
+    },
+    "filters": {
+      "allFilters": "All Filters",
+      "status": {
+        "pending": "Pending",
+        "normal": "Normal",
+        "alert": "Alert"
+      }
+    },
+    "guide": {
+      "title": "Guide",
+      "shipments": "Shipments",
+      "driver": "Driver",
+      "pending": "Pending",
+      "alert": "Alert"
+    },
+    "search": {
+      "placeholder": "Search by Shipment, Drivers..."
     }
   },
   "segments": {

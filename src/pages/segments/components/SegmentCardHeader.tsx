@@ -16,17 +16,22 @@ type SegmentCardHeaderProps = {
   shipment?: DomainShipment;
   isExpanded: boolean;
   onToggle: () => void;
+  isHighlighted?: boolean;
 };
 
 export function SegmentCardHeader({
   segment,
   isExpanded,
   onToggle,
+  isHighlighted = false,
 }: SegmentCardHeaderProps) {
   const { t } = useTranslation();
   return (
     <div
-      className="bg-slate-50 px-4 py-3 border-b border-slate-200 cursor-pointer select-none"
+      className={cn(
+        "px-4 py-3 border-b border-slate-200 cursor-pointer select-none transition-colors",
+        isHighlighted ? "bg-[#eef3ff]" : "bg-slate-50"
+      )}
       onClick={onToggle}
       role="button"
       aria-expanded={isExpanded}

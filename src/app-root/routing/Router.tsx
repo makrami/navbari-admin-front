@@ -17,6 +17,12 @@ import { FinancePage } from "../../pages/finance/FinancePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
 import { MapDemoPage } from "../../pages/map-demo/MapDemoPage";
+import { DEMO_ROUTES } from "../../shared/data/demoRoutes";
+import { segmentWithShipmentFromDemoRoute } from "../../shared/utils/demoSegmentConverters";
+
+const DEMO_SEGMENT_ENTRIES = DEMO_ROUTES.map((route) =>
+  segmentWithShipmentFromDemoRoute(route)
+);
 
 const router = createBrowserRouter([
   {
@@ -71,7 +77,7 @@ const router = createBrowserRouter([
         path: "segments",
         element: (
           <ProtectedRoute>
-            <SegmentsPage />
+            <SegmentsPage extraSegments={DEMO_SEGMENT_ENTRIES} />
           </ProtectedRoute>
         ),
       },

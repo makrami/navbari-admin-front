@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useShipments } from "../../../services/shipment/hooks";
 import { useShipmentData } from "../hooks/useShipmentData";
@@ -19,7 +19,9 @@ export function ShipmentContainer() {
   const { data: serviceShipments } = useShipments();
   const items = useShipmentData(serviceShipments ?? undefined);
 
-  const allItems = [...addedShipments, ...items];
+  const allItems = useMemo(() => {
+    return [...addedShipments, ...items];
+  }, [addedShipments, items]);
   const selectedShipment = allItems.find((i) => i.id === selectedId);
 
   // Read selectedId from URL on mount and when it changes
@@ -38,6 +40,16 @@ export function ShipmentContainer() {
       setSelectedId(null);
     }
   }, [searchParams, addedShipments, items]);
+
+  // Default selection: pick first "In Origin" shipment if none selected and no URL selection
+  useEffect(() => {
+    if (selectedId) return;
+    if (searchParams.get("selectedId")) return;
+    const firstInOrigin = allItems.find((s) => s.status === "In Origin");
+    if (firstInOrigin) {
+      setSelectedId(firstInOrigin.id);
+    }
+  }, [allItems, selectedId, searchParams]);
 
   // Cleanup timers on unmount
   useEffect(() => {
