@@ -72,7 +72,7 @@ i18n
   .init({
     lng: localStorage.getItem("i18nextLng") || "en",
     fallbackLng: "en",
-    debug: process.env.NODE_ENV === "development",
+    debug: import.meta.env.DEV,
     interpolation: { escapeValue: false },
     backend: { loadPath: "/locales/{{lng}}/translation.json" },
     detection: languageDetectorOptions,
