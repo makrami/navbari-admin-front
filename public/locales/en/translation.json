@@ -9,16 +9,20 @@
   },
   "auth": {
     "login": {
-      "title": "Welcome back",
-      "subtitle": "Log in to your account (demo mode).",
+      "title": "Welcome",
+      "subtitle": "Please enter your credentials to log in.",
       "usernameLabel": "Username",
       "usernamePlaceholder": "jane.doe",
+      "emailPlaceholder": "Email",
       "passwordLabel": "Password",
-      "passwordPlaceholder": "••••••••",
+      "passwordPlaceholder": "Password",
       "submit": {
-        "label": "Login",
-        "loading": "Logging in..."
+        "label": "Log In",
+        "loading": "Logging In..."
       },
+      "rememberMe": "Remember me",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "noAccount": "No account?",
       "signUpLink": "Sign up"
     },
@@ -269,6 +273,7 @@
         "selectRole": "Select a role to view details",
         "roleDetails": "Role Details",
         "roleName": "Role Name",
+        "roleDescription": "Description",
         "status": "Status",
         "dataVisibilityScope": "Data Visibility Scope",
         "geographicalAccess": "Geographical Access",

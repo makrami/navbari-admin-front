@@ -16,7 +16,7 @@ function DeliveryMethodOption({
       className={`w-full px-4 py-3 rounded-lg border transition-colors flex items-center justify-between ${
         selected
           ? "bg-[#1B54FE]/10 border-[#1B54FE]/20"
-          : "bg-white border-none hover:border-slate-300"
+          : "bg-white border-transparent hover:border-slate-300"
       }`}
     >
       <span
@@ -30,7 +30,7 @@ function DeliveryMethodOption({
         className={`size-4 rounded border-2 transition-colors flex items-center justify-center ${
           selected
             ? "bg-white border-[#1B54FE] p-[1px]"
-            : "bg-white border-slate-300"
+            : "bg-white border-slate-300 p-[1px]"
         }`}
       >
         {selected && <div className="w-full h-full bg-[#1B54FE] " />}

@@ -141,33 +141,43 @@ export function RolesListPanel({
             onClick={() => onRoleSelect(role.id)}
             className={`p-4 rounded-lg  cursor-pointer transition-colors ${
               selectedRoleId === role.id
-                ? "bg-blue-50 border text-[#1B54FE] border-[#1B54FE]/20"
-                : "bg-white border-none hover:border-slate-300"
+                ? "bg-blue-50 border-2 text-[#1B54FE] border-[#1B54FE]/10"
+                : "bg-white border-2 border-transparent hover:border-slate-300"
             }`}
           >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
+            <div className="flex items-start ">
+              <div className="flex-1 flex flex-col gap-2 justify-between">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-bold text-slate-900 mb-1">
+                  <h3
+                    className={`text-sm font-bold  mb-1 ${
+                      selectedRoleId === role.id
+                        ? "text-[#1B54FE]"
+                        : "text-slate-900"
+                    }`}
+                  >
                     {role.name}{" "}
-                    <span className="text-xs text-slate-500">
+                    <span
+                      className={`text-xs font-medium ${
+                        selectedRoleId === role.id
+                          ? "text-[#1B54FE]"
+                          : " text-slate-900"
+                      }`}
+                    >
                       ({role.userCount}{" "}
                       {t("settings.sections.rolesPermissions.user")})
                     </span>
                   </h3>
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
+                    className={`text-xs px-2 py-0.5 font-bold rounded-lg ${
                       role.status === "Active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-green-100  text-green-500"
+                        : "bg-yellow-100 text-yellow-500"
                     }`}
                   >
                     {role.status}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mb-2">
-                  {role.description}
-                </p>
+                <p className="text-sm text-slate-400 ">{role.description}</p>
               </div>
               <button
                 type="button"

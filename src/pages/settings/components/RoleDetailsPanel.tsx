@@ -54,17 +54,21 @@ export function RoleDetailsPanel({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
-            {t("settings.sections.rolesPermissions.roleDetails")}: {role.name} (
-            {role.userCount} {t("settings.sections.rolesPermissions.user")})
+          <h2 className="text-sm font-bold text-slate-900">
+            {t("settings.sections.rolesPermissions.roleDetails")}:{" "}
+            <span className="font-normal">
+              {" "}
+              {role.name} ({role.userCount}{" "}
+              {t("settings.sections.rolesPermissions.user")})
+            </span>
           </h2>
         </div>
         <div className="flex items-center gap-3">
           <span
-            className={`text-xs px-2 py-1 rounded-full ${
+            className={`text-xs px-2 py-1 rounded-lg font-bold ${
               role.status === "Active"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                ? "bg-green-100 text-green-500"
+                : "bg-yellow-100 text-yellow-500"
             }`}
           >
             {role.status}
@@ -81,7 +85,7 @@ export function RoleDetailsPanel({
       {/* Role Form Fields */}
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-slate-900 mb-2">
+          <label className="block text-xs  text-slate-900 mb-2">
             {t("settings.sections.rolesPermissions.roleName")}
           </label>
           <input
@@ -93,8 +97,8 @@ export function RoleDetailsPanel({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-900 mb-2">
-            {t("settings.sections.rolesPermissions.description")}
+          <label className="block text-xs  text-slate-900 mb-2">
+            {t("settings.sections.rolesPermissions.roleDescription")}
           </label>
           <input
             type="text"
@@ -178,9 +182,7 @@ function DropdownField({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-900 mb-2">
-        {label}
-      </label>
+      <label className="block text-xs  text-slate-900 mb-2">{label}</label>
       <div ref={dropdownRef} className="relative">
         <button
           type="button"

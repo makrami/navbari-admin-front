@@ -1,95 +1,123 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button } from "../../shared/components/ui/Button";
 import { loginDemo } from "../../services/auth.service";
+import loginbg from "../../assets/images/loginBg.png";
+import imgLogo from "../../assets/images/truck.svg";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [username, setUsername] = useState("");
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useTranslation();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      await loginDemo(username, password);
-      // Redirect to the page they were trying to access, or dashboard
+      await loginDemo(email, password);
       const from =
         (location.state as { from?: { pathname: string } })?.from?.pathname ||
         "/dashboard";
       navigate(from, { replace: true });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(t("common.error.unknown"));
-      }
+      setError(err instanceof Error ? err.message : t("common.error.unknown"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen grid place-items-center px-4">
-      <div className="w-full max-w-sm bg-white rounded-md shadow border border-slate-200 p-6">
-        <h1 className="text-xl font-semibold mb-1">{t("auth.login.title")}</h1>
-        <p className="text-sm text-slate-600 mb-6">
+    <div
+      className="min-h-screen grid place-items-center px-4"
+      style={{
+        backgroundImage: `url(${loginbg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="fixed top-6 left-12 z-10 grid size-16 place-items-center rounded-2xl bg-[#1b54fe]">
+        <img src={imgLogo} alt={t("sidebar.brandAlt")} className="h-9 w-9" />
+      </div>
+      <div className="w-80 md:w-96 max-w-md rounded-2xl bg-white  p-6 md:p-8">
+        <h1 className="text-lg font-bold text-center text-slate-900">
+          {t("auth.login.title")}
+        </h1>
+        <p className="text-xs text-center text-slate-500 mt-1 mb-6">
           {t("auth.login.subtitle")}
         </p>
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-1.5">
-            <label htmlFor="username" className="text-sm font-medium">
-              {t("auth.login.usernameLabel")}
-            </label>
+          <div className="relative">
             <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder={t("auth.login.usernamePlaceholder")}
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+              placeholder={t("auth.login.emailPlaceholder")}
               required
             />
           </div>
-          <div className="grid gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium">
-              {t("auth.login.passwordLabel")}
-            </label>
+          <div className="relative">
             <input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
               placeholder={t("auth.login.passwordPlaceholder")}
               required
               minLength={4}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-slate-100"
+              aria-label={
+                showPassword
+                  ? t("auth.login.hidePassword")
+                  : t("auth.login.showPassword")
+              }
+            >
+              {showPassword ? (
+                <EyeOff className="size-4 text-slate-400" />
+              ) : (
+                <Eye className="size-4 text-slate-400" />
+              )}
+            </button>
           </div>
           {error ? (
             <div className="text-sm text-red-600" role="alert">
               {error}
             </div>
           ) : null}
-          <Button type="submit" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-10 rounded-md bg-[#1B54FE] text-white text-sm font-medium hover:bg-[#1545d4] disabled:opacity-60 disabled:cursor-not-allowed"
+          >
             {loading
               ? t("auth.login.submit.loading")
               : t("auth.login.submit.label")}
-          </Button>
+          </button>
+          <label className="mt-1 inline-flex w-full justify-center items-center gap-2 text-xs text-slate-600">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="size-3 rounded border-slate-300 text-[#1B54FE] focus:ring-[#1B54FE]"
+            />
+            {t("auth.login.rememberMe")}
+          </label>
         </form>
-        <div className="text-sm text-slate-600 mt-4">
-          {t("auth.login.noAccount")}{" "}
-          <Link className="underline" to="/sign-up">
-            {t("auth.login.signUpLink")}
-          </Link>
-        </div>
       </div>
     </div>
   );

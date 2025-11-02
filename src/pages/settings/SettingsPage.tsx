@@ -196,22 +196,39 @@ export function SettingsPage() {
     },
   ];
 
-  const handleAddRole = () => {
-    // Handle add role logic
-    console.log("Add role clicked");
-  };
-
   const handleRoleUpdate = (roleId: string, updates: Partial<Role>) => {
     setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...updates } : r)));
   };
 
-  const handleUserEdit = (userId: string) => {
-    // Handle user edit logic
-    console.log("Edit user:", userId);
-  };
-
   const handleUserRemove = (userId: string) => {
     setUsers(users.filter((u) => u.id !== userId));
+  };
+
+  const handleUserAdd = (user: { name: string; email: string }) => {
+    const newId = String(Date.now());
+    setUsers([
+      ...users,
+      { id: newId, name: user.name, email: user.email, status: "Active" },
+    ]);
+    if (selectedRoleId) {
+      setRoles(
+        roles.map((r) =>
+          r.id === selectedRoleId ? { ...r, userCount: r.userCount + 1 } : r
+        )
+      );
+    }
+  };
+
+  const handleUserUpdate = (user: {
+    id: string;
+    name: string;
+    email: string;
+  }) => {
+    setUsers(
+      users.map((u) =>
+        u.id === user.id ? { ...u, name: user.name, email: user.email } : u
+      )
+    );
   };
 
   const handleCardClick = (key: string) => {
@@ -347,7 +364,6 @@ export function SettingsPage() {
                     roles={roles}
                     selectedRoleId={selectedRoleId}
                     onRoleSelect={setSelectedRoleId}
-                    onAddRole={handleAddRole}
                     selectedRole={
                       roles.find((r) => r.id === selectedRoleId) || null
                     }
@@ -358,7 +374,8 @@ export function SettingsPage() {
                       handleRoleUpdate(selectedRoleId, updates)
                     }
                     onPermissionsChange={setPermissions}
-                    onUserEdit={handleUserEdit}
+                    onUserAdd={handleUserAdd}
+                    onUserUpdate={handleUserUpdate}
                     onUserRemove={handleUserRemove}
                     changeCount={changeCount}
                     onRevert={handleRevert}
