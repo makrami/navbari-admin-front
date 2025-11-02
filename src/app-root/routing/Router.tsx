@@ -14,6 +14,7 @@ import { SegmentsPage } from "../../pages/segments/SegmentsPage";
 import { LocalCompaniesPage } from "../../pages/LocalCompanies/LocalCompianiesPage";
 import { DriversPage } from "../../pages/Drivers/DriversPage";
 import { FinancePage } from "../../pages/finance/FinancePage";
+import { SettingsPage } from "../../pages/settings/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
 import { MapDemoPage } from "../../pages/map-demo/MapDemoPage";
@@ -102,6 +103,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <FinancePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         ),
       },

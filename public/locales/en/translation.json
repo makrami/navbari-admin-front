@@ -193,6 +193,96 @@
       "brand": "Navbari",
       "closeMenu": "Close menu"
     }
+  },
+  "settings": {
+    "page": {
+      "title": "Settings"
+    },
+    "sections": {
+      "general": {
+        "title": "General Settings",
+        "description": "Configure core company and application settings.",
+        "companyName": "Company Name",
+        "companyNamePlaceholder": "Shipment Name...",
+        "companyLogo": "Company Logo",
+        "uploadText": "Click upload or drag and drop",
+        "uploadHint": "PNG or JPG (Max 2MB)",
+        "uploadButton": "Upload",
+        "timeZone": "Time Zone",
+        "mapStyle": "Map Style",
+        "measurementUnits": "Measurement Units",
+        "distanceUnit": "Kilometers (KM)",
+        "weightUnit": "Kilograms (KG)",
+        "changesCount": "There are {{count}} changes",
+        "revert": "Revert",
+        "saveChanges": "Save Changes"
+      },
+      "notifications": {
+        "title": "Notification & Alerts",
+        "description": "Manage automated alerts and user notification preferences."
+      },
+      "localization": {
+        "title": "Localization",
+        "description": "Set language, currency and regional formatting for the platform.",
+        "language": "Language",
+        "baseCurrency": "Base Currency",
+        "perCountryCurrencyOverride": {
+          "title": "Per-country Currency Override",
+          "description": "Set specific currencies for different destination countries",
+          "addOverride": "Add Override"
+        },
+        "dateFormat": "Date Format",
+        "timeFormat": "Time Format",
+        "numericSeparator": "Numeric Separator",
+        "decimalSeparator": "Decimal Separator"
+      },
+      "systemParameters": {
+        "title": "System Parameters",
+        "description": "Fine-tune operational logic",
+        "slaConfiguration": {
+          "title": "SLA Configuration",
+          "description": "Define service-level agreements per shipment",
+          "loadingTime": "Loading time",
+          "transitTime": "Transit time",
+          "unloadingTime": "Unloading time"
+        },
+        "etaCalculationMethod": {
+          "title": "ETA Calculation Method",
+          "description": "Select how to define Estimated time of arrival",
+          "realtimeGps": "Based on real-time GPS",
+          "historicalData": "Based on historical data"
+        },
+        "gpsTracking": {
+          "title": "GPS & Tracking",
+          "description": "Configure how location data is tracked and when alerts are triggered",
+          "gpsAlertDistance": "GPS Alert Distance",
+          "pingInterval": "Ping Interval",
+          "maxConcurrentShipments": "Max Concurrent Ship. per Local Company"
+        }
+      },
+      "rolesPermissions": {
+        "title": "Roles & Permissions",
+        "description": "Manage user access and permissions across the platform.",
+        "addNewRole": "Add New Role",
+        "search": "Search roles...",
+        "user": "User",
+        "selectRole": "Select a role to view details",
+        "roleDetails": "Role Details",
+        "roleName": "Role Name",
+        "status": "Status",
+        "dataVisibilityScope": "Data Visibility Scope",
+        "geographicalAccess": "Geographical Access",
+        "permissions": "Permissions",
+        "modules": "Modules",
+        "view": "View",
+        "createEdit": "Create/Edit",
+        "delete": "Delete",
+        "approve": "Approve",
+        "users": "Users",
+        "nameEmail": "Name & Email",
+        "actions": "Actions"
+      }
+    }
   }
 }
 

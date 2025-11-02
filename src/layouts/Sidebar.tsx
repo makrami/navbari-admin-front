@@ -180,7 +180,10 @@ export function Sidebar() {
           <div className="flex-1" />
 
           {/* Avatar + name */}
-          <div className="flex h-12 w-full items-center gap-3 px-5">
+          <button
+            onClick={() => navigate("/settings")}
+            className="flex h-12 w-full items-center gap-3 px-5 hover:bg-slate-50 transition-colors rounded-md cursor-pointer"
+          >
             <img
               src={imgAvatar}
               alt={t("sidebar.profileAlt")}
@@ -189,7 +192,7 @@ export function Sidebar() {
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
               {t("sidebar.profileName")}
             </span>
-          </div>
+          </button>
 
           {/* Notifs row */}
           <div className="flex h-12 w-full items-center gap-2 px-5">
