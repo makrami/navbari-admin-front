@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import Backend from "i18next-http-backend";
-import { initReactI18next } from "react-i18next";
+import {initReactI18next} from "react-i18next";
 
 const languageDetectorOptions = {
   order: ["localStorage", "navigator", "htmlTag"],
@@ -16,9 +16,9 @@ i18n
   .init({
     lng: localStorage.getItem("i18nextLng") || "en",
     fallbackLng: "en",
-    debug: process.env.NODE_ENV === "development",
-    interpolation: { escapeValue: false },
-    backend: { loadPath: "/locales/{{lng}}/translation.json" },
+    debug: import.meta.env.DEV,
+    interpolation: {escapeValue: false},
+    backend: {loadPath: "/locales/{{lng}}/translation.json"},
     detection: languageDetectorOptions,
   });
 
@@ -30,4 +30,3 @@ i18n.on("languageChanged", (lng) => {
 document.documentElement.lang = localStorage.getItem("i18nextLng") || "en";
 
 export default i18n;
-
