@@ -59,17 +59,27 @@
       "segmentsAwaitingDriver": {
         "title": "Segments Awaiting Driver",
         "metaTop": "6 arriving soon, 9 unassigned",
-        "metaBottom": "6 countries impacted"
+        "metaBottom": "6 countries impacted",
+        "modal": {
+          "showAll": "Show All"
+        }
       },
       "newAwaitingRegistrations": {
         "title": "New Awaiting Registrations",
         "metaTop": "6 new drivers, 9 new companies",
-        "metaBottom": "last request: 2h ago"
+        "metaBottom": "last request: 2h ago",
+        "modal": {
+          "showAll": "Show All"
+        }
       },
       "unreadMessages": {
         "title": "Unread Messages",
         "metaTop": "6 unread, 9 waiting response",
-        "metaBottom": "last message: 25m ago"
+        "metaBottom": "last message: 25m ago",
+        "modal": {
+          "showAll": "Show All",
+          "messageSnippet": "i'm trying to turn on m..."
+        }
       }
     },
     "filters": {
