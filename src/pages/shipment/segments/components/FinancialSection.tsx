@@ -53,19 +53,24 @@ export function FinancialSection() {
         Financial
       </header>
       <div className="px-4 py-2 bg-slate-50 rounded-xl">
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Base Fee */}
-          <div className="flex flex-1 gap-2">
-            <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2">
+          {/* Scrollable Costs Section */}
+          <div className="flex flex-1 gap-1 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {/* Base Fee */}
+            <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-2 flex-shrink-0">
               <span className="text-xs text-slate-900">Base Fee:</span>
               <span className="text-xs font-bold text-slate-900">$34.5</span>
             </div>
 
             {/* Additional Costs */}
             {additionalCosts.map((cost) => (
-              <div key={cost.id} className="flex items-center gap-2">
-                <Plus className="size-4 text-slate-400" />
-                <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2">
+              <div
+                key={cost.id}
+                className="flex items-center gap-2 flex-shrink-0"
+              >
+                <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-2">
+                  <Plus className="size-3 text-slate-400" />
+
                   <span className="text-xs text-slate-900">{cost.label}</span>
                   <span className="text-xs font-bold text-slate-900">
                     ${cost.amount.toFixed(1)}
@@ -82,9 +87,8 @@ export function FinancialSection() {
             ))}
 
             {/* Input Card - Always visible */}
-            <div className="flex items-center gap-2">
-              <Plus className="size-4 text-slate-400" />
-              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 py-2">
                 <input
                   type="text"
                   placeholder="Cost label"
@@ -136,10 +140,10 @@ export function FinancialSection() {
           </div>
 
           {/* Vertical Separator */}
-          <div className="h-12 w-px bg-slate-300 mx-2" />
+          <div className="h-12 w-px bg-slate-300 mx-2 flex-shrink-0" />
 
           {/* Total Section */}
-          <div className="flex w-20 flex-col justify-between items-center gap-1">
+          <div className="flex w-20 flex-col justify-between items-center gap-1 flex-shrink-0">
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <CoinsIcon className="size-3 text-slate-400" />
               <span className="uppercase">TOTAL</span>

@@ -18,9 +18,7 @@ import { DriversPageSkeleton } from "./components/DriversSkeleton";
 
 export function DriversPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
-  const [selectedId, setSelectedId] = useState<string | null>(
-    DRIVERS[0]?.id || null
-  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
@@ -65,45 +63,51 @@ export function DriversPage() {
     return <DriversPageSkeleton />;
   }
 
-  // Default list view
+  // Default wrapped layout view - left-aligned
   if (!selectedId) {
     return (
-      <div className="py-6 space-y-6 h-screen  max-w-7xl mx-auto  transition-all">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">
-              {t("drivers.page.title")}
-            </h1>
+      <div className="py-6 space-y-6 min-h-screen max-w-7xl mx-auto flex flex-col items-start transition-all">
+        <div className="w-full max-w-7xl px-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold">
+                {t("drivers.page.title")}
+              </h1>
+            </div>
           </div>
         </div>
 
-        <StatusFilterChips
-          active={activeFilter}
-          onChange={setActiveFilter}
-          counts={countByFilter as Record<FilterKey, number>}
-          isListPanel={selectedId !== null}
-        />
+        <div className="w-full max-w-7xl px-6">
+          <StatusFilterChips
+            active={activeFilter}
+            onChange={setActiveFilter}
+            counts={countByFilter as Record<FilterKey, number>}
+            isListPanel={false}
+          />
+        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <div className="w-full max-w-7xl px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {filteredDrivers.map((d) => (
-            <EntityCard
-              key={d.id}
-              entity={d}
-              onView={(id) => setSelectedId(id)}
-              statsLabels={{
-                driversLabel: t("drivers.page.stats.shipments"),
-                activeLabel: t("drivers.page.stats.vehicles"),
-              }}
-            />
+            <div key={d.id} className="w-full">
+              <EntityCard
+                entity={d}
+                className="w-full h-full"
+                onView={(id) => setSelectedId(id)}
+                statsLabels={{
+                  driversLabel: t("drivers.page.stats.shipments"),
+                  activeLabel: t("drivers.page.stats.vehicles"),
+                }}
+              />
+            </div>
           ))}
         </div>
       </div>
     );
   }
 
-  // Split view matching left-side list panel layout
+  // List panel view - split layout with driver details
   return (
-    <div className="flex w-full  overflow-hidden ">
+    <div className="flex w-full overflow-hidden">
       <ListPanel title={t("drivers.page.title")}>
         <StatusFilterChips
           active={activeFilter}
@@ -114,16 +118,18 @@ export function DriversPage() {
         <AddDriver />
         <div className="grid gap-4">
           {filteredDrivers.map((d) => (
-            <EntityCard
-              key={d.id}
-              entity={d}
-              selected={selectedId === d.id}
-              onView={(id) => setSelectedId(id)}
-              statsLabels={{
-                driversLabel: t("drivers.page.stats.shipments"),
-                activeLabel: t("drivers.page.stats.vehicles"),
-              }}
-            />
+            <div key={d.id} className="w-full">
+              <EntityCard
+                entity={d}
+                className="w-full h-full"
+                selected={selectedId === d.id}
+                onView={(id) => setSelectedId(id)}
+                statsLabels={{
+                  driversLabel: t("drivers.page.stats.shipments"),
+                  activeLabel: t("drivers.page.stats.vehicles"),
+                }}
+              />
+            </div>
           ))}
         </div>
       </ListPanel>

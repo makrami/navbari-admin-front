@@ -11,7 +11,8 @@ import {
   BoxesIcon,
   UsersIcon,
   DollarSignIcon,
-  BellIcon,
+  MessageSquareDot,
+  SettingsIcon,
   LogOutIcon,
 } from "lucide-react";
 import { ActiveIndicator } from "../shared/components";
@@ -176,14 +177,67 @@ export function Sidebar() {
             )}
           </NavLink>
 
+          {/* Chat & Alert */}
+          <NavLink
+            to="/chat-alert"
+            className={({ isActive }) =>
+              `relative flex h-12 w-full items-center px-5 ${
+                isActive ? "" : ""
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <div className="flex items-center gap-2">
+                <ActiveIndicator isActive={isActive} />
+                <MessageSquareDot
+                  className={`size-5 ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                />
+                <span
+                  className={`text-xs font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  {t("sidebar.links.chatAlert")}
+                </span>
+              </div>
+            )}
+          </NavLink>
+
+          {/* Settings */}
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `relative flex h-12 w-full items-center px-5 ${
+                isActive ? "" : ""
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <div className="flex items-center gap-2">
+                <ActiveIndicator isActive={isActive} />
+                <SettingsIcon
+                  className={`size-5 ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                />
+                <span
+                  className={`text-xs font-medium uppercase tracking-wide ${
+                    isActive ? "text-[#1B54FE]" : "text-slate-400"
+                  }`}
+                >
+                  {t("sidebar.links.settings")}
+                </span>
+              </div>
+            )}
+          </NavLink>
+
           {/* Spacer to push bottom actions */}
           <div className="flex-1" />
 
           {/* Avatar + name */}
-          <button
-            onClick={() => navigate("/settings")}
-            className="flex h-12 w-full items-center gap-3 px-5 hover:bg-slate-50 transition-colors rounded-md cursor-pointer"
-          >
+          <div className="flex h-12 w-full items-center gap-3 px-5">
             <img
               src={imgAvatar}
               alt={t("sidebar.profileAlt")}
@@ -191,14 +245,6 @@ export function Sidebar() {
             />
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
               {t("sidebar.profileName")}
-            </span>
-          </button>
-
-          {/* Notifs row */}
-          <div className="flex h-12 w-full items-center gap-2 px-5">
-            <BellIcon className="size-5 text-slate-400" />
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              {t("sidebar.notifications")}
             </span>
           </div>
 

@@ -27,20 +27,20 @@ export function Segments({
                 type="button"
                 onClick={onAddSegment}
                 aria-label="Add Segment"
-                className="inline-flex items-center gap-2 rounded-[8px] px-3 py-2 text-[12px] font-medium text-blue-600 bg-blue-100 hover:scale-[1.02] active:scale-[0.99] transition-transform"
+                className="inline-flex items-center gap-2 rounded-[8px] px-3 py-2 text-xs font-medium text-blue-600 bg-blue-100 hover:scale-[1.02] active:scale-[0.99] transition-transform"
               >
                 <PlusIcon className="size-4" />
                 <span>Add Segment</span>
               </button>
             )}
       </header>
-      <div className="mt-4 relative rounded-xl bg-white p-5">
+      <div className="mt-4 relative rounded-xl bg-white p-3">
         {/* Vertical spine linking the segment cards visually */}
         <div
           aria-hidden="true"
           className="absolute left-8 top-5 bottom-5 w-3 bg-slate-200 rounded-full z-0"
         />
-        <div className="grid gap-4 relative z-10">{children}</div>
+        <div className="grid gap-4 bg relative z-10">{children}</div>
       </div>
     </section>
   );

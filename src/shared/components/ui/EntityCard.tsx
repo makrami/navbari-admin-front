@@ -89,7 +89,7 @@ export function EntityCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden p-2 rounded-2xl transition-shadow",
+        "relative overflow-hidden p-2 rounded-2xl transition-shadow flex flex-col",
         selected ? "bg-[#1b54fe] text-white shadow" : "bg-white cursor-pointer",
         className
       )}
@@ -106,7 +106,7 @@ export function EntityCard({
     >
       <div className={cn("h-1.5 rounded-full", `${colors.bar}`)} />
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3 flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
@@ -191,7 +191,7 @@ export function EntityCard({
         {/* Stats */}
         <div
           className={cn(
-            "grid grid-cols-3 gap-2 text-xs",
+            "flex  justify-between items-center flex-1 gap-2 text-xs",
             selected ? "text-white/80" : "text-slate-600"
           )}
         >
@@ -238,7 +238,7 @@ export function EntityCard({
 
         {/* Actions */}
         {entity.status === "pending" ? (
-          <div className="mt-5 grid grid-cols-2 gap-2">
+          <div className="mt-auto pt-5 grid grid-cols-2 gap-2">
             <Button
               variant="ghost"
               className={cn(
@@ -273,7 +273,7 @@ export function EntityCard({
             </Button>
           </div>
         ) : (
-          <div className="mt-2">
+          <div className="mt-auto pt-2">
             <Button
               variant="ghost"
               className={cn(

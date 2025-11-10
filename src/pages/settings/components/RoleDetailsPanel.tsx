@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, MoreVertical } from "lucide-react";
 import type { Role } from "./RolesListPanel";
-import { PermissionsTable } from "./PermissionsTable";
 import { UsersTable } from "./UsersTable";
 
 export type Permission = {
@@ -26,16 +25,16 @@ type RoleDetailsPanelProps = {
   users: User[];
   onRoleUpdate: (role: Partial<Role>) => void;
   onPermissionsChange: (permissions: Permission[]) => void;
+  onUserAdd: () => void;
   onUserEdit: (userId: string) => void;
   onUserRemove: (userId: string) => void;
 };
 
 export function RoleDetailsPanel({
   role,
-  permissions,
   users,
   onRoleUpdate,
-  onPermissionsChange,
+  onUserAdd,
   onUserEdit,
   onUserRemove,
 }: RoleDetailsPanelProps) {
@@ -64,15 +63,6 @@ export function RoleDetailsPanel({
           </h2>
         </div>
         <div className="flex items-center gap-3">
-          <span
-            className={`text-xs px-2 py-1 rounded-lg font-bold ${
-              role.status === "Active"
-                ? "bg-green-100 text-green-500"
-                : "bg-yellow-100 text-yellow-500"
-            }`}
-          >
-            {role.status}
-          </span>
           <button
             type="button"
             className="p-1 hover:bg-slate-100 rounded transition-colors"
@@ -107,42 +97,29 @@ export function RoleDetailsPanel({
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B54FE] focus:border-transparent bg-white text-slate-900"
           />
         </div>
-
-        <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className="block text-xs text-slate-900 mb-2">
+            {t("settings.sections.rolesPermissions.geographicalAccess")}
+          </label>
           <DropdownField
-            label={t("settings.sections.rolesPermissions.status")}
-            value={role.status}
-            options={["Active", "Suspended"]}
+            label=""
+            value={role.geographicalAccess || "All Countries"}
+            options={["All Countries", "Selected Countries"]}
             onChange={(value) =>
-              onRoleUpdate({ status: value as "Active" | "Suspended" })
+              onRoleUpdate({
+                geographicalAccess: value as
+                  | "All Countries"
+                  | "Selected Countries",
+              })
             }
           />
-          <DropdownField
-            label={t("settings.sections.rolesPermissions.dataVisibilityScope")}
-            value="Global"
-            options={["Global", "Regional", "Country"]}
-            onChange={() => {}}
-          />
-          <DropdownField
-            label={t("settings.sections.rolesPermissions.geographicalAccess")}
-            value="All Countries"
-            options={["All Countries", "Selected Countries"]}
-            onChange={() => {}}
-          />
         </div>
-      </div>
-
-      {/* Permissions Table */}
-      <div className="mb-6">
-        <PermissionsTable
-          permissions={permissions}
-          onPermissionsChange={onPermissionsChange}
-        />
       </div>
 
       {/* Users Table */}
       <UsersTable
         users={users}
+        onUserAdd={() => onUserAdd()}
         onUserEdit={onUserEdit}
         onUserRemove={onUserRemove}
       />
@@ -151,7 +128,7 @@ export function RoleDetailsPanel({
 }
 
 type DropdownFieldProps = {
-  label: string;
+  label?: string;
   value: string;
   options: string[];
   onChange: (value: string) => void;
@@ -182,7 +159,9 @@ function DropdownField({
 
   return (
     <div>
-      <label className="block text-xs  text-slate-900 mb-2">{label}</label>
+      {label && (
+        <label className="block text-xs text-slate-900 mb-2">{label}</label>
+      )}
       <div ref={dropdownRef} className="relative">
         <button
           type="button"

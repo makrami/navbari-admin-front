@@ -5,13 +5,12 @@ import { X } from "lucide-react";
 import { useShipments } from "../../services/shipment/hooks";
 import type { FilterType } from "./components/SegmentsFilters";
 import { SegmentsFilters } from "./components/SegmentsFilters";
-import {
-  SegmentCard,
-  type SegmentWithShipment,
-} from "./components/SegmentCard";
+import type { SegmentWithShipment } from "./components/SegmentCard";
 import { useSegmentsData } from "./hooks/useSegmentsData";
 import { cn } from "../../shared/utils/cn";
 import { getSegmentListId } from "./utils/getSegmentListId";
+import SegmentDetails from "../shipment/segments/components/SegmentDetails";
+import { convertSegmentWithShipmentToSegmentData } from "./utils/convertSegmentData";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
@@ -135,44 +134,84 @@ export function SegmentsPage({
         className="flex-1 overflow-y-auto no-scrollbar"
         style={{ scrollbarGutter: "stable" }}
       >
-        <div className="max-w-6xl mx-auto space-y-4 pb-6">
+        <div className="max-w-6xl mx-auto pb-6">
           {allSegments.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               {t("segments.page.empty")}
             </div>
           ) : (
-            allSegments.map((segment) => {
-              const segmentId = getSegmentListId(
-                segment.shipmentId,
-                segment.step
-              );
-              const isExpanded = expandedSegments.has(segmentId);
-              const isHighlighted = selectedSegmentId === segmentId;
-              const shipment = serviceShipments?.find(
-                (s) => s.id === segment.shipmentId
-              );
+            <div className="relative rounded-xl bg-white p-3">
+              {/* Vertical spine linking the segment cards visually */}
+              <div
+                aria-hidden="true"
+                className="absolute left-8 top-5 bottom-5 w-3 bg-slate-200 rounded-full z-0"
+              />
+              <div className="grid gap-4 relative z-10">
+                {allSegments.map((segment) => {
+                  const segmentId = getSegmentListId(
+                    segment.shipmentId,
+                    segment.step
+                  );
+                  const isExpanded = expandedSegments.has(segmentId);
 
-              return (
-                <div
-                  key={segmentId}
-                  ref={(node) => {
-                    if (!node) {
-                      itemRefs.current.delete(segmentId);
-                    } else {
-                      itemRefs.current.set(segmentId, node);
-                    }
-                  }}
-                >
-                  <SegmentCard
-                    segment={segment}
-                    shipment={shipment}
-                    isExpanded={isExpanded}
-                    onToggle={() => toggleSegment(segmentId)}
-                    isHighlighted={isHighlighted}
-                  />
-                </div>
-              );
-            })
+                  // Find current segment index for this shipment
+                  const shipmentSegments = allSegments.filter(
+                    (s) => s.shipmentId === segment.shipmentId
+                  );
+                  const currentSegmentIndex = shipmentSegments.findIndex(
+                    (s) =>
+                      s.progressStage &&
+                      s.progressStage !== "delivered" &&
+                      !s.isCompleted
+                  );
+
+                  const segmentData = convertSegmentWithShipmentToSegmentData(
+                    segment,
+                    shipmentSegments,
+                    currentSegmentIndex >= 0 ? currentSegmentIndex : undefined
+                  );
+
+                  // Get shipment destination - prefer from service shipment, otherwise use last segment's nextPlace
+                  const shipment = serviceShipments?.find(
+                    (s) => s.id === segment.shipmentId
+                  );
+                  const destination =
+                    shipment?.destination ||
+                    shipmentSegments[shipmentSegments.length - 1]?.nextPlace ||
+                    segment.nextPlace;
+
+                  return (
+                    <div
+                      key={segmentId}
+                      ref={(node) => {
+                        if (!node) {
+                          itemRefs.current.delete(segmentId);
+                        } else {
+                          itemRefs.current.set(segmentId, node);
+                        }
+                      }}
+                    >
+                      <SegmentDetails
+                        data={segmentData}
+                        open={isExpanded}
+                        onToggle={() => toggleSegment(segmentId)}
+                        editable={false}
+                        locked={false}
+                        showStatuses={true}
+                        shipmentLinkProps={{
+                          shipmentTitle: segment.shipmentTitle,
+                          shipmentId: segment.shipmentId,
+                          fromPlace: segment.place,
+                          toPlace: destination,
+                          fromCountryCode: segment.shipmentFromCountryCode,
+                          toCountryCode: segment.shipmentToCountryCode,
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
       </div>

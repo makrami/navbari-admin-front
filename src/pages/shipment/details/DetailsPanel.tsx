@@ -13,10 +13,12 @@ export function DetailsPanel({
 }: DetailsPanelProps) {
   return (
     <section className={cn(className)} data-name="Shipment Details Pane">
-      <header>
-        <h2 className=" font-bold text-slate-900">{title}</h2>
-      </header>
-      <div className="mt-4 grid gap-4">{children}</div>
+      {title && (
+        <header>
+          <h2 className=" font-bold text-slate-900">{title}</h2>
+        </header>
+      )}
+      <div className={title ? "mt-4 grid gap-4" : "grid gap-4"}>{children}</div>
     </section>
   );
 }

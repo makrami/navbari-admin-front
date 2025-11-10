@@ -1,6 +1,5 @@
 import { SLAConfigurationSection } from "./SLAConfigurationSection";
-import { ETACalculationMethodSection } from "./ETACalculationMethodSection";
-import { GPSTrackingSection } from "./GPSTrackingSection";
+
 import { SettingsFooter } from "./SettingsFooter";
 
 type SystemParametersSettingsProps = {
@@ -30,14 +29,7 @@ export function SystemParametersSettings({
   onTransitTimeChange,
   unloadingTime,
   onUnloadingTimeChange,
-  etaMethod,
-  onEtaMethodChange,
-  gpsAlertDistance,
-  onGpsAlertDistanceChange,
-  pingInterval,
-  onPingIntervalChange,
-  maxConcurrentShipments,
-  onMaxConcurrentShipmentsChange,
+
   changeCount,
   onRevert,
   onSave,
@@ -53,19 +45,19 @@ export function SystemParametersSettings({
         onUnloadingTimeChange={onUnloadingTimeChange}
       />
 
-      <ETACalculationMethodSection
+      {/* <ETACalculationMethodSection
         method={etaMethod}
         onChange={onEtaMethodChange}
-      />
+      /> */}
 
-      <GPSTrackingSection
+      {/* <GPSTrackingSection
         gpsAlertDistance={gpsAlertDistance}
         onGpsAlertDistanceChange={onGpsAlertDistanceChange}
         pingInterval={pingInterval}
         onPingIntervalChange={onPingIntervalChange}
         maxConcurrentShipments={maxConcurrentShipments}
         onMaxConcurrentShipmentsChange={onMaxConcurrentShipmentsChange}
-      />
+      /> */}
 
       <SettingsFooter
         changeCount={changeCount}

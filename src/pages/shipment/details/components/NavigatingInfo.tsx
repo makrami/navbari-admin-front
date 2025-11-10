@@ -4,7 +4,6 @@ import { cn } from "../../../../shared/utils/cn";
 import {
   MapPinIcon,
   MessagesSquareIcon,
-  StarIcon,
   CarIcon,
   Building2Icon,
   WeightIcon,
@@ -13,9 +12,6 @@ import {
   MinusIcon,
   PlaneIcon,
   UserRoundIcon,
-  DollarSignIcon,
-  TimerIcon,
-  MapIcon,
   BellIcon,
   XIcon,
   Check,
@@ -29,7 +25,6 @@ type NavigatingInfoProps = PropsWithChildren<{
   shipmentId?: string;
   driverName: string;
   driverPhoto?: string; // Optional - if not provided, show user icon
-  rating: number;
   vehicle: string;
   weight: string;
   localCompany: string;
@@ -49,7 +44,6 @@ export function NavigatingInfo({
   shipmentId = "#6c23m68",
   driverName,
   driverPhoto,
-  rating,
   vehicle,
   weight,
   localCompany,
@@ -128,27 +122,6 @@ export function NavigatingInfo({
 
         <div className="relative flex items-center gap-2" ref={notifRef}>
           {/* Icon buttons (outline, subtle) */}
-          <button
-            type="button"
-            className="bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto"
-            aria-label="Pricing"
-          >
-            <DollarSignIcon className="block size-5 text-slate-400" />
-          </button>
-          <button
-            type="button"
-            className="bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto"
-            aria-label="Time"
-          >
-            <TimerIcon className="block size-5 text-slate-400" />
-          </button>
-          <button
-            type="button"
-            className="bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto"
-            aria-label="Map"
-          >
-            <MapIcon className="block size-5 text-slate-400" />
-          </button>
 
           <button
             type="button"
@@ -293,12 +266,6 @@ export function NavigatingInfo({
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-slate-900">
-                  <span className="text-sm font-medium">
-                    {rating.toFixed(1)}
-                  </span>
-                  <StarIcon className="size-4 text-yellow-500 fill-yellow-500" />
-                </div>
                 <button
                   type="button"
                   aria-label="Open chat"

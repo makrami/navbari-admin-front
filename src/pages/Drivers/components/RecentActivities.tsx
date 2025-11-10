@@ -106,37 +106,71 @@ export default function RecentActivities({
       </div>
 
       <div className="rounded-2xl bg-white p-4">
-        <div className="grid grid-cols-[1fr_2fr_1fr_1fr] items-center px-3 py-2 text-xs font-semibold text-slate-900">
+        {/* Header - hidden on small screens, shown on larger screens */}
+        <div className="hidden xl:grid grid-cols-[1fr_2fr_1fr_1fr] items-center px-3 py-2 text-xs font-semibold text-slate-900">
           <div>ID</div>
           <div>Route</div>
           <div>Date</div>
           <div>Status</div>
         </div>
-        <ul className=" space-y-3 divide-slate-100">
+        <ul className="space-y-3 divide-slate-100">
           {items.map((a) => (
-            <li
-              key={a.id}
-              className="grid grid-cols-[1fr_2fr_1fr_1fr] bg-slate-50 items-center gap-3 rounded-lg px-3 py-3 text-sm"
-            >
-              <span className="text-slate-600 ">{a.id}</span>
-              <span className="flex items-center gap-2 text-slate-900">
-                <span className="font-semibold">{a.fromCountry}</span>
-                <span className="text-slate-500">/ {a.fromCity}</span>
-                <ArrowRight className="size-4 text-slate-400" />
-                <span className="font-semibold">{a.toCountry}</span>
-                <span className="text-slate-500">/ {a.toCity}</span>
-              </span>
-              <span className="text-slate-600">{a.dateRange}</span>
-              <span
-                className={cn(
-                  "rounded-full px-2 py-1 text-xs font-medium",
-                  a.status === "Delivered" && "text-green-600",
-                  a.status === "In-Origin" && "text-amber-600",
-                  a.status === "Loading" && "text-orange-500"
-                )}
-              >
-                {a.status}
-              </span>
+            <li key={a.id} className="bg-slate-50 rounded-lg px-3 py-3 text-sm">
+              {/* Mobile/Tablet Layout - Stacked */}
+              <div className="xl:hidden flex flex-col gap-2">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-slate-600 font-medium">{a.id}</span>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap shrink-0",
+                      a.status === "Delivered" && "bg-green-50 text-green-600",
+                      a.status === "In-Origin" && "bg-amber-50 text-amber-600",
+                      a.status === "Loading" && "bg-orange-50 text-orange-500"
+                    )}
+                  >
+                    {a.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-900 flex-wrap">
+                  <span className="font-semibold truncate">
+                    {a.fromCountry}
+                  </span>
+                  <span className="text-slate-500 truncate">
+                    / {a.fromCity}
+                  </span>
+                  <ArrowRight className="size-4 text-slate-400 shrink-0" />
+                  <span className="font-semibold truncate">{a.toCountry}</span>
+                  <span className="text-slate-500 truncate">/ {a.toCity}</span>
+                </div>
+                <span className="text-slate-600 text-xs">{a.dateRange}</span>
+              </div>
+
+              {/* Desktop Layout - Grid (xl and above) */}
+              <div className="hidden xl:grid grid-cols-[1fr_2fr_1fr_1fr] items-center gap-3">
+                <span className="text-slate-600 truncate">{a.id}</span>
+                <span className="flex items-center gap-2 text-slate-900 min-w-0">
+                  <span className="font-semibold truncate">
+                    {a.fromCountry}
+                  </span>
+                  <span className="text-slate-500 truncate">
+                    / {a.fromCity}
+                  </span>
+                  <ArrowRight className="size-4 text-slate-400 shrink-0" />
+                  <span className="font-semibold truncate">{a.toCountry}</span>
+                  <span className="text-slate-500 truncate">/ {a.toCity}</span>
+                </span>
+                <span className="text-slate-600 truncate">{a.dateRange}</span>
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",
+                    a.status === "Delivered" && "text-green-600",
+                    a.status === "In-Origin" && "text-amber-600",
+                    a.status === "Loading" && "text-orange-500"
+                  )}
+                >
+                  {a.status}
+                </span>
+              </div>
             </li>
           ))}
         </ul>

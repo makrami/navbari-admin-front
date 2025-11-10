@@ -2,7 +2,6 @@ import { CompanyNameField } from "./CompanyNameField";
 import { CompanyLogoUpload } from "./CompanyLogoUpload";
 import { TimeZoneField } from "./TimeZoneField";
 import { MapStyleField } from "./MapStyleField";
-import { MeasurementUnitsField } from "./MeasurementUnitsField";
 import { SettingsFooter } from "./SettingsFooter";
 
 type GeneralSettingsProps = {
@@ -32,10 +31,7 @@ export function GeneralSettings({
   onTimeZoneChange,
   mapStyle,
   onMapStyleChange,
-  distanceUnit,
-  onDistanceUnitChange,
-  weightUnit,
-  onWeightUnitChange,
+
   changeCount,
   onRevert,
   onSave,
@@ -51,12 +47,12 @@ export function GeneralSettings({
         <TimeZoneField value={timeZone} onChange={onTimeZoneChange} />
         <MapStyleField value={mapStyle} onChange={onMapStyleChange} />
       </div>
-      <MeasurementUnitsField
+      {/* <MeasurementUnitsField
         distanceUnit={distanceUnit}
         weightUnit={weightUnit}
         onDistanceUnitChange={onDistanceUnitChange}
         onWeightUnitChange={onWeightUnitChange}
-      />
+      /> */}
       <SettingsFooter
         changeCount={changeCount}
         onRevert={onRevert}

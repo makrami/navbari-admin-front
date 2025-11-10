@@ -1,154 +1,88 @@
+import { Fragment } from "react";
 import { cn } from "../../../../shared/utils/cn";
-import {
-  Truck,
-  Car,
-  LocateFixed,
-  Sun,
-  Check,
-  UserRound,
-  ChevronsRight,
-  Stamp,
-} from "lucide-react";
+import { PROGRESS_STEPS_CONFIG } from "../config/progressSteps";
+import { ProgressIconCard, ProgressActiveCard } from "./ProgressStepCards";
+import { getChevronColor, getStepState } from "../utils/progressUtils";
+import type { ProgressExtraField } from "../../utils/progressFlowHelpers";
+import { ChevronsRightIcon } from "lucide-react";
 
 export type SegmentProgressStage =
+  | "start"
   | "to_origin"
   | "in_origin"
   | "loading"
+  | "in_customs"
   | "to_dest"
-  | "delivered"
-  | "end";
+  | "delivered";
 
 type SegmentProgressProps = {
   className?: string;
   current: SegmentProgressStage;
+  badge?: string;
+  showWarningIcon?: boolean;
+  dateTime?: string;
+  distance?: string;
+  plannedDate?: string;
+  estFinishAt?: string;
+  extraFields?: ProgressExtraField[];
 };
 
-const steps: Array<{ key: SegmentProgressStage; label: string }> = [
-  { key: "to_origin", label: "To Origin" },
-  { key: "in_origin", label: "In Origin" },
-  { key: "loading", label: "Loading" },
-  { key: "to_dest", label: "To Dest." },
-  { key: "delivered", label: "Delivered" },
-  { key: "end", label: "End" },
-];
-
-function StepIcon({ stage }: { stage: SegmentProgressStage }) {
-  switch (stage) {
-    case "to_origin":
-      return <Truck className="size-[14px]" />;
-    case "in_origin":
-      return <Car className="size-[14px]" />;
-    case "loading":
-      return <LocateFixed className="size-[14px]" />;
-    case "to_dest":
-      return <Sun className="size-[14px]" />;
-    case "delivered":
-      return <Stamp className="size-[14px]" />;
-    case "end":
-      return <Check className="size-[14px]" />;
-    default:
-      return null;
-  }
-}
-
-export function SegmentProgress({ className, current }: SegmentProgressProps) {
-  const activeStages: SegmentProgressStage[] = [
-    "to_origin",
-    "in_origin",
-    "loading",
-    "to_dest",
-  ];
-  const hasActive = activeStages.includes(current);
-  const activeIndex = hasActive
-    ? steps.findIndex((s) => s.key === current)
-    : -1;
+export function SegmentProgress({
+  className,
+  current,
+  badge,
+  showWarningIcon = false,
+  dateTime,
+}: SegmentProgressProps) {
+  const activeIndex = PROGRESS_STEPS_CONFIG.findIndex((s) => s.key === current);
+  const validIndex = activeIndex >= 0 ? activeIndex : 0;
 
   return (
     <div
       className={cn(
-        " flex-1 min-w-0 flex items-center justify-center py-3 px-6",
+        "flex flex-1 b justify-between items-center w-full overflow-x-auto py-2 ",
         className
       )}
       data-name="Segment Progress"
     >
-      {steps.map((step, index) => {
-        const isEndStep = step.key === "end";
-        const isSegmentCompleted = current === "delivered" || current === "end";
-        const isCurrent = hasActive && index === activeIndex;
-        const isDone = isSegmentCompleted
-          ? !isEndStep
-          : hasActive
-          ? index < activeIndex
-          : false;
-        const isUpcoming = !isDone && !isCurrent;
-
-        // Square step (done or upcoming)
-        const square = (
-          <div
-            className={cn(
-              "size-10 rounded-xl inline-flex items-center justify-center",
-              // End step special coloring
-              isEndStep
-                ? isSegmentCompleted
-                  ? "bg-green-50 text-green-600 ring-1 ring-green-100"
-                  : "bg-slate-50 text-slate-400 ring-1 ring-slate-100"
-                : undefined,
-              // Regular steps
-              !isEndStep &&
-                isDone &&
-                "bg-green-50 text-green-600 ring-1 ring-green-100",
-              !isEndStep &&
-                isUpcoming &&
-                "bg-slate-50 text-slate-400 ring-1 ring-slate-100"
-            )}
-          >
-            <StepIcon stage={step.key} />
-          </div>
-        );
-
-        // Yellow info card for current step
-        const currentCard = (
-          <div className="inline-flex items-center gap-8 bg-yellow-50 text-amber-700 rounded-md py-1 px-3 ring-1 ring-amber-100">
-            <div className="">
-              <div className="text-xs font-semibold text-amber-700">
-                Planned
-              </div>
-              <div className="text-xs text-amber-700/80">14 Aug - 03:45</div>
-            </div>
-            <div className="">
-              <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
-                <span>To Dest.</span>
-                <UserRound className="size-4 text-amber-700" />
-              </div>
-              <div className="text-xs text-amber-700/80">34 KM</div>
-            </div>
-            <div className="">
-              <div className="text-xs font-semibold text-red-600">
-                Est. (GPS)
-              </div>
-              <div className="text-xs text-red-600">14 Aug - 03:45</div>
-            </div>
-          </div>
-        );
+      {PROGRESS_STEPS_CONFIG.map((step, index) => {
+        const state = getStepState(index, validIndex);
+        const Icon = step.icon;
+        const isActive = state === "active";
+        const isCompleted = state === "completed";
+        const isUpcoming = state === "upcoming";
 
         return (
-          <div key={step.key} className="flex items-center">
-            {isCurrent ? currentCard : square}
-            {index < steps.length - 1 ? (
-              <ChevronsRight
-                className={cn(
-                  "mx-2 size-4",
-                  isSegmentCompleted
-                    ? "text-green-500/60"
-                    : index === activeIndex - 1
-                    ? "text-amber-700"
-                    : index < activeIndex - 1
-                    ? "text-green-500/60"
-                    : "text-slate-300"
-                )}
+          <Fragment key={step.key}>
+            {/* Render stage card as independent element */}
+            {isActive ? (
+              <ProgressActiveCard
+                step={step}
+                badge={badge}
+                showWarningIcon={showWarningIcon}
+                dateTime={dateTime}
+                plannedDate={step.plannedDate}
+                estFinishAt={step.estFinishAt}
+                distance={step.distance}
               />
-            ) : null}
-          </div>
+            ) : (
+              <ProgressIconCard
+                Icon={Icon}
+                isCompleted={isCompleted}
+                isUpcoming={isUpcoming}
+              />
+            )}
+            {/* Render chevron between stages, not attached to any stage */}
+            {index < PROGRESS_STEPS_CONFIG.length - 1 && (
+              <ChevronsRightIcon
+                className={cn(
+                  "size-3 flex-shrink-0 transition-colors",
+                  getChevronColor(index, validIndex, PROGRESS_STEPS_CONFIG)
+                )}
+                data-name="Progress Chevron"
+              />
+            )}
+          </Fragment>
         );
       })}
     </div>

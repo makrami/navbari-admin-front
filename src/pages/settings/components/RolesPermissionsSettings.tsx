@@ -90,6 +90,7 @@ export function RolesPermissionsSettings({
           onPermissionsChange={onPermissionsChange}
           onUserEdit={handleOpenEditUser}
           onUserRemove={onUserRemove}
+          onUserAdd={handleOpenAddUser}
         />
       </div>
 

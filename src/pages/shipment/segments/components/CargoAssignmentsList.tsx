@@ -39,7 +39,6 @@ export default function CargoAssignmentsList({
                       .join("")}
                   </span>
                   <span>{co.admin}</span>
-                  <span className="text-slate-400">4.5</span>
                   <Star className="size-3 fill-yellow-400 text-yellow-400" />
                 </div>
               ) : (

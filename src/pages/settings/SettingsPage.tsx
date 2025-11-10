@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { SettingsCard } from "./components/SettingsCard";
 import { GeneralSettings } from "./components/GeneralSettings";
 import { NotificationSettings } from "./components/NotificationSettings";
-import { LocalizationSettings } from "./components/LocalizationSettings";
 import { SystemParametersSettings } from "./components/SystemParametersSettings";
 import { RolesPermissionsSettings } from "./components/RolesPermissionsSettings";
 import type { Role } from "./components/RolesListPanel";
@@ -38,15 +37,15 @@ export function SettingsPage() {
   const [mobilePush, setMobilePush] = useState(true);
 
   // Localization Settings state
-  const [language, setLanguage] = useState("en");
-  const [baseCurrency, setBaseCurrency] = useState("USD ($)");
-  const [currencyOverrides, setCurrencyOverrides] = useState([
-    { id: "1", country: "United Kingdom", currency: "USD ($)" },
-  ]);
-  const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
-  const [timeFormat, setTimeFormat] = useState("24h");
-  const [numericSeparator, setNumericSeparator] = useState("Comma (,)");
-  const [decimalSeparator, setDecimalSeparator] = useState("Period (.)");
+  // const [language, setLanguage] = useState("en");
+  // const [baseCurrency, setBaseCurrency] = useState("USD ($)");
+  // const [] = useState([
+  //   { id: "1", country: "United Kingdom", currency: "USD ($)" },
+  // ]);
+  // const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
+  // const [timeFormat, setTimeFormat] = useState("24h");
+  // const [numericSeparator, setNumericSeparator] = useState("Comma (,)");
+  // const [decimalSeparator, setDecimalSeparator] = useState("Period (.)");
 
   // System Parameters Settings state
   const [loadingTime, setLoadingTime] = useState(4);
@@ -179,11 +178,11 @@ export function SettingsPage() {
       title: t("settings.sections.notifications.title"),
       description: t("settings.sections.notifications.description"),
     },
-    {
-      key: "localization",
-      title: t("settings.sections.localization.title"),
-      description: t("settings.sections.localization.description"),
-    },
+    // {
+    //   key: "localization",
+    //   title: t("settings.sections.localization.title"),
+    //   description: t("settings.sections.localization.description"),
+    // },
     {
       key: "systemParameters",
       title: t("settings.sections.systemParameters.title"),
@@ -319,27 +318,28 @@ export function SettingsPage() {
                     onRevert={handleRevert}
                     onSave={handleSave}
                   />
-                ) : section.key === "localization" ? (
-                  <LocalizationSettings
-                    language={language}
-                    onLanguageChange={setLanguage}
-                    baseCurrency={baseCurrency}
-                    onBaseCurrencyChange={setBaseCurrency}
-                    currencyOverrides={currencyOverrides}
-                    onCurrencyOverridesChange={setCurrencyOverrides}
-                    dateFormat={dateFormat}
-                    onDateFormatChange={setDateFormat}
-                    timeFormat={timeFormat}
-                    onTimeFormatChange={setTimeFormat}
-                    numericSeparator={numericSeparator}
-                    onNumericSeparatorChange={setNumericSeparator}
-                    decimalSeparator={decimalSeparator}
-                    onDecimalSeparatorChange={setDecimalSeparator}
-                    changeCount={changeCount}
-                    onRevert={handleRevert}
-                    onSave={handleSave}
-                  />
-                ) : section.key === "systemParameters" ? (
+                ) : //   : section.key === "localization" ? (
+                // <LocalizationSettings
+                //   language={language}
+                //   onLanguageChange={setLanguage}
+                //   baseCurrency={baseCurrency}
+                //   onBaseCurrencyChange={setBaseCurrency}
+                //   currencyOverrides={currencyOverrides}
+                //   onCurrencyOverridesChange={setCurrencyOverrides}
+                //   dateFormat={dateFormat}
+                //   onDateFormatChange={setDateFormat}
+                //   timeFormat={timeFormat}
+                //   onTimeFormatChange={setTimeFormat}
+                //   numericSeparator={numericSeparator}
+                //   onNumericSeparatorChange={setNumericSeparator}
+                //   decimalSeparator={decimalSeparator}
+                //   onDecimalSeparatorChange={setDecimalSeparator}
+                //   changeCount={changeCount}
+                //   onRevert={handleRevert}
+                //   onSave={handleSave}
+                // />
+                //   )
+                section.key === "systemParameters" ? (
                   <SystemParametersSettings
                     loadingTime={loadingTime}
                     onLoadingTimeChange={setLoadingTime}

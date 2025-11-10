@@ -41,7 +41,10 @@ export default function AddShipmentModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return;
-    const genId = `#${Math.random().toString(36).slice(2, 9)}`;
+    // Generate a more unique ID using timestamp + random string
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).slice(2, 9);
+    const genId = `#${timestamp}-${random}`;
     onCreate({
       id: genId,
       title: name,
@@ -99,13 +102,13 @@ export default function AddShipmentModal({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                 <input
-                  className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-list-button]:hidden"
                   placeholder="Search..."
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
                   list="city-options-list"
                 />
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
             <div className="grid gap-1">
@@ -113,13 +116,13 @@ export default function AddShipmentModal({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                 <input
-                  className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-list-button]:hidden"
                   placeholder="Search..."
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
                   list="city-options-list"
                 />
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -168,7 +171,7 @@ export default function AddShipmentModal({
           </div>
 
           <div className="grid gap-1">
-            <label className="text-xs text-slate-600">Segments Amount</label>
+            <label className="text-xs text-slate-600">Segment Count</label>
             <input
               type="number"
               min="0"

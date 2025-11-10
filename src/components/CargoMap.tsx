@@ -33,7 +33,7 @@ type Props = {
 
 const SEGMENT_DURATION_MS = 2000;
 const ROUTING_PROFILE = "driving-traffic"; // or "driving"
-const GREEN_MAP_STYLE = "mapbox://styles/mapbox/outdoors-v12";
+const GREEN_MAP_STYLE = "mapbox://styles/mapbox/navigation-day-v1";
 
 export function CargoMap({
   segments,

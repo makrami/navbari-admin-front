@@ -6,8 +6,10 @@ import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
 import FieldBoxSelect from "./fields/FieldBoxSelect";
-import DateTimePickerField from "./fields/DateTimePickerField";
+import DatePicker from "./fields/DatePicker";
+import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
+import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
@@ -16,6 +18,7 @@ import type {
   SegmentLogisticsStatus,
 } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
+import { ShipmentLinkSection } from "./ShipmentLinkSection";
 export type SegmentData = {
   step: number;
   place: string;
@@ -30,10 +33,13 @@ export type SegmentData = {
   vehicleLabel?: string;
   startAt?: string;
   estFinishAt?: string;
+  distance?: string;
   localCompany?: string;
   baseFeeUsd?: number;
   /** Title helper: start of the next segment (if any). If undefined, treated as destination. */
   nextPlace?: string;
+  /** When true, indicates this segment has a disruption/error */
+  hasDisruption?: boolean;
   documents?: Array<{
     id: string | number;
     name: string;
@@ -56,30 +62,66 @@ type SegmentDetailsProps = {
   className?: string;
   data: SegmentData;
   defaultOpen?: boolean;
+  open?: boolean;
+  onToggle?: () => void;
   children?: ReactNode;
   onSave?: (update: Partial<SegmentData>) => void;
   editable?: boolean;
   locked?: boolean;
   showStatuses?: boolean;
+  /** Shipment link props - when provided, shows a clickable shipment link section */
+  shipmentLinkProps?: {
+    shipmentTitle: string;
+    shipmentId: string;
+    fromPlace: string;
+    toPlace?: string;
+    fromCountryCode?: string;
+    toCountryCode?: string;
+  };
 };
 
 export function SegmentDetails({
   className,
   data,
   defaultOpen = false,
+  open: controlledOpen,
+  onToggle: controlledOnToggle,
   children,
   onSave,
   editable = false,
   locked = false,
   showStatuses = true,
+  shipmentLinkProps,
 }: SegmentDetailsProps) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+
+  // Use controlled state if provided, otherwise use internal state
+  const isControlled =
+    controlledOpen !== undefined && controlledOnToggle !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const handleToggle = isControlled
+    ? controlledOnToggle
+    : () => setInternalOpen((v) => !v);
   const [toValue, setToValue] = useState<string>(data.nextPlace ?? "");
   const [fromValue, setFromValue] = useState<string>(data.place ?? "");
-  const [startAt, setStartAt] = useState<string>(data.startAt ?? "");
-  const [estFinishAt, setEstFinishAt] = useState<string>(
-    data.estFinishAt ?? ""
-  );
+
+  // Split date-time values into separate date and time states
+  const [startDateValue, setStartDateValue] = useState<string>(() => {
+    const { d } = splitDateTime(data.startAt ?? "");
+    return d;
+  });
+  const [startTimeValue, setStartTimeValue] = useState<string>(() => {
+    const { t } = splitDateTime(data.startAt ?? "");
+    return t;
+  });
+  const [estFinishDateValue, setEstFinishDateValue] = useState<string>(() => {
+    const { d } = splitDateTime(data.estFinishAt ?? "");
+    return d;
+  });
+  const [estFinishTimeValue, setEstFinishTimeValue] = useState<string>(() => {
+    const { t } = splitDateTime(data.estFinishAt ?? "");
+    return t;
+  });
   const [baseFee, setBaseFee] = useState<string>(
     typeof data.baseFeeUsd === "number" ? String(data.baseFeeUsd) : ""
   );
@@ -95,16 +137,42 @@ export function SegmentDetails({
     return data.documents ?? [];
   }, [data.documents]);
 
+  // Determine border color based on segment status
+  const getBorderColor = () => {
+    if (locked) return "border-transparent";
+    if (editable) return "border-dotted border-blue-500";
+
+    // Check for error/alert state first (highest priority)
+    const hasError =
+      data.hasDisruption ||
+      data.logisticsStatus === "CANCELLED" ||
+      data.logisticsStatus === "LOADING";
+    if (hasError) {
+      return "border-red-600";
+    }
+
+    // Check for delivered state
+    if (data.progressStage === "delivered") {
+      return "border-green-600";
+    }
+
+    // Check for in-progress state (any active progressStage except delivered)
+    // This includes: in_origin, loading, to_dest, in_customs, to_origin, start
+    // or if segment is marked as current
+    if (data.progressStage || data.isCurrent) {
+      return "border-yellow-600";
+    }
+
+    // Not started yet (upcoming states) or no progressStage
+    return "border-slate-200";
+  };
+
   return (
     <div
       className={cn(
         "relative border-2 rounded-xl shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
         locked ? "bg-slate-50 border-transparent" : "bg-white",
-        !locked && editable
-          ? "border-dotted border-blue-500"
-          : !locked
-          ? "border-slate-200"
-          : null,
+        getBorderColor(),
         className
       )}
       data-name="Segment Item"
@@ -115,10 +183,14 @@ export function SegmentDetails({
         nextPlace={data.isPlaceholder ? undefined : data.nextPlace}
         isCompleted={data.isCompleted}
         open={open}
+        isCurrent={data.isCurrent ?? false}
+        distance={data.distance}
+        avatarUrl={data.assigneeAvatarUrl}
+        assigneeName={data.assigneeName}
         locked={locked}
         editable={editable}
         headerId={headerId}
-        onToggle={() => setOpen((v) => !v)}
+        onToggle={handleToggle}
         showCargoButton={
           !open && editable && Boolean(data.nextPlace) && !data.isCompleted
         }
@@ -129,12 +201,15 @@ export function SegmentDetails({
         }}
       />
 
-      {/* Inline progress just below header when this is the current segment */}
-      {data.isCurrent && data.progressStage && !locked ? (
+      {data.progressStage && !open && (
         <div className="px-3 pb-3">
-          <SegmentProgress current={data.progressStage} />
+          <SegmentProgress
+            current={data.progressStage}
+            dateTime={data.datetime}
+            showWarningIcon={data.hasDisruption ?? false}
+          />
         </div>
-      ) : null}
+      )}
 
       {/* Assignment and Logistics statuses */}
       {showStatuses && (data.assignmentStatus || data.logisticsStatus) && (
@@ -165,12 +240,31 @@ export function SegmentDetails({
       >
         <div className={cn("overflow-hidden", open)}>
           <div className="px-3 py-3 gap-6">
+            {/* Shipment Link Section - only shown when shipmentLinkProps is provided */}
+            {shipmentLinkProps && (
+              <div className="mb-4">
+                <ShipmentLinkSection
+                  shipmentTitle={shipmentLinkProps.shipmentTitle}
+                  shipmentId={shipmentLinkProps.shipmentId}
+                  fromPlace={shipmentLinkProps.fromPlace}
+                  toPlace={shipmentLinkProps.toPlace}
+                  fromCountryCode={shipmentLinkProps.fromCountryCode}
+                  toCountryCode={shipmentLinkProps.toCountryCode}
+                  step={data.step}
+                />
+              </div>
+            )}
+
             {/* Segment progress appears here only for non-current segments */}
             {children ? (
               <div>{children}</div>
             ) : !data.isCurrent && data.progressStage && !locked ? (
-              <SegmentProgress current={data.progressStage} />
+              <SegmentProgress
+                current={data.progressStage}
+                showWarningIcon={data.hasDisruption ?? false}
+              />
             ) : null}
+
             {editable && !locked ? (
               <div className=" rounded-xl  grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FieldBoxSelect
@@ -185,17 +279,30 @@ export function SegmentDetails({
                   onChange={setToValue}
                   options={CITY_OPTIONS}
                 />
-                <DateTimePickerField
-                  label="START"
-                  value={startAt}
-                  onChange={setStartAt}
-                  error={showErrors && !startAt.trim()}
+                <DatePicker
+                  label="START DATE"
+                  value={startDateValue}
+                  onChange={setStartDateValue}
+                  error={showErrors && !startDateValue.trim()}
                 />
-                <DateTimePickerField
-                  label="EST. FINISH"
-                  value={estFinishAt}
-                  onChange={setEstFinishAt}
-                  error={showErrors && !estFinishAt.trim()}
+                <DatePicker
+                  label="EST. FINISH DATE"
+                  value={estFinishDateValue}
+                  onChange={setEstFinishDateValue}
+                  error={showErrors && !estFinishDateValue.trim()}
+                />
+                <TimePicker
+                  label="START TIME"
+                  value={startTimeValue}
+                  onChange={setStartTimeValue}
+                  error={showErrors && !startTimeValue.trim()}
+                />
+
+                <TimePicker
+                  label="EST. FINISH TIME"
+                  value={estFinishTimeValue}
+                  onChange={setEstFinishTimeValue}
+                  error={showErrors && !estFinishTimeValue.trim()}
                 />
                 <BaseFeeField
                   value={baseFee}
@@ -206,16 +313,20 @@ export function SegmentDetails({
                   readOnly={locked || !editable}
                   onReset={() => {
                     setToValue("");
-                    setStartAt("");
-                    setEstFinishAt("");
+                    setStartDateValue("");
+                    setStartTimeValue("");
+                    setEstFinishDateValue("");
+                    setEstFinishTimeValue("");
                     setBaseFee("");
                     setShowErrors(false);
                   }}
                   onSave={() => {
                     const valid =
                       toValue.trim() &&
-                      startAt.trim() &&
-                      estFinishAt.trim() &&
+                      startDateValue.trim() &&
+                      startTimeValue.trim() &&
+                      estFinishDateValue.trim() &&
+                      estFinishTimeValue.trim() &&
                       baseFee.trim();
                     if (!valid) {
                       setShowErrors(true);
@@ -224,18 +335,29 @@ export function SegmentDetails({
                     onSave?.({
                       place: fromValue.trim(),
                       nextPlace: toValue.trim(),
-                      startAt: startAt.trim(),
-                      estFinishAt: estFinishAt.trim(),
+                      startAt: combineDateTime(
+                        startDateValue.trim(),
+                        startTimeValue.trim()
+                      ),
+                      estFinishAt: combineDateTime(
+                        estFinishDateValue.trim(),
+                        estFinishTimeValue.trim()
+                      ),
                       baseFeeUsd: parseFloat(baseFee),
                       isPlaceholder: false,
                     });
-                    setOpen(false);
+                    // Close segment after save if it's currently open
+                    if (open) {
+                      handleToggle();
+                    }
                   }}
                   onSaveDeclare={() => {
                     const valid =
                       toValue.trim() &&
-                      startAt.trim() &&
-                      estFinishAt.trim() &&
+                      startDateValue.trim() &&
+                      startTimeValue.trim() &&
+                      estFinishDateValue.trim() &&
+                      estFinishTimeValue.trim() &&
                       baseFee.trim();
                     if (!valid) {
                       setShowErrors(true);
@@ -244,8 +366,14 @@ export function SegmentDetails({
                     setPendingUpdate({
                       place: fromValue.trim(),
                       nextPlace: toValue.trim(),
-                      startAt: startAt.trim(),
-                      estFinishAt: estFinishAt.trim(),
+                      startAt: combineDateTime(
+                        startDateValue.trim(),
+                        startTimeValue.trim()
+                      ),
+                      estFinishAt: combineDateTime(
+                        estFinishDateValue.trim(),
+                        estFinishTimeValue.trim()
+                      ),
                       baseFeeUsd: parseFloat(baseFee),
                       isPlaceholder: false,
                     });
@@ -294,7 +422,10 @@ export function SegmentDetails({
           };
           onSave?.(update);
           setShowCargoModal(false);
-          setOpen(false);
+          // Close segment after cargo selection if it's currently open
+          if (open) {
+            handleToggle();
+          }
           setPendingUpdate(null);
         }}
       />

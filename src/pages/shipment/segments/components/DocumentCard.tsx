@@ -45,7 +45,7 @@ export function DocumentCard({
 
   return (
     <div
-      className={`flex flex-col w-52 border border-slate-200 rounded-xl p-3 shrink-0 ${
+      className={`flex flex-col w-52 border justify-between border-slate-200 rounded-xl p-3 shrink-0 ${
         className ?? ""
       }`}
     >
@@ -62,10 +62,7 @@ export function DocumentCard({
           {/* File info below status icon */}
           <div className="flex flex-col gap-0.5 flex-1 min-w-0">
             {/* File name */}
-            <div
-              className="text-xs font-medium text-slate-900 truncate"
-              title={fileName}
-            >
+            <div className="text-xs  text-slate-900 truncate" title={fileName}>
               {fileName}
             </div>
             {/* File size */}
@@ -86,14 +83,14 @@ export function DocumentCard({
           <button
             type="button"
             onClick={onApprove}
-            className="flex-1 rounded-lg bg-green-100 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors"
+            className="flex-1 rounded-lg bg-green-100 px-3 py-1 text-xs text-green-700 hover:bg-green-200 transition-colors"
           >
             Approve
           </button>
           <button
             type="button"
             onClick={onReject}
-            className="flex-1 rounded-lg bg-red-100 px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-200 transition-colors"
+            className="flex-1 rounded-lg bg-red-100 px-3 py-1 text-xs text-red-700 hover:bg-red-200 transition-colors"
           >
             Reject
           </button>

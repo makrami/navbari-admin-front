@@ -76,7 +76,7 @@ export function DocumentsSection({ documents = [] }: DocumentsSectionProps) {
           <button
             type="button"
             aria-label="Upload document"
-            className="flex flex-col w-26 items-center justify-center rounded-xl border border-dashed border-slate-300 px-3 py-6 hover:bg-slate-50 transition-colors bg-white shrink-0"
+            className="flex flex-col w-18 items-center justify-center rounded-xl border border-dashed border-slate-300 px-3 py-6 hover:bg-slate-50 transition-colors bg-white shrink-0"
           >
             <Paperclip className="size-5 text-slate-400" />
             <span className="mt-2 font-medium text-xs text-slate-400">

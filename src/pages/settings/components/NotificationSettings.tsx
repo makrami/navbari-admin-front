@@ -1,7 +1,6 @@
 import { AlertConfigCard } from "./AlertConfigCard";
 import { DeliveryMethodsSection } from "./DeliveryMethodsSection";
 import { SettingsFooter } from "./SettingsFooter";
-import { ToggleSwitch } from "./ToggleSwitch";
 
 type NotificationSettingsProps = {
   // Alert configurations
@@ -48,12 +47,7 @@ export function NotificationSettings({
   onDelayAlertToggle,
   delayAlertValue,
   onDelayAlertValueChange,
-  deliveryNotificationEnabled,
-  onDeliveryNotificationToggle,
-  missingDocumentReminderEnabled,
-  onMissingDocumentReminderToggle,
-  missingDocumentReminderValue,
-  onMissingDocumentReminderValueChange,
+
   inApp,
   email,
   sms,
@@ -89,7 +83,7 @@ export function NotificationSettings({
       </div>
 
       {/* Middle Row - Alert Configurations */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-2 gap-4">
         <div className="bg-slate-100 rounded-lg p-4 ">
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -114,7 +108,7 @@ export function NotificationSettings({
           onValueChange={onMissingDocumentReminderValueChange}
           unit="HOURS"
         />
-      </div>
+      </div> */}
 
       {/* Delivery Methods Section */}
       <DeliveryMethodsSection

@@ -177,6 +177,18 @@
       "addPayment": "Add Payment"
     }
   },
+  "chatAlert": {
+    "page": {
+      "title": "Chats & Alerts"
+    },
+    "search": {
+      "placeholder": "Search chats and alerts..."
+    },
+    "details": {
+      "title": "Details",
+      "close": "Close details panel"
+    }
+  },
   "vehicles": {
     "header": {
       "title": "Vehicles",
@@ -200,7 +212,9 @@
       "shipment": "Shipment",
       "localCompanies": "Local Companies",
       "drivers": "Drivers",
-      "finance": "Finance"
+      "finance": "Finance",
+      "chatAlert": "Chat & Alert",
+      "settings": "Settings"
     },
     "mobile": {
       "navLabel": "Navigation menu",
@@ -294,6 +308,7 @@
         "delete": "Delete",
         "approve": "Approve",
         "users": "Users",
+        "addUser": "Add User",
         "nameEmail": "Name & Email",
         "actions": "Actions"
       }

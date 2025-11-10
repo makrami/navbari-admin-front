@@ -1,5 +1,5 @@
 import ReactCountryFlag from "react-country-flag";
-import { ArrowRight, UsersIcon, Star } from "lucide-react";
+import { ArrowRight, UsersIcon } from "lucide-react";
 import { cn } from "../../shared/utils/cn";
 import imgAvatar from "../../assets/images/avatar.png";
 
@@ -39,7 +39,6 @@ export function ShipmentItem({
   toCountryCode = "RU",
   progressPercent = 25,
   userName,
-  rating = 4.5,
   selected = false,
   onClick,
   segments = [],
@@ -177,17 +176,6 @@ export function ShipmentItem({
               </span>
             </>
           ) : null}
-        </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "text-sm font-medium",
-              selected ? "text-white" : "text-slate-900"
-            )}
-          >
-            {rating}
-          </span>
-          <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
         </div>
       </div>
       {/* Segments timeline (selected) */}

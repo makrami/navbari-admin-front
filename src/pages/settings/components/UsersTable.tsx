@@ -1,25 +1,37 @@
 import { useTranslation } from "react-i18next";
-import { ChevronDown, PenLineIcon, X } from "lucide-react";
+import { ChevronDown, PenLineIcon, PlusIcon, X } from "lucide-react";
 import type { User } from "./RoleDetailsPanel";
 
 type UsersTableProps = {
   users: User[];
   onUserEdit: (userId: string) => void;
   onUserRemove: (userId: string) => void;
+  onUserAdd: () => void;
 };
 
 export function UsersTable({
   users,
   onUserEdit,
   onUserRemove,
+  onUserAdd,
 }: UsersTableProps) {
   const { t } = useTranslation();
 
   return (
     <div>
-      <h3 className="text-xs text-slate-900 mb-4">
-        {t("settings.sections.rolesPermissions.users")}
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-sm font-medium text-slate-900 ">
+          {t("settings.sections.rolesPermissions.users")}
+        </div>
+        <button
+          type="button"
+          onClick={onUserAdd}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#1B54FE]/10 px-4 py-2 text-sm font-bold text-[#1B54FE] hover:bg-[#1B54FE]/15 transition-colors"
+        >
+          {t("settings.sections.rolesPermissions.addUser")}
+          <PlusIcon className="size-4" />
+        </button>
+      </div>
       <div className=" rounded-lg overflow-hidden bg-white">
         <table className="w-full">
           <thead className="bg-slate-200 border-b border-slate-200">

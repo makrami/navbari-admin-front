@@ -14,6 +14,7 @@ import { SegmentsPage } from "../../pages/segments/SegmentsPage";
 import { LocalCompaniesPage } from "../../pages/LocalCompanies/LocalCompianiesPage";
 import { DriversPage } from "../../pages/Drivers/DriversPage";
 import { FinancePage } from "../../pages/finance/FinancePage";
+import { ChatAlertPage } from "../../pages/chat-alert/ChatAlertPage";
 import { SettingsPage } from "../../pages/settings/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
@@ -103,6 +104,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <FinancePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "chat-alert",
+        element: (
+          <ProtectedRoute>
+            <ChatAlertPage />
           </ProtectedRoute>
         ),
       },

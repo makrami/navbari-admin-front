@@ -18,12 +18,8 @@ export function InfoCard({
   valueIcon,
 }: InfoCardProps) {
   return (
-    <div
-      className={`rounded-[10px] border border-slate-200 p-3 ${
-        className ?? ""
-      }`}
-    >
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className={`p-3 ${className ?? ""}`}>
+      <div className="flex items-center gap-2 text-[10px] font-medium text-slate-400">
         {icon}
         <span>{title}</span>
       </div>
