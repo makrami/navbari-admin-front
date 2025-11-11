@@ -42,7 +42,7 @@ export default function SegmentInfoSummary({
   return (
     <div className="bg-white rounded-xl space-y-4 mt-4">
       {/* Estimated Arrival Card */}
-      <div className="bg-slate-50 rounded-xl p-4 flex items-center  gap-2">
+      <div className="bg-slate-50 rounded-xl p-4   flex items-center justify-between gap-2">
         {/* Left Section - Text Information */}
         <div className="flex flex-col gap-2">
           <div className="text-sm">
@@ -68,7 +68,7 @@ export default function SegmentInfoSummary({
         </div>
 
         {/* Right Section - Status Indicators */}
-        <div className="flex  items-center flex-1  gap-5 flex-shrink-0">
+        <div className="flex  items-center flex-1   justify-between flex-shrink-0">
           {/* GPS On Indicator */}
           <div className="flex flex-col items-center gap-1">
             <div className="size-12 rounded-full bg-green-50 flex items-center justify-center">
