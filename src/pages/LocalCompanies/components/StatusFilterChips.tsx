@@ -5,6 +5,15 @@ import type { CompanyStatus } from "../types";
 
 export type FilterKey = "all" | CompanyStatus;
 
+// Map UI status to display label
+const STATUS_LABELS: Record<FilterKey, string> = {
+  all: "All",
+  pending: "Pending",
+  active: "Active",
+  rejected: "Rejected",
+  inactive: "Inactive",
+};
+
 type Props = {
   active: FilterKey;
   onChange: (next: FilterKey) => void;
@@ -17,28 +26,28 @@ const FILTER_META: Record<
   { label: string; className: string; activeRing: string }
 > = {
   all: {
-    label: "All",
+    label: STATUS_LABELS.all,
     className:
       "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
     activeRing: "ring-2 ring-slate-300",
   },
   pending: {
-    label: "Pending",
+    label: STATUS_LABELS.pending,
     className: "bg-amber-50 text-amber-700 hover:bg-amber-100",
     activeRing: "ring-2 ring-amber-200",
   },
   active: {
-    label: "Active",
+    label: STATUS_LABELS.active,
     className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     activeRing: "ring-2 ring-emerald-200",
   },
   rejected: {
-    label: "Rejected",
+    label: STATUS_LABELS.rejected,
     className: "bg-rose-50 text-rose-700 hover:bg-rose-100",
     activeRing: "ring-2 ring-rose-200",
   },
   inactive: {
-    label: "Inactive",
+    label: STATUS_LABELS.inactive,
     className: "bg-slate-200 text-slate-700 hover:bg-slate-200",
     activeRing: "ring-2 ring-slate-300",
   },

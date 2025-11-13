@@ -13,6 +13,11 @@ export const http = axios.create({
 // Request interceptor - can be used for adding auth headers if needed in future
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // Remove Content-Type header for FormData - browser will set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+    
     // Request logging (optional, can be removed in production)
     if (import.meta.env.DEV) {
       console.log(`[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`);

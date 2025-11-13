@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EntityCard } from "../../shared/components/ui/EntityCard";
-import { COMPANIES } from "./data";
 import { StatusFilterChips } from "./components/StatusFilterChips";
 import type { FilterKey } from "./components/StatusFilterChips";
 import { ListPanel } from "../../shared/components/ui/ListPanel";
@@ -13,60 +12,118 @@ import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
 import { LocalCompaniesPageSkeleton } from "./components/LocalCompaniesSkeleton";
+import { useCompanies, useCompanyDetails, useSuspendCompany, useUnsuspendCompany } from "../../services/company/hooks";
+import { COMPANY_STATUS } from "../../services/company/company.service";
+import { formatCompanyForEntityCard } from "./utils";
+import { apiStatusToUiStatus } from "./types";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
 export function LocalCompaniesPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
-  const [selectedId, setSelectedId] = useState<string | null>(
-    COMPANIES[0]?.id || null
-  );
-  const [isActive, setIsActive] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    // Simulate loading for 2 seconds
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const filteredCompanies = useMemo(() => {
-    if (activeFilter === "all") return COMPANIES;
-    return COMPANIES.filter((c) => c.status === activeFilter);
+  // Build filters for API call
+  const apiFilters = useMemo(() => {
+    const filters: { status?: COMPANY_STATUS } = {};
+    if (activeFilter !== "all") {
+      // Map UI status to API status
+      if (activeFilter === "active") filters.status = COMPANY_STATUS.APPROVED;
+      else if (activeFilter === "inactive") filters.status = COMPANY_STATUS.SUSPENDED;
+      else if (activeFilter === "pending") filters.status = COMPANY_STATUS.PENDING;
+      else if (activeFilter === "rejected") filters.status = COMPANY_STATUS.REJECTED;
+    }
+    return filters;
   }, [activeFilter]);
 
+  // Fetch companies
+  const { data: companies = [], isLoading, error } = useCompanies(apiFilters);
+  const { data: companyDetails } = useCompanyDetails(selectedId);
+  const suspendMutation = useSuspendCompany();
+  const unsuspendMutation = useUnsuspendCompany();
+
+  // Transform companies for EntityCard
+  const transformedCompanies = useMemo(() => {
+    return companies.map(formatCompanyForEntityCard);
+  }, [companies]);
+
+  // Filter companies based on UI filter
+  const filteredCompanies = useMemo(() => {
+    if (activeFilter === "all") return transformedCompanies;
+    return transformedCompanies.filter((c) => c.status === activeFilter);
+  }, [transformedCompanies, activeFilter]);
+
+  // Calculate counts by filter
   const countByFilter = useMemo(() => {
     const counts: Record<FilterKey, number> = {
-      all: COMPANIES.length,
+      all: companies.length,
       pending: 0,
       active: 0,
       rejected: 0,
       inactive: 0,
     };
-    for (const c of COMPANIES) counts[c.status] += 1;
-    return counts;
-  }, []);
-
-  // Determine selected company for split view; keep hooks before any early returns
-  const selectedCompany =
-    COMPANIES.find((c) => c.id === selectedId) ?? filteredCompanies[0];
-
-  useEffect(() => {
-    if (selectedCompany) {
-      setIsActive(selectedCompany.status !== "inactive");
+    for (const c of companies) {
+      const uiStatus = apiStatusToUiStatus(c.status);
+      counts[uiStatus] += 1;
     }
-  }, [selectedCompany]);
+    return counts;
+  }, [companies]);
+
+  // Get selected company
+  const selectedCompany = useMemo(() => {
+    if (!selectedId) return null;
+    return companies.find((c) => c.id === selectedId) || null;
+  }, [companies, selectedId]);
+
+  // Auto-select first company if none selected
+  useEffect(() => {
+    if (!selectedId && filteredCompanies.length > 0) {
+      setSelectedId(filteredCompanies[0].id);
+    }
+  }, [selectedId, filteredCompanies]);
+
+  // Handle activate/deactivate toggle
+  const handleToggleActive = async () => {
+    if (!selectedCompany) return;
+
+    const currentUiStatus = apiStatusToUiStatus(selectedCompany.status);
+    if (currentUiStatus === "inactive") {
+      // Activate (unsuspend)
+      await unsuspendMutation.mutateAsync(selectedCompany.id);
+    } else {
+      // Deactivate (suspend)
+      await suspendMutation.mutateAsync(selectedCompany.id);
+    }
+  };
+
+  const isActive = selectedCompany
+    ? apiStatusToUiStatus(selectedCompany.status) === "active"
+    : false;
 
   if (isLoading) {
     return <LocalCompaniesPageSkeleton />;
   }
 
+  if (error) {
+    return (
+      <div className="py-6 space-y-6 h-screen max-w-7xl mx-auto">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">
+              {t("localCompanies.page.title")}
+            </h1>
+          </div>
+        </div>
+        <div className="rounded-lg bg-red-50 p-4 text-red-700">
+          {error instanceof Error ? error.message : "Failed to load companies"}
+        </div>
+      </div>
+    );
+  }
+
   // Default list view
-  if (!selectedId) {
+  if (!selectedId || !selectedCompany) {
     return (
       <div className="py-6 space-y-6 h-screen  max-w-7xl mx-auto  transition-all">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -81,22 +138,28 @@ export function LocalCompaniesPage() {
           active={activeFilter}
           onChange={setActiveFilter}
           counts={countByFilter as Record<FilterKey, number>}
-          isListPanel={selectedId !== null}
+          isListPanel={false}
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {filteredCompanies.map((c) => (
-            <EntityCard
-              key={c.id}
-              entity={c}
-              onView={(id) => setSelectedId(id)}
-              statsLabels={{
-                driversLabel: t("localCompanies.page.stats.drivers"),
-                activeLabel: t("localCompanies.page.stats.active"),
-              }}
-            />
-          ))}
-        </div>
+        {filteredCompanies.length === 0 ? (
+          <div className="text-center py-12 text-slate-500">
+            No companies found
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            {filteredCompanies.map((c) => (
+              <EntityCard
+                key={c.id}
+                entity={c}
+                onView={(id) => setSelectedId(id)}
+                statsLabels={{
+                  driversLabel: t("localCompanies.page.stats.drivers"),
+                  activeLabel: t("localCompanies.page.stats.active"),
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -109,7 +172,7 @@ export function LocalCompaniesPage() {
           active={activeFilter}
           onChange={setActiveFilter}
           counts={countByFilter as Record<FilterKey, number>}
-          isListPanel={selectedCompany !== null}
+          isListPanel={true}
         />
         <AddLocalCompany />
         <div className="grid gap-4">
@@ -145,14 +208,15 @@ export function LocalCompaniesPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setIsActive((v) => !v)}
+                      onClick={handleToggleActive}
+                      disabled={suspendMutation.isPending || unsuspendMutation.isPending}
                       role="switch"
                       aria-checked={isActive}
                       className={
                         (isActive
                           ? "bg-red-100 text-red-600"
                           : "bg-green-100 text-green-600") +
-                        " inline-flex items-center gap-2 rounded-full justify-between min-w-33 px-2 py-1.5 text-sm font-medium transition-colors duration-200"
+                        " inline-flex items-center gap-2 rounded-full justify-between min-w-33 px-2 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
                       }
                     >
                       <span
@@ -168,14 +232,16 @@ export function LocalCompaniesPage() {
                           }
                         ></span>
                       </span>
-                      {isActive
+                      {suspendMutation.isPending || unsuspendMutation.isPending
+                        ? "Loading..."
+                        : isActive
                         ? t("localCompanies.page.actions.deactivate")
                         : t("localCompanies.page.actions.activate")}
                     </button>
                   </div>
-                  <CompanyDetails company={selectedCompany} />
-                  <DocumentsList />
-                  <InternalNotes />
+                  <CompanyDetails company={companyDetails || selectedCompany} />
+                  <DocumentsList companyId={selectedId} />
+                  <InternalNotes companyId={selectedId} initialValue={selectedCompany.internalNote || ""} />
                   <RecentActivities />
                 </div>
               )}

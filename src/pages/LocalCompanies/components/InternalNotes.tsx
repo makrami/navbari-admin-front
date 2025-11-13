@@ -1,25 +1,50 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { cn } from "../../../shared/utils/cn";
 import { Save as SaveIcon } from "lucide-react";
+import { useUpdateCompany } from "../../../services/company/hooks";
 
 type InternalNotesProps = {
   className?: string;
   title?: string;
+  companyId: string | null;
   initialValue?: string;
-  onSave?: (note: string) => void;
 };
 
 export default function InternalNotes({
   className,
   title = "Internal Notes",
+  companyId,
   initialValue = "",
-  onSave,
 }: InternalNotesProps) {
   const [note, setNote] = useState<string>(initialValue);
+  const updateMutation = useUpdateCompany();
+
+  // Sync with initialValue when it changes
+  useEffect(() => {
+    setNote(initialValue);
+  }, [initialValue]);
+
   const isDisabled = useMemo(
-    () => note.trim().length === 0 || note.trim() === initialValue.trim(),
-    [note, initialValue]
+    () => note.trim().length === 0 || note.trim() === initialValue.trim() || !companyId,
+    [note, initialValue, companyId]
   );
+
+  const handleSave = async () => {
+    if (!companyId || isDisabled) return;
+
+    try {
+      await updateMutation.mutateAsync({
+        id: companyId,
+        data: { internalNote: note.trim() },
+      });
+    } catch (error) {
+      console.error("Failed to save note:", error);
+    }
+  };
+
+  if (!companyId) {
+    return null;
+  }
 
   return (
     <section className={cn("space-y-3", className)}>
@@ -35,17 +60,27 @@ export default function InternalNotes({
 
         <button
           type="button"
-          disabled={isDisabled}
-          onClick={() => !isDisabled && onSave?.(note.trim())}
+          disabled={isDisabled || updateMutation.isPending}
+          onClick={handleSave}
           className={cn(
             "mt-3 inline-flex items-center gap-2 rounded-md bg-blue-600/10 px-3 py-1.5 text-xs font-medium text-blue-600",
             "hover:bg-blue-600/15",
-            isDisabled && "opacity-50 cursor-not-allowed"
+            (isDisabled || updateMutation.isPending) && "opacity-50 cursor-not-allowed"
           )}
         >
           <SaveIcon className="size-4" />
-          <span>Save note</span>
+          <span>{updateMutation.isPending ? "Saving..." : "Save note"}</span>
         </button>
+        {updateMutation.isError && (
+          <p className="mt-2 text-xs text-red-600">
+            {updateMutation.error instanceof Error
+              ? updateMutation.error.message
+              : "Failed to save note"}
+          </p>
+        )}
+        {updateMutation.isSuccess && (
+          <p className="mt-2 text-xs text-green-600">Note saved successfully</p>
+        )}
       </div>
     </section>
   );

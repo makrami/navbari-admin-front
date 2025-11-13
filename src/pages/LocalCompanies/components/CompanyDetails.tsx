@@ -1,4 +1,4 @@
-import type { Company } from "../types";
+import type { CompanyReadDto } from "../../../services/company/company.service";
 import ReactCountryFlag from "react-country-flag";
 import {
   Phone as PhoneIcon,
@@ -8,24 +8,32 @@ import {
   Calendar as CalendarIcon,
   Plus as PlusIcon,
   Pencil as PencilIcon,
+  Globe as GlobeIcon,
+  Mail as MailIcon,
+  MapPin as MapPinIcon,
 } from "lucide-react";
-import { STATUS_TO_COLOR } from "../types";
+import { STATUS_TO_COLOR, apiStatusToUiStatus } from "../types";
+import { getCountryCode, getLogoUrl } from "../utils";
 
 type Props = {
-  company: Company;
+  company: CompanyReadDto;
 };
 
 export function CompanyDetails({ company }: Props) {
-  const colors = STATUS_TO_COLOR[company.status];
+  const uiStatus = apiStatusToUiStatus(company.status);
+  const colors = STATUS_TO_COLOR[uiStatus];
 
   const statusDotColor =
-    company.status === "active"
+    uiStatus === "active"
       ? "bg-green-500"
-      : company.status === "pending"
+      : uiStatus === "pending"
       ? "bg-amber-500"
-      : company.status === "rejected"
+      : uiStatus === "rejected"
       ? "bg-rose-500"
       : "bg-slate-500";
+
+  const countryCode = getCountryCode(company.country);
+  const city = company.address?.split(",")[0]?.trim() || company.country;
 
   return (
     <section className="bg-white rounded-2xl p-4 flex flex-col gap-4">
@@ -34,8 +42,8 @@ export function CompanyDetails({ company }: Props) {
         {/* Left: Logo + Info */}
         <div className="flex items-center gap-4 min-w-0">
           <div className="h-24 w-24 rounded-lg bg-slate-50 overflow-hidden grid place-items-center">
-            {company.logoUrl ? (
-              <img src={company.logoUrl} alt="logo" className="max-h-14" />
+            {getLogoUrl(company.logoUrl) ? (
+              <img src={getLogoUrl(company.logoUrl)} alt="logo" className="max-h-14" />
             ) : (
               <div className="h-10 w-10 rounded bg-slate-200" />
             )}
@@ -52,23 +60,23 @@ export function CompanyDetails({ company }: Props) {
             <div className="mt-2 flex items-center gap-2 text-xs text-slate-900">
               <ReactCountryFlag
                 svg
-                countryCode={company.countryCode}
+                countryCode={countryCode}
                 className=" text-2xl"
               />
               <span className="flex items-center gap-1 font-bold">
                 {company.country} <span>/</span>
-                <span className="font-normal">{company.city}</span>
+                <span className="font-normal">{city}</span>
               </span>
             </div>
 
             <div className="mt-2 flex items-center gap-6 text-xs text-slate-900">
               <div className="flex items-center gap-2">
                 <UserIcon className="size-3.5 text-slate-400" />
-                <span>{company.managerName}</span>
+                <span>{company.primaryContactFullName}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CalendarIcon className="size-3.5 text-slate-400" />
-                <span>Register: 2023-10-26</span>
+                <span>Register: {new Date(company.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
@@ -81,66 +89,78 @@ export function CompanyDetails({ company }: Props) {
           >
             <span className={`h-1.5 w-1.5 rounded-full ${statusDotColor}`} />
             <span className={`text-xs ${colors.pillText}`}>
-              {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
+              {uiStatus.charAt(0).toUpperCase() + uiStatus.slice(1)}
             </span>
           </div>
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
             <UsersIcon className="size-4 text-blue-600" />
             <span className="text-xs font-bold text-blue-600">
-              {company.numDrivers}
+              {company.totalDrivers ?? 0}
             </span>
             <span className="text-xs text-blue-600">Drivers</span>
           </div>
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
             <TruckIcon className="size-4 text-blue-600" />
             <span className="text-xs font-bold text-blue-600">
-              {company.numActiveVehicles}
+              {company.totalSegments ?? 0}
             </span>
-            <span className="text-xs text-blue-600">Shipments</span>
+            <span className="text-xs text-blue-600">Segments</span>
           </div>
         </div>
       </div>
 
       <div className="border-t border-slate-100" />
 
-      {/* Bottom contacts */}
-      <div className="flex items-center gap-4 text-xs text-slate-900">
-        <PhoneIcon className="size-6 text-slate-400" />
-
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col gap-1 min-w-[7.5rem]">
-            <p className="text-slate-400 font-semibold">Manager</p>
-            <p>{company.phone}</p>
-          </div>
-
-          <div className="h-10 border-l border-slate-200" />
-
-          <div className="flex flex-col gap-1 min-w-[7.5rem]">
-            <p className="text-slate-400 font-semibold">Coordinator</p>
-            <p>{company.phone}</p>
-          </div>
-
-          <div className="h-10 border-l border-slate-200" />
-
-          <div className="flex flex-col gap-1 min-w-[7.5rem]">
-            <p className="text-slate-400 font-semibold">Sales Manager</p>
+      {/* Contact Information */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-4 text-xs text-slate-900">
+          <PhoneIcon className="size-5 text-slate-400" />
+          <div className="flex flex-col gap-1">
+            <p className="text-slate-400 font-semibold">Phone</p>
             <p>{company.phone}</p>
           </div>
         </div>
+        
+        {company.email && (
+          <div className="flex items-center gap-4 text-xs text-slate-900">
+            <MailIcon className="size-5 text-slate-400" />
+            <div className="flex flex-col gap-1">
+              <p className="text-slate-400 font-semibold">Email</p>
+              <p>{company.email}</p>
+            </div>
+          </div>
+        )}
 
-        <div className="ml-auto flex items-center gap-3">
-          <button
-            type="button"
-            className="bg-white border border-slate-200 rounded-lg p-2"
-          >
-            <PlusIcon className="size-5 text-slate-400" />
-          </button>
-          <button
-            type="button"
-            className="bg-white border border-slate-200 rounded-lg p-2"
-          >
-            <PencilIcon className="size-5 text-slate-400" />
-          </button>
+        {company.website && (
+          <div className="flex items-center gap-4 text-xs text-slate-900">
+            <GlobeIcon className="size-5 text-slate-400" />
+            <div className="flex flex-col gap-1">
+              <p className="text-slate-400 font-semibold">Website</p>
+              <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                {company.website}
+              </a>
+            </div>
+          </div>
+        )}
+
+        {company.address && (
+          <div className="flex items-center gap-4 text-xs text-slate-900">
+            <MapPinIcon className="size-5 text-slate-400" />
+            <div className="flex flex-col gap-1">
+              <p className="text-slate-400 font-semibold">Address</p>
+              <p>{company.address}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-4 text-xs text-slate-900">
+          <UserIcon className="size-5 text-slate-400" />
+          <div className="flex flex-col gap-1">
+            <p className="text-slate-400 font-semibold">Primary Contact</p>
+            <p>{company.primaryContactFullName}</p>
+            <p className="text-slate-500">{company.primaryContactEmail}</p>
+            <p className="text-slate-500">{company.primaryContactPhoneNumber}</p>
+          </div>
         </div>
       </div>
     </section>

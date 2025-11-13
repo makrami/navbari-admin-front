@@ -1,21 +1,63 @@
+// Re-export API types and enums
+export {
+  COMPANY_STATUS,
+  VEHICLE_TYPE,
+  LANGUAGE,
+  type CompanyReadDto,
+  type UpdateCompanyDto,
+  type CompanyFilters,
+} from "../../services/company/company.service";
+
+export {
+  COMPANY_DOCUMENT_TYPE,
+  COMPANY_DOCUMENT_STATUS,
+  type CompanyDocumentReadDto,
+} from "../../services/company/document.service";
+
+// UI Status type (mapped from API status)
 export type CompanyStatus = "pending" | "active" | "rejected" | "inactive";
 
-export type Company = {
-  id: string;
-  name: string;
-  logoUrl?: string; // optional, will fallback to initials badge
-  status: CompanyStatus;
-  country: string; // country name
-  city: string;
-  countryCode: string; // ISO 3166-1 alpha-2 (e.g., "CN")
-  managerName: string;
-  phone: string;
-  numDrivers: number;
-  numActiveVehicles: number;
-  lastActivity: string; // humanized e.g., "2d ago"
-};
+// Status mapping utilities
+/**
+ * Map API status to UI status
+ * approved → active, suspended → inactive
+ */
+export function apiStatusToUiStatus(apiStatus: string): CompanyStatus {
+  switch (apiStatus) {
+    case "approved":
+      return "active";
+    case "suspended":
+      return "inactive";
+    case "pending":
+      return "pending";
+    case "rejected":
+      return "rejected";
+    default:
+      return "pending";
+  }
+}
 
-export const STATUS_TO_COLOR: Record<CompanyStatus, { bar: string; pill: string; pillText: string; }> = {
+/**
+ * Map UI status to API status
+ * active → approved, inactive → suspended
+ */
+export function uiStatusToApiStatus(uiStatus: CompanyStatus): string {
+  switch (uiStatus) {
+    case "active":
+      return "approved";
+    case "inactive":
+      return "suspended";
+    case "pending":
+      return "pending";
+    case "rejected":
+      return "rejected";
+    default:
+      return "pending";
+  }
+}
+
+// Status color mapping for UI
+export const STATUS_TO_COLOR: Record<CompanyStatus, { bar: string; pill: string; pillText: string }> = {
   pending: {
     bar: "bg-amber-300",
     pill: "bg-amber-100",
@@ -38,4 +80,5 @@ export const STATUS_TO_COLOR: Record<CompanyStatus, { bar: string; pill: string;
   },
 };
 
-
+// Type alias for backward compatibility
+export type Company = CompanyReadDto;
