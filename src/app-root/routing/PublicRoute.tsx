@@ -6,9 +6,9 @@ interface PublicRouteProps {
 }
 
 export function PublicRoute({ children }: PublicRouteProps) {
-  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  if (token) {
+  if (isAuthenticated) {
     // If already logged in, redirect to dashboard
     return <Navigate to="/dashboard" replace />;
   }

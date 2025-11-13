@@ -1,0 +1,324 @@
+{
+  "common": {
+    "welcome": "خوش آمدید",
+    "loading": "در حال بارگذاری...",
+    "language": "زبان",
+    "error": {
+      "unknown": "خطای ناشناخته رخ داد"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "خوش آمدید",
+      "subtitle": "لطفاً اطلاعات ورود خود را وارد کنید.",
+      "usernameLabel": "نام کاربری",
+      "usernamePlaceholder": "jane.doe",
+      "emailPlaceholder": "ایمیل یا شماره تلفن",
+      "passwordLabel": "رمز عبور",
+      "passwordPlaceholder": "رمز عبور",
+      "submit": {
+        "label": "ورود",
+        "loading": "در حال ورود..."
+      },
+      "rememberMe": "مرا به خاطر بسپار",
+      "showPassword": "نمایش رمز عبور",
+      "hidePassword": "پنهان کردن رمز عبور",
+      "noAccount": "حساب کاربری ندارید؟",
+      "signUpLink": "ثبت نام",
+      "errors": {
+        "invalidCredentials": "ایمیل یا رمز عبور اشتباه است",
+        "networkError": "خطا در ارتباط با سرور",
+        "required": "لطفاً تمام فیلدها را پر کنید",
+        "loginFailed": "ورود ناموفق بود. لطفاً دوباره تلاش کنید"
+      }
+    },
+    "signUp": {
+      "title": "ایجاد حساب کاربری",
+      "subtitle": "برای شروع ثبت نام کنید (حالت آزمایشی).",
+      "usernameLabel": "نام کاربری",
+      "usernamePlaceholder": "jane.doe",
+      "passwordLabel": "رمز عبور",
+      "passwordPlaceholder": "••••••••",
+      "confirmLabel": "تأیید رمز عبور",
+      "confirmPlaceholder": "••••••••",
+      "submit": {
+        "label": "ایجاد حساب کاربری",
+        "loading": "در حال ایجاد حساب کاربری..."
+      },
+      "haveAccount": "قبلاً حساب کاربری دارید؟",
+      "loginLink": "ورود",
+      "errors": {
+        "mismatch": "رمزهای عبور مطابقت ندارند"
+      }
+    }
+  },
+  "dashboard": {
+    "header": {
+      "title": "داشبورد"
+    },
+    "kpiCards": {
+      "totalShipments": {
+        "title": "کل محموله‌ها",
+        "metaTop": "76 فعال، 538 تحویل شده",
+        "metaBottom": "614 کل"
+      },
+      "segmentsAwaitingDriver": {
+        "title": "بخش‌های در انتظار راننده",
+        "metaTop": "6 به زودی می‌رسند، 9 بدون اختصاص",
+        "metaBottom": "6 کشور تحت تأثیر",
+        "modal": {
+          "showAll": "نمایش همه"
+        }
+      },
+      "newAwaitingRegistrations": {
+        "title": "ثبت‌نام‌های جدید در انتظار",
+        "metaTop": "6 راننده جدید، 9 شرکت جدید",
+        "metaBottom": "آخرین درخواست: 2 ساعت پیش",
+        "modal": {
+          "showAll": "نمایش همه"
+        }
+      },
+      "unreadMessages": {
+        "title": "پیام‌های خوانده نشده",
+        "metaTop": "6 خوانده نشده، 9 در انتظار پاسخ",
+        "metaBottom": "آخرین پیام: 25 دقیقه پیش",
+        "modal": {
+          "showAll": "نمایش همه",
+          "messageSnippet": "من سعی می‌کنم روشن کنم..."
+        }
+      }
+    },
+    "filters": {
+      "allFilters": "همه فیلترها",
+      "status": {
+        "pending": "در انتظار",
+        "normal": "عادی",
+        "alert": "هشدار"
+      }
+    },
+    "guide": {
+      "title": "راهنما",
+      "shipments": "محموله‌ها",
+      "driver": "راننده",
+      "pending": "در انتظار",
+      "alert": "هشدار"
+    },
+    "search": {
+      "placeholder": "جستجو بر اساس محموله، رانندگان..."
+    }
+  },
+  "segments": {
+    "cardHeader": {
+      "destinationFallback": "(مقصد)"
+    },
+    "infoBanner": {
+      "from": "از",
+      "to": "به",
+      "notSet": "تنظیم نشده"
+    },
+    "infoGrid": {
+      "startLabel": "شروع",
+      "finishLabel": "پایان تخمینی",
+      "vehicleLabel": "وسیله نقلیه راننده",
+      "localCompanyLabel": "شرکت محلی",
+      "notSet": "تنظیم نشده",
+      "notAssigned": "اختصاص داده نشده"
+    },
+    "page": {
+      "title": "بخش‌ها",
+      "loading": "در حال بارگذاری بخش‌ها...",
+      "closeLabel": "بستن",
+      "empty": "بخشی یافت نشد"
+    }
+  },
+  "misc": {
+    "notFound": {
+      "title": "یافت نشد",
+      "description": "صفحه‌ای که به دنبال آن هستید وجود ندارد.",
+      "link": "بازگشت به خانه"
+    }
+  },
+  "overview": {
+    "header": {
+      "title": "نمای کلی",
+      "subtitle": "خلاصه سریع معیارهای کلیدی."
+    }
+  },
+  "mapDemo": {
+    "title": "نمایش نقشه بار",
+    "segmentLabel": "{{vehicleId}} / {{driverId}}",
+    "selectedSegment": "بخش انتخاب شده #{{index}}"
+  },
+  "drivers": {
+    "page": {
+      "title": "رانندگان",
+      "stats": {
+        "shipments": "محموله",
+        "vehicles": "وسیله نقلیه"
+      },
+      "closeDetails": "بستن پنل جزئیات",
+      "actions": {
+        "activate": "فعال‌سازی",
+        "deactivate": "غیرفعال‌سازی"
+      }
+    }
+  },
+  "localCompanies": {
+    "page": {
+      "title": "شرکت‌های محلی",
+      "stats": {
+        "drivers": "راننده",
+        "active": "فعال"
+      },
+      "closeDetails": "بستن پنل جزئیات",
+      "actions": {
+        "activate": "فعال‌سازی",
+        "deactivate": "غیرفعال‌سازی"
+      }
+    }
+  },
+  "finance": {
+    "page": {
+      "title": "مالی",
+      "addPayment": "افزودن پرداخت"
+    }
+  },
+  "chatAlert": {
+    "page": {
+      "title": "چت و هشدارها"
+    },
+    "search": {
+      "placeholder": "جستجوی چت و هشدارها..."
+    },
+    "details": {
+      "title": "جزئیات",
+      "close": "بستن پنل جزئیات"
+    }
+  },
+  "vehicles": {
+    "header": {
+      "title": "وسایل نقلیه",
+      "subtitle": "مدیریت تحویل‌ها و وسایل نقلیه."
+    }
+  },
+  "layout": {
+    "app": {
+      "openMenu": "باز کردن منو",
+      "menuLabel": "منو"
+    }
+  },
+  "sidebar": {
+    "brandAlt": "برند",
+    "profileAlt": "پروفایل",
+    "profileName": "Xin Zhao",
+    "notifications": "اعلان‌ها",
+    "logout": "خروج",
+    "links": {
+      "dashboard": "داشبورد",
+      "shipment": "محموله",
+      "localCompanies": "شرکت‌های محلی",
+      "drivers": "رانندگان",
+      "finance": "مالی",
+      "chatAlert": "چت و هشدار",
+      "settings": "تنظیمات"
+    },
+    "mobile": {
+      "navLabel": "منوی ناوبری",
+      "brand": "Navbari",
+      "closeMenu": "بستن منو"
+    }
+  },
+  "settings": {
+    "page": {
+      "title": "تنظیمات"
+    },
+    "sections": {
+      "general": {
+        "title": "تنظیمات عمومی",
+        "description": "پیکربندی تنظیمات اصلی شرکت و برنامه.",
+        "companyName": "نام شرکت",
+        "companyNamePlaceholder": "نام محموله...",
+        "companyLogo": "لوگوی شرکت",
+        "uploadText": "برای آپلود کلیک کنید یا بکشید و رها کنید",
+        "uploadHint": "PNG یا JPG (حداکثر 2 مگابایت)",
+        "uploadButton": "آپلود",
+        "timeZone": "منطقه زمانی",
+        "mapStyle": "سبک نقشه",
+        "measurementUnits": "واحدهای اندازه‌گیری",
+        "distanceUnit": "کیلومتر (KM)",
+        "weightUnit": "کیلوگرم (KG)",
+        "changesCount": "{{count}} تغییر وجود دارد",
+        "revert": "بازگشت",
+        "saveChanges": "ذخیره تغییرات"
+      },
+      "notifications": {
+        "title": "اعلان و هشدارها",
+        "description": "مدیریت هشدارهای خودکار و تنظیمات اعلان کاربر."
+      },
+      "localization": {
+        "title": "بومی‌سازی",
+        "description": "تنظیم زبان، ارز و قالب‌بندی منطقه‌ای برای پلتفرم.",
+        "language": "زبان",
+        "baseCurrency": "ارز پایه",
+        "perCountryCurrencyOverride": {
+          "title": "جایگزینی ارز به ازای هر کشور",
+          "description": "تنظیم ارزهای خاص برای کشورهای مقصد مختلف",
+          "addOverride": "افزودن جایگزینی"
+        },
+        "dateFormat": "فرمت تاریخ",
+        "timeFormat": "فرمت زمان",
+        "numericSeparator": "جداکننده عددی",
+        "decimalSeparator": "جداکننده اعشار"
+      },
+      "systemParameters": {
+        "title": "پارامترهای سیستم",
+        "description": "تنظیم دقیق منطق عملیاتی",
+        "slaConfiguration": {
+          "title": "پیکربندی SLA",
+          "description": "تعریف توافق‌نامه‌های سطح خدمات به ازای هر محموله",
+          "loadingTime": "زمان بارگیری",
+          "transitTime": "زمان حمل و نقل",
+          "unloadingTime": "زمان تخلیه"
+        },
+        "etaCalculationMethod": {
+          "title": "روش محاسبه ETA",
+          "description": "انتخاب نحوه تعریف زمان تخمینی رسیدن",
+          "realtimeGps": "بر اساس GPS زمان واقعی",
+          "historicalData": "بر اساس داده‌های تاریخی"
+        },
+        "gpsTracking": {
+          "title": "GPS و ردیابی",
+          "description": "پیکربندی نحوه ردیابی داده‌های مکان و زمان فعال شدن هشدارها",
+          "gpsAlertDistance": "فاصله هشدار GPS",
+          "pingInterval": "فاصله پینگ",
+          "maxConcurrentShipments": "حداکثر محموله همزمان به ازای هر شرکت محلی"
+        }
+      },
+      "rolesPermissions": {
+        "title": "نقش‌ها و مجوزها",
+        "description": "مدیریت دسترسی کاربر و مجوزها در سراسر پلتفرم.",
+        "addNewRole": "افزودن نقش جدید",
+        "search": "جستجوی نقش‌ها...",
+        "user": "کاربر",
+        "selectRole": "انتخاب نقش برای مشاهده جزئیات",
+        "roleDetails": "جزئیات نقش",
+        "roleName": "نام نقش",
+        "roleDescription": "توضیحات",
+        "status": "وضعیت",
+        "dataVisibilityScope": "محدوده دید داده",
+        "geographicalAccess": "دسترسی جغرافیایی",
+        "permissions": "مجوزها",
+        "modules": "ماژول‌ها",
+        "view": "مشاهده",
+        "createEdit": "ایجاد/ویرایش",
+        "delete": "حذف",
+        "approve": "تأیید",
+        "users": "کاربران",
+        "addUser": "افزودن کاربر",
+        "nameEmail": "نام و ایمیل",
+        "actions": "عملیات"
+      }
+    }
+  }
+}
+

@@ -4,8 +4,8 @@ import i18n from "../../lib/i18n";
 
 const languages = [
   { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "fa", name: "فارسی", flag: "🇮🇷" },
   // Add more languages here when available
-  // { code: "fa", name: "فارسی", flag: "🇮🇷" },
   // { code: "ru", name: "Русский", flag: "🇷🇺" },
   // { code: "ar", name: "العربية", flag: "🇸🇦" },
 ];

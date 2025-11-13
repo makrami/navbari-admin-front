@@ -2,32 +2,105 @@ import { z } from "zod";
 import { http } from "../lib/http";
 import { useAuthStore } from "../store/auth.store";
 
-const loginResponseSchema = z.object({ token: z.string() });
+// Login request schema
+const loginRequestSchema = z.object({
+  emailOrPhone: z.string().min(1, "Email or phone is required"),
+  password: z.string().min(1, "Password is required"),
+  appScope: z.literal("head_office"),
+});
 
-export async function login(username: string, password: string) {
-  const res = await http.post("/auth/login", { username, password });
-  const parsed = loginResponseSchema.parse(res.data);
-  useAuthStore.getState().setToken(parsed.token);
-  return parsed;
+// Login response schema according to API documentation
+const loginResponseSchema = z.object({
+  isEmailVerified: z.boolean(),
+  isPhoneNumberVerified: z.boolean(),
+});
+
+export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+/**
+ * Login function that authenticates user with email/phone and password.
+ * Sets HTTP-only cookies automatically via the backend.
+ * 
+ * @param emailOrPhone - User's email address or phone number
+ * @param password - User's password
+ * @returns Login response with verification status
+ * @throws Error with user-friendly message on failure
+ */
+export async function login(
+  emailOrPhone: string,
+  password: string
+): Promise<LoginResponse> {
+  try {
+    // Validate input
+    const requestData = loginRequestSchema.parse({
+      emailOrPhone,
+      password,
+      appScope: "head_office",
+    });
+
+    // Make login request
+    // Cookies are automatically set by the server and included in subsequent requests
+    const response = await http.post("/auth/login", requestData);
+
+    // Parse and validate response
+    const loginData = loginResponseSchema.parse(response.data);
+
+    // Update auth store with authentication status
+    useAuthStore.getState().setAuthenticated(true, {
+      isEmailVerified: loginData.isEmailVerified,
+      isPhoneNumberVerified: loginData.isPhoneNumberVerified,
+    });
+
+    return loginData;
+  } catch (error: unknown) {
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0] as { message: string } | undefined;
+      throw new Error(firstError?.message || "Invalid input");
+    }
+
+    // Handle API errors (already normalized by http interceptor)
+    if (error instanceof Error && error.message) {
+      throw new Error(error.message);
+    }
+
+    // Fallback error
+    throw new Error("Login failed. Please try again.");
+  }
 }
 
-export function logout() {
-  useAuthStore.getState().logout();
+/**
+ * Logout function that invalidates the session and clears cookies.
+ * Server automatically clears HTTP-only cookies.
+ */
+export async function logout(): Promise<void> {
+  try {
+    // Call logout endpoint - server will clear cookies
+    await http.post("/auth/logout");
+  } catch (error: unknown) {
+    // Even if logout fails (e.g., network error), clear client-side state
+    // and redirect to login (as per API documentation)
+    console.error("Logout error:", error);
+  } finally {
+    // Always clear client-side auth state
+    useAuthStore.getState().logout();
+  }
 }
 
-// Demo-only auth (no API): accept any non-empty credentials and issue a fake token
-export async function loginDemo(username: string, password: string) {
-  if (!username || !password) {
+// Demo-only auth (kept for backward compatibility if needed)
+export async function loginDemo(emailOrPhone: string, password: string) {
+  if (!emailOrPhone || !password) {
     throw new Error("Missing credentials");
   }
-  const fake = { token: `demo-${btoa(username)}-${Date.now()}` };
-  useAuthStore.getState().setToken(fake.token);
-  return fake;
-}
-
-export async function registerDemo(username: string, password: string) {
-  // In real implementation we would call API; demo just logs in
-  return loginDemo(username, password);
+  // For demo, just set authenticated state without API call
+  useAuthStore.getState().setAuthenticated(true, {
+    isEmailVerified: true,
+    isPhoneNumberVerified: false,
+  });
+  return {
+    isEmailVerified: true,
+    isPhoneNumberVerified: false,
+  };
 }
 
 

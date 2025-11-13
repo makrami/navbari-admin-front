@@ -13,7 +13,7 @@
       "subtitle": "Please enter your credentials to log in.",
       "usernameLabel": "Username",
       "usernamePlaceholder": "jane.doe",
-      "emailPlaceholder": "Email",
+      "emailPlaceholder": "Email or Phone",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Password",
       "submit": {
@@ -24,7 +24,13 @@
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "noAccount": "No account?",
-      "signUpLink": "Sign up"
+      "signUpLink": "Sign up",
+      "errors": {
+        "invalidCredentials": "Wrong credentials!",
+        "networkError": "Network error. Please try again.",
+        "required": "Please fill in all fields",
+        "loginFailed": "Login failed. Please try again."
+      }
     },
     "signUp": {
       "title": "Create account",

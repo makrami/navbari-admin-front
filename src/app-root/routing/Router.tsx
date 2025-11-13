@@ -7,7 +7,6 @@ import { AppLayout } from "../../layouts/AppLayout";
 import { DashboardPage } from "../../pages/dashboard/DashboardPage";
 import { NotFoundPage } from "../../pages/misc/NotFoundPage";
 import { LoginPage } from "../../pages/auth/LoginPage";
-import { SignUpPage } from "../../pages/auth/SignUpPage";
 import { OverviewPage } from "../../pages/overview/OverviewPage";
 import { ShipmentPage } from "../../pages/shipment/ShipmentPage";
 import { SegmentsPage } from "../../pages/segments/SegmentsPage";
@@ -40,14 +39,6 @@ const router = createBrowserRouter([
         element: (
           <PublicRoute>
             <LoginPage />
-          </PublicRoute>
-        ),
-      },
-      {
-        path: "sign-up",
-        element: (
-          <PublicRoute>
-            <SignUpPage />
           </PublicRoute>
         ),
       },

@@ -35,8 +35,8 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     onClose();
     navigate("/login");
   };

@@ -25,8 +25,15 @@ i18n
 i18n.on("languageChanged", (lng) => {
   localStorage.setItem("i18nextLng", lng);
   document.documentElement.lang = lng;
+  // Set text direction based on language
+  const rtlLanguages = ["fa", "ar", "he", "ur"];
+  document.documentElement.dir = rtlLanguages.includes(lng) ? "rtl" : "ltr";
 });
 
-document.documentElement.lang = localStorage.getItem("i18nextLng") || "en";
+// Initialize direction on load
+const currentLang = localStorage.getItem("i18nextLng") || "en";
+document.documentElement.lang = currentLang;
+const rtlLanguages = ["fa", "ar", "he", "ur"];
+document.documentElement.dir = rtlLanguages.includes(currentLang) ? "rtl" : "ltr";
 
 export default i18n;
