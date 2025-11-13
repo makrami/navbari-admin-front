@@ -1,18 +1,15 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuthStore } from "../../store/auth.store";
-
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+/**
+ * ProtectedRoute component that allows routes to render.
+ * Authentication is handled optimistically - we assume the user is authenticated
+ * until proven otherwise by a 401 error from the API.
+ * The HTTP interceptor will handle 401 errors and redirect to login automatically.
+ */
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const location = useLocation();
-
-  if (!isAuthenticated) {
-    // Redirect to login while saving the attempted location
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
+  // Allow the route to render - HTTP interceptor will handle 401 errors
+  // and redirect to login when authentication is actually required
   return <>{children}</>;
 }

@@ -52,6 +52,8 @@ http.interceptors.response.use(
         // Redirect to login page
         // Only redirect if not already on login page to avoid infinite loops
         if (window.location.pathname !== "/login") {
+          // Use window.location.href for a clean redirect that ensures
+          // all state is cleared and the login page loads fresh
           window.location.href = "/login";
         }
       }
