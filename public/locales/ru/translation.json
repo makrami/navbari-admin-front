@@ -1,0 +1,142 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать",
+    "loading": "Загрузка...",
+    "language": "Язык",
+    "error": {
+      "unknown": "Произошла неизвестная ошибка"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Добро пожаловать",
+      "subtitle": "Пожалуйста, введите свои учетные данные для входа.",
+      "usernameLabel": "Имя пользователя",
+      "usernamePlaceholder": "jane.doe",
+      "emailPlaceholder": "Email или Телефон",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "Пароль",
+      "submit": {
+        "label": "Войти",
+        "loading": "Вход в систему..."
+      },
+      "rememberMe": "Запомнить меня",
+      "showPassword": "Показать пароль",
+      "hidePassword": "Скрыть пароль",
+      "noAccount": "Нет аккаунта?",
+      "signUpLink": "Регистрация",
+      "errors": {
+        "invalidCredentials": "Неверные учетные данные!",
+        "networkError": "Ошибка сети. Попробуйте еще раз.",
+        "required": "Пожалуйста, заполните все поля",
+        "loginFailed": "Вход не удался. Попробуйте еще раз."
+      }
+    },
+    "signUp": {
+      "title": "Создать аккаунт",
+      "subtitle": "Зарегистрируйтесь, чтобы начать (демо режим).",
+      "usernameLabel": "Имя пользователя",
+      "usernamePlaceholder": "jane.doe",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "••••••••",
+      "confirmLabel": "Подтвердить пароль",
+      "confirmPlaceholder": "••••••••",
+      "submit": {
+        "label": "Создать аккаунт",
+        "loading": "Создание аккаунта..."
+      },
+      "haveAccount": "Уже есть аккаунт?",
+      "loginLink": "Войти",
+      "errors": {
+        "mismatch": "Пароли не совпадают"
+      }
+    }
+  },
+  "dashboard": {
+    "header": {
+      "title": "Панель управления"
+    },
+    "kpiCards": {
+      "totalShipments": {
+        "title": "Всего отправлений",
+        "metaTop": "76 активных, 538 доставлено",
+        "metaBottom": "614 всего"
+      },
+      "totalAlerts": {
+        "title": "Всего оповещений",
+        "metaTop": "76 новых оповещений",
+        "metaBottom": "614 всего"
+      },
+      "segmentsAwaitingDriver": {
+        "title": "Сегменты ожидают водителя",
+        "metaTop": "6 скоро прибудут, 9 не назначены",
+        "metaBottom": "6 затронутых стран",
+        "modal": {
+          "showAll": "Показать все"
+        }
+      },
+      "newAwaitingRegistrations": {
+        "title": "Новые регистрации в ожидании",
+        "metaTop": "6 новых водителей, 9 новых компаний",
+        "metaBottom": "Последний запрос: 2 часа назад",
+        "modal": {
+          "showAll": "Показать все"
+        }
+      },
+      "unreadMessages": {
+        "title": "Непрочитанные сообщения",
+        "metaTop": "6 непрочитанных, 9 ожидают ответа",
+        "metaBottom": "Последнее сообщение: 25 минут назад",
+        "modal": {
+          "showAll": "Показать все",
+          "messageSnippet": "Я пытаюсь объяснить..."
+        }
+      }
+    },
+    "filters": {
+      "allFilters": "Все фильтры",
+      "status": {
+        "pending": "Ожидание",
+        "normal": "Нормальный",
+        "alert": "Предупреждение"
+      }
+    },
+    "guide": {
+      "title": "Руководство",
+      "shipments": "Отправления",
+      "driver": "Водитель",
+      "pending": "Ожидание",
+      "alert": "Предупреждение"
+    },
+    "search": {
+      "placeholder": "Поиск по отправлениям, водителям..."
+    }
+  },
+  "sidebar": {
+    "brandAlt": "Бренд",
+    "profileAlt": "Профиль",
+    "profileName": "Xin Zhao",
+    "notifications": "Уведомления",
+    "logout": "Выход",
+    "links": {
+      "dashboard": "Панель управления",
+      "shipment": "Отправление",
+      "localCompanies": "Местные компании",
+      "drivers": "Водители",
+      "finance": "Финансы",
+      "chatAlert": "Чат и оповещения",
+      "settings": "Настройки"
+    },
+    "mobile": {
+      "navLabel": "Меню навигации",
+      "brand": "Navbari",
+      "closeMenu": "Закрыть меню"
+    }
+  },
+  "layout": {
+    "app": {
+      "openMenu": "Открыть меню",
+      "menuLabel": "Меню"
+    }
+  }
+}

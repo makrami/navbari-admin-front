@@ -17,6 +17,7 @@ import { UnreadMessagesModal } from "./components/UnreadMessagesModal";
 import { AwaitingRegistrationsModal } from "./components/AwaitingRegistrationsModal";
 import { SegmentsAwaitingDriverModal } from "./components/SegmentsAwaitingDriverModal";
 import { useMapSegments } from "./hooks/useMapSegments";
+import { ChartBarBig } from "lucide-react";
 
 type SegmentStatus = DemoRouteStatus;
 
@@ -68,6 +69,18 @@ export function DashboardPage() {
     console.log("cardId", cardId);
   };
 
+  const handleShowAllSegments = () => {
+    // Enable all filters to show all segments on map
+    setStatusFilter({
+      pending: true,
+      normal: true,
+      alert: true,
+    });
+    // Open drawer with all segments (no specific segment selected)
+    setSelectedSegmentId(null);
+    setIsSegmentsOpen(true);
+  };
+
   // Check if modal should be open for either "unreadMessages" or "totalAlerts"
   const isModalOpen =
     openModal === "unreadMessages" || openModal === "totalAlerts";
@@ -104,8 +117,17 @@ export function DashboardPage() {
 
         <DashboardSearch />
 
+        {/* Show All Segments Button - Bottom Right */}
+        <button
+          onClick={handleShowAllSegments}
+          className="absolute bottom-10 right-10 z-40 flex items-center justify-center size-14 bg-white rounded-lg hover:scale-102 active:scale-95 transition-all duration-200 cursor-pointer"
+          title="Show all segments"
+        >
+          <ChartBarBig className="size-5 text-slate-700" />
+        </button>
+
         <SegmentsDrawer
-          open={isSegmentsOpen && selectedSegmentId !== null}
+          open={isSegmentsOpen}
           onClose={handleSegmentsClose}
           selectedSegmentId={selectedSegmentId}
           extraSegments={demoSegmentEntries}

@@ -1,0 +1,142 @@
+{
+  "common": {
+    "welcome": "مرحباً",
+    "loading": "جارٍ التحميل...",
+    "language": "اللغة",
+    "error": {
+      "unknown": "حدث خطأ غير معروف"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "مرحباً بك",
+      "subtitle": "يرجى إدخال بيانات تسجيل الدخول الخاصة بك.",
+      "usernameLabel": "اسم المستخدم",
+      "usernamePlaceholder": "jane.doe",
+      "emailPlaceholder": "البريد الإلكتروني أو رقم الهاتف",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "كلمة المرور",
+      "submit": {
+        "label": "دخول",
+        "loading": "جارٍ تسجيل الدخول..."
+      },
+      "rememberMe": "تذكرني",
+      "showPassword": "إظهار كلمة المرور",
+      "hidePassword": "إخفاء كلمة المرور",
+      "noAccount": "ليس لديك حساب؟",
+      "signUpLink": "التسجيل",
+      "errors": {
+        "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+        "networkError": "خطأ في الاتصال بالخادم",
+        "required": "يرجى ملء جميع الحقول",
+        "loginFailed": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى"
+      }
+    },
+    "signUp": {
+      "title": "إنشاء حساب",
+      "subtitle": "سجل للبدء (وضع تجريبي).",
+      "usernameLabel": "اسم المستخدم",
+      "usernamePlaceholder": "jane.doe",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "••••••••",
+      "confirmLabel": "تأكيد كلمة المرور",
+      "confirmPlaceholder": "••••••••",
+      "submit": {
+        "label": "إنشاء حساب",
+        "loading": "جارٍ إنشاء الحساب..."
+      },
+      "haveAccount": "لديك حساب بالفعل؟",
+      "loginLink": "دخول",
+      "errors": {
+        "mismatch": "كلمات المرور غير متطابقة"
+      }
+    }
+  },
+  "dashboard": {
+    "header": {
+      "title": "لوحة التحكم"
+    },
+    "kpiCards": {
+      "totalShipments": {
+        "title": "إجمالي الشحنات",
+        "metaTop": "76 نشط، 538 تم التسليم",
+        "metaBottom": "614 إجمالي"
+      },
+      "totalAlerts": {
+        "title": "إجمالي التنبيهات",
+        "metaTop": "76 تنبيه جديد",
+        "metaBottom": "614 إجمالي"
+      },
+      "segmentsAwaitingDriver": {
+        "title": "الأقسام في انتظار السائق",
+        "metaTop": "6 قادمة قريباً، 9 غير مخصصة",
+        "metaBottom": "6 دول متأثرة",
+        "modal": {
+          "showAll": "عرض الكل"
+        }
+      },
+      "newAwaitingRegistrations": {
+        "title": "التسجيلات الجديدة في الانتظار",
+        "metaTop": "6 سائقين جدد، 9 شركات جديدة",
+        "metaBottom": "آخر طلب: منذ ساعتين",
+        "modal": {
+          "showAll": "عرض الكل"
+        }
+      },
+      "unreadMessages": {
+        "title": "الرسائل غير المقروءة",
+        "metaTop": "6 غير مقروءة، 9 في انتظار الرد",
+        "metaBottom": "آخر رسالة: منذ 25 دقيقة",
+        "modal": {
+          "showAll": "عرض الكل",
+          "messageSnippet": "أحاول أن أوضح..."
+        }
+      }
+    },
+    "filters": {
+      "allFilters": "جميع المرشحات",
+      "status": {
+        "pending": "في الانتظار",
+        "normal": "عادي",
+        "alert": "تنبيه"
+      }
+    },
+    "guide": {
+      "title": "دليل",
+      "shipments": "الشحنات",
+      "driver": "السائق",
+      "pending": "في الانتظار",
+      "alert": "تنبيه"
+    },
+    "search": {
+      "placeholder": "البحث حسب الشحنات، السائقين..."
+    }
+  },
+  "sidebar": {
+    "brandAlt": "العلامة التجارية",
+    "profileAlt": "الملف الشخصي",
+    "profileName": "Xin Zhao",
+    "notifications": "الإشعارات",
+    "logout": "تسجيل الخروج",
+    "links": {
+      "dashboard": "لوحة التحكم",
+      "shipment": "الشحنة",
+      "localCompanies": "الشركات المحلية",
+      "drivers": "السائقون",
+      "finance": "المالية",
+      "chatAlert": "الدردشة والتنبيهات",
+      "settings": "الإعدادات"
+    },
+    "mobile": {
+      "navLabel": "قائمة التنقل",
+      "brand": "Navbari",
+      "closeMenu": "إغلاق القائمة"
+    }
+  },
+  "layout": {
+    "app": {
+      "openMenu": "فتح القائمة",
+      "menuLabel": "القائمة"
+    }
+  }
+}

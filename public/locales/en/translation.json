@@ -62,6 +62,11 @@
         "metaTop": "76 active, 538 delivered",
         "metaBottom": "614 total"
       },
+      "totalAlerts": {
+        "title": "Total Alerts",
+        "metaTop": "76 new alerts",
+        "metaBottom": "614 total"
+      },
       "segmentsAwaitingDriver": {
         "title": "Segments Awaiting Driver",
         "metaTop": "6 arriving soon, 9 unassigned",

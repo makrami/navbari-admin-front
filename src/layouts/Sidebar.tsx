@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useRTL } from "../shared/hooks/useRTL";
 
 // Figma-exported assets (from the currently selected node)
 import imgLogo from "../assets/images/truck.svg";
@@ -17,10 +18,12 @@ import {
 } from "lucide-react";
 import { ActiveIndicator } from "../shared/components";
 import { logout } from "../services/auth.service";
+import { LanguageSelector } from "../components/Ui/LanguageSelector";
 
 export function Sidebar() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const isRTL = useRTL();
 
   const handleLogout = async () => {
     await logout();
@@ -28,7 +31,13 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 hidden h-screen w-48 shrink-0 border-r border-slate-200 bg-white md:block">
+    <aside
+      className={`fixed top-0 hidden h-screen w-48 shrink-0 bg-white md:block ${
+        isRTL
+          ? "right-0 border-l border-slate-200"
+          : "left-0 border-r border-slate-200"
+      }`}
+    >
       <div className="flex h-full flex-col items-center gap-4 px-0 py-7">
         {/* Brand icon */}
         <div className="grid size-16 place-items-center rounded-2xl bg-[#1b54fe]">
@@ -236,29 +245,37 @@ export function Sidebar() {
           {/* Spacer to push bottom actions */}
           <div className="flex-1" />
 
-          {/* Avatar + name */}
-          <div className="flex h-12 w-full items-center gap-3 px-5">
-            <img
-              src={imgAvatar}
-              alt={t("sidebar.profileAlt")}
-              className="size-7 rounded-full object-cover"
-            />
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              {t("sidebar.profileName")}
-            </span>
-          </div>
+          {/* Profile Section */}
+          <div className="w-full space-y-2 border-t border-slate-200 pt-4">
+            {/* Profile Info */}
+            <div className="flex w-full items-center gap-3 px-5">
+              <img
+                src={imgAvatar}
+                alt={t("sidebar.profileAlt")}
+                className="size-8 rounded-full object-cover ring-2 ring-slate-200"
+              />
+              <div className="flex-1 min-w-0">
+                <span className="block text-xs font-semibold uppercase tracking-wide text-slate-700 truncate">
+                  {t("sidebar.profileName")}
+                </span>
+                <LanguageSelector />
+              </div>
+            </div>
 
-          {/* Logout */}
-          <button
-            className="flex h-12 w-full items-center gap-2 px-5 text-slate-400 hover:text-red-500"
-            onClick={handleLogout}
-            title={t("sidebar.logout")}
-          >
-            <LogOutIcon className="size-5 " />
-            <span className="text-xs font-medium uppercase tracking-wide ">
-              {t("sidebar.logout")}
-            </span>
-          </button>
+            {/* Language Selector */}
+
+            {/* Logout */}
+            <button
+              className="flex h-12 w-full items-center gap-2 px-5 text-slate-400 transition-colors hover:text-red-500"
+              onClick={handleLogout}
+              title={t("sidebar.logout")}
+            >
+              <LogOutIcon className="size-5" />
+              <span className="text-xs font-medium uppercase tracking-wide">
+                {t("sidebar.logout")}
+              </span>
+            </button>
+          </div>
         </nav>
       </div>
     </aside>

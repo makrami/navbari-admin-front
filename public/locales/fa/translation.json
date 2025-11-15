@@ -62,6 +62,11 @@
         "metaTop": "76 فعال، 538 تحویل شده",
         "metaBottom": "614 کل"
       },
+      "totalAlerts": {
+        "title": "کل هشدارها",
+        "metaTop": "76 هشدار جدید",
+        "metaBottom": "614 کل"
+      },
       "segmentsAwaitingDriver": {
         "title": "بخش‌های در انتظار راننده",
         "metaTop": "6 به زودی می‌رسند، 9 بدون اختصاص",

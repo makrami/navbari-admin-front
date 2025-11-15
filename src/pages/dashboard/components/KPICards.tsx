@@ -43,9 +43,9 @@ export function KPICards({ onCardClick }: KPICardsProps) {
     },
     {
       id: "totalAlerts",
-      title: "Total Alerts",
-      metaTop: "76 new alerts",
-      metaBottom: "614 total",
+      title: t("dashboard.kpiCards.totalAlerts.title"),
+      metaTop: t("dashboard.kpiCards.totalAlerts.metaTop"),
+      metaBottom: t("dashboard.kpiCards.totalAlerts.metaBottom"),
       iconBg: "bg-red-50",
       renderIcon: () => <BellDot className="size-4 text-red-600" />,
     },
@@ -66,7 +66,7 @@ export function KPICards({ onCardClick }: KPICardsProps) {
           key={card.id}
           type="button"
           onClick={() => onCardClick(card.id)}
-          className="text-left rounded-lg bg-white/90 backdrop-blur border border-slate-200  p-4 hover:shadow transition"
+          className="text-start rounded-lg bg-white/90 backdrop-blur border border-slate-200 p-4 hover:shadow transition min-h-[120px] w-full flex flex-col justify-between"
         >
           <div className="flex flex-col items-start gap-3">
             <div className="flex items-center gap-1">
@@ -78,16 +78,20 @@ export function KPICards({ onCardClick }: KPICardsProps) {
               >
                 {card.renderIcon()}
               </span>
-              <div className="text-sm font-semibold text-slate-900 truncate">
+              <div className="text-sm font-semibold text-slate-900 truncate max-w-full">
                 {card.title}
               </div>
             </div>
-            <div className="flex flex-col ">
-              <div className=" text-[11px] text-slate-500 font-medium">
-                {renderNumbersBold(card.metaTop, `${card.title}-top`)}
+            <div className="flex flex-col gap-1.5 flex-1">
+              <div className="text-[11px] text-slate-500 font-medium leading-tight overflow-hidden">
+                <div className="truncate">
+                  {renderNumbersBold(card.metaTop, `${card.title}-top`)}
+                </div>
               </div>
-              <div className="mt-1.5 text-sm text-slate-900">
-                {renderNumbersBold(card.metaBottom, `${card.title}-bottom`)}
+              <div className="text-sm text-slate-900 leading-tight overflow-hidden">
+                <div className="truncate">
+                  {renderNumbersBold(card.metaBottom, `${card.title}-bottom`)}
+                </div>
               </div>
             </div>
           </div>

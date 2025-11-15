@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 import { Sidebar } from "./Sidebar";
 import { MobileSidebar } from "./MobileSidebar";
 import { MenuIcon } from "lucide-react";
+import { useRTL } from "../shared/hooks/useRTL";
 
 export function AppLayout() {
   const location = useLocation();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { t } = useTranslation();
+  const isRTL = useRTL();
   const isAuthRoute =
     location.pathname === "/login" ||
     location.pathname === "/sign-up" ||
@@ -16,7 +18,7 @@ export function AppLayout() {
   return (
     <div
       className={`min-h-screen bg-slate-100 text-slate-900 ${
-        !isAuthRoute ? "md:pl-48" : ""
+        !isAuthRoute ? (isRTL ? "md:pr-48" : "md:pl-48") : ""
       }`}
     >
       {!isAuthRoute && <Sidebar />}

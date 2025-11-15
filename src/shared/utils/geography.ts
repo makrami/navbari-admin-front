@@ -1,42 +1,39 @@
 export const CITY_COORDINATES: Record<string, [number, number]> = {
+  // China cities
+  "Beijing, China": [116.4074, 39.9042],
+  "Shanghai, China": [121.4737, 31.2304],
+  "Guangzhou, China": [113.2644, 23.1291],
+  "Shenzhen, China": [114.0579, 22.5431],
+  "Xi'an, China": [108.9398, 34.3416],
+  "Urumqi, China": [87.6168, 43.8256],
+  "Hohhot, China": [111.7519, 40.8414],
   "Hejiang, China": [105.8333, 28.8167],
   "Ningxia, China": [106.2309, 38.4872],
-  "Inner Mongolia, Mongolia": [111.6708, 40.8182],
-  "Shenzhen, China": [114.0579, 22.5431],
-  "Guangzhou, China": [113.2644, 23.1291],
-  "Urumqi, China": [87.6168, 43.8256],
-  "Beijing, China": [116.4074, 39.9042],
-  "Hohhot, China": [111.7519, 40.8414],
-  "Ulaanbaatar, Mongolia": [106.9056, 47.8864],
+  // Russia cities
   "Moscow, Russia": [37.6173, 55.7558],
-  "Bratsk, Russia": [101.6167, 56.1167],
-  "Istanbul, Turkey": [28.9784, 41.0082],
-  "Sofia, Bulgaria": [23.3219, 42.6975],
-  "Prague, Czech Republic": [14.4378, 50.0755],
-  "Berlin, Germany": [13.405, 52.52],
-  "Milan, Italy": [9.19, 45.4642],
-  "Lyon, France": [4.8357, 45.764],
-  "Calais, France": [1.8587, 50.9513],
-  "London, UK": [-0.1278, 51.5074],
-  "New York, USA": [-74.006, 40.7128],
-  "Buffalo, USA": [-78.85, 42.8864],
-  "Toronto, Canada": [-79.3832, 43.6532],
+  "Saint Petersburg, Russia": [30.3159, 59.9343],
   "Novosibirsk, Russia": [82.9346, 55.0084],
+  "Yekaterinburg, Russia": [60.6122, 56.8431],
+  "Kazan, Russia": [49.1052, 55.8304],
+  "Bratsk, Russia": [101.6167, 56.1167],
+  // Iran - Tehran
+  "Tehran, Iran": [51.3890, 35.6892],
+  // Kazakhstan cities
+  "Almaty, Kazakhstan": [76.9126, 43.2220],
+  "Astana, Kazakhstan": [71.4306, 51.1694],
+  "Shymkent, Kazakhstan": [69.5901, 42.3416],
+  // Turkey cities
+  "Istanbul, Turkey": [28.9784, 41.0082],
+  "Ankara, Turkey": [32.8597, 39.9334],
+  "Izmir, Turkey": [27.1428, 38.4237],
 };
 
 const COUNTRY_NAME_TO_ISO2: Record<string, string> = {
   China: "CN",
-  Mongolia: "MN",
   Russia: "RU",
+  Iran: "IR",
+  Kazakhstan: "KZ",
   Turkey: "TR",
-  Bulgaria: "BG",
-  "Czech Republic": "CZ",
-  Germany: "DE",
-  Italy: "IT",
-  France: "FR",
-  UK: "GB",
-  USA: "US",
-  Canada: "CA",
 };
 
 function normalizeCityKey(value: string | undefined | null): string | null {

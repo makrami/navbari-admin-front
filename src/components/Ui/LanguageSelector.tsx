@@ -1,13 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { useProfileStore } from "../../store/profileStore";
 import i18n from "../../lib/i18n";
+import ReactCountryFlag from "react-country-flag";
 
 const languages = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "fa", name: "فارسی", flag: "🇮🇷" },
-  // Add more languages here when available
-  // { code: "ru", name: "Русский", flag: "🇷🇺" },
-  // { code: "ar", name: "العربية", flag: "🇸🇦" },
+  { code: "en", name: "English", countryCode: "US" },
+  { code: "fa", name: "فارسی", countryCode: "IR" },
+  { code: "ar", name: "العربية", countryCode: "SA" },
+  { code: "zh", name: "中文", countryCode: "CN" },
+  { code: "ru", name: "Русский", countryCode: "RU" },
 ];
 
 export const LanguageSelector = () => {
@@ -22,23 +23,35 @@ export const LanguageSelector = () => {
   };
 
   const currentLang = i18nInstance.language || language;
+  const currentLanguage =
+    languages.find((lang) => lang.code === currentLang) || languages[0];
 
   return (
-    <div className="relative">
+    <div className="relative w-full flex items-center gap-2">
+      <ReactCountryFlag
+        svg
+        countryCode={currentLanguage.countryCode}
+        style={{
+          width: "16px",
+          height: "12px",
+          borderRadius: "2px",
+        }}
+        title={currentLanguage.name}
+      />
       <select
         value={currentLang}
         onChange={(e) => handleLanguageChange(e.target.value)}
-        className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 pr-8 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+        className="flex-1 appearance-none bg-transparent border-0 px-0 py-1 text-xs font-medium text-slate-700 focus:outline-none focus:ring-0 cursor-pointer"
       >
         {languages.map((lang) => (
           <option key={lang.code} value={lang.code}>
-            {lang.flag} {lang.name}
+            {lang.name}
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
         <svg
-          className="h-4 w-4 text-gray-400"
+          className="h-3 w-3 text-slate-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
