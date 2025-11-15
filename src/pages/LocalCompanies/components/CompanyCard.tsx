@@ -1,6 +1,6 @@
-import ReactCountryFlag from "react-country-flag";
 import { Button } from "../../../shared/components/ui/Button";
 import type { Company } from "../types";
+import type { CompanyStatus } from "../types";
 import { STATUS_TO_COLOR } from "../types";
 import { cn } from "../../../shared/utils/cn";
 import {
@@ -44,7 +44,7 @@ export function CompanyCard({
   onReject,
   onView,
 }: Props) {
-  const colors = STATUS_TO_COLOR[company.status];
+  const colors = STATUS_TO_COLOR[company.status as CompanyStatus];
 
   return (
     <div
@@ -99,14 +99,8 @@ export function CompanyCard({
           )}
         >
           <div className="flex items-center gap-2">
-            <ReactCountryFlag
-              svg
-              countryCode={company.countryCode}
-              style={{ width: 22, height: 16, borderRadius: 2 }}
-            />
             <span className="flex text-xs items-center gap-1 font-bold">
-              {company.country} <span>/</span>{" "}
-              <span className="font-normal">{company.city}</span>
+              {company.country}
             </span>
           </div>
         </div>
@@ -119,7 +113,7 @@ export function CompanyCard({
         >
           <span className="inline-flex items-center gap-2 text-xs">
             <UserIcon className="size-3" />
-            {company.managerName}
+            {company.primaryContactFullName}
           </span>
           <div className="flex items-center gap-2">
             <PhoneIcon className="size-4" />
@@ -152,7 +146,7 @@ export function CompanyCard({
                   selected ? "text-white" : "text-slate-900"
                 )}
               >
-                {company.numDrivers}
+                {company.totalDrivers ?? 0}
               </span>{" "}
               drivers
             </span>
@@ -166,9 +160,9 @@ export function CompanyCard({
                   selected ? "text-white" : "text-slate-900"
                 )}
               >
-                {company.numActiveVehicles}
+                {company.vehicleTypes?.length ?? 0}
               </span>{" "}
-              active
+              types
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -179,7 +173,7 @@ export function CompanyCard({
                 selected ? "text-white" : "text-slate-900"
               )}
             >
-              {company.lastActivity}
+              {new Date(company.updatedAt).toLocaleDateString()}
             </span>
           </div>
         </div>

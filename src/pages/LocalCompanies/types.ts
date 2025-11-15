@@ -81,4 +81,4 @@ export const STATUS_TO_COLOR: Record<CompanyStatus, { bar: string; pill: string;
 };
 
 // Type alias for backward compatibility
-export type Company = CompanyReadDto;
+export type Company = import("../../services/company/company.service").CompanyReadDto;

@@ -6,7 +6,6 @@ import {
   Truck as TruckIcon,
   User as UserIcon,
   Calendar as CalendarIcon,
-  Plus as PlusIcon,
   Pencil as PencilIcon,
   Globe as GlobeIcon,
   Mail as MailIcon,
@@ -43,7 +42,11 @@ export function CompanyDetails({ company }: Props) {
         <div className="flex items-center gap-4 min-w-0">
           <div className="h-24 w-24 rounded-lg bg-slate-50 overflow-hidden grid place-items-center">
             {getLogoUrl(company.logoUrl) ? (
-              <img src={getLogoUrl(company.logoUrl)} alt="logo" className="max-h-14" />
+              <img
+                src={getLogoUrl(company.logoUrl)}
+                alt="logo"
+                className="max-h-14"
+              />
             ) : (
               <div className="h-10 w-10 rounded bg-slate-200" />
             )}
@@ -76,7 +79,9 @@ export function CompanyDetails({ company }: Props) {
               </div>
               <div className="flex items-center gap-2">
                 <CalendarIcon className="size-3.5 text-slate-400" />
-                <span>Register: {new Date(company.createdAt).toLocaleDateString()}</span>
+                <span>
+                  Register: {new Date(company.createdAt).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
@@ -120,7 +125,7 @@ export function CompanyDetails({ company }: Props) {
             <p>{company.phone}</p>
           </div>
         </div>
-        
+
         {company.email && (
           <div className="flex items-center gap-4 text-xs text-slate-900">
             <MailIcon className="size-5 text-slate-400" />
@@ -136,7 +141,12 @@ export function CompanyDetails({ company }: Props) {
             <GlobeIcon className="size-5 text-slate-400" />
             <div className="flex flex-col gap-1">
               <p className="text-slate-400 font-semibold">Website</p>
-              <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              <a
+                href={company.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
                 {company.website}
               </a>
             </div>
@@ -159,7 +169,9 @@ export function CompanyDetails({ company }: Props) {
             <p className="text-slate-400 font-semibold">Primary Contact</p>
             <p>{company.primaryContactFullName}</p>
             <p className="text-slate-500">{company.primaryContactEmail}</p>
-            <p className="text-slate-500">{company.primaryContactPhoneNumber}</p>
+            <p className="text-slate-500">
+              {company.primaryContactPhoneNumber}
+            </p>
           </div>
         </div>
       </div>

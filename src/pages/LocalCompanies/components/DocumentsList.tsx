@@ -10,15 +10,31 @@ import {
   Upload as UploadIcon,
   X as CloseIcon,
 } from "lucide-react";
-import { useCompanyDocuments, useApproveDocument, useRejectDocument, useUploadDocument } from "../../../services/company/hooks";
-import { COMPANY_DOCUMENT_TYPE, COMPANY_DOCUMENT_STATUS } from "../../../services/company/document.service";
+import {
+  useCompanyDocuments,
+  useApproveDocument,
+  useRejectDocument,
+  useUploadDocument,
+} from "../../../services/company/hooks";
+import {
+  COMPANY_DOCUMENT_TYPE,
+  COMPANY_DOCUMENT_STATUS,
+} from "../../../services/company/document.service";
 import type { CompanyDocumentReadDto } from "../../../services/company/document.service";
 import { getFileUrl } from "../utils";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
+const documentTypeLabels: Record<string, string> = {
+  license: "License",
+  insurance: "Insurance",
+  manager_id: "Manager ID",
+  primary_contact_id: "Primary Contact ID",
+  other: "Other Document",
+};
+
 type DocumentCardProps = HTMLAttributes<HTMLDivElement> & {
-  document: CompanyDocumentReadDto;
+  doc: CompanyDocumentReadDto;
   onApprove?: () => void;
   onReject?: () => void;
   onView?: () => void;
@@ -26,7 +42,7 @@ type DocumentCardProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 function DocumentCard({
-  document,
+  doc,
   onApprove,
   onReject,
   onView,
@@ -38,23 +54,17 @@ function DocumentCard({
     approved: { icon: CheckIcon, wrap: "bg-green-100 text-green-600" },
     rejected: { icon: XIcon, wrap: "bg-red-100 text-red-600" },
     pending: { icon: FileClock, wrap: "bg-amber-100 text-amber-600" },
-  }[document.status];
+  }[doc.status];
 
-  const documentTypeLabels: Record<string, string> = {
-    license: "License",
-    insurance: "Insurance",
-    manager_id: "Manager ID",
-    primary_contact_id: "Primary Contact ID",
-    other: "Other Document",
-  };
-
-  const documentTitle = documentTypeLabels[document.documentType] || document.documentType;
-  const fileUrl = getFileUrl(document.filePath);
+  const documentTitle =
+    documentTypeLabels[doc.documentType] || doc.documentType;
+  const fileUrl = getFileUrl(doc.filePath);
 
   // Check if file is an image
-  const isImage = fileUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(document.filePath || "");
+  const isImage =
+    fileUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.filePath || "");
   // Check if file is a PDF
-  const isPdf = fileUrl && /\.pdf$/i.test(document.filePath || "");
+  const isPdf = fileUrl && /\.pdf$/i.test(doc.filePath || "");
 
   const handleView = () => {
     if (fileUrl) {
@@ -69,13 +79,15 @@ function DocumentCard({
       {...rest}
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-slate-900 truncate">{documentTitle}</h3>
+        <h3 className="text-sm font-medium text-slate-900 truncate">
+          {documentTitle}
+        </h3>
         <span
           className={cn(
             "inline-grid place-items-center rounded-full size-6",
             statusBadge.wrap
           )}
-          aria-label={document.status}
+          aria-label={doc.status}
         >
           {statusBadge.icon && <statusBadge.icon className="size-4" />}
         </span>
@@ -105,9 +117,11 @@ function DocumentCard({
             title={documentTitle}
             onError={() => {
               // Fallback to icon if PDF fails to load
-              const iframe = document.querySelector(`iframe[title="${documentTitle}"]`);
+              const iframe = document.querySelector(
+                `iframe[title="${documentTitle}"]`
+              );
               if (iframe) {
-                iframe.style.display = "none";
+                (iframe as HTMLElement).style.display = "none";
                 const parent = iframe.parentElement;
                 if (parent) {
                   const icon = document.createElement("div");
@@ -122,12 +136,12 @@ function DocumentCard({
           <FileTextIcon className="size-10 text-slate-400" />
         )}
       </div>
-      {document.rejectionReason && (
+      {doc.rejectionReason && (
         <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-          <strong>Rejection reason:</strong> {document.rejectionReason}
+          <strong>Rejection reason:</strong> {doc.rejectionReason}
         </div>
       )}
-      {document.status === COMPANY_DOCUMENT_STATUS.PENDING && (
+      {doc.status === COMPANY_DOCUMENT_STATUS.PENDING && (
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -147,7 +161,7 @@ function DocumentCard({
           </button>
         </div>
       )}
-      {document.status === COMPANY_DOCUMENT_STATUS.APPROVED && (
+      {doc.status === COMPANY_DOCUMENT_STATUS.APPROVED && (
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -167,7 +181,7 @@ function DocumentCard({
           </button>
         </div>
       )}
-      {document.status === COMPANY_DOCUMENT_STATUS.REJECTED && (
+      {doc.status === COMPANY_DOCUMENT_STATUS.REJECTED && (
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -207,9 +221,12 @@ export default function DocumentsList({
   const uploadMutation = useUploadDocument();
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
+    null
+  );
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState<CompanyDocumentReadDto | null>(null);
+  const [previewDocument, setPreviewDocument] =
+    useState<CompanyDocumentReadDto | null>(null);
 
   const handleApprove = async (id: string) => {
     try {
@@ -239,7 +256,9 @@ export default function DocumentsList({
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file || !companyId) return;
 
@@ -277,15 +296,19 @@ export default function DocumentsList({
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-slate-500">Loading documents...</div>
+        <div className="text-center py-8 text-slate-500">
+          Loading documents...
+        </div>
       ) : documents.length === 0 ? (
-        <div className="text-center py-8 text-slate-500">No documents found</div>
+        <div className="text-center py-8 text-slate-500">
+          No documents found
+        </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {documents.map((doc) => (
             <DocumentCard
               key={doc.id}
-              document={doc}
+              doc={doc}
               onApprove={() => handleApprove(doc.id)}
               onReject={() => handleReject(doc.id)}
               onPreview={() => setPreviewDocument(doc)}
@@ -299,7 +322,9 @@ export default function DocumentsList({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">Reject Document</h3>
-            <p className="text-sm text-slate-600 mb-4">Please provide a reason for rejection:</p>
+            <p className="text-sm text-slate-600 mb-4">
+              Please provide a reason for rejection:
+            </p>
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
@@ -369,7 +394,10 @@ export default function DocumentsList({
                     primary_contact_id: "Primary Contact ID",
                     other: "Other Document",
                   };
-                  return documentTypeLabels[previewDocument.documentType] || previewDocument.documentType;
+                  return (
+                    documentTypeLabels[previewDocument.documentType] ||
+                    previewDocument.documentType
+                  );
                 })()}
               </h3>
               <button
@@ -384,14 +412,22 @@ export default function DocumentsList({
             <div className="flex-1 overflow-auto p-4">
               {(() => {
                 const previewUrl = getFileUrl(previewDocument.filePath);
-                const isImage = previewUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(previewDocument.filePath || "");
-                const isPdf = previewUrl && /\.pdf$/i.test(previewDocument.filePath || "");
+                const isImage =
+                  previewUrl &&
+                  /\.(jpg|jpeg|png|gif|webp)$/i.test(
+                    previewDocument.filePath || ""
+                  );
+                const isPdf =
+                  previewUrl && /\.pdf$/i.test(previewDocument.filePath || "");
 
                 if (isImage && previewUrl) {
                   return (
                     <img
                       src={previewUrl}
-                      alt={documentTypeLabels[previewDocument.documentType] || previewDocument.documentType}
+                      alt={
+                        documentTypeLabels[previewDocument.documentType] ||
+                        previewDocument.documentType
+                      }
                       className="max-w-full h-auto mx-auto"
                     />
                   );
@@ -400,14 +436,19 @@ export default function DocumentsList({
                     <iframe
                       src={previewUrl}
                       className="w-full h-full min-h-[600px] border-0"
-                      title={documentTypeLabels[previewDocument.documentType] || previewDocument.documentType}
+                      title={
+                        documentTypeLabels[previewDocument.documentType] ||
+                        previewDocument.documentType
+                      }
                     />
                   );
                 } else if (previewUrl) {
                   return (
                     <div className="text-center py-12">
                       <FileTextIcon className="size-16 text-slate-400 mx-auto mb-4" />
-                      <p className="text-slate-600 mb-4">Preview not available for this file type</p>
+                      <p className="text-slate-600 mb-4">
+                        Preview not available for this file type
+                      </p>
                       <a
                         href={previewUrl}
                         target="_blank"

@@ -1,20 +1,24 @@
 import { z } from "zod";
 import { http } from "../../lib/http";
 
-// Enums matching API
-export enum COMPANY_DOCUMENT_TYPE {
-  LICENSE = "license",
-  INSURANCE = "insurance",
-  MANAGER_ID = "manager_id",
-  PRIMARY_CONTACT_ID = "primary_contact_id",
-  OTHER = "other",
-}
+// Enums matching API (using const assertions for erasableSyntaxOnly compatibility)
+export const COMPANY_DOCUMENT_TYPE = {
+  LICENSE: "license",
+  INSURANCE: "insurance",
+  MANAGER_ID: "manager_id",
+  PRIMARY_CONTACT_ID: "primary_contact_id",
+  OTHER: "other",
+} as const;
 
-export enum COMPANY_DOCUMENT_STATUS {
-  PENDING = "pending",
-  APPROVED = "approved",
-  REJECTED = "rejected",
-}
+export const COMPANY_DOCUMENT_STATUS = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+} as const;
+
+// Type aliases for the const assertions
+export type COMPANY_DOCUMENT_TYPE = typeof COMPANY_DOCUMENT_TYPE[keyof typeof COMPANY_DOCUMENT_TYPE];
+export type COMPANY_DOCUMENT_STATUS = typeof COMPANY_DOCUMENT_STATUS[keyof typeof COMPANY_DOCUMENT_STATUS];
 
 // Zod schemas
 const documentTypeSchema = z.nativeEnum(COMPANY_DOCUMENT_TYPE);

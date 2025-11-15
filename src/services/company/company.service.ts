@@ -1,25 +1,30 @@
 import { z } from "zod";
 import { http } from "../../lib/http";
 
-// Enums matching API
-export enum COMPANY_STATUS {
-  PENDING = "pending",
-  APPROVED = "approved",
-  REJECTED = "rejected",
-  SUSPENDED = "suspended",
-}
+// Enums matching API (using const assertions for erasableSyntaxOnly compatibility)
+export const COMPANY_STATUS = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  SUSPENDED: "suspended",
+} as const;
 
-export enum VEHICLE_TYPE {
-  TENTED = "tented",
-  REFRIGERATED = "refrigerated",
-  FLATBED = "flatbed",
-  DOUBLE_WALL = "double_wall",
-}
+export const VEHICLE_TYPE = {
+  TENTED: "tented",
+  REFRIGERATED: "refrigerated",
+  FLATBED: "flatbed",
+  DOUBLE_WALL: "double_wall",
+} as const;
 
-export enum LANGUAGE {
-  EN = "en",
-  FA = "fa",
-}
+export const LANGUAGE = {
+  EN: "en",
+  FA: "fa",
+} as const;
+
+// Type aliases for the const assertions
+export type COMPANY_STATUS = typeof COMPANY_STATUS[keyof typeof COMPANY_STATUS];
+export type VEHICLE_TYPE = typeof VEHICLE_TYPE[keyof typeof VEHICLE_TYPE];
+export type LANGUAGE = typeof LANGUAGE[keyof typeof LANGUAGE];
 
 // Zod schemas for validation
 const vehicleTypeSchema = z.nativeEnum(VEHICLE_TYPE);
