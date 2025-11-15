@@ -154,15 +154,18 @@ export function CargoMap({
   const allCoords = useMemo(() => segments.flatMap((s) => s.path), [segments]);
 
   const center = useMemo(() => {
-    if (initialView) return initialView;
-    if (allCoords.length === 0) {
-      return { longitude: 2.5, latitude: 48.8, zoom: 4 };
-    }
-    const lons = allCoords.map((c) => c[0]);
-    const lats = allCoords.map((c) => c[1]);
-    const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
-    const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
-    return { longitude, latitude, zoom: 4 };
+    const baseView = initialView
+      ? { ...initialView, pitch: 0, bearing: 0 }
+      : allCoords.length === 0
+      ? { longitude: 105.0, latitude: 35.0, zoom: 4, pitch: 0, bearing: 0 }
+      : (() => {
+          const lons = allCoords.map((c) => c[0]);
+          const lats = allCoords.map((c) => c[1]);
+          const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
+          const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
+          return { longitude, latitude, zoom: 4, pitch: 0, bearing: 0 };
+        })();
+    return baseView;
   }, [allCoords, initialView]);
 
   useEffect(() => {
@@ -451,8 +454,13 @@ export function CargoMap({
               "Map failed to load";
             setMapError(msg);
           }}
+          pitch={0}
+          bearing={0}
+          dragRotate={false}
+          touchPitch={false}
+          touchZoomRotate={{ around: "center" }}
         >
-          <NavigationControl position="top-right" />
+          <NavigationControl position="top-right" showCompass={false} />
 
           {routeSources.map((src, idx) => {
             const isHovered = hoveredSegmentIdx === idx;

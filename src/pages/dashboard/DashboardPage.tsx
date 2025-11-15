@@ -99,7 +99,7 @@ export function DashboardPage() {
         <div className="absolute inset-0 p-5">
           <CargoMap
             segments={mapSegments}
-            initialView={{ longitude: 7.5, latitude: 49.0, zoom: 4 }}
+            initialView={{ longitude: 105.0, latitude: 35.0, zoom: 4 }}
             mapboxToken={MAPBOX_TOKEN}
             onSegmentClick={handleSegmentClick}
             onMapClick={handleMapClick}
