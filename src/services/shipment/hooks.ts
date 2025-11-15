@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import type { Shipment } from "../../shared/types/shipment";
 import { ShipmentService } from "./ShipmentService";
 
@@ -7,6 +7,11 @@ export function useShipments() {
   const [data, setData] = useState<Shipment[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -26,9 +31,9 @@ export function useShipments() {
     return () => {
       mounted = false;
     };
-  }, [service]);
+  }, [service, refreshKey]);
 
-  return { data, loading, error, service } as const;
+  return { data, loading, error, service, refresh } as const;
 }
 
 export function useShipment(id: string | null) {

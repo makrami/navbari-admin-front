@@ -300,7 +300,9 @@ export function NavigatingInfo({
                       Vehicle
                     </span>
                   </div>
-                  <p className="text-[12px] text-slate-900">{vehicle}</p>
+                  <p className="text-xs text-slate-900">
+                    {vehicle || "Unknown"}
+                  </p>
                 </div>
 
                 <div className="flex flex-col gap-3 px-1">
@@ -311,7 +313,9 @@ export function NavigatingInfo({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <p className="text-[12px] text-slate-900">{localCompany}</p>
+                    <p className="text-xs text-slate-900">
+                      {localCompany || "N/A"}
+                    </p>
                     <span className="inline-flex items-center justify-center p-1 rounded-full bg-blue-600">
                       <PlaneIcon className="size-3 text-white" />
                     </span>
@@ -324,7 +328,17 @@ export function NavigatingInfo({
                       Weight
                     </span>
                   </div>
-                  <p className="text-[12px] text-slate-900">{weight}</p>
+                  <p className="text-[12px] text-slate-900">
+                    {(() => {
+                      // Extract numeric value from weight string (handles "146.5 KG", "146.5", etc.)
+                      const numericValue = parseFloat(weight.replace(/[^0-9.]/g, ""));
+                      if (isNaN(numericValue)) return "0 Tons";
+                      // Convert from kilograms to tons (1 ton = 1000 kg)
+                      const tons = numericValue / 1000;
+                      // Format to 2 decimal places, remove trailing zeros
+                      return `${tons.toFixed(2).replace(/\.?0+$/, "")} Tons`;
+                    })()}
+                  </p>
                 </div>
                 <div className="flex flex-col gap-3 px-1">
                   <div className="flex items-center gap-2">

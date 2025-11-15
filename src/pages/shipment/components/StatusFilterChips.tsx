@@ -1,18 +1,23 @@
 import { Button } from "../../../shared/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import type { ShipmentStatus } from "../../../components/shipment/ShipmentItem";
 
-export type FilterKey = "all" | ShipmentStatus;
+// Filter keys based on backend shipment status enum (SHIPMENT_STATUS)
+// Maps to: PENDING, IN_TRANSIT, DELIVERED, CANCELLED
+export type FilterKey =
+  | "all"
+  | "Pending"
+  | "In Transit"
+  | "Delivered"
+  | "Cancelled";
 
 // Map UI status to display label
 const STATUS_LABELS: Record<FilterKey, string> = {
   all: "All",
-  "In Origin": "In Origin",
-  Delivered: "Delivered",
-  Loading: "Loading",
+  Pending: "Pending",
   "In Transit": "In Transit",
-  Customs: "Customs",
+  Delivered: "Delivered",
+  Cancelled: "Cancelled",
 };
 
 type Props = {
@@ -32,30 +37,25 @@ const FILTER_META: Record<
       "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
     activeRing: "ring-2 ring-slate-300",
   },
-  "In Origin": {
-    label: STATUS_LABELS["In Origin"],
+  Pending: {
+    label: STATUS_LABELS.Pending,
     className: "bg-blue-50 text-blue-700 hover:bg-blue-100",
     activeRing: "ring-2 ring-blue-200",
-  },
-  Delivered: {
-    label: STATUS_LABELS["Delivered"],
-    className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-    activeRing: "ring-2 ring-emerald-200",
-  },
-  Loading: {
-    label: STATUS_LABELS["Loading"],
-    className: "bg-amber-50 text-amber-700 hover:bg-amber-100",
-    activeRing: "ring-2 ring-amber-200",
   },
   "In Transit": {
     label: STATUS_LABELS["In Transit"],
     className: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
     activeRing: "ring-2 ring-indigo-200",
   },
-  Customs: {
-    label: STATUS_LABELS["Customs"],
-    className: "bg-purple-50 text-purple-700 hover:bg-purple-100",
-    activeRing: "ring-2 ring-purple-200",
+  Delivered: {
+    label: STATUS_LABELS.Delivered,
+    className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+    activeRing: "ring-2 ring-emerald-200",
+  },
+  Cancelled: {
+    label: STATUS_LABELS.Cancelled,
+    className: "bg-red-50 text-red-700 hover:bg-red-100",
+    activeRing: "ring-2 ring-red-200",
   },
 };
 
@@ -89,11 +89,10 @@ export function StatusFilterChips({
   };
   const keys: FilterKey[] = [
     "all",
-    "In Origin",
-    "Loading",
+    "Pending",
     "In Transit",
-    "Customs",
     "Delivered",
+    "Cancelled",
   ];
   return (
     <div

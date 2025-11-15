@@ -1,4 +1,5 @@
 import { DemoShipmentRepository } from "./shipment/DemoShipmentRepository";
+import { ApiShipmentRepository } from "./shipment/ApiShipmentRepository";
 import type { ShipmentRepository } from "./shipment/ShipmentRepository";
 
 const getDataMode = (): "demo" | "api" => {
@@ -6,15 +7,17 @@ const getDataMode = (): "demo" | "api" => {
   return mode === "api" ? "api" : "demo";
 };
 
+export function isApiMode(): boolean {
+  return getDataMode() === "api";
+}
+
 let singletonRepo: ShipmentRepository | null = null;
 
 export function getShipmentRepository(): ShipmentRepository {
   if (singletonRepo) return singletonRepo;
   const mode = getDataMode();
   if (mode === "api") {
-    // Lazy import or swap to API repository here when available
-    // For now, fallback to demo
-    singletonRepo = new DemoShipmentRepository();
+    singletonRepo = new ApiShipmentRepository();
   } else {
     singletonRepo = new DemoShipmentRepository();
   }

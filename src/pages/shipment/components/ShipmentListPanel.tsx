@@ -24,20 +24,21 @@ export function ShipmentListPanel({
 }: ShipmentListPanelProps) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
-  // Calculate counts for each filter
+  // Calculate counts for each filter based on backend shipment status enum
   const filterCounts = useMemo(() => {
     const counts: Record<FilterKey, number> = {
       all: shipments.length,
-      "In Origin": 0,
-      Delivered: 0,
-      Loading: 0,
+      Pending: 0,
       "In Transit": 0,
-      Customs: 0,
+      Delivered: 0,
+      Cancelled: 0,
     };
 
     shipments.forEach((shipment) => {
-      if (shipment.status in counts) {
-        counts[shipment.status as FilterKey]++;
+      // Map shipment status to filter key
+      const statusKey = shipment.status as FilterKey;
+      if (statusKey in counts) {
+        counts[statusKey]++;
       }
     });
 

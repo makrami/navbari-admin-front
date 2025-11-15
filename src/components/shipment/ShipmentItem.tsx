@@ -4,11 +4,13 @@ import { cn } from "../../shared/utils/cn";
 import imgAvatar from "../../assets/images/avatar.png";
 
 export type ShipmentStatus =
+  | "Pending"
   | "In Origin"
   | "Delivered"
   | "Loading"
   | "In Transit"
-  | "Customs";
+  | "Customs"
+  | "Cancelled";
 
 type ShipmentItemProps = {
   className?: string;

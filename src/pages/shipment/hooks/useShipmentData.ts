@@ -3,17 +3,23 @@ import type { Shipment as DomainShipment } from "../../../shared/types/shipment"
 import type { ShipmentStatus } from "../../../components";
 import type { ShipmentData } from "../types/shipmentTypes";
 import { DEMO_SHIPMENTS } from "../data/demoShipments";
+import { isApiMode } from "../../../services/config";
 
 export function useShipmentData(
   serviceShipments: DomainShipment[] | undefined
 ): ShipmentData[] {
   return useMemo(() => {
     // Prefer service-provided shipments when available; fallback to inline demo list
+    if (!serviceShipments || serviceShipments.length === 0) {
+      if (isApiMode()) {
+        return [];
+      }
+    }
     const itemsFromService: ShipmentData[] = (serviceShipments ?? []).map(
       (s: DomainShipment): ShipmentData => ({
         title: s.title,
         id: s.id,
-        status: (s.status as ShipmentStatus) || "In Origin",
+        status: (s.status as ShipmentStatus) || "Pending",
         fromCountryCode: s.fromCountryCode || "CN",
         toCountryCode: s.toCountryCode || "RU",
         progressPercent: s.progressPercent ?? 0,
@@ -27,10 +33,10 @@ export function useShipmentData(
         lastActivityTime: s.lastActivityTime || "",
         currentSegmentIndex: s.currentSegmentIndex ?? 0,
         isNew: s.source === "demo-sim",
-        segments: (s.segments || []).map((seg) => ({
-          step: seg.step ?? 0,
+        segments: (s.segments || []).map((seg, index) => ({
+          step: seg.step ?? index + 1,
           place: seg.place || "",
-          datetime: seg.datetime || "",
+          datetime: seg.datetime || (seg.startAt ? new Date(seg.startAt).toLocaleDateString() : "") || "",
           isCompleted: seg.isCompleted ?? seg.logisticsStatus === "DELIVERED",
           nextPlace: seg.nextPlace,
           startAt: seg.startAt,
@@ -46,6 +52,12 @@ export function useShipmentData(
       })
     );
 
+    // In API mode, only return service shipments (no demo data)
+    if (isApiMode()) {
+      return itemsFromService;
+    }
+
+    // In demo mode, include demo shipments
     // Always include demo shipments for now (demo mode), while keeping
     // service-provided shipments when available. Service items take priority
     // over demo items if they have the same ID.
