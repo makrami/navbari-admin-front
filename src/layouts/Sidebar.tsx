@@ -4,7 +4,6 @@ import { useRTL } from "../shared/hooks/useRTL";
 
 // Figma-exported assets (from the currently selected node)
 import imgLogo from "../assets/images/truck.svg";
-import imgAvatar from "../assets/images/avatar.png";
 
 import {
   LayoutGridIcon,
@@ -15,15 +14,32 @@ import {
   MessageSquareDot,
   SettingsIcon,
   LogOutIcon,
+  UserIcon,
 } from "lucide-react";
 import { ActiveIndicator } from "../shared/components";
 import { logout } from "../services/auth.service";
 import { LanguageSelector } from "../components/Ui/LanguageSelector";
+import { useCurrentUser } from "../services/user/hooks";
 
 export function Sidebar() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const isRTL = useRTL();
+  const {
+    data: user,
+    isLoading: isLoadingUser,
+    error: userError,
+  } = useCurrentUser();
+
+  // Debug: Log user data to console
+  if (user) {
+    console.log("User data in Sidebar:", user);
+    console.log("fullName:", user.fullName);
+    console.log("email:", user.email);
+  }
+  if (userError) {
+    console.error("Error fetching user:", userError);
+  }
 
   const handleLogout = async () => {
     await logout();
@@ -249,20 +265,20 @@ export function Sidebar() {
           <div className="w-full space-y-2 border-t border-slate-200 pt-4">
             {/* Profile Info */}
             <div className="flex w-full items-center gap-3 px-5">
-              <img
-                src={imgAvatar}
-                alt={t("sidebar.profileAlt")}
-                className="size-8 rounded-full object-cover ring-2 ring-slate-200"
-              />
+              <div className="grid size-8 place-items-center rounded-full bg-slate-100 ring-2 ring-slate-200">
+                <UserIcon className="size-4 text-slate-600" />
+              </div>
               <div className="flex-1 min-w-0">
                 <span className="block text-xs font-semibold uppercase tracking-wide text-slate-700 truncate">
-                  {t("sidebar.profileName")}
+                  {isLoadingUser
+                    ? t("common.loading") || "Loading..."
+                    : user
+                    ? String(user.fullName || user.email)
+                    : ""}
                 </span>
                 <LanguageSelector />
               </div>
             </div>
-
-            {/* Language Selector */}
 
             {/* Logout */}
             <button
