@@ -7,9 +7,9 @@ import {
   User as UserIcon,
   Calendar as CalendarIcon,
   Pencil as PencilIcon,
-  Globe as GlobeIcon,
   Mail as MailIcon,
-  MapPin as MapPinIcon,
+  Plus as PlusIcon,
+  PencilLine,
 } from "lucide-react";
 import { STATUS_TO_COLOR, apiStatusToUiStatus } from "../types";
 import { getCountryCode, getLogoUrl } from "../utils";
@@ -117,62 +117,38 @@ export function CompanyDetails({ company }: Props) {
       <div className="border-t border-slate-100" />
 
       {/* Contact Information */}
-      <div className="space-y-3">
+      <div className="space-y-3 flex">
         <div className="flex items-center gap-4 text-xs text-slate-900">
           <PhoneIcon className="size-5 text-slate-400" />
           <div className="flex flex-col gap-1">
             <p className="text-slate-400 font-semibold">Phone</p>
-            <p>{company.phone}</p>
+            <p className="text-xs text-slate-900">{company.phone}</p>
           </div>
         </div>
-
-        {company.email && (
-          <div className="flex items-center gap-4 text-xs text-slate-900">
-            <MailIcon className="size-5 text-slate-400" />
-            <div className="flex flex-col gap-1">
-              <p className="text-slate-400 font-semibold">Email</p>
-              <p>{company.email}</p>
-            </div>
-          </div>
-        )}
-
-        {company.website && (
-          <div className="flex items-center gap-4 text-xs text-slate-900">
-            <GlobeIcon className="size-5 text-slate-400" />
-            <div className="flex flex-col gap-1">
-              <p className="text-slate-400 font-semibold">Website</p>
-              <a
-                href={company.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                {company.website}
-              </a>
-            </div>
-          </div>
-        )}
-
-        {company.address && (
-          <div className="flex items-center gap-4 text-xs text-slate-900">
-            <MapPinIcon className="size-5 text-slate-400" />
-            <div className="flex flex-col gap-1">
-              <p className="text-slate-400 font-semibold">Address</p>
-              <p>{company.address}</p>
-            </div>
-          </div>
-        )}
-
+        <div className="w-px bg-slate-200 mx-6" />
         <div className="flex items-center gap-4 text-xs text-slate-900">
-          <UserIcon className="size-5 text-slate-400" />
+          <MailIcon className="size-5 text-slate-400" />
           <div className="flex flex-col gap-1">
-            <p className="text-slate-400 font-semibold">Primary Contact</p>
-            <p>{company.primaryContactFullName}</p>
-            <p className="text-slate-500">{company.primaryContactEmail}</p>
-            <p className="text-slate-500">
-              {company.primaryContactPhoneNumber}
-            </p>
+            <p className="text-slate-400 font-semibold">Email</p>
+            <p className="text-xs text-slate-900">{company.email}</p>
           </div>
+        </div>
+        <div className="w-px bg-slate-200 mx-6" />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors"
+            aria-label="Add"
+          >
+            <PlusIcon className="size-5 text-slate-400" />
+          </button>
+          <button
+            type="button"
+            className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors"
+            aria-label="Edit"
+          >
+            <PencilLine className="size-5 text-slate-400" />
+          </button>
         </div>
       </div>
     </section>

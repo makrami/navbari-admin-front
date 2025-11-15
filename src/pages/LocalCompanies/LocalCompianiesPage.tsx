@@ -12,7 +12,12 @@ import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
 import { LocalCompaniesPageSkeleton } from "./components/LocalCompaniesSkeleton";
-import { useCompanies, useCompanyDetails, useSuspendCompany, useUnsuspendCompany } from "../../services/company/hooks";
+import {
+  useCompanies,
+  useCompanyDetails,
+  useSuspendCompany,
+  useUnsuspendCompany,
+} from "../../services/company/hooks";
 import { COMPANY_STATUS } from "../../services/company/company.service";
 import { formatCompanyForEntityCard } from "./utils";
 import { apiStatusToUiStatus } from "./types";
@@ -30,9 +35,12 @@ export function LocalCompaniesPage() {
     if (activeFilter !== "all") {
       // Map UI status to API status
       if (activeFilter === "active") filters.status = COMPANY_STATUS.APPROVED;
-      else if (activeFilter === "inactive") filters.status = COMPANY_STATUS.SUSPENDED;
-      else if (activeFilter === "pending") filters.status = COMPANY_STATUS.PENDING;
-      else if (activeFilter === "rejected") filters.status = COMPANY_STATUS.REJECTED;
+      else if (activeFilter === "inactive")
+        filters.status = COMPANY_STATUS.SUSPENDED;
+      else if (activeFilter === "pending")
+        filters.status = COMPANY_STATUS.PENDING;
+      else if (activeFilter === "rejected")
+        filters.status = COMPANY_STATUS.REJECTED;
     }
     return filters;
   }, [activeFilter]);
@@ -209,7 +217,9 @@ export function LocalCompaniesPage() {
                     <button
                       type="button"
                       onClick={handleToggleActive}
-                      disabled={suspendMutation.isPending || unsuspendMutation.isPending}
+                      disabled={
+                        suspendMutation.isPending || unsuspendMutation.isPending
+                      }
                       role="switch"
                       aria-checked={isActive}
                       className={
@@ -241,7 +251,10 @@ export function LocalCompaniesPage() {
                   </div>
                   <CompanyDetails company={companyDetails || selectedCompany} />
                   <DocumentsList companyId={selectedId} />
-                  <InternalNotes companyId={selectedId} initialValue={selectedCompany.internalNote || ""} />
+                  <InternalNotes
+                    companyId={selectedId}
+                    initialValue={selectedCompany.internalNote || ""}
+                  />
                   <RecentActivities />
                 </div>
               )}
