@@ -142,23 +142,27 @@ export function useSegmentsData(
   const baseSegments = fromService.length > 0 ? fromService : fallbackSegments;
 
   const allSegments: SegmentWithShipment[] = useMemo(() => {
+    let segments: SegmentWithShipment[];
+    
     if (!extraSegments?.length) {
-      return baseSegments;
+      segments = baseSegments;
+    } else {
+      const byKey = new Map<string, SegmentWithShipment>();
+      const keyOf = (segment: SegmentWithShipment) =>
+        `${segment.shipmentId}::${segment.step ?? 0}`;
+
+      baseSegments.forEach((segment) => {
+        byKey.set(keyOf(segment), segment);
+      });
+
+      extraSegments.forEach((segment) => {
+        byKey.set(keyOf(segment), segment);
+      });
+
+      segments = Array.from(byKey.values());
     }
 
-    const byKey = new Map<string, SegmentWithShipment>();
-    const keyOf = (segment: SegmentWithShipment) =>
-      `${segment.shipmentId}::${segment.step ?? 0}`;
-
-    baseSegments.forEach((segment) => {
-      byKey.set(keyOf(segment), segment);
-    });
-
-    extraSegments.forEach((segment) => {
-      byKey.set(keyOf(segment), segment);
-    });
-
-    return Array.from(byKey.values());
+    return segments;
   }, [baseSegments, extraSegments]);
 
   // Filter segments (all segments are already assigned, so filters adjust based on status)
@@ -193,7 +197,41 @@ export function useSegmentsData(
       );
     }
 
-    return filtered;
+    // Sort segments based on active filter
+    return [...filtered].sort((a, b) => {
+      const aIsNeedAction = !a.isCompleted && a.assignmentStatus === SegmentAssignmentStatus.READY_TO_START;
+      const bIsNeedAction = !b.isCompleted && b.assignmentStatus === SegmentAssignmentStatus.READY_TO_START;
+      const aIsAlert = !a.isCompleted && a.logisticsStatus && ["CANCELLED", "AT_ORIGIN"].includes(a.logisticsStatus);
+      const bIsAlert = !b.isCompleted && b.logisticsStatus && ["CANCELLED", "AT_ORIGIN"].includes(b.logisticsStatus);
+      const aIsCompleted = Boolean(a.isCompleted);
+      const bIsCompleted = Boolean(b.isCompleted);
+
+      if (filter === "all") {
+        // "All" filter: Need to Action first, then completed segments, then others
+        if (aIsNeedAction && !bIsNeedAction) return -1;
+        if (!aIsNeedAction && bIsNeedAction) return 1;
+        if (!aIsNeedAction && !bIsNeedAction) {
+          if (aIsCompleted && !bIsCompleted) return -1;
+          if (!aIsCompleted && bIsCompleted) return 1;
+        }
+      } else if (filter === "need-action") {
+        // "Need to Action" filter: Already filtered, maintain order (or sort by urgency if needed)
+        // Keep original order for segments in the same category
+      } else if (filter === "alert") {
+        // "Alert" filter: Alert segments first, then others
+        if (aIsAlert && !bIsAlert) return -1;
+        if (!aIsAlert && bIsAlert) return 1;
+        // Within alerts, prioritize by status severity if needed
+        if (aIsAlert && bIsAlert) {
+          // CANCELLED might be more urgent than AT_ORIGIN
+          if (a.logisticsStatus === "CANCELLED" && b.logisticsStatus !== "CANCELLED") return -1;
+          if (a.logisticsStatus !== "CANCELLED" && b.logisticsStatus === "CANCELLED") return 1;
+        }
+      }
+
+      // Keep original order for segments in the same category
+      return 0;
+    });
   }, [allSegments, filter, searchQuery]);
 
   const needActionCount = useMemo(() => {

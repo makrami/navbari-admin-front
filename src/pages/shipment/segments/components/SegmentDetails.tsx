@@ -68,7 +68,6 @@ type SegmentDetailsProps = {
   onSave?: (update: Partial<SegmentData>) => void;
   editable?: boolean;
   locked?: boolean;
-  showStatuses?: boolean;
   /** Shipment link props - when provided, shows a clickable shipment link section */
   shipmentLinkProps?: {
     shipmentTitle: string;
@@ -90,7 +89,6 @@ export function SegmentDetails({
   onSave,
   editable = false,
   locked = false,
-  showStatuses = true,
   shipmentLinkProps,
 }: SegmentDetailsProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -208,22 +206,6 @@ export function SegmentDetails({
             dateTime={data.datetime}
             showWarningIcon={data.hasDisruption ?? false}
           />
-        </div>
-      )}
-
-      {/* Assignment and Logistics statuses */}
-      {showStatuses && (data.assignmentStatus || data.logisticsStatus) && (
-        <div className="px-3 pb-2 flex items-center gap-2">
-          {data.assignmentStatus ? (
-            <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-medium">
-              Assignment: {data.assignmentStatus}
-            </span>
-          ) : null}
-          {data.logisticsStatus ? (
-            <span className="inline-flex items-center rounded-md bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
-              Logistics: {data.logisticsStatus}
-            </span>
-          ) : null}
         </div>
       )}
 

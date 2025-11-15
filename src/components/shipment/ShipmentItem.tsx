@@ -51,7 +51,7 @@ export function ShipmentItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "text-left rounded-2xl p-4 shadow-sm transition-colors",
+        "text-left rounded-2xl p-4 ",
         selected ? "bg-[#1b54fe] text-white" : "bg-white",
         className
       )}

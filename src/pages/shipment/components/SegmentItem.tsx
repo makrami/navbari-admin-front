@@ -136,7 +136,6 @@ export function SegmentItem({
         !segment.cargoCompanies?.length
       }
       locked={locked}
-      showStatuses={!isReadOnly}
       onSave={handleSave}
     />
   );

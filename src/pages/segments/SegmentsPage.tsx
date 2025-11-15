@@ -27,7 +27,7 @@ export function SegmentsPage({
 }: SegmentsPageProps = {}) {
   const navigate = useNavigate();
   const { data: serviceShipments, loading } = useShipments();
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [filter, setFilter] = useState<FilterType>("need-action");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSegments, setExpandedSegments] = useState<Set<string>>(
     () => new Set(selectedSegmentId ? [selectedSegmentId] : [])
@@ -35,12 +35,13 @@ export function SegmentsPage({
   const { t } = useTranslation();
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  const { needActionCount, alertCount, allSegments } = useSegmentsData(
-    serviceShipments ?? null,
-    filter,
-    searchQuery,
-    extraSegments ?? []
-  );
+  const { needActionCount, alertCount, allSegments, filteredSegments } =
+    useSegmentsData(
+      serviceShipments ?? null,
+      filter,
+      searchQuery,
+      extraSegments ?? []
+    );
 
   const toggleSegment = (segmentId: string) => {
     setExpandedSegments((prev) => {
@@ -71,7 +72,7 @@ export function SegmentsPage({
     const node = itemRefs.current.get(selectedSegmentId);
     if (!node) return;
     node.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [selectedSegmentId, allSegments]);
+  }, [selectedSegmentId, filteredSegments]);
 
   const handleClose = () => {
     if (onClose) {
@@ -135,7 +136,7 @@ export function SegmentsPage({
         style={{ scrollbarGutter: "stable" }}
       >
         <div className="max-w-6xl mx-auto pb-6">
-          {allSegments.length === 0 ? (
+          {filteredSegments.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
               {t("segments.page.empty")}
             </div>
@@ -147,7 +148,7 @@ export function SegmentsPage({
                 className="absolute left-8 top-5 bottom-5 w-3 bg-slate-200 rounded-full z-0"
               />
               <div className="grid gap-4 relative z-10">
-                {allSegments.map((segment) => {
+                {filteredSegments.map((segment) => {
                   const segmentId = getSegmentListId(
                     segment.shipmentId,
                     segment.step
@@ -155,7 +156,7 @@ export function SegmentsPage({
                   const isExpanded = expandedSegments.has(segmentId);
 
                   // Find current segment index for this shipment
-                  const shipmentSegments = allSegments.filter(
+                  const shipmentSegments = filteredSegments.filter(
                     (s) => s.shipmentId === segment.shipmentId
                   );
                   const currentSegmentIndex = shipmentSegments.findIndex(
@@ -197,7 +198,6 @@ export function SegmentsPage({
                         onToggle={() => toggleSegment(segmentId)}
                         editable={false}
                         locked={false}
-                        showStatuses={true}
                         shipmentLinkProps={{
                           shipmentTitle: segment.shipmentTitle,
                           shipmentId: segment.shipmentId,

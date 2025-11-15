@@ -13,7 +13,29 @@ export function useShipmentSelection() {
   const selectedIdRef = useRef<string | null>(null);
 
   const allItems = useMemo(() => {
-    return [...addedShipments, ...items];
+    // Deduplicate shipments by ID - addedShipments take priority over items
+    const seenIds = new Set<string>();
+    const result: ShipmentData[] = [];
+    
+    // First add addedShipments (user-created shipments take priority)
+    addedShipments.forEach((shipment) => {
+      const id = String(shipment.id);
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        result.push(shipment);
+      }
+    });
+    
+    // Then add items (service/demo shipments) if not already present
+    items.forEach((shipment) => {
+      const id = String(shipment.id);
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        result.push(shipment);
+      }
+    });
+    
+    return result;
   }, [addedShipments, items]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);

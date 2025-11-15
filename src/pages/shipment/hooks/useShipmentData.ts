@@ -47,11 +47,34 @@ export function useShipmentData(
     );
 
     // Always include demo shipments for now (demo mode), while keeping
-    // service-provided shipments when available. Service items appear after
-    // demo items to make new demos visible immediately.
-    return itemsFromService.length
-      ? [...DEMO_SHIPMENTS, ...itemsFromService]
-      : DEMO_SHIPMENTS;
+    // service-provided shipments when available. Service items take priority
+    // over demo items if they have the same ID.
+    if (itemsFromService.length === 0) {
+      return DEMO_SHIPMENTS;
+    }
+    
+    // Deduplicate by ID - service shipments take priority over demo shipments
+    const result: ShipmentData[] = [];
+    
+    // First add demo shipments
+    DEMO_SHIPMENTS.forEach((shipment) => {
+      result.push(shipment);
+    });
+    
+    // Then add service shipments (they override demo shipments with same ID)
+    itemsFromService.forEach((shipment) => {
+      const id = String(shipment.id);
+      const existingIndex = result.findIndex((s) => String(s.id) === id);
+      if (existingIndex !== -1) {
+        // Replace demo shipment with service shipment if same ID
+        result[existingIndex] = shipment;
+      } else {
+        // Add new service shipment
+        result.push(shipment);
+      }
+    });
+    
+    return result;
   }, [serviceShipments]);
 }
 
