@@ -1,6 +1,14 @@
-import type { ShipmentRepository, CreateShipmentDto, AddSegmentDto, UpdateSegmentPatch } from "./ShipmentRepository";
+import type {
+  ShipmentRepository,
+  CreateShipmentDto,
+  AddSegmentDto,
+  UpdateSegmentPatch,
+} from "./ShipmentRepository";
 import type { Shipment, Segment } from "../../shared/types/shipment";
-import { SegmentAssignmentStatus, SegmentLogisticsStatus } from "../../shared/types/shipment";
+import {
+  SegmentAssignmentStatus,
+  SegmentLogisticsStatus,
+} from "../../shared/types/shipment";
 import {
   createShipment as apiCreateShipment,
   listShipments as apiListShipments,
@@ -17,7 +25,8 @@ import {
  */
 function mapSegmentDtoToSegment(dto: SegmentReadDto): Segment {
   // Map SEGMENT_STATUS to frontend assignment and logistics statuses
-  let assignmentStatus: SegmentAssignmentStatus = SegmentAssignmentStatus.UNASSIGNED;
+  let assignmentStatus: SegmentAssignmentStatus =
+    SegmentAssignmentStatus.UNASSIGNED;
   let logisticsStatus: SegmentLogisticsStatus | undefined;
 
   // Map backend status to frontend statuses
@@ -54,24 +63,48 @@ function mapSegmentDtoToSegment(dto: SegmentReadDto): Segment {
     logisticsStatus = SegmentLogisticsStatus.LOADING;
   }
 
+  // Combine origin city and country into place string (format: "City, Country")
+  const originPlace =
+    dto.originCity && dto.originCountry
+      ? `${dto.originCity}, ${dto.originCountry}`
+      : dto.originCity || dto.originCountry || undefined;
+
+  // Combine destination city and country into nextPlace string (format: "City, Country")
+  const destinationPlace =
+    dto.destinationCity && dto.destinationCountry
+      ? `${dto.destinationCity}, ${dto.destinationCountry}`
+      : dto.destinationCity || dto.destinationCountry || undefined;
+
   return {
     id: dto.id,
     assignmentStatus,
     logisticsStatus,
     source: "api",
     step: undefined, // Will be set based on segment order if needed
-    place: dto.originCity || dto.originCountry || undefined,
-    nextPlace: dto.destinationCity || dto.destinationCountry || undefined,
-    startAt: dto.startedAt || dto.arrivedOriginAt || undefined,
-    estFinishAt: dto.eta || dto.etaToDestination || undefined,
+    place: originPlace,
+    nextPlace: destinationPlace,
+    // Use estimatedStartTime/estimatedFinishTime for form fields, fallback to actual times
+    startAt:
+      dto.estimatedStartTime ||
+      dto.startedAt ||
+      dto.arrivedOriginAt ||
+      undefined,
+    estFinishAt:
+      dto.estimatedFinishTime || dto.eta || dto.etaToDestination || undefined,
     isCompleted: dto.status === SEGMENT_STATUS.DELIVERED,
     isPlaceholder: false,
-    datetime: dto.deliveredAt || dto.arrivedDestinationAt || dto.startedAt || undefined,
+    datetime:
+      dto.deliveredAt || dto.arrivedDestinationAt || dto.startedAt || undefined,
+    // Map distanceKm to distance string format (e.g., "24 KM")
+    distance:
+      dto.distanceKm !== null && dto.distanceKm !== undefined
+        ? `${Math.round(dto.distanceKm)} KM`
+        : undefined,
     // Additional fields that might be available from backend
     vehicleLabel: undefined, // Not in DTO, but can be added if available
     localCompany: undefined, // Not in DTO, but can be added if available
     documents: undefined, // Not in DTO, but can be added if available
-    baseFeeUsd: undefined, // Not in DTO, but can be added if available
+    baseFeeUsd: dto.baseFee ?? undefined, // Map baseFee from backend
     driverName: undefined, // Not in DTO, but can be added if available
     driverPhoto: undefined, // Not in DTO, but can be added if available
     driverRating: undefined, // Not in DTO, but can be added if available
@@ -109,7 +142,8 @@ function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
   const completedSegments = segments.filter(
     (s) => s.logisticsStatus === SegmentLogisticsStatus.DELIVERED
   ).length;
-  const progressPercent = totalSegments > 0 ? (completedSegments / totalSegments) * 100 : 0;
+  const progressPercent =
+    totalSegments > 0 ? (completedSegments / totalSegments) * 100 : 0;
 
   return {
     id: dto.id,
@@ -137,7 +171,7 @@ function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
 export class ApiShipmentRepository implements ShipmentRepository {
   async listShipments(): Promise<Shipment[]> {
     const dtos = await apiListShipments();
-    
+
     const shipments = await Promise.all(
       dtos.map(async (dto) => {
         const shipment = mapShipmentDtoToShipment(dto);
@@ -177,7 +211,9 @@ export class ApiShipmentRepository implements ShipmentRepository {
       if (!dto.segments || dto.segments.length === 0) {
         try {
           const segments = await apiGetShipmentSegments(id);
-          shipment.segments = segments.map((seg) => mapSegmentDtoToSegment(seg));
+          shipment.segments = segments.map((seg) =>
+            mapSegmentDtoToSegment(seg)
+          );
         } catch {
           // If segments endpoint fails, just use empty array
         }
@@ -185,7 +221,12 @@ export class ApiShipmentRepository implements ShipmentRepository {
       return shipment;
     } catch (error: unknown) {
       // If shipment not found (404), return undefined
-      if (error && typeof error === "object" && "status" in error && error.status === 404) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        error.status === 404
+      ) {
         return undefined;
       }
       throw error;
@@ -216,7 +257,9 @@ export class ApiShipmentRepository implements ShipmentRepository {
     // This would need to be implemented in the backend or handled differently
     // For now, we'll throw an error indicating this needs backend support
     void _dto; // Mark as intentionally unused
-    throw new Error("Adding segments via API is not yet supported. Please use the backend API directly.");
+    throw new Error(
+      "Adding segments via API is not yet supported. Please use the backend API directly."
+    );
   }
 
   async updateSegment(
@@ -230,7 +273,8 @@ export class ApiShipmentRepository implements ShipmentRepository {
     void _shipmentId;
     void _segmentId;
     void _patch;
-    throw new Error("Updating segments via API is not yet supported. Please use the backend API directly.");
+    throw new Error(
+      "Updating segments via API is not yet supported. Please use the backend API directly."
+    );
   }
 }
-

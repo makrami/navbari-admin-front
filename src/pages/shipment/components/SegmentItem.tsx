@@ -125,7 +125,9 @@ export function SegmentItem({
         progressStage,
         nextPlace,
         estFinishAt: segment.estFinishAt,
-        distance: "24 KM",
+        // Use distance from segment (mapped from backend distanceKm) or fallback to domainShipment
+        distance:
+          segment.distance ?? domainShipment?.segments?.[index]?.distance,
         hasDisruption,
       }}
       defaultOpen={segmentStep === segment.step}
@@ -138,6 +140,39 @@ export function SegmentItem({
         !segment.cargoCompanies?.length
       }
       locked={locked}
+      segmentId={(() => {
+        // Try to find segment by step number first (more reliable than index)
+        const segmentByStep = domainShipment?.segments?.find(
+          (s) => s.step === segment.step
+        );
+        // Fallback to index if step doesn't match
+        const segmentByIdx = domainShipment?.segments?.[index];
+        const matchedSegment = segmentByStep || segmentByIdx;
+        const id = matchedSegment?.id;
+
+        if (!id) {
+          console.warn("SegmentItem: No segmentId found", {
+            index,
+            segmentStep: segment.step,
+            domainShipmentId: domainShipment?.id,
+            domainSegmentsCount: domainShipment?.segments?.length,
+            domainSegmentSteps: domainShipment?.segments?.map((s, i) => ({
+              index: i,
+              id: s.id,
+              step: s.step,
+            })),
+            foundByStep: !!segmentByStep,
+            foundByIdx: !!segmentByIdx,
+          });
+        } else {
+          console.log("SegmentItem: Found segmentId", {
+            segmentId: id,
+            segmentStep: segment.step,
+            matchedBy: segmentByStep ? "step" : "index",
+          });
+        }
+        return id;
+      })()}
       onSave={handleSave}
     />
   );

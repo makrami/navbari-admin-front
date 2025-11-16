@@ -19,6 +19,10 @@ import type {
 } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
 import { ShipmentLinkSection } from "./ShipmentLinkSection";
+import {
+  updateSegment,
+  type SegmentReadDto,
+} from "../../../../services/shipment/shipment.api.service";
 export type SegmentData = {
   step: number;
   place: string;
@@ -68,6 +72,8 @@ type SegmentDetailsProps = {
   onSave?: (update: Partial<SegmentData>) => void;
   editable?: boolean;
   locked?: boolean;
+  /** Segment ID for API calls - when provided, will call PUT /segments/:id on save */
+  segmentId?: string;
   /** Shipment link props - when provided, shows a clickable shipment link section */
   shipmentLinkProps?: {
     shipmentTitle: string;
@@ -89,6 +95,7 @@ export function SegmentDetails({
   onSave,
   editable = false,
   locked = false,
+  segmentId,
   shipmentLinkProps,
 }: SegmentDetailsProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -150,6 +157,18 @@ export function SegmentDetails({
   const [showCargoModal, setShowCargoModal] = useState(false);
   const [pendingUpdate, setPendingUpdate] =
     useState<Partial<SegmentData> | null>(null);
+
+  // Utility function to parse city and country from place string (format: "City, Country")
+  const parsePlace = (place: string): { city: string; country: string } => {
+    const parts = place.split(",").map((p) => p.trim());
+    if (parts.length >= 2) {
+      return {
+        city: parts[0] || "",
+        country: parts.slice(1).join(", ") || "",
+      };
+    }
+    return { city: place, country: "" };
+  };
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
   const [hasBeenSaved, setHasBeenSaved] = useState(() => {
     // Consider saved if essential fields are present
@@ -347,7 +366,7 @@ export function SegmentDetails({
                     setShowErrors(false);
                     setHasBeenSaved(false);
                   }}
-                  onSave={() => {
+                  onSave={async () => {
                     const valid =
                       toValue.trim() &&
                       startDateValue.trim() &&
@@ -359,27 +378,119 @@ export function SegmentDetails({
                       setShowErrors(true);
                       return;
                     }
-                    setHasBeenSaved(true);
-                    onSave?.({
-                      place: fromValue.trim(),
-                      nextPlace: toValue.trim(),
-                      startAt: combineDateTime(
-                        startDateValue.trim(),
-                        startTimeValue.trim()
-                      ),
-                      estFinishAt: combineDateTime(
-                        estFinishDateValue.trim(),
-                        estFinishTimeValue.trim()
-                      ),
-                      baseFeeUsd: parseFloat(baseFee),
-                      isPlaceholder: false,
-                    });
-                    // Close segment after save if it's currently open
-                    if (open) {
-                      handleToggle();
+                    try {
+                      const update: Partial<SegmentData> = {
+                        place: fromValue.trim(),
+                        nextPlace: toValue.trim(),
+                        startAt: combineDateTime(
+                          startDateValue.trim(),
+                          startTimeValue.trim()
+                        ),
+                        estFinishAt: combineDateTime(
+                          estFinishDateValue.trim(),
+                          estFinishTimeValue.trim()
+                        ),
+                        baseFeeUsd: parseFloat(baseFee),
+                        isPlaceholder: false,
+                      };
+
+                      // Call API if segmentId is provided
+                      let apiResponse: SegmentReadDto | null = null;
+                      if (segmentId) {
+                        try {
+                          const fromPlace = parsePlace(fromValue.trim());
+                          const toPlace = parsePlace(toValue.trim());
+                          const updatePayload = {
+                            originCity: fromPlace.city,
+                            originCountry: fromPlace.country,
+                            destinationCity: toPlace.city,
+                            destinationCountry: toPlace.country,
+                            estimatedStartTime: combineDateTime(
+                              startDateValue.trim(),
+                              startTimeValue.trim()
+                            ),
+                            estimatedFinishTime: combineDateTime(
+                              estFinishDateValue.trim(),
+                              estFinishTimeValue.trim()
+                            ),
+                            baseFee: parseFloat(baseFee),
+                          };
+                          console.log("Calling updateSegment API with:", {
+                            segmentId,
+                            payload: updatePayload,
+                          });
+                          apiResponse = await updateSegment(
+                            segmentId,
+                            updatePayload
+                          );
+                          console.log(
+                            "Segment updated successfully",
+                            apiResponse
+                          );
+                        } catch (apiError) {
+                          console.error("API update failed:", apiError);
+                          throw apiError; // Re-throw to be caught by outer catch
+                        }
+                      } else {
+                        console.warn(
+                          "No segmentId provided, skipping API call"
+                        );
+                      }
+
+                      setHasBeenSaved(true);
+                      // Use API response if available, otherwise use local update
+                      if (apiResponse) {
+                        // Map API response back to SegmentData format
+                        const originPlace =
+                          apiResponse.originCity && apiResponse.originCountry
+                            ? `${apiResponse.originCity}, ${apiResponse.originCountry}`
+                            : apiResponse.originCity ||
+                              apiResponse.originCountry ||
+                              "";
+                        const destinationPlace =
+                          apiResponse.destinationCity &&
+                          apiResponse.destinationCountry
+                            ? `${apiResponse.destinationCity}, ${apiResponse.destinationCountry}`
+                            : apiResponse.destinationCity ||
+                              apiResponse.destinationCountry ||
+                              "";
+
+                        onSave?.({
+                          place: originPlace,
+                          nextPlace: destinationPlace,
+                          startAt: apiResponse.estimatedStartTime || undefined,
+                          estFinishAt:
+                            apiResponse.estimatedFinishTime || undefined,
+                          baseFeeUsd: apiResponse.baseFee ?? undefined,
+                          isPlaceholder: false,
+                        });
+                      } else {
+                        onSave?.(update);
+                      }
+                      // Close segment after save if it's currently open
+                      if (open) {
+                        handleToggle();
+                      }
+                    } catch (error) {
+                      console.error("Failed to update segment:", error);
+                      // Still call onSave for local state update even if API fails
+                      onSave?.({
+                        place: fromValue.trim(),
+                        nextPlace: toValue.trim(),
+                        startAt: combineDateTime(
+                          startDateValue.trim(),
+                          startTimeValue.trim()
+                        ),
+                        estFinishAt: combineDateTime(
+                          estFinishDateValue.trim(),
+                          estFinishTimeValue.trim()
+                        ),
+                        baseFeeUsd: parseFloat(baseFee),
+                        isPlaceholder: false,
+                      });
                     }
                   }}
-                  onSaveDeclare={() => {
+                  onSaveDeclare={async () => {
                     const valid =
                       toValue.trim() &&
                       startDateValue.trim() &&
@@ -391,22 +502,122 @@ export function SegmentDetails({
                       setShowErrors(true);
                       return;
                     }
-                    setHasBeenSaved(true);
-                    setPendingUpdate({
-                      place: fromValue.trim(),
-                      nextPlace: toValue.trim(),
-                      startAt: combineDateTime(
-                        startDateValue.trim(),
-                        startTimeValue.trim()
-                      ),
-                      estFinishAt: combineDateTime(
-                        estFinishDateValue.trim(),
-                        estFinishTimeValue.trim()
-                      ),
-                      baseFeeUsd: parseFloat(baseFee),
-                      isPlaceholder: false,
-                    });
-                    setShowCargoModal(true);
+                    try {
+                      const update: Partial<SegmentData> = {
+                        place: fromValue.trim(),
+                        nextPlace: toValue.trim(),
+                        startAt: combineDateTime(
+                          startDateValue.trim(),
+                          startTimeValue.trim()
+                        ),
+                        estFinishAt: combineDateTime(
+                          estFinishDateValue.trim(),
+                          estFinishTimeValue.trim()
+                        ),
+                        baseFeeUsd: parseFloat(baseFee),
+                        isPlaceholder: false,
+                      };
+
+                      // Call API if segmentId is provided
+                      let apiResponse: SegmentReadDto | null = null;
+                      if (segmentId) {
+                        try {
+                          const fromPlace = parsePlace(fromValue.trim());
+                          const toPlace = parsePlace(toValue.trim());
+                          const updatePayload = {
+                            originCity: fromPlace.city,
+                            originCountry: fromPlace.country,
+                            destinationCity: toPlace.city,
+                            destinationCountry: toPlace.country,
+                            estimatedStartTime: combineDateTime(
+                              startDateValue.trim(),
+                              startTimeValue.trim()
+                            ),
+                            estimatedFinishTime: combineDateTime(
+                              estFinishDateValue.trim(),
+                              estFinishTimeValue.trim()
+                            ),
+                            baseFee: parseFloat(baseFee),
+                          };
+                          console.log(
+                            "Calling updateSegment API (Save & Declare) with:",
+                            {
+                              segmentId,
+                              payload: updatePayload,
+                            }
+                          );
+                          apiResponse = await updateSegment(
+                            segmentId,
+                            updatePayload
+                          );
+                          console.log(
+                            "Segment updated successfully (Save & Declare)",
+                            apiResponse
+                          );
+                        } catch (apiError) {
+                          console.error(
+                            "API update failed (Save & Declare):",
+                            apiError
+                          );
+                          throw apiError; // Re-throw to be caught by outer catch
+                        }
+                      } else {
+                        console.warn(
+                          "No segmentId provided (Save & Declare), skipping API call"
+                        );
+                      }
+
+                      setHasBeenSaved(true);
+                      // Use API response if available, otherwise use local update
+                      if (apiResponse) {
+                        // Map API response back to SegmentData format
+                        const originPlace =
+                          apiResponse.originCity && apiResponse.originCountry
+                            ? `${apiResponse.originCity}, ${apiResponse.originCountry}`
+                            : apiResponse.originCity ||
+                              apiResponse.originCountry ||
+                              "";
+                        const destinationPlace =
+                          apiResponse.destinationCity &&
+                          apiResponse.destinationCountry
+                            ? `${apiResponse.destinationCity}, ${apiResponse.destinationCountry}`
+                            : apiResponse.destinationCity ||
+                              apiResponse.destinationCountry ||
+                              "";
+
+                        setPendingUpdate({
+                          place: originPlace,
+                          nextPlace: destinationPlace,
+                          startAt: apiResponse.estimatedStartTime || undefined,
+                          estFinishAt:
+                            apiResponse.estimatedFinishTime || undefined,
+                          baseFeeUsd: apiResponse.baseFee ?? undefined,
+                          isPlaceholder: false,
+                        });
+                      } else {
+                        setPendingUpdate(update);
+                      }
+                      setShowCargoModal(true);
+                    } catch (error) {
+                      console.error("Failed to update segment:", error);
+                      // Still proceed with cargo modal even if API fails
+                      setHasBeenSaved(true);
+                      setPendingUpdate({
+                        place: fromValue.trim(),
+                        nextPlace: toValue.trim(),
+                        startAt: combineDateTime(
+                          startDateValue.trim(),
+                          startTimeValue.trim()
+                        ),
+                        estFinishAt: combineDateTime(
+                          estFinishDateValue.trim(),
+                          estFinishTimeValue.trim()
+                        ),
+                        baseFeeUsd: parseFloat(baseFee),
+                        isPlaceholder: false,
+                      });
+                      setShowCargoModal(true);
+                    }
                   }}
                 />
               </div>

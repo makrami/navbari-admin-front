@@ -37,7 +37,6 @@ export default function SegmentHeader({
   locked,
   isCurrent,
   distance,
-  eta,
   avatarUrl,
   assigneeName,
   editable,
@@ -92,12 +91,14 @@ export default function SegmentHeader({
       </div>
 
       <div className="flex-1 flex items-center justify-center gap-2 min-w-0">
-        <span className="text-sm font-bold text-slate-900 ">{place}</span>
+        <span className="text-sm font-bold text-slate-900 ">
+          {place && place.trim() ? place : "NOT ASSIGNED"}
+        </span>
         <ArrowRight className="size-3.5 text-slate-400" />
         <span className="text-sm font-bold text-slate-900 ">
           {nextPlace ? nextPlace : editable ? "NOT ASSIGNED" : "(DESTINATION)"}
         </span>
-        {isCurrent && eta !== null && eta !== undefined ? (
+        {distance ? (
           <div className="flex items-center gap-1">
             <MapPinned className="size-3.5 text-slate-300" />{" "}
             <span className="text-xs font-bold text-slate-400 ">

@@ -64,7 +64,7 @@ export function ShipmentLinkSection({
                 />
               )}
               <span className="text-sm font-semibold text-gray-900">
-                {fromPlace}
+                {fromPlace && fromPlace.trim() ? fromPlace : "NOT ASSIGNED"}
               </span>
             </div>
             <ArrowRight className="size-3.5 text-gray-400" />

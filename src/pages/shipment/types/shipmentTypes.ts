@@ -28,6 +28,7 @@ export type ShipmentData = {
     nextPlace?: string;
     startAt?: string;
     estFinishAt?: string;
+    distance?: string;
     vehicleLabel?: string;
     localCompany?: string;
     baseFeeUsd?: number;
@@ -38,4 +39,3 @@ export type ShipmentData = {
   }>;
   activities: ActivityItemData[];
 };
-

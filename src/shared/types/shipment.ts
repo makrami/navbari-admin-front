@@ -31,6 +31,7 @@ export type Segment = {
   nextPlace?: string;
   startAt?: string;
   estFinishAt?: string;
+  distance?: string;
   vehicleLabel?: string;
   localCompany?: string;
   documents?: Array<{ id: string; name: string; url?: string }>;
