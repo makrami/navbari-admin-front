@@ -8,6 +8,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { cn } from "../../../../shared/utils/cn";
+import { SegmentAssignmentStatus } from "../../../../shared/types/shipment";
 
 type SegmentHeaderProps = {
   step: number;
@@ -26,6 +27,7 @@ type SegmentHeaderProps = {
   onToggle: () => void;
   showCargoButton: boolean;
   onCargoClick: (e: React.MouseEvent) => void;
+  assignmentStatus?: SegmentAssignmentStatus;
 };
 
 export default function SegmentHeader({
@@ -44,13 +46,19 @@ export default function SegmentHeader({
   onToggle,
   showCargoButton,
   onCargoClick,
+  assignmentStatus,
 }: SegmentHeaderProps) {
+  // Only show driver info when backend has approved/assigned the driver
+  const isDriverApproved =
+    assignmentStatus === SegmentAssignmentStatus.ASSIGNED ||
+    assignmentStatus === SegmentAssignmentStatus.READY_TO_START;
+  const shouldShowDriverInfo = isDriverApproved && assigneeName;
   return (
     <div
       id={headerId}
       className={cn(
         "w-full px-3 py-2.5 bg flex items-center justify-between",
-        open && "bg-white",
+        open && "bg-white rounded-t-xl",
         !open && editable && !locked && "bg-blue-100 rounded-xl",
         locked && "cursor-not-allowed opacity-60 bg-slate-50 rounded-xl"
       )}
@@ -121,15 +129,21 @@ export default function SegmentHeader({
             Cargo Declaration
           </button>
         ) : null}
-        <div className="flex items-center gap-2">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="size-5 rounded-full" />
-          ) : null}
-          <span className="text-xs font-medium text-slate-900 ">
-            {assigneeName}
-          </span>
-        </div>
-        {isCurrent ? (
+        {shouldShowDriverInfo ? (
+          <div className="flex items-center gap-2">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="avatar"
+                className="size-5 rounded-full"
+              />
+            ) : null}
+            <span className="text-xs font-medium text-slate-900 ">
+              {assigneeName}
+            </span>
+          </div>
+        ) : null}
+        {isCurrent && shouldShowDriverInfo ? (
           <div className="flex items-center gap-2">
             <div className="bg-[#1B54FE]/10 rounded-md p-1.5">
               <MessagesSquare className="size-3.5 text-[#1B54FE]" />

@@ -7,9 +7,6 @@ import {
   Eye as EyeIcon,
   FileClock,
 } from "lucide-react";
-// Using public folder for images to ensure proper loading
-const driverPhoto = "/driverphoto.png";
-const vehiclePhoto = "/vehiclephoto.png";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
@@ -133,26 +130,10 @@ type DocumentsListProps = {
 
 export default function DocumentsList({
   title = "Documents",
-  items,
+  items = [],
   className,
 }: DocumentsListProps) {
-  const list = items ?? [
-    {
-      id: "d1",
-      title: "Driver Photo",
-      status: "pending" as const,
-      imageUrl: driverPhoto,
-    },
-    {
-      id: "d2",
-      title: "Vehicle Photo",
-      status: "approved" as const,
-      imageUrl: vehiclePhoto,
-    },
-    { id: "d3", title: "Driver License", status: "rejected" as const },
-    { id: "d4", title: "Vehicle Reg.", status: "approved" as const },
-    { id: "d5", title: "Insurance", status: "approved" as const },
-  ];
+  const list = items;
 
   return (
     <section className={cn("space-y-4", className)}>

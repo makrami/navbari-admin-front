@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { X, Search, Users, CalendarDays, UserIcon } from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
 import { DRIVER_LIST, type Driver } from "../data/drivers";
 import { getFileUrl } from "../../LocalCompanies/utils";
+import { announceSegment } from "../../../services/shipment/shipment.api.service";
 
 import company1 from "../../../assets/images/companieslogo/company1.png";
 import company2 from "../../../assets/images/companieslogo/company2.png";
@@ -74,6 +75,7 @@ type CargoDeclarationModalProps = {
   onSelect: (companies: CargoCompany[]) => void;
   companies?: CargoCompany[];
   defaultSelectedIds?: string[];
+  segmentId?: string;
 };
 
 export default function CargoDeclarationModal({
@@ -82,11 +84,14 @@ export default function CargoDeclarationModal({
   onSelect,
   companies = DEFAULT_COMPANIES,
   defaultSelectedIds,
+  segmentId,
 }: CargoDeclarationModalProps) {
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     new Set(defaultSelectedIds ?? [])
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return companies;
@@ -94,11 +99,24 @@ export default function CargoDeclarationModal({
     return companies.filter((c) => c.name.toLowerCase().includes(q));
   }, [companies, query]);
 
+  // Clear error when modal opens or closes
+  useEffect(() => {
+    if (open) {
+      setError(null);
+    }
+  }, [open]);
+
+  // Clear error when modal closes
+  const handleClose = () => {
+    setError(null);
+    onClose();
+  };
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/40" onClick={handleClose} />
       <div className="relative w-full max-w-2xl rounded-2xl bg-slate-50 shadow-xl border border-slate-200">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200">
@@ -106,7 +124,7 @@ export default function CargoDeclarationModal({
             type="button"
             className="inline-flex items-center justify-center rounded-md p-2 hover:bg-slate-100"
             aria-label="Close"
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X className="size-5 text-slate-500" />
           </button>
@@ -125,6 +143,15 @@ export default function CargoDeclarationModal({
             />
           </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="px-5 pt-2">
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          </div>
+        )}
 
         {/* List */}
         <div className="px-5 py-4">
@@ -194,20 +221,46 @@ export default function CargoDeclarationModal({
           <button
             type="button"
             className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-            onClick={onClose}
+            onClick={handleClose}
           >
             Cancel
           </button>
           <button
             type="button"
             className="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
-            disabled={selectedIds.size === 0}
-            onClick={() => {
+            disabled={selectedIds.size === 0 || isLoading}
+            onClick={async () => {
               const list = companies.filter((c) => selectedIds.has(c.id));
-              if (list.length) onSelect(list);
+              if (!list.length) return;
+
+              // If segmentId is provided, call the announce API
+              if (segmentId) {
+                setIsLoading(true);
+                setError(null);
+                try {
+                  const companyIds = list.map((c) => c.id);
+                  await announceSegment(segmentId, companyIds);
+                  // Call onSelect callback after successful API call
+                  onSelect(list);
+                  // Close modal on success
+                  onClose();
+                } catch (err) {
+                  const errorMessage =
+                    err instanceof Error
+                      ? err.message
+                      : "Failed to announce segment";
+                  setError(errorMessage);
+                  console.error("Failed to announce segment:", err);
+                } finally {
+                  setIsLoading(false);
+                }
+              } else {
+                // If no segmentId, just call onSelect (backward compatibility)
+                onSelect(list);
+              }
             }}
           >
-            Select
+            {isLoading ? "Announcing..." : "Select"}
           </button>
         </div>
       </div>

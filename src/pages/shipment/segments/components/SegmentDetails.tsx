@@ -218,7 +218,7 @@ export function SegmentDetails({
   };
 
   // Fetch companies from API
-  const { data: companies = [] } = useCompanies({ status: "approved" });
+  const { data: companies = [] } = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -316,6 +316,7 @@ export function SegmentDetails({
           setPendingUpdate({});
           setShowCargoModal(true);
         }}
+        assignmentStatus={data.assignmentStatus}
       />
 
       {data.progressStage && !open && (
@@ -339,8 +340,13 @@ export function SegmentDetails({
         role="region"
         aria-labelledby={headerId}
       >
-        <div className={cn("overflow-hidden", open)}>
-          <div className="px-3 py-3 gap-6">
+        <div className="overflow-hidden">
+          <div
+            className={cn(
+              "px-3 bg-slate-100 py-2 gap-6",
+              open && "rounded-b-xl"
+            )}
+          >
             {/* Shipment Link Section - only shown when shipmentLinkProps is provided */}
             {shipmentLinkProps && (
               <div className="mb-4">
@@ -712,6 +718,7 @@ export function SegmentDetails({
         onClose={() => setShowCargoModal(false)}
         companies={cargoCompanies}
         defaultSelectedIds={data.cargoCompanies?.map((c) => c.id)}
+        segmentId={segmentId}
         onSelect={(companies) => {
           const update: Partial<SegmentData> = {
             ...(pendingUpdate ?? {}),

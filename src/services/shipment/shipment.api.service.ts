@@ -517,3 +517,27 @@ export async function updateSegment(
     throw new Error("Failed to update segment");
   }
 }
+
+/**
+ * Announce segment to companies
+ */
+export async function announceSegment(
+  id: string,
+  companyIds: string[]
+): Promise<SegmentReadDto> {
+  try {
+    const response = await http.post<SegmentReadDto>(
+      `/segments/${id}/announce`,
+      { companyIds }
+    );
+    return segmentReadDtoSchema.parse(response.data);
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      throw new Error("Invalid response format");
+    }
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to announce segment");
+  }
+}

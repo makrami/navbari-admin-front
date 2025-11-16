@@ -36,24 +36,17 @@ export function SegmentItem({
   index,
   shipment,
   domainShipment,
-  renderSegments,
   isReadOnly,
   segmentStep,
-  editedSegmentsByShipmentId,
   onSegmentSave,
-  onSegmentUpdate,
-  onShipmentIsNewOverride,
   onUpdateShipment,
-  timeoutsRef,
   open,
   onToggle,
 }: SegmentItemProps) {
   const isCurrent =
     shipment.currentSegmentIndex >= 0 && index === shipment.currentSegmentIndex;
   const isCompleted = Boolean(segment.isCompleted);
-  const prevCompleted =
-    index > 0 ? Boolean(renderSegments[index - 1]?.isCompleted) : false;
-  const isNewShipment = shipment.isNew === true;
+
   // Allow all segments to be editable when clicked - don't lock based on previous completion
   // Segments should be editable immediately when shipment is created
   const locked = false;
@@ -70,9 +63,6 @@ export function SegmentItem({
     onSegmentSave(shipment.id, segment.step, update);
 
     if (update.cargoCompanies?.length) {
-      const chosenCompany = update.cargoCompanies[0];
-      const chosenDriver = chosenCompany.drivers?.[0];
-
       // When a segment is assigned, update currentSegmentIndex to this segment's index
       // Only update if no segment is currently assigned (currentSegmentIndex < 0)
       // This ensures segments only become current after explicit assignment
@@ -80,28 +70,8 @@ export function SegmentItem({
         onUpdateShipment(shipment.id, { currentSegmentIndex: index });
       }
 
-      const timeoutId = window.setTimeout(() => {
-        onSegmentUpdate(shipment.id, index, {
-          assigneeName:
-            chosenDriver?.name ||
-            renderSegments[index]?.driverName ||
-            "Xin Zhao",
-          assigneeAvatarUrl:
-            chosenDriver?.avatarUrl || renderSegments[index]?.driverPhoto,
-          cargoCompanies: undefined,
-          isCompleted: true,
-        });
-
-        const updatedSegments =
-          editedSegmentsByShipmentId[shipment.id] ?? shipment.segments;
-        const anyPending = updatedSegments.some(
-          (s) => s.cargoCompanies?.length
-        );
-        if (!anyPending) {
-          onShipmentIsNewOverride(shipment.id, false);
-        }
-      }, 10000);
-      timeoutsRef.current.push(timeoutId);
+      // Remove demo delay logic - driver assignment should only come from backend API approval
+      // Driver name and avatar will only be displayed after actual backend/company approval
     }
   };
 

@@ -36,7 +36,10 @@ export function useShipmentData(
         segments: (s.segments || []).map((seg, index) => ({
           step: seg.step ?? index + 1,
           place: seg.place || "",
-          datetime: seg.datetime || (seg.startAt ? new Date(seg.startAt).toLocaleDateString() : "") || "",
+          datetime:
+            seg.datetime ||
+            (seg.startAt ? new Date(seg.startAt).toLocaleDateString() : "") ||
+            "",
           isCompleted: seg.isCompleted ?? seg.logisticsStatus === "DELIVERED",
           nextPlace: seg.nextPlace,
           startAt: seg.startAt,
@@ -64,15 +67,15 @@ export function useShipmentData(
     if (itemsFromService.length === 0) {
       return DEMO_SHIPMENTS;
     }
-    
+
     // Deduplicate by ID - service shipments take priority over demo shipments
     const result: ShipmentData[] = [];
-    
+
     // First add demo shipments
     DEMO_SHIPMENTS.forEach((shipment) => {
       result.push(shipment);
     });
-    
+
     // Then add service shipments (they override demo shipments with same ID)
     itemsFromService.forEach((shipment) => {
       const id = String(shipment.id);
@@ -85,8 +88,7 @@ export function useShipmentData(
         result.push(shipment);
       }
     });
-    
+
     return result;
   }, [serviceShipments]);
 }
-

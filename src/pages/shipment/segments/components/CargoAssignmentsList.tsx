@@ -1,8 +1,23 @@
 import { RefreshCcw, Star } from "lucide-react";
 import type { CargoCompany } from "../../components/CargoDeclarationModal";
+import { ENV } from "../../../../lib/env";
 
 type CargoAssignmentsListProps = {
   companies: CargoCompany[];
+};
+
+const getLogoUrl = (logoPath: string | null | undefined): string => {
+  if (!logoPath) return "";
+
+  // If already a full URL, return as is
+  if (logoPath.startsWith("http://") || logoPath.startsWith("https://")) {
+    return logoPath;
+  }
+
+  // Construct full URL from relative path
+  // Remove leading slash if present to avoid double slash
+  const cleanPath = logoPath.startsWith("/") ? logoPath.slice(1) : logoPath;
+  return `${ENV.FILE_BASE_URL}/${cleanPath}`;
 };
 
 export default function CargoAssignmentsList({
@@ -14,12 +29,12 @@ export default function CargoAssignmentsList({
         {companies.map((co) => (
           <div
             key={co.id}
-            className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+            className="flex items-center justify-between gap-4 rounded-xl  bg-white px-4 py-3 "
           >
             {/* Left: company */}
             <div className="flex items-center gap-2 min-w-0">
               <img
-                src={co.logoUrl}
+                src={getLogoUrl(co.logoUrl)}
                 alt=""
                 className="h-5 w-5 rounded bg-white object-contain"
               />
