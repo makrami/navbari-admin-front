@@ -17,13 +17,6 @@ import { ChatAlertPage } from "../../pages/chat-alert/ChatAlertPage";
 import { SettingsPage } from "../../pages/settings/SettingsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
-import { MapDemoPage } from "../../pages/map-demo/MapDemoPage";
-import { DEMO_ROUTES } from "../../shared/data/demoRoutes";
-import { segmentWithShipmentFromDemoRoute } from "../../shared/utils/demoSegmentConverters";
-
-const DEMO_SEGMENT_ENTRIES = DEMO_ROUTES.map((route) =>
-  segmentWithShipmentFromDemoRoute(route)
-);
 
 const router = createBrowserRouter([
   {
@@ -70,7 +63,7 @@ const router = createBrowserRouter([
         path: "segments",
         element: (
           <ProtectedRoute>
-            <SegmentsPage extraSegments={DEMO_SEGMENT_ENTRIES} />
+            <SegmentsPage />
           </ProtectedRoute>
         ),
       },
@@ -111,14 +104,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <SettingsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "map-demo",
-        element: (
-          <ProtectedRoute>
-            <MapDemoPage />
           </ProtectedRoute>
         ),
       },

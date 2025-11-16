@@ -1,9 +1,9 @@
 import { X, Clock, Calendar, Truck, Building } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { SegmentWithShipment } from "./SegmentCard";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 type SegmentInfoGridProps = {
-  segment: SegmentWithShipment;
+  segment: SegmentData;
 };
 
 export function SegmentInfoGrid({ segment }: SegmentInfoGridProps) {

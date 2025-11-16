@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, type ReactNode } from "react";
-import SegmentProgress, { type SegmentProgressStage } from "./SegmentProgress";
+import SegmentProgress from "./SegmentProgress";
 import { cn } from "../../../../shared/utils/cn";
 import { CITY_OPTIONS } from "../../data/cities";
 import CargoDeclarationModal, {
@@ -13,10 +13,9 @@ import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type {
-  SegmentAssignmentStatus,
-  SegmentLogisticsStatus,
-} from "../../../../shared/types/shipment";
+import type { SegmentData } from "../../../../shared/types/segmentData";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import { SegmentAssignmentStatus } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
 import { ShipmentLinkSection } from "./ShipmentLinkSection";
 import {
@@ -25,42 +24,10 @@ import {
 } from "../../../../services/shipment/shipment.api.service";
 import { useCompanies } from "../../../../services/company/hooks";
 import type { CompanyReadDto } from "../../../../services/company/company.service";
-export type SegmentData = {
-  step: number;
-  place: string;
-  datetime?: string;
-  isCompleted?: boolean;
-  progressStage?: SegmentProgressStage;
-  isCurrent?: boolean;
-  /** When true, render a minimal placeholder row like in the reference */
-  isPlaceholder?: boolean;
-  assigneeName?: string;
-  assigneeAvatarUrl?: string;
-  vehicleLabel?: string;
-  startAt?: string;
-  estFinishAt?: string;
-  distance?: string;
-  localCompany?: string;
-  baseFeeUsd?: number;
-  /** Title helper: start of the next segment (if any). If undefined, treated as destination. */
-  nextPlace?: string;
-  /** When true, indicates this segment has a disruption/error */
-  hasDisruption?: boolean;
-  documents?: Array<{
-    id: string | number;
-    name: string;
-    sizeLabel: string;
-    status: "pending" | "approved" | "rejected";
-    author?: string;
-    thumbnailUrl?: string;
-  }>;
-  /** Selected cargo companies for this segment */
-  cargoCompanies?: CargoCompany[];
-  /** Assignment phase status (not mixed with logistics) */
-  assignmentStatus?: SegmentAssignmentStatus;
-  /** Logistics operation status */
-  logisticsStatus?: SegmentLogisticsStatus;
-};
+import {
+  computeSegmentPlace,
+  computeSegmentNextPlace,
+} from "../../../../shared/utils/segmentHelpers";
 
 type DocumentItem = NonNullable<SegmentData["documents"]>[number];
 
@@ -146,7 +113,6 @@ export function SegmentDetails({
   shipmentLinkProps,
 }: SegmentDetailsProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
-
   // Use controlled state if provided, otherwise use internal state
   const isControlled =
     controlledOpen !== undefined && controlledOnToggle !== undefined;
@@ -154,52 +120,58 @@ export function SegmentDetails({
   const handleToggle = isControlled
     ? controlledOnToggle
     : () => setInternalOpen((v) => !v);
-  const [toValue, setToValue] = useState<string>(data.nextPlace ?? "");
-  const [fromValue, setFromValue] = useState<string>(data.place ?? "");
+
+  // Compute place and nextPlace from API fields
+  const place = computeSegmentPlace(data);
+  const nextPlace = computeSegmentNextPlace(data);
+
+  const [toValue, setToValue] = useState<string>(nextPlace ?? "");
+  const [fromValue, setFromValue] = useState<string>(place);
 
   // Split date-time values into separate date and time states
   const [startDateValue, setStartDateValue] = useState<string>(() => {
-    const { d } = splitDateTime(data.startAt ?? "");
-    return d;
+    const startAt = typeof data.startAt === "string" ? data.startAt : "";
+    const result = splitDateTime(startAt);
+    return result.d;
   });
   const [startTimeValue, setStartTimeValue] = useState<string>(() => {
-    const { t } = splitDateTime(data.startAt ?? "");
-    return t;
+    const startAt = typeof data.startAt === "string" ? data.startAt : "";
+    const result = splitDateTime(startAt);
+    return result.t;
   });
   const [estFinishDateValue, setEstFinishDateValue] = useState<string>(() => {
-    const { d } = splitDateTime(data.estFinishAt ?? "");
-    return d;
+    const estFinishAt =
+      typeof data.estFinishAt === "string" ? data.estFinishAt : "";
+    const result = splitDateTime(estFinishAt);
+    return result.d;
   });
   const [estFinishTimeValue, setEstFinishTimeValue] = useState<string>(() => {
-    const { t } = splitDateTime(data.estFinishAt ?? "");
-    return t;
+    const estFinishAt =
+      typeof data.estFinishAt === "string" ? data.estFinishAt : "";
+    const result = splitDateTime(estFinishAt);
+    return result.t;
   });
+
   const [baseFee, setBaseFee] = useState<string>(
-    typeof data.baseFeeUsd === "number" ? String(data.baseFeeUsd) : ""
+    typeof data.baseFee === "number" ? String(data.baseFee) : ""
   );
+  console.log(shipmentLinkProps?.fromPlace, shipmentLinkProps?.toPlace);
 
   // Sync form fields when data changes externally (e.g., after save)
   useEffect(() => {
-    setFromValue(data.place ?? "");
-    setToValue(data.nextPlace ?? "");
-    const { d: startDate, t: startTime } = splitDateTime(data.startAt ?? "");
-    setStartDateValue(startDate);
-    setStartTimeValue(startTime);
-    const { d: finishDate, t: finishTime } = splitDateTime(
-      data.estFinishAt ?? ""
-    );
-    setEstFinishDateValue(finishDate);
-    setEstFinishTimeValue(finishTime);
-    setBaseFee(
-      typeof data.baseFeeUsd === "number" ? String(data.baseFeeUsd) : ""
-    );
-  }, [
-    data.place,
-    data.nextPlace,
-    data.startAt,
-    data.estFinishAt,
-    data.baseFeeUsd,
-  ]);
+    setFromValue(place);
+    setToValue(nextPlace ?? "");
+    const startAt = typeof data.startAt === "string" ? data.startAt : "";
+    const startResult = splitDateTime(startAt);
+    setStartDateValue(startResult.d);
+    setStartTimeValue(startResult.t);
+    const estFinishAt =
+      typeof data.estFinishAt === "string" ? data.estFinishAt : "";
+    const finishResult = splitDateTime(estFinishAt);
+    setEstFinishDateValue(finishResult.d);
+    setEstFinishTimeValue(finishResult.t);
+    setBaseFee(typeof data.baseFee === "number" ? String(data.baseFee) : "");
+  }, [place, nextPlace, data.startAt, data.estFinishAt, data.baseFee]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
   const [pendingUpdate, setPendingUpdate] =
@@ -226,23 +198,9 @@ export function SegmentDetails({
   }, [companies]);
 
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
-  const [hasBeenSaved, setHasBeenSaved] = useState(() => {
-    // Consider saved if essential fields are present
-    return Boolean(
-      data.startAt && data.estFinishAt && typeof data.baseFeeUsd === "number"
-    );
-  });
-
-  // Sync hasBeenSaved when data changes (e.g., after external updates)
-  useEffect(() => {
-    const isSaved = Boolean(
-      data.startAt && data.estFinishAt && typeof data.baseFeeUsd === "number"
-    );
-    setHasBeenSaved(isSaved);
-  }, [data.startAt, data.estFinishAt, data.baseFeeUsd]);
 
   // helper state derived inline by Field components when needed
-  const { step, place } = data;
+  const step = data.step ?? 0;
   const headerId = `segment-header-${step}`;
 
   useMemo<DocumentItem[]>(() => {
@@ -292,14 +250,14 @@ export function SegmentDetails({
       <SegmentHeader
         step={step}
         place={place}
-        nextPlace={data.isPlaceholder ? undefined : data.nextPlace}
+        nextPlace={data.isPlaceholder ? undefined : nextPlace}
         isCompleted={data.isCompleted}
         open={open}
         isCurrent={data.isCurrent ?? false}
-        distance={data.distance}
-        eta={data.estFinishAt}
-        avatarUrl={data.assigneeAvatarUrl}
-        assigneeName={data.assigneeName}
+        distanceKm={data.distanceKm}
+        eta={(data.estFinishAt ?? null) as string | null}
+        avatarUrl={data.assigneeAvatarUrl ?? undefined}
+        assigneeName={data.assigneeName ?? undefined}
         locked={locked}
         editable={editable}
         headerId={headerId}
@@ -307,23 +265,29 @@ export function SegmentDetails({
         showCargoButton={
           !open &&
           editable &&
-          Boolean(data.nextPlace) &&
-          !data.isCompleted &&
-          hasBeenSaved
+          Boolean(data.destinationCity) &&
+          Boolean(data.originCity) &&
+          !data.isCompleted
         }
         onCargoClick={(e) => {
           e.stopPropagation();
           setPendingUpdate({});
           setShowCargoModal(true);
         }}
-        assignmentStatus={data.assignmentStatus}
+        assignmentStatus={
+          data.status === SEGMENT_STATUS.ASSIGNED
+            ? SegmentAssignmentStatus.ASSIGNED
+            : data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT
+            ? SegmentAssignmentStatus.PENDING_ASSIGNMENT
+            : undefined
+        }
       />
 
       {data.progressStage && !open && (
         <div className="px-3 pb-3">
           <SegmentProgress
             current={data.progressStage}
-            dateTime={data.datetime}
+            dateTime={(data.datetime ?? undefined) as string | undefined}
             showWarningIcon={data.hasDisruption ?? false}
           />
         </div>
@@ -357,7 +321,7 @@ export function SegmentDetails({
                   toPlace={shipmentLinkProps.toPlace}
                   fromCountryCode={shipmentLinkProps.fromCountryCode}
                   toCountryCode={shipmentLinkProps.toCountryCode}
-                  step={data.step}
+                  step={data.step ?? 0}
                 />
               </div>
             )}
@@ -372,7 +336,7 @@ export function SegmentDetails({
               />
             ) : null}
 
-            {editable && !locked ? (
+            {editable ? (
               <div className=" rounded-xl  grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FieldBoxSelect
                   label="FROM"
@@ -426,7 +390,6 @@ export function SegmentDetails({
                     setEstFinishTimeValue("");
                     setBaseFee("");
                     setShowErrors(false);
-                    setHasBeenSaved(false);
                   }}
                   onSave={async () => {
                     const valid =
@@ -452,7 +415,7 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFeeUsd: parseFloat(baseFee),
+                        baseFee: parseFloat(baseFee),
                         isPlaceholder: false,
                       };
 
@@ -499,7 +462,6 @@ export function SegmentDetails({
                         );
                       }
 
-                      setHasBeenSaved(true);
                       // Use API response if available, otherwise use local update
                       if (apiResponse) {
                         // Map API response back to SegmentData format
@@ -523,7 +485,7 @@ export function SegmentDetails({
                           startAt: apiResponse.estimatedStartTime || undefined,
                           estFinishAt:
                             apiResponse.estimatedFinishTime || undefined,
-                          baseFeeUsd: apiResponse.baseFee ?? undefined,
+                          baseFee: apiResponse.baseFee ?? undefined,
                           isPlaceholder: false,
                         });
                       } else {
@@ -547,7 +509,7 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFeeUsd: parseFloat(baseFee),
+                        baseFee: parseFloat(baseFee),
                         isPlaceholder: false,
                       });
                     }
@@ -576,7 +538,7 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFeeUsd: parseFloat(baseFee),
+                        baseFee: parseFloat(baseFee),
                         isPlaceholder: false,
                       };
 
@@ -629,7 +591,6 @@ export function SegmentDetails({
                         );
                       }
 
-                      setHasBeenSaved(true);
                       // Use API response if available, otherwise use local update
                       if (apiResponse) {
                         // Map API response back to SegmentData format
@@ -653,7 +614,7 @@ export function SegmentDetails({
                           startAt: apiResponse.estimatedStartTime || undefined,
                           estFinishAt:
                             apiResponse.estimatedFinishTime || undefined,
-                          baseFeeUsd: apiResponse.baseFee ?? undefined,
+                          baseFee: apiResponse.baseFee ?? undefined,
                           isPlaceholder: false,
                         });
                       } else {
@@ -663,7 +624,6 @@ export function SegmentDetails({
                     } catch (error) {
                       console.error("Failed to update segment:", error);
                       // Still proceed with cargo modal even if API fails
-                      setHasBeenSaved(true);
                       setPendingUpdate({
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
@@ -675,7 +635,7 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFeeUsd: parseFloat(baseFee),
+                        baseFee: parseFloat(baseFee),
                         isPlaceholder: false,
                       });
                       setShowCargoModal(true);
@@ -683,15 +643,24 @@ export function SegmentDetails({
                   }}
                 />
               </div>
-            ) : data.cargoCompanies && data.cargoCompanies.length ? (
-              <CargoAssignmentsList companies={data.cargoCompanies} />
+            ) : data.hasPendingAnnouncements ? (
+              <CargoAssignmentsList companies={data.cargoCompanies ?? []} />
             ) : (
               <SegmentInfoSummary
-                vehicleLabel={data.vehicleLabel}
-                startAt={data.startAt}
-                localCompany={data.localCompany}
-                estFinishAt={data.estFinishAt}
-                documents={data.documents}
+                vehicleLabel={
+                  (data.vehicleLabel ?? undefined) as string | undefined
+                }
+                startAt={(data.startAt ?? undefined) as string | undefined}
+                localCompany={
+                  (data.localCompany ?? undefined) as string | undefined
+                }
+                estFinishAt={
+                  (data.estFinishAt ?? undefined) as string | undefined
+                }
+                documents={data.documents?.map((doc) => ({
+                  ...doc,
+                  sizeLabel: doc.sizeLabel || "0 KB",
+                }))}
               />
             )}
           </div>

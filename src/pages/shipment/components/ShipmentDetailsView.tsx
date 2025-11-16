@@ -6,7 +6,7 @@ import { createShipmentFromFormData } from "../utils/shipmentHelpers";
 import type { AddShipmentInput as AddShipmentFormInput } from "./AddShipmentModal";
 import type { ShipmentData } from "../types/shipmentTypes";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../segments/components/SegmentDetails";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 type ShipmentDetailsViewProps = {
   shipments: ShipmentData[];
@@ -35,6 +35,8 @@ type ShipmentDetailsViewProps = {
   timeoutsRef: React.MutableRefObject<number[]>;
   onShipmentIsNewOverride: (shipmentId: string, isNew: boolean) => void;
   onUpdateShipment: (shipmentId: string, update: Partial<ShipmentData>) => void;
+  segmentsLoading?: boolean;
+  fetchedSegments?: SegmentData[] | null;
 };
 
 export function ShipmentDetailsView({
@@ -56,6 +58,8 @@ export function ShipmentDetailsView({
   timeoutsRef,
   onShipmentIsNewOverride,
   onUpdateShipment,
+  segmentsLoading = false,
+  fetchedSegments = null,
 }: ShipmentDetailsViewProps) {
   const handleCreateShipment = useCallback(
     (data: AddShipmentFormInput) => {
@@ -71,6 +75,8 @@ export function ShipmentDetailsView({
         selectedId={selectedId}
         onShipmentSelect={onShipmentSelect}
         onAddShipment={onAddShipment}
+        editedSegmentsByShipmentId={editedSegmentsByShipmentId}
+        segmentsLoading={segmentsLoading}
       />
 
       {selectedShipment ? (
@@ -90,6 +96,8 @@ export function ShipmentDetailsView({
           timeoutsRef={timeoutsRef}
           onShipmentIsNewOverride={onShipmentIsNewOverride}
           onUpdateShipment={onUpdateShipment}
+          segmentsLoading={segmentsLoading}
+          fetchedSegments={fetchedSegments}
         />
       ) : (
         <EmptyShipmentView

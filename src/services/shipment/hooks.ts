@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Shipment } from "../../shared/types/shipment";
-import { ShipmentService } from "./ShipmentService";
+import type { SegmentData } from "../../shared/types/segmentData";
+import { listShipments, getShipment, getShipmentSegments } from "./shipment.api.service";
 
 export function useShipments() {
-  const service = useMemo(() => new ShipmentService(), []);
   const [data, setData] = useState<Shipment[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -16,8 +16,7 @@ export function useShipments() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    service
-      .list()
+    listShipments()
       .then((res) => {
         if (!mounted) return;
         setData(res);
@@ -31,13 +30,12 @@ export function useShipments() {
     return () => {
       mounted = false;
     };
-  }, [service, refreshKey]);
+  }, [refreshKey]);
 
-  return { data, loading, error, service, refresh } as const;
+  return { data, loading, error, refresh } as const;
 }
 
 export function useShipment(id: string | null) {
-  const service = useMemo(() => new ShipmentService(), []);
   const [data, setData] = useState<Shipment | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(id));
   const [error, setError] = useState<Error | null>(null);
@@ -51,8 +49,7 @@ export function useShipment(id: string | null) {
       return;
     }
     setLoading(true);
-    service
-      .get(id)
+    getShipment(id)
       .then((res) => {
         if (!mounted) return;
         setData(res ?? null);
@@ -66,7 +63,40 @@ export function useShipment(id: string | null) {
     return () => {
       mounted = false;
     };
-  }, [id, service]);
+  }, [id]);
 
-  return { data, loading, error, service } as const;
+  return { data, loading, error } as const;
+}
+
+export function useShipmentSegments(shipmentId: string | null) {
+  const [data, setData] = useState<SegmentData[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(Boolean(shipmentId));
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    if (!shipmentId) {
+      setData(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    setLoading(true);
+    getShipmentSegments(shipmentId)
+      .then((res) => {
+        if (!mounted) return;
+        setData(res);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setError(e as Error);
+        setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [shipmentId]);
+
+  return { data, loading, error } as const;
 }

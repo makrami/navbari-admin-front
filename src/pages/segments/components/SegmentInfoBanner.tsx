@@ -3,10 +3,10 @@ import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentWithShipment } from "./SegmentCard";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 type SegmentInfoBannerProps = {
-  segment: SegmentWithShipment;
+  segment: SegmentData;
   shipment?: DomainShipment;
 };
 

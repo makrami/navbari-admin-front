@@ -1,6 +1,6 @@
 import type { ShipmentStatus } from "../../../components";
 import type { ActivityItemData } from "../Activity/types";
-import type { CargoCompany } from "../components/CargoDeclarationModal";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 export type ShipmentData = {
   title: string;
@@ -15,27 +15,14 @@ export type ShipmentData = {
   weight: string;
   localCompany: string;
   destination: string;
+  originCountry: string;
+  originCity: string;
+  destinationCountry: string;
+  destinationCity: string;
   lastActivity: string;
   lastActivityTime: string;
   currentSegmentIndex: number; // 0-based index of the current segment
   isNew?: boolean; // newly created shipment - suppress progress UI
-  segments: Array<{
-    step: number;
-    place: string;
-    datetime: string;
-    isCompleted?: boolean;
-    isPlaceholder?: boolean;
-    nextPlace?: string;
-    startAt?: string;
-    estFinishAt?: string;
-    distance?: string;
-    vehicleLabel?: string;
-    localCompany?: string;
-    baseFeeUsd?: number;
-    driverName: string;
-    driverPhoto?: string; // Optional - if not provided, show user icon
-    driverRating: number;
-    cargoCompanies?: CargoCompany[];
-  }>;
+  segments: SegmentData[];
   activities: ActivityItemData[];
 };

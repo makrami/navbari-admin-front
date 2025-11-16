@@ -10,66 +10,8 @@ type SegmentsAwaitingDriverModalProps = {
   onClose: () => void;
 };
 
-// Mock data for segments awaiting driver - based on image description
-const MOCK_SEGMENTS_AWAITING_DRIVER = [
-  {
-    id: "SH-7563",
-    title: "Electronic Shipment",
-    shipmentId: "#SH-7563",
-    origin: {
-      step: "#3",
-      city: "Hejiang",
-      country: "China",
-      countryCode: "CN",
-    },
-    destination: {
-      city: "Ningxia",
-      country: "China",
-      countryCode: "CN",
-    },
-    status: "Awaiting Driver...",
-    statusColor: "bg-[#CA8A041A]",
-    textColor: "text-yellow-500",
-  },
-  {
-    id: "SH-7564",
-    title: "Electronic Shipment",
-    shipmentId: "#SH-7564",
-    origin: {
-      step: "#2",
-      city: "Beijing",
-      country: "China",
-      countryCode: "CN",
-    },
-    destination: {
-      city: "Shanghai",
-      country: "China",
-      countryCode: "CN",
-    },
-    status: "Arriving Soon",
-    statusColor: "bg-[#22C55E1A]",
-    textColor: "text-green-500",
-  },
-  {
-    id: "SH-7565",
-    title: "Electronic Shipment",
-    shipmentId: "#SH-7565",
-    origin: {
-      step: "#1",
-      city: "Shenzhen",
-      country: "China",
-      countryCode: "CN",
-    },
-    destination: {
-      city: "Guangzhou",
-      country: "China",
-      countryCode: "CN",
-    },
-    status: "Awaiting Driver...",
-    statusColor: "bg-[#CA8A041A]",
-    textColor: "text-yellow-500",
-  },
-];
+// TODO: Replace with real API data
+const MOCK_SEGMENTS_AWAITING_DRIVER: never[] = [];
 
 export function SegmentsAwaitingDriverModal({
   open,
@@ -125,7 +67,12 @@ export function SegmentsAwaitingDriverModal({
         {/* Segments List */}
         <div className="max-h-[60vh] overflow-y-auto  flex-1">
           <div className="space-y-3">
-            {MOCK_SEGMENTS_AWAITING_DRIVER.map((segment, index) => (
+            {MOCK_SEGMENTS_AWAITING_DRIVER.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                No segments awaiting driver
+              </div>
+            ) : (
+              MOCK_SEGMENTS_AWAITING_DRIVER.map((segment, index) => (
               <div
                 key={segment.id}
                 className={cn(
@@ -199,7 +146,8 @@ export function SegmentsAwaitingDriverModal({
                   </div>
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

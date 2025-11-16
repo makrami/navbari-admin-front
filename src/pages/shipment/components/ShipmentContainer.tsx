@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ShipmentDetailsView } from "./ShipmentDetailsView";
 import { useShipmentSelection } from "../hooks/useShipmentSelection";
 import { useSegmentHandlers } from "../hooks/useSegmentHandlers";
+import { useShipmentSegments } from "../../../services/shipment/hooks";
 import type { ShipmentData } from "../types/shipmentTypes";
 
 export function ShipmentContainer() {
@@ -33,6 +34,21 @@ export function ShipmentContainer() {
     setEditedSegmentsByShipmentId
   );
 
+  // Fetch segments when a shipment is selected
+  const { data: fetchedSegments, loading: segmentsLoading } =
+    useShipmentSegments(selectedId);
+
+  // Update editedSegmentsByShipmentId when segments are fetched
+  // This ensures ShipmentItem can display segments in the list panel
+  useEffect(() => {
+    if (selectedId && fetchedSegments && !segmentsLoading) {
+      setEditedSegmentsByShipmentId((prev) => ({
+        ...prev,
+        [selectedId]: fetchedSegments,
+      }));
+    }
+  }, [selectedId, fetchedSegments, segmentsLoading]);
+
   return (
     <ShipmentDetailsView
       shipments={allItems}
@@ -57,6 +73,8 @@ export function ShipmentContainer() {
       timeoutsRef={timeoutsRef}
       onShipmentIsNewOverride={() => {}}
       onUpdateShipment={handleUpdateShipment}
+      segmentsLoading={segmentsLoading}
+      fetchedSegments={fetchedSegments}
     />
   );
 }

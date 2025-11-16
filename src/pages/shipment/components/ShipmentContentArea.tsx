@@ -7,9 +7,10 @@ import AddShipmentModal, {
 } from "./AddShipmentModal";
 import { SegmentItem } from "./SegmentItem";
 import { useSegmentScroll } from "../hooks/useSegmentScroll";
+import { SegmentDetailsSkeleton } from "./ShipmentSkeleton";
 import type { ShipmentData } from "../types/shipmentTypes";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../segments/components/SegmentDetails";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 type ShipmentContentAreaProps = {
   selectedShipment: ShipmentData;
@@ -35,6 +36,8 @@ type ShipmentContentAreaProps = {
   timeoutsRef: React.MutableRefObject<number[]>;
   onShipmentIsNewOverride: (shipmentId: string, isNew: boolean) => void;
   onUpdateShipment: (shipmentId: string, update: Partial<ShipmentData>) => void;
+  segmentsLoading?: boolean;
+  fetchedSegments?: SegmentData[] | null;
 };
 
 export function ShipmentContentArea({
@@ -53,13 +56,31 @@ export function ShipmentContentArea({
   timeoutsRef,
   onShipmentIsNewOverride,
   onUpdateShipment,
+  segmentsLoading = false,
+  fetchedSegments = null,
 }: ShipmentContentAreaProps) {
-  const renderSegments = useMemo(
-    () =>
-      editedSegmentsByShipmentId[selectedShipment.id] ??
-      selectedShipment.segments,
-    [editedSegmentsByShipmentId, selectedShipment]
-  );
+  // Use fetched segments only - never use segments from initial shipment data
+  // Segments are fetched on-demand when a shipment is selected
+  const segmentsToRender = useMemo(() => {
+    // If loading, return empty array (skeleton will be shown)
+    if (segmentsLoading) {
+      return [];
+    }
+    // If we have fetched segments, use them (even if empty array)
+    if (fetchedSegments !== null) {
+      return fetchedSegments;
+    }
+    // If no fetched segments yet and not loading, check for edited segments
+    // Otherwise return empty array (segments will be fetched)
+    return editedSegmentsByShipmentId[selectedShipment.id] ?? [];
+  }, [
+    fetchedSegments,
+    segmentsLoading,
+    editedSegmentsByShipmentId,
+    selectedShipment.id,
+  ]);
+
+  const renderSegments = segmentsToRender;
 
   // Manage which segment is open (accordion behavior - only one at a time)
   const [openSegmentStep, setOpenSegmentStep] = useState<number | undefined>(
@@ -77,9 +98,7 @@ export function ShipmentContentArea({
     setOpenSegmentStep((current) => (current === step ? undefined : step));
   };
 
-  const isReadOnlySelected = Boolean(
-    serviceShipments?.find((s) => s.id === selectedId)?.source === "demo-static"
-  );
+  const isReadOnlySelected = false;
 
   const currentSegment =
     selectedShipment.currentSegmentIndex >= 0
@@ -119,33 +138,38 @@ export function ShipmentContentArea({
                 : undefined
             }
           >
-            {renderSegments.map((seg, idx) => {
-              const domainSelected = serviceShipments?.find(
-                (s) => s.id === selectedId
-              );
+            {segmentsLoading
+              ? // Show skeleton loading state while fetching segments
+                Array.from({ length: 3 }).map((_, index) => (
+                  <SegmentDetailsSkeleton key={`skeleton-${index}`} />
+                ))
+              : renderSegments.map((seg, idx) => {
+                  const domainSelected = serviceShipments?.find(
+                    (s) => s.id === selectedId
+                  );
 
-              return (
-                <SegmentItem
-                  key={seg.step}
-                  segment={seg}
-                  index={idx}
-                  shipment={selectedShipment}
-                  selectedId={selectedId}
-                  domainShipment={domainSelected}
-                  renderSegments={renderSegments}
-                  isReadOnly={isReadOnlySelected}
-                  segmentStep={segmentStep}
-                  editedSegmentsByShipmentId={editedSegmentsByShipmentId}
-                  onSegmentSave={onSegmentSave}
-                  onSegmentUpdate={onSegmentUpdate}
-                  onShipmentIsNewOverride={onShipmentIsNewOverride}
-                  onUpdateShipment={onUpdateShipment}
-                  timeoutsRef={timeoutsRef}
-                  open={openSegmentStep === seg.step}
-                  onToggle={() => handleSegmentToggle(seg.step)}
-                />
-              );
-            })}
+                  return (
+                    <SegmentItem
+                      key={seg.step}
+                      segment={seg}
+                      index={idx}
+                      shipment={selectedShipment}
+                      selectedId={selectedId}
+                      domainShipment={domainSelected}
+                      renderSegments={renderSegments}
+                      isReadOnly={isReadOnlySelected}
+                      segmentStep={segmentStep}
+                      editedSegmentsByShipmentId={editedSegmentsByShipmentId}
+                      onSegmentSave={onSegmentSave}
+                      onSegmentUpdate={onSegmentUpdate}
+                      onShipmentIsNewOverride={onShipmentIsNewOverride}
+                      onUpdateShipment={onUpdateShipment}
+                      timeoutsRef={timeoutsRef}
+                      open={openSegmentStep === seg.step}
+                      onToggle={() => handleSegmentToggle(seg.step ?? 0)}
+                    />
+                  );
+                })}
           </Segments>
           <ActivitySection
             items={selectedShipment.activities}

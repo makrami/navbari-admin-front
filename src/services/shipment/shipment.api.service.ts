@@ -1,5 +1,6 @@
-import { z } from "zod";
 import { http } from "../../lib/http";
+import type { Shipment } from "../../shared/types/shipment";
+import type { SegmentData } from "../../shared/types/segmentData";
 
 // Enums matching API
 export const SHIPMENT_STATUS = {
@@ -49,156 +50,94 @@ export type SEGMENT_STATUS =
   (typeof SEGMENT_STATUS)[keyof typeof SEGMENT_STATUS];
 export type ACTIVITY_TYPE = (typeof ACTIVITY_TYPE)[keyof typeof ACTIVITY_TYPE];
 
-// Zod schemas
-const shipmentStatusSchema = z.nativeEnum(SHIPMENT_STATUS);
-const segmentStatusSchema = z.nativeEnum(SEGMENT_STATUS);
-const activityTypeSchema = z.nativeEnum(ACTIVITY_TYPE);
+// Segment Read DTO type
+export interface SegmentReadDto {
+  id: string;
+  shipmentId: string;
+  companyId?: string | null;
+  driverId?: string | null;
+  originCountry?: string | null;
+  originCity?: string | null;
+  destinationCountry?: string | null;
+  destinationCity?: string | null;
+  status: SEGMENT_STATUS;
+  eta?: string | null;
+  currentLatitude?: number | null;
+  currentLongitude?: number | null;
+  lastGpsUpdate?: string | null;
+  startedAt?: string | null;
+  arrivedOriginAt?: string | null;
+  startLoadingAt?: string | null;
+  arrivedDestinationAt?: string | null;
+  deliveredAt?: string | null;
+  etaToOrigin?: string | null;
+  etaToDestination?: string | null;
+  estimatedStartTime?: string | null;
+  estimatedFinishTime?: string | null;
+  baseFee?: number | null;
+  distanceKm?: number | null;
+  contractAccepted: boolean;
+  contractAcceptedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
 
-// Segment Read DTO schema
-const segmentReadDtoSchema = z
-  .object({
-    id: z.string().uuid(),
-    shipmentId: z.string().uuid(),
-    companyId: z.string().uuid().optional().nullable(),
-    driverId: z.string().uuid().optional().nullable(),
-    originCountry: z.string().optional().nullable(),
-    originCity: z.string().optional().nullable(),
-    destinationCountry: z.string().optional().nullable(),
-    destinationCity: z.string().optional().nullable(),
-    status: segmentStatusSchema,
-    eta: z.string().optional().nullable(),
-    currentLatitude: z
-      .union([z.number(), z.string()])
-      .optional()
-      .nullable()
-      .transform((val) =>
-        val === null || val === undefined
-          ? null
-          : typeof val === "string"
-          ? parseFloat(val)
-          : val
-      ),
-    currentLongitude: z
-      .union([z.number(), z.string()])
-      .optional()
-      .nullable()
-      .transform((val) =>
-        val === null || val === undefined
-          ? null
-          : typeof val === "string"
-          ? parseFloat(val)
-          : val
-      ),
-    lastGpsUpdate: z.string().optional().nullable(),
-    startedAt: z.string().optional().nullable(),
-    arrivedOriginAt: z.string().optional().nullable(),
-    startLoadingAt: z.string().optional().nullable(),
-    arrivedDestinationAt: z.string().optional().nullable(),
-    deliveredAt: z.string().optional().nullable(),
-    etaToOrigin: z.string().optional().nullable(),
-    etaToDestination: z.string().optional().nullable(),
-    estimatedStartTime: z.string().optional().nullable(),
-    estimatedFinishTime: z.string().optional().nullable(),
-    baseFee: z
-      .union([z.number(), z.string()])
-      .optional()
-      .nullable()
-      .transform((val) =>
-        val === null || val === undefined
-          ? null
-          : typeof val === "string"
-          ? parseFloat(val)
-          : val
-      ),
-    distanceKm: z
-      .union([z.number(), z.string()])
-      .optional()
-      .nullable()
-      .transform((val) =>
-        val === null || val === undefined
-          ? null
-          : typeof val === "string"
-          ? parseFloat(val)
-          : val
-      ),
-    contractAccepted: z.boolean(),
-    contractAcceptedAt: z.string().optional().nullable(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
-  })
-  .passthrough();
+// Shipment Read DTO type
+export interface ShipmentReadDto {
+  id: string;
+  title: string;
+  originCountry: string;
+  originCity: string;
+  destinationCountry: string;
+  destinationCity: string;
+  cargoType: string;
+  cargoWeight: number;
+  cargoDescription?: string | null;
+  status: SHIPMENT_STATUS;
+  createdAt: string;
+  updatedAt: string;
+  segments?: SegmentReadDto[];
+  [key: string]: unknown;
+}
 
-export type SegmentReadDto = z.infer<typeof segmentReadDtoSchema>;
+// Activity Log Read DTO type
+export interface ActivityLogReadDto {
+  id: string;
+  shipmentId?: string | null;
+  segmentId?: string | null;
+  userId: string;
+  activityType: ACTIVITY_TYPE;
+  description: string;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+  [key: string]: unknown;
+}
 
-// Shipment Read DTO schema
-const shipmentReadDtoSchema = z
-  .object({
-    id: z.string().uuid(),
-    title: z.string(),
-    originCountry: z.string(),
-    originCity: z.string(),
-    destinationCountry: z.string(),
-    destinationCity: z.string(),
-    cargoType: z.string(),
-    cargoWeight: z
-      .union([z.number(), z.string()])
-      .transform((val) => (typeof val === "string" ? parseFloat(val) : val)),
-    cargoDescription: z.string().optional().nullable(),
-    status: shipmentStatusSchema,
-    createdAt: z.string(),
-    updatedAt: z.string(),
-    segments: z.array(segmentReadDtoSchema).optional(),
-  })
-  .passthrough();
+// Create Shipment DTO type
+export interface CreateShipmentDto {
+  title: string;
+  originCountry: string;
+  originCity: string;
+  destinationCountry: string;
+  destinationCity: string;
+  cargoType: string;
+  cargoWeight: number;
+  cargoDescription?: string;
+  segmentCount: number;
+}
 
-export type ShipmentReadDto = z.infer<typeof shipmentReadDtoSchema>;
-
-// Activity Log Read DTO schema
-const activityLogReadDtoSchema = z
-  .object({
-    id: z.string().uuid(),
-    shipmentId: z.string().uuid().optional().nullable(),
-    segmentId: z.string().uuid().optional().nullable(),
-    userId: z.string().uuid(),
-    activityType: activityTypeSchema,
-    description: z.string(),
-    metadata: z.record(z.string(), z.unknown()).optional().nullable(),
-    createdAt: z.string(),
-  })
-  .passthrough();
-
-export type ActivityLogReadDto = z.infer<typeof activityLogReadDtoSchema>;
-
-// Create Shipment DTO schema
-const createShipmentDtoSchema = z.object({
-  title: z.string().min(1).max(200),
-  originCountry: z.string().min(1).max(100),
-  originCity: z.string().min(1).max(100),
-  destinationCountry: z.string().min(1).max(100),
-  destinationCity: z.string().min(1).max(100),
-  cargoType: z.string().min(1).max(100),
-  cargoWeight: z.number().positive(),
-  cargoDescription: z.string().max(1000).optional(),
-  segmentCount: z.number().int().positive().min(1),
-});
-
-export type CreateShipmentDto = z.infer<typeof createShipmentDtoSchema>;
-
-// Update Shipment DTO schema
-const updateShipmentDtoSchema = z
-  .object({
-    title: z.string().min(1).max(200).optional(),
-    originCountry: z.string().min(1).max(100).optional(),
-    originCity: z.string().min(1).max(100).optional(),
-    destinationCountry: z.string().min(1).max(100).optional(),
-    destinationCity: z.string().min(1).max(100).optional(),
-    cargoType: z.string().min(1).max(100).optional(),
-    cargoWeight: z.number().positive().optional(),
-    cargoDescription: z.string().max(1000).optional(),
-  })
-  .partial();
-
-export type UpdateShipmentDto = z.infer<typeof updateShipmentDtoSchema>;
+// Update Shipment DTO type
+export interface UpdateShipmentDto {
+  title?: string;
+  originCountry?: string;
+  originCity?: string;
+  destinationCountry?: string;
+  destinationCity?: string;
+  cargoType?: string;
+  cargoWeight?: number;
+  cargoDescription?: string;
+}
 
 // Shipment filters
 export type ShipmentFilters = {
@@ -207,25 +146,94 @@ export type ShipmentFilters = {
 };
 
 /**
+ * Maps backend ShipmentReadDto to frontend Shipment type
+ */
+function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
+  // Map segments if available - directly use SegmentReadDto, only add step and source
+  const segments: SegmentData[] = dto.segments
+    ? dto.segments.map((seg, index) => ({
+        ...seg, // All fields from SegmentReadDto (including baseFee and distanceKm)
+        step: index + 1,
+        source: "api" as const,
+      }))
+    : [];
+
+  // Map shipment status
+  let status: string = "Pending";
+  switch (dto.status) {
+    case SHIPMENT_STATUS.PENDING:
+      status = "Pending";
+      break;
+    case SHIPMENT_STATUS.IN_TRANSIT:
+      status = "In Transit";
+      break;
+    case SHIPMENT_STATUS.DELIVERED:
+      status = "Delivered";
+      break;
+    case SHIPMENT_STATUS.CANCELLED:
+      status = "Cancelled";
+      break;
+  }
+
+  // Calculate progress based on segments - use SEGMENT_STATUS directly
+  const totalSegments = segments.length;
+  const completedSegments = segments.filter(
+    (s) => s.status === SEGMENT_STATUS.DELIVERED
+  ).length;
+  const progressPercent =
+    totalSegments > 0 ? (completedSegments / totalSegments) * 100 : 0;
+
+  return {
+    id: dto.id,
+    title: dto.title,
+    status,
+    fromCountryCode: dto.originCountry, // Using country name as code for now
+    toCountryCode: dto.destinationCountry, // Using country name as code for now
+    progressPercent,
+    source: "api",
+    segments,
+    // Additional fields
+    userName: undefined,
+    rating: undefined,
+    vehicle: undefined,
+    weight: dto.cargoWeight?.toString(),
+    localCompany: undefined,
+    originCountry: dto.originCountry,
+    originCity: dto.originCity,
+    destination: dto.destinationCity || dto.destinationCountry,
+    destinationCountry: dto.destinationCountry,
+    destinationCity: dto.destinationCity,
+    lastActivity: undefined,
+    lastActivityTime: dto.updatedAt,
+    currentSegmentIndex: 0,
+    isNew: false,
+  };
+}
+
+/**
+ * Maps SegmentReadDto to SegmentData
+ */
+function mapSegmentDtoToSegmentData(
+  dto: SegmentReadDto,
+  step?: number
+): SegmentData {
+  return {
+    ...dto,
+    step: step,
+    source: "api" as const,
+  };
+}
+
+/**
  * Create a new shipment
  */
 export async function createShipment(
   data: CreateShipmentDto
-): Promise<ShipmentReadDto> {
+): Promise<Shipment> {
   try {
-    // Validate input
-    const validatedData = createShipmentDtoSchema.parse(data);
-
-    const response = await http.post<ShipmentReadDto>(
-      "/shipments",
-      validatedData
-    );
-    return shipmentReadDtoSchema.parse(response.data);
+    const response = await http.post<ShipmentReadDto>("/shipments", data);
+    return mapShipmentDtoToShipment(response.data);
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      const firstError = error.issues[0];
-      throw new Error(firstError?.message || "Invalid input");
-    }
     if (error instanceof Error) {
       throw error;
     }
@@ -238,7 +246,7 @@ export async function createShipment(
  */
 export async function listShipments(
   filters: ShipmentFilters = {}
-): Promise<ShipmentReadDto[]> {
+): Promise<Shipment[]> {
   try {
     const params = new URLSearchParams();
     if (filters.skip !== undefined)
@@ -251,28 +259,24 @@ export async function listShipments(
 
     const response = await http.get<ShipmentReadDto[]>(url);
 
-    // Validate response array
-    try {
-      return z.array(shipmentReadDtoSchema).parse(response.data);
-    } catch (validationError) {
-      if (validationError instanceof z.ZodError) {
-        const firstIssue = validationError.issues[0];
-        throw new Error(
-          `Invalid response format: ${firstIssue?.path.join(".")} - ${
-            firstIssue?.message
-          }`
-        );
+    const shipments = response.data.map((dto) => {
+      const shipment = mapShipmentDtoToShipment(dto);
+      // Only use segments if they're included in the response
+      // Segments will be fetched separately when a shipment is selected
+      if (dto.segments && dto.segments.length > 0) {
+        // Ensure segments have step numbers
+        shipment.segments = shipment.segments.map((seg, segIndex) => ({
+          ...seg,
+          step: seg.step ?? segIndex + 1,
+        }));
+      } else {
+        // Initialize with empty segments - will be fetched when shipment is selected
+        shipment.segments = [];
       }
-      throw validationError;
-    }
+      return shipment;
+    });
+    return shipments;
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      throw new Error(
-        `Invalid response format: ${error.issues
-          .map((e: z.ZodIssue) => `${e.path.join(".")}: ${e.message}`)
-          .join(", ")}`
-      );
-    }
     if (error instanceof Error) {
       throw error;
     }
@@ -283,13 +287,32 @@ export async function listShipments(
 /**
  * Get shipment by ID
  */
-export async function getShipment(id: string): Promise<ShipmentReadDto> {
+export async function getShipment(id: string): Promise<Shipment | undefined> {
   try {
     const response = await http.get<ShipmentReadDto>(`/shipments/${id}`);
-    return shipmentReadDtoSchema.parse(response.data);
+    const shipment = mapShipmentDtoToShipment(response.data);
+    // Only use segments if they're included in the response
+    // Segments will be fetched separately when a shipment is selected
+    if (response.data.segments && response.data.segments.length > 0) {
+      // Ensure segments have step numbers
+      shipment.segments = shipment.segments.map((seg, segIndex) => ({
+        ...seg,
+        step: seg.step ?? segIndex + 1,
+      }));
+    } else {
+      // Initialize with empty segments - will be fetched when shipment is selected
+      shipment.segments = [];
+    }
+    return shipment;
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      throw new Error("Invalid response format");
+    // If shipment not found (404), return undefined
+    if (
+      error &&
+      typeof error === "object" &&
+      "status" in error &&
+      error.status === 404
+    ) {
+      return undefined;
     }
     if (error instanceof Error) {
       throw error;
@@ -304,21 +327,11 @@ export async function getShipment(id: string): Promise<ShipmentReadDto> {
 export async function updateShipment(
   id: string,
   data: UpdateShipmentDto
-): Promise<ShipmentReadDto> {
+): Promise<Shipment> {
   try {
-    // Validate input
-    const validatedData = updateShipmentDtoSchema.parse(data);
-
-    const response = await http.put<ShipmentReadDto>(
-      `/shipments/${id}`,
-      validatedData
-    );
-    return shipmentReadDtoSchema.parse(response.data);
+    const response = await http.put<ShipmentReadDto>(`/shipments/${id}`, data);
+    return mapShipmentDtoToShipment(response.data);
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      const firstError = error.issues[0];
-      throw new Error(firstError?.message || "Invalid input");
-    }
     if (error instanceof Error) {
       throw error;
     }
@@ -341,20 +354,32 @@ export async function deleteShipment(id: string): Promise<void> {
 }
 
 /**
- * Get shipment segments
+ * Get shipment segments (internal - returns DTOs for use in mapping)
  */
-export async function getShipmentSegments(
+async function getShipmentSegmentsInternal(
   id: string
 ): Promise<SegmentReadDto[]> {
   try {
     const response = await http.get<SegmentReadDto[]>(
       `/shipments/${id}/segments`
     );
-    return z.array(segmentReadDtoSchema).parse(response.data);
+    return response.data;
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      throw new Error("Invalid response format");
+    if (error instanceof Error) {
+      throw error;
     }
+    throw new Error("Failed to fetch shipment segments");
+  }
+}
+
+/**
+ * Get shipment segments
+ */
+export async function getShipmentSegments(id: string): Promise<SegmentData[]> {
+  try {
+    const dtos = await getShipmentSegmentsInternal(id);
+    return dtos.map((dto, index) => mapSegmentDtoToSegmentData(dto, index + 1));
+  } catch (error: unknown) {
     if (error instanceof Error) {
       throw error;
     }
@@ -372,11 +397,8 @@ export async function getShipmentActivityLog(
     const response = await http.get<ActivityLogReadDto[]>(
       `/shipments/${id}/activity-log`
     );
-    return z.array(activityLogReadDtoSchema).parse(response.data);
+    return response.data;
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      throw new Error("Invalid response format");
-    }
     if (error instanceof Error) {
       throw error;
     }
@@ -384,44 +406,16 @@ export async function getShipmentActivityLog(
   }
 }
 
-// Update Segment DTO schema
-const updateSegmentDtoSchema = z
-  .object({
-    originCountry: z.string().min(1).max(100).optional(),
-    originCity: z.string().min(1).max(100).optional(),
-    destinationCountry: z.string().min(1).max(100).optional(),
-    destinationCity: z.string().min(1).max(100).optional(),
-    estimatedStartTime: z
-      .string()
-      .refine(
-        (val) => {
-          if (!val) return true; // optional
-          // Accept ISO 8601 datetime formats: YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ssZ or YYYY-MM-DDTHH:mm:ss+HH:mm
-          const iso8601Regex =
-            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})?$/;
-          return iso8601Regex.test(val) || !isNaN(Date.parse(val));
-        },
-        { message: "Invalid ISO datetime format" }
-      )
-      .optional(),
-    estimatedFinishTime: z
-      .string()
-      .refine(
-        (val) => {
-          if (!val) return true; // optional
-          // Accept ISO 8601 datetime formats: YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ssZ or YYYY-MM-DDTHH:mm:ss+HH:mm
-          const iso8601Regex =
-            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})?$/;
-          return iso8601Regex.test(val) || !isNaN(Date.parse(val));
-        },
-        { message: "Invalid ISO datetime format" }
-      )
-      .optional(),
-    baseFee: z.number().optional(),
-  })
-  .partial();
-
-export type UpdateSegmentDto = z.infer<typeof updateSegmentDtoSchema>;
+// Update Segment DTO type
+export interface UpdateSegmentDto {
+  originCountry?: string;
+  originCity?: string;
+  destinationCountry?: string;
+  destinationCity?: string;
+  estimatedStartTime?: string;
+  estimatedFinishTime?: string;
+  baseFee?: number;
+}
 
 /**
  * Update a segment
@@ -429,7 +423,7 @@ export type UpdateSegmentDto = z.infer<typeof updateSegmentDtoSchema>;
 export async function updateSegment(
   id: string,
   data: UpdateSegmentDto
-): Promise<SegmentReadDto> {
+): Promise<SegmentData> {
   try {
     // Normalize datetime strings to ISO 8601 format (ensure seconds are included)
     const normalizedData = { ...data };
@@ -496,21 +490,14 @@ export async function updateSegment(
       });
     }
 
-    console.log("Normalized data before validation:", normalizedData);
-
-    // Validate input
-    const validatedData = updateSegmentDtoSchema.parse(normalizedData);
+    console.log("Normalized data before sending:", normalizedData);
 
     const response = await http.put<SegmentReadDto>(
       `/segments/${id}`,
-      validatedData
+      normalizedData
     );
-    return segmentReadDtoSchema.parse(response.data);
+    return mapSegmentDtoToSegmentData(response.data);
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      const firstError = error.issues[0];
-      throw new Error(firstError?.message || "Invalid input");
-    }
     if (error instanceof Error) {
       throw error;
     }
@@ -524,17 +511,14 @@ export async function updateSegment(
 export async function announceSegment(
   id: string,
   companyIds: string[]
-): Promise<SegmentReadDto> {
+): Promise<SegmentData> {
   try {
     const response = await http.post<SegmentReadDto>(
       `/segments/${id}/announce`,
       { companyIds }
     );
-    return segmentReadDtoSchema.parse(response.data);
+    return mapSegmentDtoToSegmentData(response.data);
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      throw new Error("Invalid response format");
-    }
     if (error instanceof Error) {
       throw error;
     }

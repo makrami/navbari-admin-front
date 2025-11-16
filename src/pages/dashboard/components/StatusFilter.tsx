@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDownIcon } from "lucide-react";
-import type { DemoRouteStatus } from "../../../shared/data/demoRoutes";
 
-type SegmentStatus = DemoRouteStatus;
+type SegmentStatus = "pending" | "normal" | "alert";
 
 type StatusFilterProps = {
   statusFilter: Record<SegmentStatus, boolean>;

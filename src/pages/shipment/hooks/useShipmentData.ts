@@ -2,18 +2,14 @@ import { useMemo } from "react";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
 import type { ShipmentStatus } from "../../../components";
 import type { ShipmentData } from "../types/shipmentTypes";
-import { DEMO_SHIPMENTS } from "../data/demoShipments";
-import { isApiMode } from "../../../services/config";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 export function useShipmentData(
   serviceShipments: DomainShipment[] | undefined
 ): ShipmentData[] {
   return useMemo(() => {
-    // Prefer service-provided shipments when available; fallback to inline demo list
     if (!serviceShipments || serviceShipments.length === 0) {
-      if (isApiMode()) {
-        return [];
-      }
+      return [];
     }
     const itemsFromService: ShipmentData[] = (serviceShipments ?? []).map(
       (s: DomainShipment): ShipmentData => ({
@@ -32,63 +28,15 @@ export function useShipmentData(
         lastActivity: s.lastActivity || "",
         lastActivityTime: s.lastActivityTime || "",
         currentSegmentIndex: s.currentSegmentIndex ?? 0,
-        isNew: s.source === "demo-sim",
-        segments: (s.segments || []).map((seg, index) => ({
-          step: seg.step ?? index + 1,
-          place: seg.place || "",
-          datetime:
-            seg.datetime ||
-            (seg.startAt ? new Date(seg.startAt).toLocaleDateString() : "") ||
-            "",
-          isCompleted: seg.isCompleted ?? seg.logisticsStatus === "DELIVERED",
-          nextPlace: seg.nextPlace,
-          startAt: seg.startAt,
-          estFinishAt: seg.estFinishAt,
-          vehicleLabel: seg.vehicleLabel,
-          localCompany: seg.localCompany,
-          baseFeeUsd: seg.baseFeeUsd,
-          driverName: seg.driverName || "",
-          driverPhoto: seg.driverPhoto,
-          driverRating: seg.driverRating ?? 0,
+        isNew: false,
+        segments: s.segments.map((seg: SegmentData) => ({
+          ...seg,
+          step: seg.step ?? 0,
         })),
         activities: [],
       })
     );
 
-    // In API mode, only return service shipments (no demo data)
-    if (isApiMode()) {
-      return itemsFromService;
-    }
-
-    // In demo mode, include demo shipments
-    // Always include demo shipments for now (demo mode), while keeping
-    // service-provided shipments when available. Service items take priority
-    // over demo items if they have the same ID.
-    if (itemsFromService.length === 0) {
-      return DEMO_SHIPMENTS;
-    }
-
-    // Deduplicate by ID - service shipments take priority over demo shipments
-    const result: ShipmentData[] = [];
-
-    // First add demo shipments
-    DEMO_SHIPMENTS.forEach((shipment) => {
-      result.push(shipment);
-    });
-
-    // Then add service shipments (they override demo shipments with same ID)
-    itemsFromService.forEach((shipment) => {
-      const id = String(shipment.id);
-      const existingIndex = result.findIndex((s) => String(s.id) === id);
-      if (existingIndex !== -1) {
-        // Replace demo shipment with service shipment if same ID
-        result[existingIndex] = shipment;
-      } else {
-        // Add new service shipment
-        result.push(shipment);
-      }
-    });
-
-    return result;
+    return itemsFromService;
   }, [serviceShipments]);
 }

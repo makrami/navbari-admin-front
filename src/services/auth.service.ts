@@ -20,7 +20,7 @@ export type LoginResponse = z.infer<typeof loginResponseSchema>;
 /**
  * Login function that authenticates user with email/phone and password.
  * Sets HTTP-only cookies automatically via the backend.
- * 
+ *
  * @param emailOrPhone - User's email address or phone number
  * @param password - User's password
  * @returns Login response with verification status
@@ -86,21 +86,3 @@ export async function logout(): Promise<void> {
     useAuthStore.getState().logout();
   }
 }
-
-// Demo-only auth (kept for backward compatibility if needed)
-export async function loginDemo(emailOrPhone: string, password: string) {
-  if (!emailOrPhone || !password) {
-    throw new Error("Missing credentials");
-  }
-  // For demo, just set authenticated state without API call
-  useAuthStore.getState().setAuthenticated(true, {
-    isEmailVerified: true,
-    isPhoneNumberVerified: false,
-  });
-  return {
-    isEmailVerified: true,
-    isPhoneNumberVerified: false,
-  };
-}
-
-

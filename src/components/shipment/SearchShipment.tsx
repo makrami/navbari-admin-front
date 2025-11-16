@@ -16,7 +16,7 @@ export function SearchShipment({ className }: SearchShipmentProps) {
       )}
       data-name="Search Shipment"
     >
-      {/* Search input mock matching Figma */}
+      {/* Search input */}
       <div className="flex h-11 flex-1 items-center gap-2 rounded-lg bg-white px-2.5">
         <Search className="h-5 w-5 text-slate-400" />
         <p className="text-sm text-slate-300">Search...</p>

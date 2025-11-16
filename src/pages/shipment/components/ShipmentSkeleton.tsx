@@ -153,7 +153,7 @@ function NavigatingInfoSkeleton() {
 }
 
 // Skeleton for segment details
-function SegmentDetailsSkeleton() {
+export function SegmentDetailsSkeleton() {
   return (
     <div className="relative bg-white border border-slate-200 rounded-[12px] shadow-sm animate-pulse">
       <div className="w-full px-3 py-2.5 flex items-center justify-between">

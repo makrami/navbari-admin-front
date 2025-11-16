@@ -1,12 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import CargoMap, { type Segment } from "../../components/CargoMap";
 import { useShipments } from "../../services/shipment/hooks";
-import {
-  DEMO_ROUTES,
-  type DemoRouteStatus,
-} from "../../shared/data/demoRoutes";
-import { segmentWithShipmentFromDemoRoute } from "../../shared/utils/demoSegmentConverters";
-import type { SegmentWithShipment } from "../segments/components/SegmentCard";
+import type { SegmentData } from "../../shared/types/segmentData";
 import { MAPBOX_TOKEN } from "./constants";
 import { KPICards } from "./components/KPICards";
 import { StatusFilter } from "./components/StatusFilter";
@@ -19,7 +14,7 @@ import { SegmentsAwaitingDriverModal } from "./components/SegmentsAwaitingDriver
 import { useMapSegments } from "./hooks/useMapSegments";
 import { ChartBarBig } from "lucide-react";
 
-type SegmentStatus = DemoRouteStatus;
+type SegmentStatus = "pending" | "normal" | "alert";
 
 export function DashboardPage() {
   const { data: serviceShipments } = useShipments();
@@ -37,12 +32,6 @@ export function DashboardPage() {
   const [openModal, setOpenModal] = useState<string | null>(null);
 
   const mapSegments = useMapSegments(serviceShipments, statusFilter);
-
-  const demoSegmentEntries = useMemo(
-    (): SegmentWithShipment[] =>
-      DEMO_ROUTES.map((route) => segmentWithShipmentFromDemoRoute(route)),
-    []
-  );
 
   const handleSegmentClick = (segment: Segment) => {
     const segmentKey = segment.meta?.segmentKey;
@@ -130,7 +119,6 @@ export function DashboardPage() {
           open={isSegmentsOpen}
           onClose={handleSegmentsClose}
           selectedSegmentId={selectedSegmentId}
-          extraSegments={demoSegmentEntries}
         />
 
         {/* Shared modal for both "Unread Messages" and "Total Alerts" cards */}

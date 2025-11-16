@@ -1,154 +1,72 @@
 import { useMemo } from "react";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import { SegmentAssignmentStatus } from "../../../shared/types/shipment";
-import { DEMO_SHIPMENTS } from "../../shipment/data/demoShipments";
-import type { SegmentWithShipment } from "../components/SegmentCard";
+import type { SegmentData } from "../../../shared/types/segmentData";
 import type { FilterType } from "../components/SegmentsFilters";
-import type { SegmentProgressStage } from "../../shipment/segments/components/SegmentProgress";
+import { SEGMENT_STATUS } from "../../../services/shipment/shipment.api.service";
+import {
+  computeSegmentPlace,
+  computeSegmentNextPlace,
+  getProgressStageFromStatus,
+} from "../../../shared/utils/segmentHelpers";
 
 export function useSegmentsData(
   serviceShipments: DomainShipment[] | null | undefined,
   filter: FilterType,
   searchQuery: string,
-  extraSegments: SegmentWithShipment[] | undefined = []
+  extraSegments: SegmentData[] | undefined = []
 ) {
   // Convert shipments to segments with shipment context.
-  // Show ALL segments (no assignment-status filter). If service shipments are
-  // unavailable, fall back to demo shipments to populate the list.
+  // Show ALL segments (no assignment-status filter).
   const fromService = useMemo(() => {
     return (serviceShipments ?? []).flatMap((shipment: DomainShipment) => {
       const segments = shipment.segments || [];
       return segments.map((seg, idx) => {
         const allSegments = shipment.segments || [];
-        const segmentIndex = allSegments.findIndex((s) => s === seg);
+        const segmentIndex = allSegments.findIndex((s) => s.id === seg.id);
         const isCurrent = segmentIndex === shipment.currentSegmentIndex;
-        const isCompleted = Boolean(seg.isCompleted);
+        const isCompleted = seg.status === SEGMENT_STATUS.DELIVERED;
 
-        let progressStage: SegmentProgressStage | undefined;
-        if (!shipment.isNew) {
-          if (segmentIndex < (shipment.currentSegmentIndex ?? 0)) {
-            progressStage = "delivered";
-          } else if (isCurrent) {
-            if (shipment.status === "Loading") {
-              progressStage = "loading";
-            } else if (shipment.status === "In Origin") {
-              progressStage = "in_origin";
-            } else if (shipment.status === "Delivered") {
-              progressStage = "delivered";
-            } else if (shipment.status === "In Transit") {
-              progressStage = "to_dest";
-            } else if (shipment.status === "Customs") {
-              progressStage = "to_dest";
-            }
-          }
-        }
+        // Use helper function to get progress stage from status
+        const progressStage = getProgressStageFromStatus(
+          seg.status,
+          isCompleted
+        );
 
+        // Use helper functions to compute place and nextPlace
+        const place = computeSegmentPlace(seg);
         const nextPlace =
-          seg.nextPlace !== undefined &&
-          seg.nextPlace !== null &&
-          seg.nextPlace !== ""
-            ? seg.nextPlace
-            : segmentIndex < allSegments.length - 1
-            ? allSegments[segmentIndex + 1]?.place
-            : undefined;
+          computeSegmentNextPlace(seg) ||
+          (segmentIndex < allSegments.length - 1
+            ? computeSegmentPlace(allSegments[segmentIndex + 1])
+            : undefined);
 
         return {
+          ...seg, // All fields from SegmentData
           step: seg.step ?? idx + 1,
-          place: seg.place || "",
-          datetime: seg.datetime || "",
+          isCurrent,
           isCompleted,
           progressStage,
+          place,
           nextPlace,
-          startAt: seg.startAt,
-          estFinishAt: seg.estFinishAt,
-          vehicleLabel: seg.vehicleLabel,
-          localCompany: seg.localCompany,
-          baseFeeUsd: seg.baseFeeUsd,
-          assigneeName: seg.driverName || "",
-          assigneeAvatarUrl: seg.driverPhoto,
-          driverRating: seg.driverRating ?? 0,
-          assignmentStatus: seg.assignmentStatus,
-          logisticsStatus: seg.logisticsStatus,
-          documents: seg.documents?.map((doc) => ({
-            id: doc.id,
-            name: doc.name || "",
-            sizeLabel: "1.2MB",
-            status: "pending" as const,
-            author: seg.driverName,
-          })),
-          shipmentId: shipment.id,
           shipmentTitle: shipment.title,
           shipmentStatus: shipment.status,
           shipmentFromCountryCode: shipment.fromCountryCode,
           shipmentToCountryCode: shipment.toCountryCode,
-        };
+        } as SegmentData;
       });
     });
   }, [serviceShipments]);
 
-  const fallbackSegments = useMemo(() => {
-    if (fromService.length > 0) return [] as SegmentWithShipment[];
+  const baseSegments = fromService;
 
-    return DEMO_SHIPMENTS.flatMap((shipment) => {
-      const segments = shipment.segments || [];
-      return segments.map((seg, idx) => {
-        const allSegments = shipment.segments || [];
-        const segmentIndex = idx;
-        const isCompleted = Boolean(seg.isCompleted);
+  const allSegments: SegmentData[] = useMemo(() => {
+    let segments: SegmentData[];
 
-        let progressStage: SegmentProgressStage | undefined;
-        if (segmentIndex < (shipment.currentSegmentIndex ?? 0)) {
-          progressStage = "delivered";
-        } else if (segmentIndex === (shipment.currentSegmentIndex ?? 0)) {
-          if (shipment.status === "Loading") progressStage = "loading";
-          else if (shipment.status === "In Origin") progressStage = "in_origin";
-          else if (shipment.status === "Delivered") progressStage = "delivered";
-          else progressStage = "to_dest";
-        }
-
-        const nextPlace =
-          segmentIndex < allSegments.length - 1
-            ? allSegments[segmentIndex + 1]?.place
-            : undefined;
-
-        return {
-          step: seg.step ?? idx + 1,
-          place: seg.place || "",
-          datetime: seg.datetime || "",
-          isCompleted,
-          progressStage,
-          nextPlace,
-          startAt: undefined,
-          estFinishAt: undefined,
-          vehicleLabel: undefined,
-          localCompany: shipment.localCompany,
-          baseFeeUsd: undefined,
-          assigneeName: seg.driverName || "",
-          assigneeAvatarUrl: seg.driverPhoto,
-          driverRating: seg.driverRating ?? 0,
-          assignmentStatus: SegmentAssignmentStatus.READY_TO_START,
-          logisticsStatus: undefined,
-          documents: [],
-          shipmentId: shipment.id,
-          shipmentTitle: shipment.title,
-          shipmentStatus: shipment.status,
-          shipmentFromCountryCode: shipment.fromCountryCode,
-          shipmentToCountryCode: shipment.toCountryCode,
-        };
-      });
-    });
-  }, [fromService.length]);
-
-  const baseSegments = fromService.length > 0 ? fromService : fallbackSegments;
-
-  const allSegments: SegmentWithShipment[] = useMemo(() => {
-    let segments: SegmentWithShipment[];
-    
     if (!extraSegments?.length) {
       segments = baseSegments;
     } else {
-      const byKey = new Map<string, SegmentWithShipment>();
-      const keyOf = (segment: SegmentWithShipment) =>
+      const byKey = new Map<string, SegmentData>();
+      const keyOf = (segment: SegmentData) =>
         `${segment.shipmentId}::${segment.step ?? 0}`;
 
       baseSegments.forEach((segment) => {
@@ -165,7 +83,7 @@ export function useSegmentsData(
     return segments;
   }, [baseSegments, extraSegments]);
 
-  // Filter segments (all segments are already assigned, so filters adjust based on status)
+  // Filter segments using SEGMENT_STATUS directly
   const filteredSegments = useMemo(() => {
     let filtered = allSegments;
 
@@ -174,14 +92,15 @@ export function useSegmentsData(
       filtered = filtered.filter(
         (seg) =>
           !seg.isCompleted &&
-          seg.assignmentStatus === SegmentAssignmentStatus.READY_TO_START
+          (seg.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
+            seg.status === SEGMENT_STATUS.ASSIGNED)
       );
     } else if (filter === "alert") {
       filtered = filtered.filter(
         (seg) =>
           !seg.isCompleted &&
-          seg.logisticsStatus &&
-          ["CANCELLED", "AT_ORIGIN"].includes(seg.logisticsStatus)
+          (seg.status === SEGMENT_STATUS.CANCELLED ||
+            seg.status === SEGMENT_STATUS.AT_ORIGIN)
       );
     }
 
@@ -190,19 +109,31 @@ export function useSegmentsData(
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (seg) =>
-          seg.place.toLowerCase().includes(query) ||
+          seg.place?.toLowerCase().includes(query) ||
           seg.nextPlace?.toLowerCase().includes(query) ||
           seg.assigneeName?.toLowerCase().includes(query) ||
-          seg.shipmentTitle.toLowerCase().includes(query)
+          seg.shipmentTitle?.toLowerCase().includes(query)
       );
     }
 
     // Sort segments based on active filter
     return [...filtered].sort((a, b) => {
-      const aIsNeedAction = !a.isCompleted && a.assignmentStatus === SegmentAssignmentStatus.READY_TO_START;
-      const bIsNeedAction = !b.isCompleted && b.assignmentStatus === SegmentAssignmentStatus.READY_TO_START;
-      const aIsAlert = !a.isCompleted && a.logisticsStatus && ["CANCELLED", "AT_ORIGIN"].includes(a.logisticsStatus);
-      const bIsAlert = !b.isCompleted && b.logisticsStatus && ["CANCELLED", "AT_ORIGIN"].includes(b.logisticsStatus);
+      const aIsNeedAction =
+        !a.isCompleted &&
+        (a.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
+          a.status === SEGMENT_STATUS.ASSIGNED);
+      const bIsNeedAction =
+        !b.isCompleted &&
+        (b.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
+          b.status === SEGMENT_STATUS.ASSIGNED);
+      const aIsAlert =
+        !a.isCompleted &&
+        (a.status === SEGMENT_STATUS.CANCELLED ||
+          a.status === SEGMENT_STATUS.AT_ORIGIN);
+      const bIsAlert =
+        !b.isCompleted &&
+        (b.status === SEGMENT_STATUS.CANCELLED ||
+          b.status === SEGMENT_STATUS.AT_ORIGIN);
       const aIsCompleted = Boolean(a.isCompleted);
       const bIsCompleted = Boolean(b.isCompleted);
 
@@ -224,8 +155,16 @@ export function useSegmentsData(
         // Within alerts, prioritize by status severity if needed
         if (aIsAlert && bIsAlert) {
           // CANCELLED might be more urgent than AT_ORIGIN
-          if (a.logisticsStatus === "CANCELLED" && b.logisticsStatus !== "CANCELLED") return -1;
-          if (a.logisticsStatus !== "CANCELLED" && b.logisticsStatus === "CANCELLED") return 1;
+          if (
+            a.status === SEGMENT_STATUS.CANCELLED &&
+            b.status !== SEGMENT_STATUS.CANCELLED
+          )
+            return -1;
+          if (
+            a.status !== SEGMENT_STATUS.CANCELLED &&
+            b.status === SEGMENT_STATUS.CANCELLED
+          )
+            return 1;
         }
       }
 
@@ -238,7 +177,8 @@ export function useSegmentsData(
     return allSegments.filter(
       (seg) =>
         !seg.isCompleted &&
-        seg.assignmentStatus === SegmentAssignmentStatus.READY_TO_START
+        (seg.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
+          seg.status === SEGMENT_STATUS.ASSIGNED)
     ).length;
   }, [allSegments]);
 
@@ -246,8 +186,8 @@ export function useSegmentsData(
     return allSegments.filter(
       (seg) =>
         !seg.isCompleted &&
-        seg.logisticsStatus &&
-        ["CANCELLED", "AT_ORIGIN"].includes(seg.logisticsStatus)
+        (seg.status === SEGMENT_STATUS.CANCELLED ||
+          seg.status === SEGMENT_STATUS.AT_ORIGIN)
     ).length;
   }, [allSegments]);
 
@@ -258,4 +198,3 @@ export function useSegmentsData(
     alertCount,
   };
 }
-

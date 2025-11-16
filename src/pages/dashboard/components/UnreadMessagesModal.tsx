@@ -9,36 +9,8 @@ type UnreadMessagesModalProps = {
   onClose: () => void;
 };
 
-// Mock data for messages
-const MOCK_MESSAGES = [
-  {
-    id: "1",
-    name: "Amita Sing",
-    avatar: imgAvatar,
-    message: "i'm trying to turn on m...",
-    alerts: 2,
-    messages: 7,
-    time: "14:35",
-  },
-  {
-    id: "2",
-    name: "Xin Zhao",
-    avatar: imgAvatar,
-    message: "i'm trying to turn on m...",
-    alerts: 2,
-    messages: 7,
-    time: "14:35",
-  },
-  {
-    id: "3",
-    name: "Olaf Khan",
-    avatar: imgAvatar,
-    message: "i'm trying to turn on m...",
-    alerts: 2,
-    messages: 7,
-    time: "14:35",
-  },
-];
+// TODO: Replace with real API data
+const MOCK_MESSAGES: never[] = [];
 
 export function UnreadMessagesModal({
   open,
@@ -88,7 +60,12 @@ export function UnreadMessagesModal({
         {/* Messages List */}
         <div className="max-h-[60vh] overflow-y-auto  pt-3">
           <div className="space-y-3">
-            {MOCK_MESSAGES.map((msg, index) => (
+            {MOCK_MESSAGES.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                No unread messages
+              </div>
+            ) : (
+              MOCK_MESSAGES.map((msg, index) => (
               <div
                 key={msg.id}
                 className={cn(
@@ -134,7 +111,8 @@ export function UnreadMessagesModal({
                   {/* Right side: Badges and timestamp */}
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

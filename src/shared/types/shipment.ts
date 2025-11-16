@@ -1,3 +1,6 @@
+import type { SegmentData } from "./segmentData";
+
+// UI-only enums for backward compatibility (not used for mapping, only for UI display)
 export const SegmentAssignmentStatus = {
   UNASSIGNED: "UNASSIGNED",
   PENDING_ASSIGNMENT: "PENDING_ASSIGNMENT",
@@ -17,31 +20,6 @@ export const SegmentLogisticsStatus = {
 export type SegmentLogisticsStatus =
   (typeof SegmentLogisticsStatus)[keyof typeof SegmentLogisticsStatus];
 
-export type Segment = {
-  id: string;
-  assignmentStatus: SegmentAssignmentStatus;
-  logisticsStatus?: SegmentLogisticsStatus;
-  source: "demo-static" | "demo-sim" | "api";
-  // Existing or future fields used by UI
-  step?: number;
-  place?: string;
-  datetime?: string;
-  isCompleted?: boolean;
-  isPlaceholder?: boolean;
-  nextPlace?: string;
-  startAt?: string;
-  estFinishAt?: string;
-  distance?: string;
-  vehicleLabel?: string;
-  localCompany?: string;
-  documents?: Array<{ id: string; name: string; url?: string }>;
-  baseFeeUsd?: number;
-  // Driver info used by cards/UI
-  driverName?: string;
-  driverPhoto?: string;
-  driverRating?: number;
-};
-
 export type Shipment = {
   id: string;
   title: string;
@@ -55,13 +33,16 @@ export type Shipment = {
   weight?: string;
   localCompany?: string;
   destination?: string;
+  originCountry?: string;
+  originCity?: string;
+  destinationCountry?: string;
+  destinationCity?: string;
   lastActivity?: string;
   lastActivityTime?: string;
   currentSegmentIndex?: number;
   isNew?: boolean;
-  source: "demo-static" | "demo-sim" | "api";
-  segments: Segment[];
+  source: "api";
+  segments: SegmentData[];
 };
 
-export const isReadOnlySegment = (segment: Segment): boolean =>
-  segment.source === "demo-static";
+export const isReadOnlySegment = (): boolean => false;

@@ -164,8 +164,8 @@ export function SettingsPage() {
     },
   ]);
 
-  // Mock change count for demo
-  const changeCount = 5;
+  // TODO: Get change count from API
+  const changeCount = 0;
 
   const sections = [
     {

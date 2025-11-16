@@ -6,7 +6,6 @@ import { DriverAndShipmentInfo } from "./DriverAndShipmentInfo";
 import { FinancialCards } from "./FinancialCards";
 import { SegmentSection } from "./SegmentSection";
 import type { Segment } from "../../../components/CargoMap";
-import { getDriverMockData } from "../data/mockDriverData";
 
 type ChatAlertDetailsProps = {
   chatAlert: ChatAlert;
@@ -19,17 +18,28 @@ export function ChatAlertDetails({
   onClose,
   currentStateIndex,
 }: ChatAlertDetailsProps) {
-  // Get driver-specific mock data
-  const driverData = useMemo(
-    () => getDriverMockData(chatAlert.driverId, chatAlert),
-    [chatAlert]
-  );
+  // TODO: Replace with real API data
+  // For now, use default values from chatAlert
+  const effectiveStateIndex = currentStateIndex ?? 0;
 
-  // Use provided currentStateIndex or calculate from driver data
-  const effectiveStateIndex =
-    currentStateIndex !== undefined
-      ? currentStateIndex
-      : driverData.currentStateIndex;
+  // Default financial data - should come from API
+  const financialData = {
+    estFinish: chatAlert.estFinish || "",
+    totalPaid: chatAlert.totalPaid || "$0",
+    totalPending: chatAlert.totalPending || "$0",
+  };
+
+  // Default segment data - should come from API
+  const segmentData = chatAlert.currentSegment || {
+    number: 1,
+    from: "",
+    to: "",
+    distance: "",
+  };
+
+  // Default messages - should come from API
+  const messages: any[] = [];
+  const actionableAlerts: any[] = [];
   const mapSegments = useMemo<Segment[]>(
     () => [
       {
@@ -108,13 +118,13 @@ export function ChatAlertDetails({
         />
 
         <FinancialCards
-          estFinish={driverData.financialData.estFinish}
-          totalPaid={driverData.financialData.totalPaid}
-          totalPending={driverData.financialData.totalPending}
+          estFinish={financialData.estFinish}
+          totalPaid={financialData.totalPaid}
+          totalPending={financialData.totalPending}
         />
 
         <SegmentSection
-          currentSegment={driverData.segmentData}
+          currentSegment={segmentData}
           currentStateIndex={effectiveStateIndex}
         />
       </div>
@@ -123,8 +133,8 @@ export function ChatAlertDetails({
       <div className="bg-white rounded-xl overflow-hidden h-[600px]  flex flex-col">
         <ChatSection
           key={chatAlert.driverId}
-          messages={driverData.messages}
-          actionableAlerts={driverData.actionableAlerts}
+          messages={messages}
+          actionableAlerts={actionableAlerts}
         />
       </div>
     </div>

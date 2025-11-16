@@ -6,14 +6,50 @@ import {
 } from "../../../components";
 import { ListPanel } from "../../../shared/components/ui/ListPanel";
 import type { ShipmentData } from "../types/shipmentTypes";
+import type { SegmentData } from "../../../shared/types/segmentData";
 import { useMemo, useState } from "react";
 import { StatusFilterChips, type FilterKey } from "./StatusFilterChips";
+
+// Helper function to format SegmentData for ShipmentItem
+function formatSegmentsForShipmentItem(segments: SegmentData[]): Array<{
+  step: number;
+  place: string;
+  datetime: string;
+  isCompleted?: boolean;
+}> {
+  return segments.map((seg) => {
+    // Format datetime from estimatedStartTime or startedAt
+    let datetime = "";
+    const dateTimeSource = seg.estimatedStartTime || seg.startedAt;
+    if (dateTimeSource) {
+      try {
+        const date = new Date(dateTimeSource);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        datetime = `${day}/${month} - ${hours}:${minutes}`;
+      } catch {
+        // If date parsing fails, use empty string
+      }
+    }
+
+    return {
+      step: seg.step ?? 0,
+      place: seg.place || seg.originCity || seg.destinationCity || "",
+      datetime,
+      isCompleted: seg.isCompleted ?? false,
+    };
+  });
+}
 
 type ShipmentListPanelProps = {
   shipments: ShipmentData[];
   selectedId: string;
   onShipmentSelect: (id: string) => void;
   onAddShipment: () => void;
+  editedSegmentsByShipmentId?: Record<string, ShipmentData["segments"]>;
+  segmentsLoading?: boolean;
 };
 
 export function ShipmentListPanel({
@@ -21,6 +57,8 @@ export function ShipmentListPanel({
   selectedId,
   onShipmentSelect,
   onAddShipment,
+  editedSegmentsByShipmentId = {},
+  segmentsLoading = false,
 }: ShipmentListPanelProps) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
@@ -83,6 +121,16 @@ export function ShipmentListPanel({
         {filteredShipments.map((item) => {
           // Use the memoized selection map for consistent comparison
           const isSelected = selectionMap.get(item.id) ?? false;
+          // Check if segments are loading for this specific shipment
+          const isLoadingSegments = isSelected && segmentsLoading;
+          // Use fetched segments if available, otherwise use shipment segments
+          const segmentsToDisplay =
+            editedSegmentsByShipmentId[item.id] ?? item.segments;
+          // Format segments for ShipmentItem component
+          // If loading, pass empty array so loading placeholder can be shown
+          const formattedSegments = isLoadingSegments
+            ? []
+            : formatSegmentsForShipmentItem(segmentsToDisplay);
           return (
             <ShipmentItem
               key={item.id}
@@ -94,9 +142,10 @@ export function ShipmentListPanel({
               progressPercent={item.progressPercent}
               userName={item.userName}
               rating={item.rating}
-              segments={item.segments}
+              segments={formattedSegments}
               selected={isSelected}
               onClick={() => onShipmentSelect(item.id)}
+              segmentsLoading={isLoadingSegments}
             />
           );
         })}

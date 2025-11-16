@@ -1,8 +1,8 @@
 import SegmentProgress from "../../shipment/segments/components/SegmentProgress";
-import type { SegmentWithShipment } from "./SegmentCard";
+import type { SegmentData } from "../../../shared/types/segmentData";
 
 type SegmentProgressSectionProps = {
-  segment: SegmentWithShipment;
+  segment: SegmentData;
 };
 
 export function SegmentProgressSection({

@@ -7,11 +7,10 @@ import {
   getIso2FromPlace,
   toFlagEmojiFromIso2,
 } from "../../../shared/utils/geography";
-import { DEMO_ROUTES, type DemoRouteStatus } from "../../../shared/data/demoRoutes";
 import { STATUS_COLORS } from "../constants";
 import { seededCount } from "../utils";
 
-type SegmentStatus = DemoRouteStatus;
+type SegmentStatus = "pending" | "normal" | "alert";
 
 export function useMapSegments(
   serviceShipments: any,
@@ -19,7 +18,7 @@ export function useMapSegments(
 ) {
   const { allSegments } = useSegmentsData(serviceShipments ?? null, "all", "");
 
-  // API segments (default to normal status in demo)
+  // API segments
   const apiSegments = useMemo((): Segment[] => {
     return allSegments
       .map((segment): Segment | null => {
@@ -57,40 +56,13 @@ export function useMapSegments(
       .filter((segment): segment is Segment => segment !== null);
   }, [allSegments]);
 
-  // Demo shipments with mixed statuses
-  const demoSegments = useMemo((): Segment[] => {
-    return DEMO_ROUTES.map(({ id, from, to, status, details }) => {
-      const a = getCityCoordinates(from);
-      const b = getCityCoordinates(to);
-      if (!a || !b) return null;
-      const originIso2 = getIso2FromPlace(from);
-      const destIso2 = getIso2FromPlace(to);
-      const originFlag = toFlagEmojiFromIso2(originIso2);
-      const destFlag = toFlagEmojiFromIso2(destIso2);
-      return {
-        color: STATUS_COLORS[status],
-        path: [a, b] as readonly [number, number][],
-        meta: {
-          segmentKey: getSegmentListId(id, 1),
-          status,
-          trucksCount: seededCount(id),
-          ...details,
-          originFlag: originFlag ?? "",
-          destFlag: destFlag ?? "",
-          originIso2: originIso2 ?? "",
-          destIso2: destIso2 ?? "",
-        },
-      } as Segment;
-    }).filter((s): s is Segment => s !== null);
-  }, []);
-
   const mapSegments = useMemo((): Segment[] => {
-    const combined = [...demoSegments, ...apiSegments];
+    const combined = [...apiSegments];
     return combined.filter((s) => {
       const st = (s.meta?.status as SegmentStatus | undefined) ?? "normal";
       return statusFilter[st];
     });
-  }, [demoSegments, apiSegments, statusFilter]);
+  }, [apiSegments, statusFilter]);
 
   return mapSegments;
 }

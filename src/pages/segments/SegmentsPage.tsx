@@ -5,18 +5,17 @@ import { X } from "lucide-react";
 import { useShipments } from "../../services/shipment/hooks";
 import type { FilterType } from "./components/SegmentsFilters";
 import { SegmentsFilters } from "./components/SegmentsFilters";
-import type { SegmentWithShipment } from "./components/SegmentCard";
+import type { SegmentData } from "../../shared/types/segmentData";
 import { useSegmentsData } from "./hooks/useSegmentsData";
 import { cn } from "../../shared/utils/cn";
 import { getSegmentListId } from "./utils/getSegmentListId";
 import SegmentDetails from "../shipment/segments/components/SegmentDetails";
-import { convertSegmentWithShipmentToSegmentData } from "./utils/convertSegmentData";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
   onClose?: () => void;
   className?: string;
-  extraSegments?: SegmentWithShipment[];
+  extraSegments?: SegmentData[];
 };
 
 export function SegmentsPage({
@@ -166,11 +165,14 @@ export function SegmentsPage({
                       !s.isCompleted
                   );
 
-                  const segmentData = convertSegmentWithShipmentToSegmentData(
-                    segment,
-                    shipmentSegments,
-                    currentSegmentIndex >= 0 ? currentSegmentIndex : undefined
-                  );
+                  // segment is already SegmentData, just ensure it has computed fields
+                  const segmentData = {
+                    ...segment,
+                    isCurrent:
+                      currentSegmentIndex >= 0 &&
+                      shipmentSegments.findIndex((s) => s.id === segment.id) ===
+                        currentSegmentIndex,
+                  };
 
                   // Get shipment destination - prefer from service shipment, otherwise use last segment's nextPlace
                   const shipment = serviceShipments?.find(

@@ -30,6 +30,7 @@ type ShipmentItemProps = {
     datetime: string; // e.g., 06/11 - 17:45
     isCompleted?: boolean;
   }[];
+  segmentsLoading?: boolean;
 };
 
 export function ShipmentItem({
@@ -44,6 +45,7 @@ export function ShipmentItem({
   selected = false,
   onClick,
   segments = [],
+  segmentsLoading = false,
 }: ShipmentItemProps) {
   const clampedProgress = Math.max(0, Math.min(100, progressPercent));
   const isDelivered = status === "Delivered";
@@ -181,36 +183,72 @@ export function ShipmentItem({
         </div>
       </div>
       {/* Segments timeline (selected) */}
-      {selected && segments && segments.length > 0 && (
-        <div className="mt-4 grid gap-3">
-          {segments.map((seg, idx) => (
-            <div
-              key={`${seg.step}-${seg.place}`}
-              className="grid grid-cols-[14px_1fr_auto] items-start gap-2"
-            >
-              {/* Timeline column */}
-              <div className="relative flex justify-center">
+      {selected && (
+        <>
+          {segmentsLoading ? (
+            // Loading placeholder for segments
+            <div className="mt-4 grid gap-3">
+              {Array.from({ length: 3 }).map((_, idx) => (
                 <div
-                  className={cn(
-                    "mt-0.5 h-2 w-2 rounded-full",
-                    seg.isCompleted ? "bg-white" : "border border-white/80"
-                  )}
-                />
-                {idx !== segments.length - 1 && (
-                  <div className="absolute left-1/2 top-2 -translate-x-1/2 h-6 w-px bg-white/40" />
-                )}
-              </div>
+                  key={`loading-${idx}`}
+                  className="grid grid-cols-[14px_1fr_auto] items-start gap-2 animate-pulse"
+                >
+                  {/* Timeline column */}
+                  <div className="relative flex justify-center">
+                    <div className="mt-0.5 h-2 w-2 rounded-full bg-white/40" />
+                    {idx !== 2 && (
+                      <div className="absolute left-1/2 top-2 -translate-x-1/2 h-6 w-px bg-white/20" />
+                    )}
+                  </div>
 
-              {/* Title column */}
-              <div className="truncate text-xs text-white/90">
-                <span className="font-medium">#{seg.step}</span> {seg.place}
-              </div>
+                  {/* Title column */}
+                  <div className="h-4 bg-white/20 rounded w-24" />
 
-              {/* Date/time column */}
-              <div className="text-[11px] text-white/80">{seg.datetime}</div>
+                  {/* Date/time column */}
+                  <div className="h-3 bg-white/20 rounded w-16" />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : (
+            segments &&
+            segments.length > 0 && (
+              <div className="mt-4 grid gap-3">
+                {segments.map((seg, idx) => (
+                  <div
+                    key={`${seg.step}-${seg.place}`}
+                    className="grid grid-cols-[14px_1fr_auto] items-start gap-2"
+                  >
+                    {/* Timeline column */}
+                    <div className="relative flex justify-center">
+                      <div
+                        className={cn(
+                          "mt-0.5 h-2 w-2 rounded-full",
+                          seg.isCompleted
+                            ? "bg-white"
+                            : "border border-white/80"
+                        )}
+                      />
+                      {idx !== segments.length - 1 && (
+                        <div className="absolute left-1/2 top-2 -translate-x-1/2 h-6 w-px bg-white/40" />
+                      )}
+                    </div>
+
+                    {/* Title column */}
+                    <div className="truncate text-xs text-white/90">
+                      <span className="font-medium">#{seg.step}</span>{" "}
+                      {seg.place}
+                    </div>
+
+                    {/* Date/time column */}
+                    <div className="text-[11px] text-white/80">
+                      {seg.datetime}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </>
       )}
 
       {/* Footer */}

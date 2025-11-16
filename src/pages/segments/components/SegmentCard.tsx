@@ -1,46 +1,15 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "../../../shared/utils/cn";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
+import type { SegmentData } from "../../../shared/types/segmentData";
 import { SegmentCardHeader } from "./SegmentCardHeader";
 import { SegmentInfoBanner } from "./SegmentInfoBanner";
 import { SegmentInfoGrid } from "./SegmentInfoGrid";
-import { type SegmentProgressStage } from "../../shipment/segments/components/SegmentProgress";
 import { FinancialSection } from "../../shipment/segments/components/FinancialSection";
 import { DocumentsSection } from "../../shipment/segments/components/DocumentsSection";
 
-export type SegmentWithShipment = {
-  step: number;
-  place: string;
-  datetime?: string;
-  isCompleted?: boolean;
-  progressStage?: SegmentProgressStage;
-  nextPlace?: string;
-  startAt?: string;
-  estFinishAt?: string;
-  vehicleLabel?: string;
-  localCompany?: string;
-  baseFeeUsd?: number;
-  assigneeName?: string;
-  assigneeAvatarUrl?: string;
-  driverRating?: number;
-  assignmentStatus?: string;
-  logisticsStatus?: string;
-  documents?: Array<{
-    id: string | number;
-    name: string;
-    sizeLabel: string;
-    status: "pending" | "approved" | "rejected";
-    author?: string;
-  }>;
-  shipmentId: string;
-  shipmentTitle: string;
-  shipmentStatus?: string;
-  shipmentFromCountryCode?: string;
-  shipmentToCountryCode?: string;
-};
-
 type SegmentCardProps = {
-  segment: SegmentWithShipment;
+  segment: SegmentData;
   shipment?: DomainShipment;
   isExpanded: boolean;
   onToggle: () => void;

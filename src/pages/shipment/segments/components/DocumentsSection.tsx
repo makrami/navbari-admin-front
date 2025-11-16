@@ -14,41 +14,9 @@ type DocumentsSectionProps = {
   documents?: DocumentItem[];
 };
 
-// Demo documents with pending status
-const DEMO_DOCUMENTS: DocumentItem[] = [
-  {
-    id: 1,
-    name: "photo_af...jpg",
-    sizeLabel: "1.2MB",
-    status: "pending",
-    author: "Oni Chan",
-  },
-  {
-    id: 2,
-    name: "document_1.pdf",
-    sizeLabel: "2.5MB",
-    status: "pending",
-    author: "Oni Chan",
-  },
-  {
-    id: 3,
-    name: "invoice_2024.pdf",
-    sizeLabel: "856KB",
-    status: "pending",
-    author: "Oni Chan",
-  },
-  {
-    id: 4,
-    name: "contract_signed.pdf",
-    sizeLabel: "1.8MB",
-    status: "pending",
-    author: "Oni Chan",
-  },
-];
-
 export function DocumentsSection({ documents = [] }: DocumentsSectionProps) {
-  // Use demo documents if no documents provided, otherwise use provided documents
-  const displayDocuments = documents.length > 0 ? documents : DEMO_DOCUMENTS;
+  // Use provided documents only
+  const displayDocuments = documents;
 
   const handleApprove = (docId: string | number) => {
     console.log("Approve document:", docId);

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../../../shared/utils/cn";
 import { SegmentAssignmentStatus } from "../../../../shared/types/shipment";
+import { formatDistance } from "../../../../shared/utils/segmentHelpers";
 
 type SegmentHeaderProps = {
   step: number;
@@ -18,7 +19,7 @@ type SegmentHeaderProps = {
   open: boolean;
   locked: boolean;
   isCurrent: boolean;
-  distance?: string;
+  distanceKm?: number | null;
   eta?: string | null; // Estimated Time of Arrival - if null, don't show distance
   avatarUrl?: string;
   assigneeName?: string;
@@ -38,7 +39,7 @@ export default function SegmentHeader({
   open,
   locked,
   isCurrent,
-  distance,
+  distanceKm,
   avatarUrl,
   assigneeName,
   editable,
@@ -53,6 +54,7 @@ export default function SegmentHeader({
     assignmentStatus === SegmentAssignmentStatus.ASSIGNED ||
     assignmentStatus === SegmentAssignmentStatus.READY_TO_START;
   const shouldShowDriverInfo = isDriverApproved && assigneeName;
+  const distance = formatDistance(distanceKm);
   return (
     <div
       id={headerId}

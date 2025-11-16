@@ -13,43 +13,8 @@ type AwaitingRegistrationsModalProps = {
   onClose: () => void;
 };
 
-// Mock data for registrations
-const MOCK_REGISTRATIONS = [
-  {
-    id: "1",
-    type: "driver" as const,
-    name: "Amita Sing",
-    avatar: imgAvatar,
-    company: {
-      logo: company1Logo,
-      name: "DHL Logestics",
-    },
-    status: "New Driver",
-  },
-  {
-    id: "2",
-    type: "company" as const,
-    name: "UPS Logistics",
-    logo: company2Logo,
-    location: {
-      country: "China",
-      city: "Hejiang",
-      countryCode: "CN",
-    },
-    status: "New Company",
-  },
-  {
-    id: "3",
-    type: "driver" as const,
-    name: "Olaf Khan",
-    avatar: imgAvatar,
-    company: {
-      logo: null,
-      name: "Independent",
-    },
-    status: "New Driver",
-  },
-];
+// TODO: Replace with real API data
+const MOCK_REGISTRATIONS: never[] = [];
 
 export function AwaitingRegistrationsModal({
   open,
@@ -105,7 +70,12 @@ export function AwaitingRegistrationsModal({
         {/* Registrations List */}
         <div className="max-h-[60vh] overflow-y-auto pt-3">
           <div className="space-y-3">
-            {MOCK_REGISTRATIONS.map((registration, index) => (
+            {MOCK_REGISTRATIONS.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                No pending registrations
+              </div>
+            ) : (
+              MOCK_REGISTRATIONS.map((registration, index) => (
               <div
                 key={registration.id}
                 className={cn(
@@ -188,7 +158,8 @@ export function AwaitingRegistrationsModal({
                   </div>
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
