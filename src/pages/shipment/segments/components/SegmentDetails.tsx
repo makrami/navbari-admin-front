@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import SegmentProgress, { type SegmentProgressStage } from "./SegmentProgress";
 import { cn } from "../../../../shared/utils/cn";
 import { CITY_OPTIONS } from "../../data/cities";
@@ -123,10 +123,49 @@ export function SegmentDetails({
   const [baseFee, setBaseFee] = useState<string>(
     typeof data.baseFeeUsd === "number" ? String(data.baseFeeUsd) : ""
   );
+
+  // Sync form fields when data changes externally (e.g., after save)
+  useEffect(() => {
+    setFromValue(data.place ?? "");
+    setToValue(data.nextPlace ?? "");
+    const { d: startDate, t: startTime } = splitDateTime(data.startAt ?? "");
+    setStartDateValue(startDate);
+    setStartTimeValue(startTime);
+    const { d: finishDate, t: finishTime } = splitDateTime(
+      data.estFinishAt ?? ""
+    );
+    setEstFinishDateValue(finishDate);
+    setEstFinishTimeValue(finishTime);
+    setBaseFee(
+      typeof data.baseFeeUsd === "number" ? String(data.baseFeeUsd) : ""
+    );
+  }, [
+    data.place,
+    data.nextPlace,
+    data.startAt,
+    data.estFinishAt,
+    data.baseFeeUsd,
+  ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
   const [pendingUpdate, setPendingUpdate] =
     useState<Partial<SegmentData> | null>(null);
+  // Track if the segment form has been saved (to show "Cargo Declaration" button)
+  const [hasBeenSaved, setHasBeenSaved] = useState(() => {
+    // Consider saved if essential fields are present
+    return Boolean(
+      data.startAt && data.estFinishAt && typeof data.baseFeeUsd === "number"
+    );
+  });
+
+  // Sync hasBeenSaved when data changes (e.g., after external updates)
+  useEffect(() => {
+    const isSaved = Boolean(
+      data.startAt && data.estFinishAt && typeof data.baseFeeUsd === "number"
+    );
+    setHasBeenSaved(isSaved);
+  }, [data.startAt, data.estFinishAt, data.baseFeeUsd]);
+
   // helper state derived inline by Field components when needed
   const { step, place } = data;
   const headerId = `segment-header-${step}`;
@@ -183,6 +222,7 @@ export function SegmentDetails({
         open={open}
         isCurrent={data.isCurrent ?? false}
         distance={data.distance}
+        eta={data.estFinishAt}
         avatarUrl={data.assigneeAvatarUrl}
         assigneeName={data.assigneeName}
         locked={locked}
@@ -190,7 +230,11 @@ export function SegmentDetails({
         headerId={headerId}
         onToggle={handleToggle}
         showCargoButton={
-          !open && editable && Boolean(data.nextPlace) && !data.isCompleted
+          !open &&
+          editable &&
+          Boolean(data.nextPlace) &&
+          !data.isCompleted &&
+          hasBeenSaved
         }
         onCargoClick={(e) => {
           e.stopPropagation();
@@ -301,6 +345,7 @@ export function SegmentDetails({
                     setEstFinishTimeValue("");
                     setBaseFee("");
                     setShowErrors(false);
+                    setHasBeenSaved(false);
                   }}
                   onSave={() => {
                     const valid =
@@ -314,6 +359,7 @@ export function SegmentDetails({
                       setShowErrors(true);
                       return;
                     }
+                    setHasBeenSaved(true);
                     onSave?.({
                       place: fromValue.trim(),
                       nextPlace: toValue.trim(),
@@ -345,6 +391,7 @@ export function SegmentDetails({
                       setShowErrors(true);
                       return;
                     }
+                    setHasBeenSaved(true);
                     setPendingUpdate({
                       place: fromValue.trim(),
                       nextPlace: toValue.trim(),

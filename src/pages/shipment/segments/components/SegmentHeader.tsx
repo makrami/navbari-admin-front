@@ -18,6 +18,7 @@ type SegmentHeaderProps = {
   locked: boolean;
   isCurrent: boolean;
   distance?: string;
+  eta?: string | null; // Estimated Time of Arrival - if null, don't show distance
   avatarUrl?: string;
   assigneeName?: string;
   editable: boolean;
@@ -36,6 +37,7 @@ export default function SegmentHeader({
   locked,
   isCurrent,
   distance,
+  eta,
   avatarUrl,
   assigneeName,
   editable,
@@ -95,7 +97,7 @@ export default function SegmentHeader({
         <span className="text-sm font-bold text-slate-900 ">
           {nextPlace ? nextPlace : editable ? "NOT ASSIGNED" : "(DESTINATION)"}
         </span>
-        {isCurrent ? (
+        {isCurrent && eta !== null && eta !== undefined ? (
           <div className="flex items-center gap-1">
             <MapPinned className="size-3.5 text-slate-300" />{" "}
             <span className="text-xs font-bold text-slate-400 ">

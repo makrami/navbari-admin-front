@@ -72,7 +72,7 @@ export function ShipmentItem({
             {title}
           </p>
           <p className={cn(selected ? "text-white/70" : "text-slate-400")}>
-            {id}
+            {id.split("-").pop()}
           </p>
         </div>
         <div

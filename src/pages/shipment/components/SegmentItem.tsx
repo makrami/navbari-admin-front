@@ -54,7 +54,9 @@ export function SegmentItem({
   const prevCompleted =
     index > 0 ? Boolean(renderSegments[index - 1]?.isCompleted) : false;
   const isNewShipment = shipment.isNew === true;
-  const locked = !isReadOnly && isNewShipment && index > 0 && !prevCompleted;
+  // Allow all segments to be editable when clicked - don't lock based on previous completion
+  // Segments should be editable immediately when shipment is created
+  const locked = false;
 
   const progressStage = getSegmentProgressStage(shipment, index, isCurrent);
 

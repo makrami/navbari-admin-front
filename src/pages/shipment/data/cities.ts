@@ -2,7 +2,7 @@ export const CITY_OPTIONS: string[] = [
   // China
   "Hejiang, China",
   "Ningxia, China",
-  "Inner Mongolia, Mongolia",
+  "Inner Mongolia, China",
   "Shenzhen, China",
   "Guangzhou, China",
   "Urumqi, China",
@@ -13,26 +13,25 @@ export const CITY_OPTIONS: string[] = [
   // Russia
   "Moscow, Russia",
   "Bratsk, Russia",
-  // Turkey / Europe
-  "Istanbul, Turkey",
-  "Sofia, Bulgaria",
-  "Prague, Czech Republic",
-  "Berlin, Germany",
-  // Italy / France / UK
-  "Milan, Italy",
-  "Lyon, France",
-  "Calais, France",
-  "London, UK",
-  // US / Canada
-  "New York, USA",
-  "Buffalo, USA",
-  "Toronto, Canada",
-  // Misc examples
   "Novosibirsk, Russia",
-  "Moscow, Russia",
-  "Moscow, Russia",
+  // Turkey
+  "Istanbul, Turkey",
+  "Ankara, Turkey",
+  "Izmir, Turkey",
+  "Antalya, Turkey",
+  "Bursa, Turkey",
+  // Iran
+  "Tehran, Iran",
+  "Mashhad, Iran",
+  "Isfahan, Iran",
+  "Karaj, Iran",
+  "Tabriz, Iran",
+  // Kazakhstan
+  "Nur-Sultan, Kazakhstan",
+  "Almaty, Kazakhstan",
+  "Shymkent, Kazakhstan",
+  "Karaganda, Kazakhstan",
+  "Aktobe, Kazakhstan",
 ];
 
 export default CITY_OPTIONS;
-
-

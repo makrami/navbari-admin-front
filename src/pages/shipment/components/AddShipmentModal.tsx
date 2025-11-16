@@ -1,6 +1,17 @@
-import { useState } from "react";
-import { XIcon, Search, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { XIcon, Search, ChevronDown, Check } from "lucide-react";
 import { CITY_OPTIONS } from "../data/cities";
+
+const CARGO_CATEGORY_OPTIONS = [
+  { value: "electronics", label: "Electronics" },
+  { value: "textiles", label: "Textiles" },
+  { value: "food", label: "Food" },
+  { value: "medical", label: "Medical" },
+  { value: "machinery", label: "Machinery" },
+  { value: "chemicals", label: "Chemicals" },
+  { value: "automotive", label: "Automotive" },
+  { value: "furniture", label: "Furniture" },
+];
 
 export type AddShipmentInput = {
   id: string;
@@ -16,6 +27,289 @@ export type AddShipmentInput = {
   cargoWeight?: number;
   segmentsAmount?: number;
 };
+
+type CityDropdownProps = {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  label: string;
+};
+
+function CityDropdown({
+  value,
+  onChange,
+  placeholder,
+  label,
+}: CityDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Filter cities based on search term - show all when no search term
+  const filteredCities = searchTerm.trim()
+    ? CITY_OPTIONS.filter((city) =>
+        city.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : CITY_OPTIONS;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setSearchTerm("");
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle city selection
+  const handleSelectCity = (city: string) => {
+    onChange(city);
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  // Handle input focus and dropdown toggle
+  const handleInputClick = () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    if (newIsOpen) {
+      setSearchTerm(""); // Clear search when opening to show all cities
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  };
+
+  // Handle input change for search
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+    // If user types and matches exactly, select it
+    const exactMatch = CITY_OPTIONS.find(
+      (city) => city.toLowerCase() === newValue.toLowerCase()
+    );
+    if (exactMatch) {
+      onChange(exactMatch);
+    } else {
+      onChange(newValue);
+    }
+  };
+
+  // Handle clear selection
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange("");
+    setSearchTerm("");
+  };
+
+  return (
+    <div className="grid gap-1">
+      <label className="text-xs text-slate-600">{label}</label>
+      <div className="relative" ref={dropdownRef}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+          <input
+            ref={inputRef}
+            className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+            placeholder={placeholder}
+            value={isOpen ? searchTerm : value}
+            onChange={handleInputChange}
+            onClick={handleInputClick}
+          />
+          {value && !isOpen && (
+            <button
+              type="button"
+              className="absolute right-8 top-1/2 -translate-y-1/2 size-4 text-slate-400 hover:text-slate-600"
+              onClick={handleClear}
+            >
+              <XIcon className="size-4" />
+            </button>
+          )}
+          <ChevronDown
+            className={`absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </div>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+            {filteredCities.length > 0 ? (
+              filteredCities.map((city) => (
+                <div
+                  key={city}
+                  className="flex cursor-pointer items-center justify-between px-3 py-2 text-sm hover:bg-slate-50"
+                  onClick={() => handleSelectCity(city)}
+                >
+                  <span
+                    className={
+                      value === city
+                        ? "font-medium text-slate-900"
+                        : "text-slate-700"
+                    }
+                  >
+                    {city}
+                  </span>
+                  {value === city && <Check className="size-4 text-blue-600" />}
+                </div>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-sm text-slate-500">
+                No cities found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type CargoCategoryDropdownProps = {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  label: string;
+};
+
+function CargoCategoryDropdown({
+  value,
+  onChange,
+  placeholder,
+  label,
+}: CargoCategoryDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Filter categories based on search term
+  const filteredCategories = searchTerm.trim()
+    ? CARGO_CATEGORY_OPTIONS.filter((category) =>
+        category.label.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : CARGO_CATEGORY_OPTIONS;
+
+  // Get selected category label
+  const selectedCategory = CARGO_CATEGORY_OPTIONS.find(
+    (cat) => cat.value === value
+  );
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setSearchTerm("");
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle category selection
+  const handleSelectCategory = (categoryValue: string) => {
+    onChange(categoryValue);
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  // Handle input focus and dropdown toggle
+  const handleInputClick = () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    if (newIsOpen) {
+      setSearchTerm(""); // Clear search when opening to show all categories
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  };
+
+  // Handle input change for search
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Handle clear selection
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange("");
+    setSearchTerm("");
+  };
+
+  return (
+    <div className="grid gap-1">
+      <label className="text-xs text-slate-600">{label}</label>
+      <div className="relative" ref={dropdownRef}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+          <input
+            ref={inputRef}
+            className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+            placeholder={placeholder}
+            value={isOpen ? searchTerm : selectedCategory?.label || ""}
+            onChange={handleInputChange}
+            onClick={handleInputClick}
+          />
+          {value && !isOpen && (
+            <button
+              type="button"
+              className="absolute right-8 top-1/2 -translate-y-1/2 size-4 text-slate-400 hover:text-slate-600"
+              onClick={handleClear}
+            >
+              <XIcon className="size-4" />
+            </button>
+          )}
+          <ChevronDown
+            className={`absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </div>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+            {filteredCategories.length > 0 ? (
+              filteredCategories.map((category) => (
+                <div
+                  key={category.value}
+                  className="flex cursor-pointer items-center justify-between px-3 py-2 text-sm hover:bg-slate-50"
+                  onClick={() => handleSelectCategory(category.value)}
+                >
+                  <span
+                    className={
+                      value === category.value
+                        ? "font-medium text-slate-900"
+                        : "text-slate-700"
+                    }
+                  >
+                    {category.label}
+                  </span>
+                  {value === category.value && (
+                    <Check className="size-4 text-blue-600" />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-sm text-slate-500">
+                No categories found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 type AddShipmentModalProps = {
   open: boolean;
@@ -97,60 +391,27 @@ export default function AddShipmentModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="grid gap-1">
-              <label className="text-xs text-slate-600">From</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                <input
-                  className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-list-button]:hidden"
-                  placeholder="Search..."
-                  value={from}
-                  onChange={(e) => setFrom(e.target.value)}
-                  list="city-options-list"
-                />
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-            <div className="grid gap-1">
-              <label className="text-xs text-slate-600">To</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                <input
-                  className="w-full rounded-xl border border-slate-200 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-list-button]:hidden"
-                  placeholder="Search..."
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  list="city-options-list"
-                />
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
+            <CityDropdown
+              label="From"
+              placeholder="Search cities..."
+              value={from}
+              onChange={setFrom}
+            />
+            <CityDropdown
+              label="To"
+              placeholder="Search cities..."
+              value={to}
+              onChange={setTo}
+            />
           </div>
-          {/* shared datalist for city selection */}
-          <datalist id="city-options-list">
-            {CITY_OPTIONS.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="grid gap-1">
-              <label className="text-xs text-slate-600">Cargo Category</label>
-              <div className="relative">
-                <select
-                  className="w-full appearance-none rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
-                  value={cargoCategory}
-                  onChange={(e) => setCargoCategory(e.target.value)}
-                >
-                  <option value="">Select</option>
-                  <option value="electronics">Electronics</option>
-                  <option value="textiles">Textiles</option>
-                  <option value="food">Food</option>
-                  <option value="medical">Medical</option>
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-              </div>
-            </div>
+            <CargoCategoryDropdown
+              label="Cargo Category"
+              placeholder="Search categories..."
+              value={cargoCategory}
+              onChange={setCargoCategory}
+            />
             <div className="grid gap-1">
               <label className="text-xs text-slate-600">Cargo Weight</label>
               <div className="relative">

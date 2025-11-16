@@ -26,16 +26,25 @@ export function createShipmentFromFormData(
     isNew: true,
     segments: Array.from({
       length: Math.max(0, Number(data.segmentsAmount ?? 0)),
-    }).map((_, i) => ({
-      step: i + 1,
-      place: i === 0 ? data.from || "" : "Assign Previous Segment First",
-      datetime: "",
-      isCompleted: false,
-      isPlaceholder: i > 0,
-      driverName: "",
-      driverRating: 0,
-    })),
+    }).map((_, i, arr) => {
+      const isFirst = i === 0;
+      const isLast = i === arr.length - 1;
+
+      return {
+        step: i + 1,
+        // First segment's origin is the shipment origin
+        place: isFirst ? data.from || "" : "",
+        // Last segment's destination is the shipment destination
+        nextPlace: isLast ? data.to || "" : undefined,
+        datetime: "",
+        isCompleted: false,
+        // Only mark as placeholder if it's not the first segment
+        // First segment should be editable immediately
+        isPlaceholder: !isFirst,
+        driverName: "",
+        driverRating: 0,
+      };
+    }),
     activities: [],
   };
 }
-

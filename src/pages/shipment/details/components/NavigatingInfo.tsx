@@ -170,7 +170,7 @@ export function NavigatingInfo({
                       )}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-[12px] text-slate-500 bg-slate-100 rounded-full px-2 py-[2px] shrink-0">
+                        <span className="text-xs text-slate-500 bg-slate-100 rounded-full px-2 py-[2px] shrink-0">
                           {n.time}
                         </span>
                         <div className="flex items-center gap-2 min-w-0">
@@ -262,7 +262,9 @@ export function NavigatingInfo({
                     <UserRoundIcon className="size-4 text-slate-500" />
                   </div>
                 )}
-                <p className="text-slate-900 font-medium">{driverName}</p>
+                <p className="text-slate-900 font-medium">
+                  {driverName || "Unknown"}
+                </p>
               </div>
 
               <div className="flex items-center gap-3">
@@ -331,7 +333,9 @@ export function NavigatingInfo({
                   <p className="text-[12px] text-slate-900">
                     {(() => {
                       // Extract numeric value from weight string (handles "146.5 KG", "146.5", etc.)
-                      const numericValue = parseFloat(weight.replace(/[^0-9.]/g, ""));
+                      const numericValue = parseFloat(
+                        weight.replace(/[^0-9.]/g, "")
+                      );
                       if (isNaN(numericValue)) return "0 Tons";
                       // Convert from kilograms to tons (1 ton = 1000 kg)
                       const tons = numericValue / 1000;
