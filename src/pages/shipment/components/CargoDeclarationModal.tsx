@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { X, Search, Users, CalendarDays, UserIcon } from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
 import { DRIVER_LIST, type Driver } from "../data/drivers";
+import { getFileUrl } from "../../LocalCompanies/utils";
 
 import company1 from "../../../assets/images/companieslogo/company1.png";
 import company2 from "../../../assets/images/companieslogo/company2.png";
@@ -147,7 +148,7 @@ export default function CargoDeclarationModal({
                     className="h-5 w-5 rounded-[6px] border border-slate-300 bg-white appearance-none cursor-pointer transition-all hover:border-blue-300 checked:bg-[#1b54fe] checked:border-[#1b54fe] [box-shadow:inset_0_0_0_2px_white] checked:[box-shadow:inset_0_0_0_2px_white]"
                   />
                   <img
-                    src={co.logoUrl}
+                    src={getFileUrl(co.logoUrl) || co.logoUrl}
                     alt=""
                     className="size-8 rounded-md object-contain bg-white"
                   />

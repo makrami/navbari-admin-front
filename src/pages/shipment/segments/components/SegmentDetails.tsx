@@ -23,6 +23,8 @@ import {
   updateSegment,
   type SegmentReadDto,
 } from "../../../../services/shipment/shipment.api.service";
+import { useCompanies } from "../../../../services/company/hooks";
+import type { CompanyReadDto } from "../../../../services/company/company.service";
 export type SegmentData = {
   step: number;
   place: string;
@@ -61,6 +63,51 @@ export type SegmentData = {
 };
 
 type DocumentItem = NonNullable<SegmentData["documents"]>[number];
+
+// Helper function to map country name to ISO country code
+function getCountryCode(countryName: string): string {
+  const countryMap: Record<string, string> = {
+    China: "CN",
+    "United States": "US",
+    Germany: "DE",
+    "United Kingdom": "GB",
+    France: "FR",
+    Italy: "IT",
+    Spain: "ES",
+    Netherlands: "NL",
+    Belgium: "BE",
+    Poland: "PL",
+    Russia: "RU",
+    Turkey: "TR",
+    Iran: "IR",
+    Iraq: "IQ",
+    Afghanistan: "AF",
+    Pakistan: "PK",
+    India: "IN",
+    Kazakhstan: "KZ",
+    Uzbekistan: "UZ",
+    Mongolia: "MN",
+  };
+  return countryMap[countryName] || "US"; // Default to US if not found
+}
+
+// Helper function to transform CompanyReadDto to CargoCompany
+function transformCompanyToCargoCompany(company: CompanyReadDto): CargoCompany {
+  return {
+    id: company.id,
+    name: company.name,
+    country: company.country,
+    countryCode: getCountryCode(company.country),
+    admin: company.primaryContactFullName,
+    registeredAt: new Date(company.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }),
+    logoUrl: company.logoUrl || "",
+    availableDrivers: company.totalDrivers || 0,
+  };
+}
 
 type SegmentDetailsProps = {
   className?: string;
@@ -169,6 +216,15 @@ export function SegmentDetails({
     }
     return { city: place, country: "" };
   };
+
+  // Fetch companies from API
+  const { data: companies = [] } = useCompanies({ status: "approved" });
+
+  // Transform companies to CargoCompany format
+  const cargoCompanies = useMemo(() => {
+    return companies.map(transformCompanyToCargoCompany);
+  }, [companies]);
+
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
   const [hasBeenSaved, setHasBeenSaved] = useState(() => {
     // Consider saved if essential fields are present
@@ -654,6 +710,8 @@ export function SegmentDetails({
       <CargoDeclarationModal
         open={showCargoModal}
         onClose={() => setShowCargoModal(false)}
+        companies={cargoCompanies}
+        defaultSelectedIds={data.cargoCompanies?.map((c) => c.id)}
         onSelect={(companies) => {
           const update: Partial<SegmentData> = {
             ...(pendingUpdate ?? {}),
