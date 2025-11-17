@@ -3,12 +3,13 @@ import {
   AddShipment,
   SegmentButton,
   ShipmentItem,
+  type ShipmentStatus,
 } from "../../../components";
-import { ListPanel } from "../../../shared/components/ui/ListPanel";
-import type { ShipmentData } from "../types/shipmentTypes";
-import type { SegmentData } from "../../../shared/types/segmentData";
-import { useMemo, useState } from "react";
-import { StatusFilterChips, type FilterKey } from "./StatusFilterChips";
+import {ListPanel} from "../../../shared/components/ui/ListPanel";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {SegmentData} from "../../../shared/types/segmentData";
+import {useMemo, useState} from "react";
+import {StatusFilterChips, type FilterKey} from "./StatusFilterChips";
 
 // Helper function to format SegmentData for ShipmentItem
 function formatSegmentsForShipmentItem(segments: SegmentData[]): Array<{
@@ -44,11 +45,11 @@ function formatSegmentsForShipmentItem(segments: SegmentData[]): Array<{
 }
 
 type ShipmentListPanelProps = {
-  shipments: ShipmentData[];
+  shipments: Shipment[];
   selectedId: string;
   onShipmentSelect: (id: string) => void;
   onAddShipment: () => void;
-  editedSegmentsByShipmentId?: Record<string, ShipmentData["segments"]>;
+  editedSegmentsByShipmentId?: Record<string, SegmentData[]>;
   segmentsLoading?: boolean;
 };
 
@@ -136,7 +137,7 @@ export function ShipmentListPanel({
               key={item.id}
               title={item.title}
               id={item.id}
-              status={item.status}
+              status={(item.status as ShipmentStatus) || "Pending"}
               fromCountryCode={item.fromCountryCode}
               toCountryCode={item.toCountryCode}
               progressPercent={item.progressPercent}

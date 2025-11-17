@@ -1,26 +1,26 @@
-import { useMemo, useState, useEffect } from "react";
-import { Segments } from "../segments/Segments";
+import {useMemo, useState, useEffect} from "react";
+import {Segments} from "../segments/Segments";
 import NavigatingInfo from "../details/components/NavigatingInfo";
 import ActivitySection from "../Activity/components/ActivitySection";
 import AddShipmentModal, {
   type AddShipmentInput as AddShipmentFormInput,
 } from "./AddShipmentModal";
-import { SegmentItem } from "./SegmentItem";
-import { useSegmentScroll } from "../hooks/useSegmentScroll";
-import { SegmentDetailsSkeleton } from "./ShipmentSkeleton";
-import type { ShipmentData } from "../types/shipmentTypes";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import {SegmentItem} from "./SegmentItem";
+import {useSegmentScroll} from "../hooks/useSegmentScroll";
+import {SegmentDetailsSkeleton} from "./ShipmentSkeleton";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {SegmentData} from "../../../shared/types/segmentData";
 
 type ShipmentContentAreaProps = {
-  selectedShipment: ShipmentData;
+  selectedShipment: Shipment;
   selectedId: string;
   segmentStep?: number;
   showAddShipment: boolean;
   onCloseAddShipment: () => void;
   onCreateShipment: (data: AddShipmentFormInput) => void;
   onDeselect: () => void;
-  editedSegmentsByShipmentId: Record<string, ShipmentData["segments"]>;
+  editedSegmentsByShipmentId: Record<string, SegmentData[]>;
   onSegmentUpdate: (
     shipmentId: string,
     segmentIndex: number,
@@ -35,7 +35,7 @@ type ShipmentContentAreaProps = {
   serviceShipments: DomainShipment[] | undefined;
   timeoutsRef: React.MutableRefObject<number[]>;
   onShipmentIsNewOverride: (shipmentId: string, isNew: boolean) => void;
-  onUpdateShipment: (shipmentId: string, update: Partial<ShipmentData>) => void;
+  onUpdateShipment: (shipmentId: string, update: Partial<Shipment>) => void;
   segmentsLoading?: boolean;
   fetchedSegments?: SegmentData[] | null;
 };
@@ -101,6 +101,7 @@ export function ShipmentContentArea({
   const isReadOnlySelected = false;
 
   const currentSegment =
+    selectedShipment.currentSegmentIndex &&
     selectedShipment.currentSegmentIndex >= 0
       ? renderSegments[selectedShipment.currentSegmentIndex]
       : undefined;
@@ -120,12 +121,12 @@ export function ShipmentContentArea({
             shipmentId={selectedShipment.id}
             driverName={currentSegment?.driverName || ""}
             driverPhoto={currentSegment?.driverPhoto}
-            vehicle={selectedShipment.vehicle}
-            weight={selectedShipment.weight}
-            localCompany={selectedShipment.localCompany}
-            destination={selectedShipment.destination}
-            lastActivity={selectedShipment.lastActivity}
-            lastActivityTime={selectedShipment.lastActivityTime}
+            vehicle={selectedShipment.vehicle || ""}
+            weight={selectedShipment.weight || ""}
+            localCompany={selectedShipment.localCompany || ""}
+            destination={selectedShipment.destination || ""}
+            lastActivity={selectedShipment.lastActivity || ""}
+            lastActivityTime={selectedShipment.lastActivityTime || ""}
             onClose={onDeselect}
           />
 
@@ -140,14 +141,21 @@ export function ShipmentContentArea({
           >
             {segmentsLoading
               ? // Show skeleton loading state while fetching segments
-                Array.from({ length: 3 }).map((_, index) => (
+                Array.from({length: 3}).map((_, index) => (
                   <SegmentDetailsSkeleton key={`skeleton-${index}`} />
                 ))
-              : renderSegments.map((seg, idx) => {
+              : renderSegments.map((seg: SegmentData, idx: number) => {
                   const domainSelected = serviceShipments?.find(
                     (s) => s.id === selectedId
                   );
 
+                  if (idx == 0) {
+                    seg.originCity = selectedShipment.originCity;
+                  }
+
+                  if (idx == renderSegments.length - 1) {
+                    seg.destinationCity = selectedShipment.destinationCity;
+                  }
                   return (
                     <SegmentItem
                       key={seg.step}
@@ -172,7 +180,7 @@ export function ShipmentContentArea({
                 })}
           </Segments>
           <ActivitySection
-            items={selectedShipment.activities}
+            items={selectedShipment.activities ?? []}
             defaultOpen={false}
           />
         </div>

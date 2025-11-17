@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { Truck, ArrowRight } from "lucide-react";
-import { cn } from "../../../shared/utils/cn";
+import {useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
+import {Truck, ArrowRight} from "lucide-react";
+import {cn} from "../../../shared/utils/cn";
 import ReactCountryFlag from "react-country-flag";
 
 type SegmentsAwaitingDriverModalProps = {
@@ -17,7 +17,7 @@ export function SegmentsAwaitingDriverModal({
   open,
   onClose,
 }: SegmentsAwaitingDriverModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const navigate = useNavigate();
 
   const handleShowAll = () => {
@@ -72,81 +72,83 @@ export function SegmentsAwaitingDriverModal({
                 No segments awaiting driver
               </div>
             ) : (
-              MOCK_SEGMENTS_AWAITING_DRIVER.map((segment, index) => (
-              <div
-                key={segment.id}
-                className={cn(
-                  "flex items-start gap-3 p-3 transition-colors cursor-pointer",
-                  index !== MOCK_SEGMENTS_AWAITING_DRIVER.length - 1 &&
-                    "border-b-1 border-slate-600"
-                )}
-              >
-                {/* Truck Icon */}
-                <div className="w-10 py-6 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ">
-                  <Truck className="w-6 h-6 text-white" />
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 flex-col min-w-0 flex items-start justify-between gap-1">
-                  {/* Title and Status */}
-                  <div className="flex-1 flex items-center justify-between w-full min-w-0">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-bold text-white">
-                        {segment.title}
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        {segment.shipmentId}
-                      </span>
+              MOCK_SEGMENTS_AWAITING_DRIVER.map(
+                (segment: any, index: number) => (
+                  <div
+                    key={segment.id}
+                    className={cn(
+                      "flex items-start gap-3 p-3 transition-colors cursor-pointer",
+                      index !== MOCK_SEGMENTS_AWAITING_DRIVER.length - 1 &&
+                        "border-b-1 border-slate-600"
+                    )}
+                  >
+                    {/* Truck Icon */}
+                    <div className="w-10 py-6 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ">
+                      <Truck className="w-6 h-6 text-white" />
                     </div>
-                    {/* Status badge */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div
-                        className={cn(
-                          "flex items-center text-xs font-bold px-2 py-2 rounded-lg",
-                          segment.textColor,
-                          segment.statusColor
-                        )}
-                      >
-                        {segment.status}
+
+                    {/* Content */}
+                    <div className="flex-1 flex-col min-w-0 flex items-start justify-between gap-1">
+                      {/* Title and Status */}
+                      <div className="flex-1 flex items-center justify-between w-full min-w-0">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-sm font-bold text-white">
+                            {segment.title}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {segment.shipmentId}
+                          </span>
+                        </div>
+                        {/* Status badge */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div
+                            className={cn(
+                              "flex items-center text-xs font-bold px-2 py-2 rounded-lg",
+                              segment.textColor,
+                              segment.statusColor
+                            )}
+                          >
+                            {segment.status}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Origin and Destination */}
+                      <div className="flex items-center gap-2 w-full mt-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-slate-300">
+                            {segment.origin.step}
+                          </span>
+                          <span className="text-xs text-slate-300">
+                            {segment.origin.city}
+                          </span>
+                          <ReactCountryFlag
+                            countryCode={segment.origin.countryCode}
+                            svg
+                            style={{
+                              width: "1rem",
+                              height: "0.75rem",
+                            }}
+                          />
+                        </div>
+                        <ArrowRight className="w-3 h-3 text-slate-300" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-slate-300">
+                            {segment.destination.city}
+                          </span>
+                          <ReactCountryFlag
+                            countryCode={segment.destination.countryCode}
+                            svg
+                            style={{
+                              width: "1rem",
+                              height: "0.75rem",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                  {/* Origin and Destination */}
-                  <div className="flex items-center gap-2 w-full mt-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-300">
-                        {segment.origin.step}
-                      </span>
-                      <span className="text-xs text-slate-300">
-                        {segment.origin.city}
-                      </span>
-                      <ReactCountryFlag
-                        countryCode={segment.origin.countryCode}
-                        svg
-                        style={{
-                          width: "1rem",
-                          height: "0.75rem",
-                        }}
-                      />
-                    </div>
-                    <ArrowRight className="w-3 h-3 text-slate-300" />
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-300">
-                        {segment.destination.city}
-                      </span>
-                      <ReactCountryFlag
-                        countryCode={segment.destination.countryCode}
-                        svg
-                        style={{
-                          width: "1rem",
-                          height: "0.75rem",
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              ))
+                )
+              )
             )}
           </div>
         </div>

@@ -1,8 +1,7 @@
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { AlertTriangle, MessageSquareText } from "lucide-react";
-import { cn } from "../../../shared/utils/cn";
-import imgAvatar from "../../../assets/images/avatar.png";
+import {useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {AlertTriangle, MessageSquareText} from "lucide-react";
+import {cn} from "../../../shared/utils/cn";
 
 type UnreadMessagesModalProps = {
   open: boolean;
@@ -12,11 +11,8 @@ type UnreadMessagesModalProps = {
 // TODO: Replace with real API data
 const MOCK_MESSAGES: never[] = [];
 
-export function UnreadMessagesModal({
-  open,
-  onClose,
-}: UnreadMessagesModalProps) {
-  const { t } = useTranslation();
+export function UnreadMessagesModal({open, onClose}: UnreadMessagesModalProps) {
+  const {t} = useTranslation();
 
   useEffect(() => {
     if (!open) return;
@@ -65,52 +61,54 @@ export function UnreadMessagesModal({
                 No unread messages
               </div>
             ) : (
-              MOCK_MESSAGES.map((msg, index) => (
-              <div
-                key={msg.id}
-                className={cn(
-                  "flex items-start gap-3 p-3 transition-colors cursor-pointer",
-                  index !== MOCK_MESSAGES.length - 1 &&
-                    "border-b-2 border-slate-600"
-                )}
-              >
-                {/* Avatar */}
-                <img
-                  src={msg.avatar}
-                  alt={msg.name}
-                  className="w-10 h-10 rounded-full object-cover flex-shrink-0 "
-                />
+              MOCK_MESSAGES.map((msg: any, index: number) => (
+                <div
+                  key={msg.id}
+                  className={cn(
+                    "flex items-start gap-3 p-3 transition-colors cursor-pointer",
+                    index !== MOCK_MESSAGES.length - 1 &&
+                      "border-b-2 border-slate-600"
+                  )}
+                >
+                  {/* Avatar */}
+                  <img
+                    src={msg.avatar}
+                    alt={msg.name}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0 "
+                  />
 
-                {/* Content */}
-                <div className="flex-1  flex-col min-w-0 flex items-start justify-between gap-1">
-                  {/* Left side: Name and message */}
-                  <div className="flex-1 flex items-center justify-between w-full min-w-0">
-                    <span className="text-sm font-semibold text-white">
-                      {msg.name}
-                    </span>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* Alert badge */}
-                      <div className="flex items-center text-xs font-bold text-yellow-500 bg-[#CA8A041A] px-2  py-1 rounded-lg gap-2">
-                        <AlertTriangle className="w-4 h-4 " />
-                        {msg.alerts}
+                  {/* Content */}
+                  <div className="flex-1  flex-col min-w-0 flex items-start justify-between gap-1">
+                    {/* Left side: Name and message */}
+                    <div className="flex-1 flex items-center justify-between w-full min-w-0">
+                      <span className="text-sm font-semibold text-white">
+                        {msg.name}
+                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Alert badge */}
+                        <div className="flex items-center text-xs font-bold text-yellow-500 bg-[#CA8A041A] px-2  py-1 rounded-lg gap-2">
+                          <AlertTriangle className="w-4 h-4 " />
+                          {msg.alerts}
+                        </div>
+                        {/* Message badge */}
+                        <div className="flex items-center text-xs font-bold text-blue-400 bg-[#1B54FE1A] px-2  py-1 rounded-lg gap-2">
+                          <MessageSquareText className="w-4 h-4 " />
+                          {msg.messages}
+                        </div>
+                        {/* Timestamp */}
                       </div>
-                      {/* Message badge */}
-                      <div className="flex items-center text-xs font-bold text-blue-400 bg-[#1B54FE1A] px-2  py-1 rounded-lg gap-2">
-                        <MessageSquareText className="w-4 h-4 " />
-                        {msg.messages}
-                      </div>
-                      {/* Timestamp */}
                     </div>
+                    <div className="flex items-center gap-2 w-full justify-between">
+                      <p className="text-sm text-white truncate">
+                        {msg.message}
+                      </p>
+                      <span className="text-sm font-semibold text-white ">
+                        {msg.time}
+                      </span>
+                    </div>
+                    {/* Right side: Badges and timestamp */}
                   </div>
-                  <div className="flex items-center gap-2 w-full justify-between">
-                    <p className="text-sm text-white truncate">{msg.message}</p>
-                    <span className="text-sm font-semibold text-white ">
-                      {msg.time}
-                    </span>
-                  </div>
-                  {/* Right side: Badges and timestamp */}
                 </div>
-              </div>
               ))
             )}
           </div>

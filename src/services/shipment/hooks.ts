@@ -1,102 +1,201 @@
-import { useEffect, useState, useCallback } from "react";
-import type { Shipment } from "../../shared/types/shipment";
-import type { SegmentData } from "../../shared/types/segmentData";
-import { listShipments, getShipment, getShipmentSegments } from "./shipment.api.service";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {
+  listShipments,
+  getShipment,
+  getShipmentSegments,
+  createShipment,
+  updateShipment,
+  deleteShipment,
+  updateSegment,
+  announceSegment,
+  getShipmentActivityLog,
+  getSegmentAnnouncements,
+  type ShipmentFilters,
+  type CreateShipmentDto,
+  type UpdateShipmentDto,
+  type UpdateSegmentDto,
+} from "./shipment.api.service";
 
-export function useShipments() {
-  const [data, setData] = useState<Shipment[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+// Query keys
+export const shipmentKeys = {
+  all: ["shipments"] as const,
+  lists: () => [...shipmentKeys.all, "list"] as const,
+  list: (filters?: ShipmentFilters) =>
+    [...shipmentKeys.lists(), filters] as const,
+  details: () => [...shipmentKeys.all, "detail"] as const,
+  detail: (id: string) => [...shipmentKeys.details(), id] as const,
+  segments: (shipmentId: string) =>
+    [...shipmentKeys.detail(shipmentId), "segments"] as const,
+  activityLog: (shipmentId: string) =>
+    [...shipmentKeys.detail(shipmentId), "activity-log"] as const,
+  segmentAnnouncements: (segmentId: string) =>
+    [...shipmentKeys.all, "segment", segmentId, "announcements"] as const,
+};
 
-  const refresh = useCallback(() => {
-    setRefreshKey((prev) => prev + 1);
-  }, []);
+/**
+ * Query hook for listing shipments
+ */
+export function useShipments(filters: ShipmentFilters = {}) {
+  const query = useQuery({
+    queryKey: shipmentKeys.list(filters),
+    queryFn: () => listShipments(filters),
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    listShipments()
-      .then((res) => {
-        if (!mounted) return;
-        setData(res);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (!mounted) return;
-        setError(e as Error);
-        setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [refreshKey]);
-
-  return { data, loading, error, refresh } as const;
+  // Maintain backward compatibility with existing code
+  return {
+    ...query,
+    loading: query.isLoading,
+    refresh: query.refetch,
+  };
 }
 
+/**
+ * Query hook for single shipment
+ */
 export function useShipment(id: string | null) {
-  const [data, setData] = useState<Shipment | null>(null);
-  const [loading, setLoading] = useState<boolean>(Boolean(id));
-  const [error, setError] = useState<Error | null>(null);
+  const query = useQuery({
+    queryKey: shipmentKeys.detail(id!),
+    queryFn: () => getShipment(id!),
+    enabled: !!id,
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    if (!id) {
-      setData(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-    setLoading(true);
-    getShipment(id)
-      .then((res) => {
-        if (!mounted) return;
-        setData(res ?? null);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (!mounted) return;
-        setError(e as Error);
-        setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [id]);
-
-  return { data, loading, error } as const;
+  // Maintain backward compatibility with existing code
+  return {
+    ...query,
+    loading: query.isLoading,
+  };
 }
 
+/**
+ * Query hook for shipment segments
+ */
 export function useShipmentSegments(shipmentId: string | null) {
-  const [data, setData] = useState<SegmentData[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(Boolean(shipmentId));
-  const [error, setError] = useState<Error | null>(null);
+  const query = useQuery({
+    queryKey: shipmentKeys.segments(shipmentId!),
+    queryFn: () => getShipmentSegments(shipmentId!),
+    enabled: !!shipmentId,
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    if (!shipmentId) {
-      setData(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-    setLoading(true);
-    getShipmentSegments(shipmentId)
-      .then((res) => {
-        if (!mounted) return;
-        setData(res);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (!mounted) return;
-        setError(e as Error);
-        setLoading(false);
+  // Maintain backward compatibility with existing code
+  return {
+    ...query,
+    loading: query.isLoading,
+  };
+}
+
+/**
+ * Query hook for shipment activity log
+ */
+export function useShipmentActivityLog(shipmentId: string | null) {
+  return useQuery({
+    queryKey: shipmentKeys.activityLog(shipmentId!),
+    queryFn: () => getShipmentActivityLog(shipmentId!),
+    enabled: !!shipmentId,
+  });
+}
+
+/**
+ * Mutation hook for creating shipment
+ */
+export function useCreateShipment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateShipmentDto) => createShipment(data),
+    onSuccess: () => {
+      // Invalidate and refetch shipments list
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+    },
+  });
+}
+
+/**
+ * Mutation hook for updating shipment
+ */
+export function useUpdateShipment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({id, data}: {id: string; data: UpdateShipmentDto}) =>
+      updateShipment(id, data),
+    onSuccess: (data) => {
+      // Invalidate and refetch shipment queries
+      queryClient.invalidateQueries({queryKey: shipmentKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+    },
+  });
+}
+
+/**
+ * Mutation hook for deleting shipment
+ */
+export function useDeleteShipment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteShipment(id),
+    onSuccess: () => {
+      // Invalidate and refetch shipments list
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+    },
+  });
+}
+
+/**
+ * Mutation hook for updating segment
+ */
+export function useUpdateSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({id, data}: {id: string; data: UpdateSegmentDto}) =>
+      updateSegment(id, data),
+    onSuccess: (data) => {
+      // Invalidate shipment and segments queries
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segments(data.shipmentId),
       });
-    return () => {
-      mounted = false;
-    };
-  }, [shipmentId]);
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.detail(data.shipmentId),
+      });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+    },
+  });
+}
 
-  return { data, loading, error } as const;
+/**
+ * Mutation hook for announcing segment to companies
+ */
+export function useAnnounceSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({id, companyIds}: {id: string; companyIds: string[]}) =>
+      announceSegment(id, companyIds),
+    onSuccess: (data) => {
+      // Invalidate shipment and segments queries
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segments(data.shipmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.detail(data.shipmentId),
+      });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      // Invalidate announcements query for this segment
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segmentAnnouncements(data.id),
+      });
+    },
+  });
+}
+
+/**
+ * Query hook for segment announcements
+ */
+export function useSegmentAnnouncements(segmentId: string | null) {
+  return useQuery({
+    queryKey: shipmentKeys.segmentAnnouncements(segmentId!),
+    queryFn: () => getSegmentAnnouncements(segmentId!),
+    enabled: !!segmentId,
+  });
 }

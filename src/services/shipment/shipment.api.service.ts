@@ -1,6 +1,6 @@
-import { http } from "../../lib/http";
-import type { Shipment } from "../../shared/types/shipment";
-import type { SegmentData } from "../../shared/types/segmentData";
+import {http} from "../../lib/http";
+import type {Shipment} from "../../shared/types/shipment";
+import type {SegmentData} from "../../shared/types/segmentData";
 
 // Enums matching API
 export const SHIPMENT_STATUS = {
@@ -80,7 +80,6 @@ export interface SegmentReadDto {
   contractAcceptedAt?: string | null;
   createdAt: string;
   updatedAt: string;
-  [key: string]: unknown;
 }
 
 // Shipment Read DTO type
@@ -426,7 +425,7 @@ export async function updateSegment(
 ): Promise<SegmentData> {
   try {
     // Normalize datetime strings to ISO 8601 format (ensure seconds are included)
-    const normalizedData = { ...data };
+    const normalizedData = {...data};
 
     // Helper function to normalize datetime string to ISO 8601 format
     // Backend @IsDateString() requires strict ISO 8601 format (e.g., 2024-01-01T12:00:00.000Z)
@@ -515,7 +514,7 @@ export async function announceSegment(
   try {
     const response = await http.post<SegmentReadDto>(
       `/segments/${id}/announce`,
-      { companyIds }
+      {companyIds}
     );
     return mapSegmentDtoToSegmentData(response.data);
   } catch (error: unknown) {
@@ -523,5 +522,45 @@ export async function announceSegment(
       throw error;
     }
     throw new Error("Failed to announce segment");
+  }
+}
+
+// Segment Announcement Read DTO type
+export interface SegmentAnnouncementReadDto {
+  id: string;
+  segmentId: string;
+  companyId: string;
+  companyName: string;
+  companyLogoUrl: string | null;
+  status: "pending" | "accepted" | "rejected";
+  announcedBy: string;
+  announcerName: string;
+  respondedBy?: string | null;
+  responderName?: string | null;
+  driverId?: string | null;
+  driverName?: string | null;
+  driverAvatarUrl?: string | null;
+  rejectionComment?: string | null;
+  respondedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Get segment announcements
+ */
+export async function getSegmentAnnouncements(
+  id: string
+): Promise<SegmentAnnouncementReadDto[]> {
+  try {
+    const response = await http.get<SegmentAnnouncementReadDto[]>(
+      `/segments/${id}/announcements`
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to fetch segment announcements");
   }
 }

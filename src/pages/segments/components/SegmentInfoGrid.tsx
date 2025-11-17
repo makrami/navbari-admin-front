@@ -1,13 +1,13 @@
-import { X, Clock, Calendar, Truck, Building } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import {X, Clock, Calendar, Truck, Building} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import type {SegmentData} from "../../../shared/types/segmentData";
 
 type SegmentInfoGridProps = {
   segment: SegmentData;
 };
 
-export function SegmentInfoGrid({ segment }: SegmentInfoGridProps) {
-  const { t } = useTranslation();
+export function SegmentInfoGrid({segment}: SegmentInfoGridProps) {
+  const {t} = useTranslation();
   return (
     <div className="grid grid-cols-4 gap-4">
       <div className="rounded-lg border border-slate-200 p-3">
@@ -16,7 +16,7 @@ export function SegmentInfoGrid({ segment }: SegmentInfoGridProps) {
           <span>{t("segments.infoGrid.startLabel")}</span>
         </div>
         <div className="text-xs text-blue-600 font-bold">
-          {segment.startAt || t("segments.infoGrid.notSet")}
+          {segment.startedAt || t("segments.infoGrid.notSet")}
         </div>
       </div>
       <div className="rounded-lg border border-slate-200 p-3">
@@ -25,7 +25,7 @@ export function SegmentInfoGrid({ segment }: SegmentInfoGridProps) {
           <span>{t("segments.infoGrid.finishLabel")}</span>
         </div>
         <div className="text-xs text-blue-600 font-bold">
-          {segment.estFinishAt || t("segments.infoGrid.notSet")}
+          {segment.estimatedFinishTime ?? t("segments.infoGrid.notSet")}
         </div>
       </div>
       <div className="rounded-lg border border-slate-200 p-3">

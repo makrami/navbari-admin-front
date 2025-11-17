@@ -1,7 +1,7 @@
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import {useMemo, useState, useEffect, type ReactNode} from "react";
 import SegmentProgress from "./SegmentProgress";
-import { cn } from "../../../../shared/utils/cn";
-import { CITY_OPTIONS } from "../../data/cities";
+import {cn} from "../../../../shared/utils/cn";
+import {CITY_OPTIONS} from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -9,21 +9,25 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
+import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type { SegmentData } from "../../../../shared/types/segmentData";
-import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
-import { SegmentAssignmentStatus } from "../../../../shared/types/shipment";
-import CargoAssignmentsList from "./CargoAssignmentsList";
-import { ShipmentLinkSection } from "./ShipmentLinkSection";
+import type {SegmentData} from "../../../../shared/types/segmentData";
+import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
 import {
-  updateSegment,
-  type SegmentReadDto,
-} from "../../../../services/shipment/shipment.api.service";
-import { useCompanies } from "../../../../services/company/hooks";
-import type { CompanyReadDto } from "../../../../services/company/company.service";
+  SegmentAssignmentStatus,
+  type Shipment,
+} from "../../../../shared/types/shipment";
+import CargoAssignmentsList from "./CargoAssignmentsList";
+import {ShipmentLinkSection} from "./ShipmentLinkSection";
+import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service";
+import {useCompanies} from "../../../../services/company/hooks";
+import {
+  useUpdateSegment,
+  useSegmentAnnouncements,
+} from "../../../../services/shipment/hooks";
+import type {CompanyReadDto} from "../../../../services/company/company.service";
 import {
   computeSegmentPlace,
   computeSegmentNextPlace,
@@ -79,6 +83,7 @@ function transformCompanyToCargoCompany(company: CompanyReadDto): CargoCompany {
 type SegmentDetailsProps = {
   className?: string;
   data: SegmentData;
+  shipment: Shipment;
   defaultOpen?: boolean;
   open?: boolean;
   onToggle?: () => void;
@@ -86,22 +91,14 @@ type SegmentDetailsProps = {
   onSave?: (update: Partial<SegmentData>) => void;
   editable?: boolean;
   locked?: boolean;
-  /** Segment ID for API calls - when provided, will call PUT /segments/:id on save */
   segmentId?: string;
-  /** Shipment link props - when provided, shows a clickable shipment link section */
-  shipmentLinkProps?: {
-    shipmentTitle: string;
-    shipmentId: string;
-    fromPlace: string;
-    toPlace?: string;
-    fromCountryCode?: string;
-    toCountryCode?: string;
-  };
+  linkShipment?: boolean;
 };
 
 export function SegmentDetails({
   className,
   data,
+  shipment,
   defaultOpen = false,
   open: controlledOpen,
   onToggle: controlledOnToggle,
@@ -110,7 +107,7 @@ export function SegmentDetails({
   editable = false,
   locked = false,
   segmentId,
-  shipmentLinkProps,
+  linkShipment = false,
 }: SegmentDetailsProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   // Use controlled state if provided, otherwise use internal state
@@ -130,24 +127,34 @@ export function SegmentDetails({
 
   // Split date-time values into separate date and time states
   const [startDateValue, setStartDateValue] = useState<string>(() => {
-    const startAt = typeof data.startAt === "string" ? data.startAt : "";
+    const startAt =
+      typeof data.estimatedStartTime === "string"
+        ? data.estimatedStartTime
+        : "";
     const result = splitDateTime(startAt);
     return result.d;
   });
   const [startTimeValue, setStartTimeValue] = useState<string>(() => {
-    const startAt = typeof data.startAt === "string" ? data.startAt : "";
+    const startAt =
+      typeof data.estimatedStartTime === "string"
+        ? data.estimatedStartTime
+        : "";
     const result = splitDateTime(startAt);
     return result.t;
   });
   const [estFinishDateValue, setEstFinishDateValue] = useState<string>(() => {
     const estFinishAt =
-      typeof data.estFinishAt === "string" ? data.estFinishAt : "";
+      typeof data.estimatedFinishTime === "string"
+        ? data.estimatedFinishTime
+        : "";
     const result = splitDateTime(estFinishAt);
     return result.d;
   });
   const [estFinishTimeValue, setEstFinishTimeValue] = useState<string>(() => {
     const estFinishAt =
-      typeof data.estFinishAt === "string" ? data.estFinishAt : "";
+      typeof data.estimatedFinishTime === "string"
+        ? data.estimatedFinishTime
+        : "";
     const result = splitDateTime(estFinishAt);
     return result.t;
   });
@@ -155,30 +162,42 @@ export function SegmentDetails({
   const [baseFee, setBaseFee] = useState<string>(
     typeof data.baseFee === "number" ? String(data.baseFee) : ""
   );
-  console.log(shipmentLinkProps?.fromPlace, shipmentLinkProps?.toPlace);
+
+  const updateSegmentMutation = useUpdateSegment();
 
   // Sync form fields when data changes externally (e.g., after save)
   useEffect(() => {
     setFromValue(place);
     setToValue(nextPlace ?? "");
-    const startAt = typeof data.startAt === "string" ? data.startAt : "";
+    const startAt =
+      typeof data.estimatedStartTime === "string"
+        ? data.estimatedStartTime
+        : "";
     const startResult = splitDateTime(startAt);
     setStartDateValue(startResult.d);
     setStartTimeValue(startResult.t);
     const estFinishAt =
-      typeof data.estFinishAt === "string" ? data.estFinishAt : "";
+      typeof data.estimatedFinishTime === "string"
+        ? data.estimatedFinishTime
+        : "";
     const finishResult = splitDateTime(estFinishAt);
     setEstFinishDateValue(finishResult.d);
     setEstFinishTimeValue(finishResult.t);
     setBaseFee(typeof data.baseFee === "number" ? String(data.baseFee) : "");
-  }, [place, nextPlace, data.startAt, data.estFinishAt, data.baseFee]);
+  }, [
+    place,
+    nextPlace,
+    data.estimatedStartTime,
+    data.estimatedFinishTime,
+    data.baseFee,
+  ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
   const [pendingUpdate, setPendingUpdate] =
     useState<Partial<SegmentData> | null>(null);
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): { city: string; country: string } => {
+  const parsePlace = (place: string): {city: string; country: string} => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -186,16 +205,21 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return { city: place, country: "" };
+    return {city: place, country: ""};
   };
 
   // Fetch companies from API
-  const { data: companies = [] } = useCompanies();
+  const {data: companies = []} = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
     return companies.map(transformCompanyToCargoCompany);
   }, [companies]);
+
+  // Fetch segment announcements when hasPendingAnnouncements is true
+  const {data: announcements = []} = useSegmentAnnouncements(
+    data.hasPendingAnnouncements && segmentId ? segmentId : null
+  );
 
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
 
@@ -215,8 +239,8 @@ export function SegmentDetails({
     // Check for error/alert state first (highest priority)
     const hasError =
       data.hasDisruption ||
-      data.logisticsStatus === "CANCELLED" ||
-      data.logisticsStatus === "LOADING";
+      data.status === SEGMENT_STATUS.CANCELLED ||
+      data.status === SEGMENT_STATUS.LOADING;
     if (hasError) {
       return "border-red-600";
     }
@@ -255,7 +279,7 @@ export function SegmentDetails({
         open={open}
         isCurrent={data.isCurrent ?? false}
         distanceKm={data.distanceKm}
-        eta={(data.estFinishAt ?? null) as string | null}
+        eta={(data.estimatedFinishTime ?? null) as string | null}
         avatarUrl={data.assigneeAvatarUrl ?? undefined}
         assigneeName={data.assigneeName ?? undefined}
         locked={locked}
@@ -287,7 +311,9 @@ export function SegmentDetails({
         <div className="px-3 pb-3">
           <SegmentProgress
             current={data.progressStage}
-            dateTime={(data.datetime ?? undefined) as string | undefined}
+            dateTime={
+              (data.estimatedStartTime ?? undefined) as string | undefined
+            }
             showWarningIcon={data.hasDisruption ?? false}
           />
         </div>
@@ -312,15 +338,15 @@ export function SegmentDetails({
             )}
           >
             {/* Shipment Link Section - only shown when shipmentLinkProps is provided */}
-            {shipmentLinkProps && (
+            {shipment && linkShipment && (
               <div className="mb-4">
                 <ShipmentLinkSection
-                  shipmentTitle={shipmentLinkProps.shipmentTitle}
-                  shipmentId={shipmentLinkProps.shipmentId}
-                  fromPlace={shipmentLinkProps.fromPlace}
-                  toPlace={shipmentLinkProps.toPlace}
-                  fromCountryCode={shipmentLinkProps.fromCountryCode}
-                  toCountryCode={shipmentLinkProps.toCountryCode}
+                  shipmentTitle={shipment.title}
+                  shipmentId={shipment.id}
+                  fromPlace={shipment.originCity ?? ""}
+                  toPlace={shipment.destinationCity}
+                  fromCountryCode={shipment.fromCountryCode}
+                  toCountryCode={shipment.toCountryCode ?? ""}
                   step={data.step ?? 0}
                 />
               </div>
@@ -407,11 +433,11 @@ export function SegmentDetails({
                       const update: Partial<SegmentData> = {
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
-                        startAt: combineDateTime(
+                        estimatedStartTime: combineDateTime(
                           startDateValue.trim(),
                           startTimeValue.trim()
                         ),
-                        estFinishAt: combineDateTime(
+                        estimatedFinishTime: combineDateTime(
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
@@ -444,9 +470,11 @@ export function SegmentDetails({
                             segmentId,
                             payload: updatePayload,
                           });
-                          apiResponse = await updateSegment(
-                            segmentId,
-                            updatePayload
+                          apiResponse = await updateSegmentMutation.mutateAsync(
+                            {
+                              id: segmentId,
+                              data: updatePayload,
+                            }
                           );
                           console.log(
                             "Segment updated successfully",
@@ -482,8 +510,9 @@ export function SegmentDetails({
                         onSave?.({
                           place: originPlace,
                           nextPlace: destinationPlace,
-                          startAt: apiResponse.estimatedStartTime || undefined,
-                          estFinishAt:
+                          estimatedStartTime:
+                            apiResponse.estimatedStartTime || undefined,
+                          estimatedFinishTime:
                             apiResponse.estimatedFinishTime || undefined,
                           baseFee: apiResponse.baseFee ?? undefined,
                           isPlaceholder: false,
@@ -501,11 +530,11 @@ export function SegmentDetails({
                       onSave?.({
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
-                        startAt: combineDateTime(
+                        estimatedStartTime: combineDateTime(
                           startDateValue.trim(),
                           startTimeValue.trim()
                         ),
-                        estFinishAt: combineDateTime(
+                        estimatedFinishTime: combineDateTime(
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
@@ -530,11 +559,11 @@ export function SegmentDetails({
                       const update: Partial<SegmentData> = {
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
-                        startAt: combineDateTime(
+                        estimatedStartTime: combineDateTime(
                           startDateValue.trim(),
                           startTimeValue.trim()
                         ),
-                        estFinishAt: combineDateTime(
+                        estimatedFinishTime: combineDateTime(
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
@@ -570,9 +599,11 @@ export function SegmentDetails({
                               payload: updatePayload,
                             }
                           );
-                          apiResponse = await updateSegment(
-                            segmentId,
-                            updatePayload
+                          apiResponse = await updateSegmentMutation.mutateAsync(
+                            {
+                              id: segmentId,
+                              data: updatePayload,
+                            }
                           );
                           console.log(
                             "Segment updated successfully (Save & Declare)",
@@ -611,8 +642,9 @@ export function SegmentDetails({
                         setPendingUpdate({
                           place: originPlace,
                           nextPlace: destinationPlace,
-                          startAt: apiResponse.estimatedStartTime || undefined,
-                          estFinishAt:
+                          estimatedStartTime:
+                            apiResponse.estimatedStartTime || undefined,
+                          estimatedFinishTime:
                             apiResponse.estimatedFinishTime || undefined,
                           baseFee: apiResponse.baseFee ?? undefined,
                           isPlaceholder: false,
@@ -627,11 +659,11 @@ export function SegmentDetails({
                       setPendingUpdate({
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
-                        startAt: combineDateTime(
+                        estimatedStartTime: combineDateTime(
                           startDateValue.trim(),
                           startTimeValue.trim()
                         ),
-                        estFinishAt: combineDateTime(
+                        estimatedFinishTime: combineDateTime(
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
@@ -644,18 +676,20 @@ export function SegmentDetails({
                 />
               </div>
             ) : data.hasPendingAnnouncements ? (
-              <CargoAssignmentsList companies={data.cargoCompanies ?? []} />
+              <CargoAssignmentsList announcements={announcements ?? []} />
             ) : (
               <SegmentInfoSummary
                 vehicleLabel={
                   (data.vehicleLabel ?? undefined) as string | undefined
                 }
-                startAt={(data.startAt ?? undefined) as string | undefined}
                 localCompany={
                   (data.localCompany ?? undefined) as string | undefined
                 }
-                estFinishAt={
-                  (data.estFinishAt ?? undefined) as string | undefined
+                startAt={
+                  (data.estimatedStartTime ?? undefined) as string | undefined
+                }
+                finishedAt={
+                  (data.estimatedFinishTime ?? undefined) as string | undefined
                 }
                 documents={data.documents?.map((doc) => ({
                   ...doc,

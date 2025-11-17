@@ -1,4 +1,5 @@
-import type { SegmentData } from "./segmentData";
+import type {ActivityItemData} from "../../pages/shipment/Activity/types";
+import type {SegmentData} from "./segmentData";
 
 // UI-only enums for backward compatibility (not used for mapping, only for UI display)
 export const SegmentAssignmentStatus = {
@@ -43,6 +44,7 @@ export type Shipment = {
   isNew?: boolean;
   source: "api";
   segments: SegmentData[];
+  activities?: ActivityItemData[];
 };
 
 export const isReadOnlySegment = (): boolean => false;

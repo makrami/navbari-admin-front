@@ -1,6 +1,6 @@
-import type { SegmentProgressStage } from "../segments/components/SegmentProgress";
-import type { ShipmentData } from "../types/shipmentTypes";
-
+import type {SegmentProgressStage} from "../segments/components/SegmentProgress";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {SegmentData} from "../../../shared/types/segmentData";
 export type ProgressExtraField = {
   label: string;
   value: string;
@@ -20,13 +20,15 @@ export type ProgressFlowData = {
  */
 export function getProgressFlowData(
   progressStage: SegmentProgressStage,
-  segment: ShipmentData["segments"][number] | undefined,
-  shipment: ShipmentData
+  segment: SegmentData | undefined,
+  shipment: Shipment
 ): ProgressFlowData {
   let badge: string | undefined;
   let showWarningIcon = false;
   const dateTime =
-    segment?.datetime || shipment.lastActivityTime || "14 Aug - 03:45";
+    segment?.estimatedStartTime ||
+    shipment.lastActivityTime ||
+    "14 Aug - 03:45";
   const extraFields: ProgressExtraField[] = [];
 
   // Determine badge and extra fields based on progress stage
@@ -34,10 +36,10 @@ export function getProgressFlowData(
     case "start":
       badge = "Planned";
       showWarningIcon = !segment?.isCompleted;
-      if (segment?.startAt) {
+      if (segment?.startedAt) {
         extraFields.push({
           label: "Started At",
-          value: segment.startAt,
+          value: segment.startedAt,
           textColor: "red",
         });
       }
@@ -45,11 +47,11 @@ export function getProgressFlowData(
     case "to_origin":
       badge = "Planned";
       showWarningIcon = !segment?.isCompleted;
-      extraFields.push({ label: "34 KM", value: "" });
-      if (segment?.estFinishAt) {
+      extraFields.push({label: "34 KM", value: ""});
+      if (segment?.estimatedFinishTime) {
         extraFields.push({
           label: "Est. (GPS)",
-          value: segment.estFinishAt,
+          value: segment.estimatedFinishTime,
           textColor: "green",
         });
       }
@@ -57,10 +59,10 @@ export function getProgressFlowData(
     case "in_origin":
       badge = "Planned";
       showWarningIcon = !segment?.isCompleted;
-      if (segment?.startAt) {
+      if (segment?.startedAt) {
         extraFields.push({
           label: "Start Shipment at",
-          value: segment.startAt,
+          value: segment.startedAt,
           textColor: "red",
         });
       }
@@ -68,48 +70,47 @@ export function getProgressFlowData(
     case "loading":
       badge = "Loading";
       showWarningIcon = !segment?.isCompleted;
-      if (segment?.estFinishAt) {
+      if (segment?.estimatedFinishTime) {
         extraFields.push({
           label: "Est.",
-          value: segment.estFinishAt,
+          value: segment.estimatedFinishTime,
           textColor: "red",
         });
       }
       break;
     case "in_customs":
       badge = "Planned";
-      if (segment?.estFinishAt) {
+      if (segment?.estimatedFinishTime) {
         extraFields.push({
           label: "Est.",
-          value: segment.estFinishAt,
+          value: segment.estimatedFinishTime,
           textColor: "green",
         });
       }
       break;
     case "to_dest":
       badge = "Planned";
-      extraFields.push({ label: "34 KM", value: "" });
-      if (segment?.estFinishAt) {
+      extraFields.push({label: "34 KM", value: ""});
+      if (segment?.estimatedFinishTime) {
         extraFields.push({
           label: "Est. (GPS)",
-          value: segment.estFinishAt,
+          value: segment.estimatedFinishTime,
           textColor: "green",
         });
       }
       break;
     case "delivered":
       badge = "Planned";
-      extraFields.push({ label: "Click to Summary", value: "" });
-      if (segment?.datetime) {
+      extraFields.push({label: "Click to Summary", value: ""});
+      if (segment?.deliveredAt) {
         extraFields.push({
           label: "Delivered At",
-          value: segment.datetime,
+          value: segment.deliveredAt ?? "",
           textColor: "red",
         });
       }
       break;
   }
 
-  return { progressStage, badge, showWarningIcon, dateTime, extraFields };
+  return {progressStage, badge, showWarningIcon, dateTime, extraFields};
 }
-

@@ -1,16 +1,16 @@
-import { useCallback } from "react";
-import { ShipmentListPanel } from "./ShipmentListPanel";
-import { EmptyShipmentView } from "./EmptyShipmentView";
-import { ShipmentContentArea } from "./ShipmentContentArea";
-import { createShipmentFromFormData } from "../utils/shipmentHelpers";
-import type { AddShipmentInput as AddShipmentFormInput } from "./AddShipmentModal";
-import type { ShipmentData } from "../types/shipmentTypes";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import {useCallback} from "react";
+import {ShipmentListPanel} from "./ShipmentListPanel";
+import {EmptyShipmentView} from "./EmptyShipmentView";
+import {ShipmentContentArea} from "./ShipmentContentArea";
+import {createShipmentFromFormData} from "../utils/shipmentHelpers";
+import type {AddShipmentInput as AddShipmentFormInput} from "./AddShipmentModal";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {SegmentData} from "../../../shared/types/segmentData";
 
 type ShipmentDetailsViewProps = {
-  shipments: ShipmentData[];
-  selectedShipment: ShipmentData | undefined;
+  shipments: Shipment[];
+  selectedShipment: Shipment | undefined;
   selectedId: string;
   segmentStep?: number;
   onShipmentSelect: (id: string) => void;
@@ -18,8 +18,8 @@ type ShipmentDetailsViewProps = {
   onAddShipment: () => void;
   showAddShipment: boolean;
   onCloseAddShipment: () => void;
-  onCreateShipment: (shipment: ShipmentData) => void;
-  editedSegmentsByShipmentId: Record<string, ShipmentData["segments"]>;
+  onCreateShipment: (shipment: Shipment) => void;
+  editedSegmentsByShipmentId: Record<string, SegmentData[]>;
   onSegmentUpdate: (
     shipmentId: string,
     segmentIndex: number,
@@ -34,7 +34,7 @@ type ShipmentDetailsViewProps = {
   serviceShipments: DomainShipment[] | undefined;
   timeoutsRef: React.MutableRefObject<number[]>;
   onShipmentIsNewOverride: (shipmentId: string, isNew: boolean) => void;
-  onUpdateShipment: (shipmentId: string, update: Partial<ShipmentData>) => void;
+  onUpdateShipment: (shipmentId: string, update: Partial<Shipment>) => void;
   segmentsLoading?: boolean;
   fetchedSegments?: SegmentData[] | null;
 };

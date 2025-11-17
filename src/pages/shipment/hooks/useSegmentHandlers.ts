@@ -1,12 +1,12 @@
-import { useRef, useEffect, useCallback } from "react";
-import type { ShipmentData } from "../types/shipmentTypes";
-import type { SegmentData } from "../segments/components/SegmentDetails";
+import {useRef, useEffect, useCallback} from "react";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {SegmentData} from "../../../shared/types/segmentData";
 
 export function useSegmentHandlers(
-  allItems: ShipmentData[],
-  _editedSegmentsByShipmentId: Record<string, ShipmentData["segments"]>,
+  allItems: Shipment[],
+  _editedSegmentsByShipmentId: Record<string, SegmentData[]>,
   setEditedSegmentsByShipmentId: React.Dispatch<
-    React.SetStateAction<Record<string, ShipmentData["segments"]>>
+    React.SetStateAction<Record<string, SegmentData[]>>
   >
 ) {
   const timeoutsRef = useRef<number[]>([]);
@@ -38,29 +38,29 @@ export function useSegmentHandlers(
           ...base[segmentIndex],
           place: update.place ?? base[segmentIndex].place,
           nextPlace: update.nextPlace ?? base[segmentIndex].nextPlace,
-          startAt: update.startAt ?? base[segmentIndex].startAt,
-          estFinishAt: update.estFinishAt ?? base[segmentIndex].estFinishAt,
-          baseFeeUsd: update.baseFeeUsd ?? base[segmentIndex].baseFeeUsd,
+          startedAt: update.startedAt ?? base[segmentIndex].startedAt,
+          estimatedFinishTime:
+            update.estimatedFinishTime ??
+            base[segmentIndex].estimatedFinishTime,
+          baseFee: update.baseFee ?? base[segmentIndex].baseFee,
           cargoCompanies:
             update.cargoCompanies ?? base[segmentIndex].cargoCompanies,
           driverName: update.assigneeName ?? base[segmentIndex].driverName,
-          driverPhoto: update.assigneeAvatarUrl ?? base[segmentIndex].driverPhoto,
-          isPlaceholder: update.isPlaceholder ?? base[segmentIndex].isPlaceholder,
+          driverPhoto:
+            update.assigneeAvatarUrl ?? base[segmentIndex].driverPhoto,
+          isPlaceholder:
+            update.isPlaceholder ?? base[segmentIndex].isPlaceholder,
           isCompleted: update.isCompleted ?? base[segmentIndex].isCompleted,
-        } as ShipmentData["segments"][number];
+        } as SegmentData;
 
-        return { ...prev, [shipmentId]: base };
+        return {...prev, [shipmentId]: base};
       });
     },
     [allItems, setEditedSegmentsByShipmentId]
   );
 
   const handleSegmentSave = useCallback(
-    (
-      shipmentId: string,
-      segmentStep: number,
-      update: Partial<SegmentData>
-    ) => {
+    (shipmentId: string, segmentStep: number, update: Partial<SegmentData>) => {
       setEditedSegmentsByShipmentId((prev) => {
         const shipment = allItems.find((s) => s.id === shipmentId);
         if (!shipment) return prev;
@@ -75,17 +75,18 @@ export function useSegmentHandlers(
           ...base[index],
           place: update.place ?? base[index].place,
           nextPlace: update.nextPlace ?? base[index].nextPlace,
-          startAt: update.startAt ?? base[index].startAt,
-          estFinishAt: update.estFinishAt ?? base[index].estFinishAt,
-          baseFeeUsd: update.baseFeeUsd ?? base[index].baseFeeUsd,
+          startedAt: update.startedAt ?? base[index].startedAt,
+          estimatedFinishTime:
+            update.estimatedFinishTime ?? base[index].estimatedFinishTime,
+          baseFee: update.baseFee ?? base[index].baseFee,
           cargoCompanies: update.cargoCompanies ?? base[index].cargoCompanies,
           driverName: update.assigneeName ?? base[index].driverName,
           driverPhoto: update.assigneeAvatarUrl ?? base[index].driverPhoto,
           isPlaceholder: update.isPlaceholder ?? base[index].isPlaceholder,
           isCompleted: update.isCompleted ?? base[index].isCompleted,
-        } as ShipmentData["segments"][number];
+        } as SegmentData;
 
-        return { ...prev, [shipmentId]: base };
+        return {...prev, [shipmentId]: base};
       });
     },
     [allItems, setEditedSegmentsByShipmentId]
@@ -104,13 +105,9 @@ export function useSegmentHandlers(
         base.push({
           step: nextStep,
           place: "Assign Previous Segment First",
-          datetime: "",
-          isCompleted: false,
-          isPlaceholder: true,
-          driverName: "",
-          driverRating: 0,
-        });
-        return { ...prev, [shipmentId]: base };
+          nextPlace: "Assign Previous Segment First",
+        } as SegmentData);
+        return {...prev, [shipmentId]: base};
       });
     },
     [allItems, setEditedSegmentsByShipmentId]
@@ -123,4 +120,3 @@ export function useSegmentHandlers(
     timeoutsRef,
   };
 }
-

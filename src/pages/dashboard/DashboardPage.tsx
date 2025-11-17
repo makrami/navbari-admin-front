@@ -1,23 +1,22 @@
-import { useState } from "react";
-import CargoMap, { type Segment } from "../../components/CargoMap";
-import { useShipments } from "../../services/shipment/hooks";
-import type { SegmentData } from "../../shared/types/segmentData";
-import { MAPBOX_TOKEN } from "./constants";
-import { KPICards } from "./components/KPICards";
-import { StatusFilter } from "./components/StatusFilter";
-import { MapLegend } from "./components/MapLegend";
-import { DashboardSearch } from "./components/DashboardSearch";
-import { SegmentsDrawer } from "./components/SegmentsDrawer";
-import { UnreadMessagesModal } from "./components/UnreadMessagesModal";
-import { AwaitingRegistrationsModal } from "./components/AwaitingRegistrationsModal";
-import { SegmentsAwaitingDriverModal } from "./components/SegmentsAwaitingDriverModal";
-import { useMapSegments } from "./hooks/useMapSegments";
-import { ChartBarBig } from "lucide-react";
+import {useState} from "react";
+import CargoMap, {type Segment} from "../../components/CargoMap";
+import {useShipments} from "../../services/shipment/hooks";
+import {MAPBOX_TOKEN} from "./constants";
+import {KPICards} from "./components/KPICards";
+import {StatusFilter} from "./components/StatusFilter";
+import {MapLegend} from "./components/MapLegend";
+import {DashboardSearch} from "./components/DashboardSearch";
+import {SegmentsDrawer} from "./components/SegmentsDrawer";
+import {UnreadMessagesModal} from "./components/UnreadMessagesModal";
+import {AwaitingRegistrationsModal} from "./components/AwaitingRegistrationsModal";
+import {SegmentsAwaitingDriverModal} from "./components/SegmentsAwaitingDriverModal";
+import {useMapSegments} from "./hooks/useMapSegments";
+import {ChartBarBig} from "lucide-react";
 
 type SegmentStatus = "pending" | "normal" | "alert";
 
 export function DashboardPage() {
-  const { data: serviceShipments } = useShipments();
+  const {data: serviceShipments} = useShipments();
   const [isSegmentsOpen, setIsSegmentsOpen] = useState(false);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(
     null
@@ -55,7 +54,6 @@ export function DashboardPage() {
 
   const handleCardClick = (cardId: string) => {
     setOpenModal(cardId);
-    console.log("cardId", cardId);
   };
 
   const handleShowAllSegments = () => {
@@ -88,7 +86,7 @@ export function DashboardPage() {
         <div className="absolute inset-0 p-5">
           <CargoMap
             segments={mapSegments}
-            initialView={{ longitude: 105.0, latitude: 35.0, zoom: 4 }}
+            initialView={{longitude: 105.0, latitude: 35.0, zoom: 4}}
             mapboxToken={MAPBOX_TOKEN}
             onSegmentClick={handleSegmentClick}
             onMapClick={handleMapClick}

@@ -1,11 +1,8 @@
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { Building2, UserIcon, Globe } from "lucide-react";
-import { cn } from "../../../shared/utils/cn";
-import imgAvatar from "../../../assets/images/avatar.png";
-import company1Logo from "../../../assets/images/companieslogo/company1.png";
-import company2Logo from "../../../assets/images/companieslogo/company2.png";
+import {useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
+import {Building2, UserIcon, Globe} from "lucide-react";
+import {cn} from "../../../shared/utils/cn";
 import ReactCountryFlag from "react-country-flag";
 
 type AwaitingRegistrationsModalProps = {
@@ -20,7 +17,7 @@ export function AwaitingRegistrationsModal({
   open,
   onClose,
 }: AwaitingRegistrationsModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const navigate = useNavigate();
 
   const handleShowAll = () => {
@@ -75,89 +72,89 @@ export function AwaitingRegistrationsModal({
                 No pending registrations
               </div>
             ) : (
-              MOCK_REGISTRATIONS.map((registration, index) => (
-              <div
-                key={registration.id}
-                className={cn(
-                  "flex items-start gap-3 p-3 transition-colors cursor-pointer",
-                  index !== MOCK_REGISTRATIONS.length - 1 &&
-                    "border-b-1 border-slate-600"
-                )}
-              >
-                {/* Avatar/Icon */}
-                {registration.type === "driver" ? (
-                  <img
-                    src={registration.avatar}
-                    alt={registration.name}
-                    className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-slate-400"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-slate-400 overflow-hidden">
-                    {registration.logo ? (
-                      <img
-                        src={registration.logo}
-                        alt={registration.name}
-                        className="w-full h-full object-contain p-1"
-                      />
-                    ) : (
-                      <Building2 className="w-6 h-6 text-slate-400" />
-                    )}
-                  </div>
-                )}
+              MOCK_REGISTRATIONS.map((registration: any, index: number) => (
+                <div
+                  key={registration.id as string}
+                  className={cn(
+                    "flex items-start gap-3 p-3 transition-colors cursor-pointer",
+                    index !== MOCK_REGISTRATIONS.length - 1 &&
+                      "border-b-1 border-slate-600"
+                  )}
+                >
+                  {/* Avatar/Icon */}
+                  {registration.type === "driver" ? (
+                    <img
+                      src={registration.avatar}
+                      alt={registration.name}
+                      className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-slate-400"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-slate-400 overflow-hidden">
+                      {registration.logo ? (
+                        <img
+                          src={registration.logo}
+                          alt={registration.name}
+                          className="w-full h-full object-contain p-1"
+                        />
+                      ) : (
+                        <Building2 className="w-6 h-6 text-slate-400" />
+                      )}
+                    </div>
+                  )}
 
-                {/* Content */}
-                <div className="flex-1 flex-col min-w-0 flex items-start justify-between gap-1">
-                  {/* Left side: Name and details */}
-                  <div className="flex-1 flex items-center justify-between w-full min-w-0">
-                    <span className="text-sm font-semibold text-white">
-                      {registration.name}
-                    </span>
-                    {/* Status badge */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="flex items-center text-xs font-bold text-yellow-500 bg-[#CA8A041A] px-2 py-1 rounded-lg">
-                        {registration.status}
+                  {/* Content */}
+                  <div className="flex-1 flex-col min-w-0 flex items-start justify-between gap-1">
+                    {/* Left side: Name and details */}
+                    <div className="flex-1 flex items-center justify-between w-full min-w-0">
+                      <span className="text-sm font-semibold text-white">
+                        {registration.name}
+                      </span>
+                      {/* Status badge */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center text-xs font-bold text-yellow-500 bg-[#CA8A041A] px-2 py-1 rounded-lg">
+                          {registration.status}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 w-full">
-                    {registration.type === "driver" ? (
-                      <>
-                        {registration.company.logo ? (
-                          <img
-                            src={registration.company.logo}
-                            alt={registration.company.name}
-                            className="size-6 object-contain bg-black/10  rounded-lg p-1"
-                          />
-                        ) : (
-                          <UserIcon className="size-7 text-white bg-black/10 rounded-lg p-1" />
-                        )}
-                        <p className="text-sm text-slate-300">
-                          {registration.company.name}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        {registration.location?.countryCode ? (
-                          <ReactCountryFlag
-                            countryCode={registration.location.countryCode}
-                            svg
-                            style={{
-                              width: "1.5rem",
-                              height: "1rem",
-                            }}
-                          />
-                        ) : (
-                          <Globe className="w-6 h-6 text-slate-300" />
-                        )}
-                        <p className="text-sm text-slate-300">
-                          {registration.location?.country || "Unknown"} /{" "}
-                          {registration.location?.city || "Unknown"}
-                        </p>
-                      </>
-                    )}
+                    <div className="flex items-center gap-2 w-full">
+                      {registration.type === "driver" ? (
+                        <>
+                          {registration.company.logo ? (
+                            <img
+                              src={registration.company.logo}
+                              alt={registration.company.name}
+                              className="size-6 object-contain bg-black/10  rounded-lg p-1"
+                            />
+                          ) : (
+                            <UserIcon className="size-7 text-white bg-black/10 rounded-lg p-1" />
+                          )}
+                          <p className="text-sm text-slate-300">
+                            {registration.company.name}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          {registration.location?.countryCode ? (
+                            <ReactCountryFlag
+                              countryCode={registration.location.countryCode}
+                              svg
+                              style={{
+                                width: "1.5rem",
+                                height: "1rem",
+                              }}
+                            />
+                          ) : (
+                            <Globe className="w-6 h-6 text-slate-300" />
+                          )}
+                          <p className="text-sm text-slate-300">
+                            {registration.location?.country || "Unknown"} /{" "}
+                            {registration.location?.city || "Unknown"}
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
               ))
             )}
           </div>

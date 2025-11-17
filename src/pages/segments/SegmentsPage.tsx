@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { useShipments } from "../../services/shipment/hooks";
-import type { FilterType } from "./components/SegmentsFilters";
-import { SegmentsFilters } from "./components/SegmentsFilters";
-import type { SegmentData } from "../../shared/types/segmentData";
-import { useSegmentsData } from "./hooks/useSegmentsData";
-import { cn } from "../../shared/utils/cn";
-import { getSegmentListId } from "./utils/getSegmentListId";
+import {useEffect, useRef, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
+import {X} from "lucide-react";
+import {useShipments} from "../../services/shipment/hooks";
+import type {FilterType} from "./components/SegmentsFilters";
+import {SegmentsFilters} from "./components/SegmentsFilters";
+import type {SegmentData} from "../../shared/types/segmentData";
+import {useSegmentsData} from "./hooks/useSegmentsData";
+import {cn} from "../../shared/utils/cn";
+import {getSegmentListId} from "./utils/getSegmentListId";
 import SegmentDetails from "../shipment/segments/components/SegmentDetails";
+import type {Shipment} from "../../shared/types/shipment";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
@@ -25,16 +26,16 @@ export function SegmentsPage({
   extraSegments,
 }: SegmentsPageProps = {}) {
   const navigate = useNavigate();
-  const { data: serviceShipments, loading } = useShipments();
+  const {data: serviceShipments, loading} = useShipments();
   const [filter, setFilter] = useState<FilterType>("need-action");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSegments, setExpandedSegments] = useState<Set<string>>(
     () => new Set(selectedSegmentId ? [selectedSegmentId] : [])
   );
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  const { needActionCount, alertCount, allSegments, filteredSegments } =
+  const {needActionCount, alertCount, allSegments, filteredSegments} =
     useSegmentsData(
       serviceShipments ?? null,
       filter,
@@ -70,7 +71,7 @@ export function SegmentsPage({
     if (!selectedSegmentId) return;
     const node = itemRefs.current.get(selectedSegmentId);
     if (!node) return;
-    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    node.scrollIntoView({behavior: "smooth", block: "center"});
   }, [selectedSegmentId, filteredSegments]);
 
   const handleClose = () => {
@@ -132,7 +133,7 @@ export function SegmentsPage({
       {/* Segments List */}
       <div
         className="flex-1 overflow-y-auto no-scrollbar"
-        style={{ scrollbarGutter: "stable" }}
+        style={{scrollbarGutter: "stable"}}
       >
         <div className="max-w-6xl mx-auto pb-6">
           {filteredSegments.length === 0 ? (
@@ -150,7 +151,7 @@ export function SegmentsPage({
                 {filteredSegments.map((segment) => {
                   const segmentId = getSegmentListId(
                     segment.shipmentId,
-                    segment.step
+                    segment.step ?? 0
                   );
                   const isExpanded = expandedSegments.has(segmentId);
 
@@ -178,10 +179,10 @@ export function SegmentsPage({
                   const shipment = serviceShipments?.find(
                     (s) => s.id === segment.shipmentId
                   );
-                  const destination =
-                    shipment?.destination ||
-                    shipmentSegments[shipmentSegments.length - 1]?.nextPlace ||
-                    segment.nextPlace;
+                  // const destination =
+                  //   shipment?.destination ||
+                  //   shipmentSegments[shipmentSegments.length - 1]?.nextPlace ||
+                  //   segment.nextPlace;
 
                   return (
                     <div
@@ -200,14 +201,9 @@ export function SegmentsPage({
                         onToggle={() => toggleSegment(segmentId)}
                         editable={false}
                         locked={false}
-                        shipmentLinkProps={{
-                          shipmentTitle: segment.shipmentTitle,
-                          shipmentId: segment.shipmentId,
-                          fromPlace: segment.place,
-                          toPlace: destination,
-                          fromCountryCode: segment.shipmentFromCountryCode,
-                          toCountryCode: segment.shipmentToCountryCode,
-                        }}
+                        shipment={shipment as Shipment}
+                        segmentId={segment.id}
+                        linkShipment={true}
                       />
                     </div>
                   );

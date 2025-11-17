@@ -1,14 +1,14 @@
-import { useMemo } from "react";
-import type { Segment } from "../../../components/CargoMap";
-import { useSegmentsData } from "../../segments/hooks/useSegmentsData";
-import { getSegmentListId } from "../../segments/utils/getSegmentListId";
+import {useMemo} from "react";
+import type {Segment} from "../../../components/CargoMap";
+import {useSegmentsData} from "../../segments/hooks/useSegmentsData";
+import {getSegmentListId} from "../../segments/utils/getSegmentListId";
 import {
   getCityCoordinates,
   getIso2FromPlace,
   toFlagEmojiFromIso2,
 } from "../../../shared/utils/geography";
-import { STATUS_COLORS } from "../constants";
-import { seededCount } from "../utils";
+import {STATUS_COLORS} from "../constants";
+import {seededCount} from "../utils";
 
 type SegmentStatus = "pending" | "normal" | "alert";
 
@@ -16,7 +16,7 @@ export function useMapSegments(
   serviceShipments: any,
   statusFilter: Record<SegmentStatus, boolean>
 ) {
-  const { allSegments } = useSegmentsData(serviceShipments ?? null, "all", "");
+  const {allSegments} = useSegmentsData(serviceShipments ?? null, "all", "");
 
   // API segments
   const apiSegments = useMemo((): Segment[] => {
@@ -25,7 +25,10 @@ export function useMapSegments(
         const originCoords = getCityCoordinates(segment.place);
         const destCoords = getCityCoordinates(segment.nextPlace);
         if (!originCoords || !destCoords) return null;
-        const segmentKey = getSegmentListId(segment.shipmentId, segment.step);
+        const segmentKey = getSegmentListId(
+          segment.shipmentId,
+          segment.step ?? 0
+        );
         const status: SegmentStatus = "normal";
         const originIso2 =
           getIso2FromPlace(segment.place) ||
@@ -43,7 +46,7 @@ export function useMapSegments(
           meta: {
             segmentKey,
             shipmentId: segment.shipmentId,
-            step: segment.step,
+            step: segment.step ?? 0,
             status,
             trucksCount: seededCount(segmentKey),
             originFlag: originFlag ?? "",
@@ -66,4 +69,3 @@ export function useMapSegments(
 
   return mapSegments;
 }
-

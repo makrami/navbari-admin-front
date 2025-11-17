@@ -1,27 +1,20 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useShipments } from "../../../services/shipment/hooks";
-import { useShipmentData } from "../hooks/useShipmentData";
+import {useState, useRef, useEffect, useMemo, useCallback} from "react";
+import {useSearchParams} from "react-router-dom";
 import {
-  createShipment as apiCreateShipment,
-  type UpdateShipmentDto,
-} from "../../../services/shipment/shipment.api.service";
-import type { ShipmentData } from "../types/shipmentTypes";
+  useShipments,
+  useCreateShipment,
+  useUpdateShipment,
+} from "../../../services/shipment/hooks";
+import type {UpdateShipmentDto} from "../../../services/shipment/shipment.api.service";
+import type {Shipment} from "../../../shared/types/shipment";
 
 export function useShipmentSelection() {
   const [searchParams] = useSearchParams();
-  const {
-    data: serviceShipments,
-    loading: serviceLoading,
-    refresh: refreshShipments,
-  } = useShipments();
-  const items = useShipmentData(serviceShipments ?? undefined);
+  const {data: shipments, loading: serviceLoading} = useShipments();
+  const createShipmentMutation = useCreateShipment();
+  const updateShipmentMutation = useUpdateShipment();
   const hasInitializedRef = useRef(false);
   const selectedIdRef = useRef<string | null>(null);
-
-  const allItems = useMemo(() => {
-    return items;
-  }, [items]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -33,8 +26,8 @@ export function useShipmentSelection() {
   const selectedShipment = useMemo(() => {
     if (!selectedId) return undefined;
     // Use strict string comparison to ensure exact match
-    return allItems.find((i) => String(i.id) === String(selectedId));
-  }, [allItems, selectedId]);
+    return shipments?.find((i) => String(i.id) === String(selectedId));
+  }, [shipments, selectedId]);
 
   // Sync selectedId with URL params and auto-select first "In Origin" if needed
   useEffect(() => {
@@ -44,7 +37,7 @@ export function useShipmentSelection() {
 
     // Handle URL param selection (always takes priority)
     if (urlSelectedId) {
-      const shipmentExists = items.some(
+      const shipmentExists = shipments?.some(
         (item) => String(item.id) === urlSelectedId
       );
       if (shipmentExists && currentSelectedId !== urlSelectedId) {
@@ -63,20 +56,20 @@ export function useShipmentSelection() {
     // Also skip if we've already initialized (to prevent interference with manual selections)
     if (
       !hasInitializedRef.current &&
-      allItems.length > 0 &&
+      (shipments?.length ?? 0) > 0 &&
       !currentSelectedId
     ) {
-      const firstInOrigin = allItems.find((s) => s.status === "In Origin");
+      const firstInOrigin = shipments?.find((s) => s.status === "In Origin");
       if (firstInOrigin) {
         setSelectedId(firstInOrigin.id);
         selectedIdRef.current = firstInOrigin.id;
       }
       hasInitializedRef.current = true;
     }
-  }, [searchParams, items, allItems.length]);
+  }, [searchParams, shipments?.length ?? 0]);
 
   const handleCreateShipment = useCallback(
-    async (shipment: ShipmentData) => {
+    async (shipment: Shipment) => {
       // Update ref immediately BEFORE any state updates to prevent race conditions
       selectedIdRef.current = shipment.id;
       // Mark as initialized to prevent auto-selection effect from interfering
@@ -105,8 +98,8 @@ export function useShipmentSelection() {
           : 0;
         const segmentCount = shipment.segments?.length || 1;
 
-        // Create via API
-        const createdShipment = await apiCreateShipment({
+        // Create via API using mutation hook
+        const createdShipment = await createShipmentMutation.mutateAsync({
           title: shipment.title,
           originCountry: originCountry,
           originCity: originCity,
@@ -121,20 +114,18 @@ export function useShipmentSelection() {
         setSelectedId(createdShipment.id);
         selectedIdRef.current = createdShipment.id;
 
-        // Refresh the shipments list to get the newly created shipment from API
-        // This will update the list and the new shipment will appear
-        refreshShipments();
+        // Query invalidation is handled automatically by the mutation hook
       } catch (error) {
         // Error creating shipment - will be handled by UI
         console.error("Error creating shipment", error);
         return;
       }
     },
-    [refreshShipments]
+    [createShipmentMutation]
   );
 
   const handleUpdateShipment = useCallback(
-    async (shipmentId: string, update: Partial<ShipmentData>) => {
+    async (shipmentId: string, update: Partial<Shipment>) => {
       // Update via API
       try {
         // Map update to UpdateShipmentDto format
@@ -146,29 +137,27 @@ export function useShipmentSelection() {
         }
         // Note: Other fields like origin/destination would need to be mapped if available
 
-        // Import updateShipment function
-        const { updateShipment } = await import(
-          "../../../services/shipment/shipment.api.service"
-        );
-        await updateShipment(shipmentId, updateDto);
+        // Update via API using mutation hook
+        await updateShipmentMutation.mutateAsync({
+          id: shipmentId,
+          data: updateDto,
+        });
 
-        // Refresh the shipments list
-        refreshShipments();
+        // Query invalidation is handled automatically by the mutation hook
       } catch (error) {
         // Error updating shipment - will be handled by UI
         console.error("Error updating shipment", error);
         return;
       }
     },
-    [refreshShipments]
+    [updateShipmentMutation]
   );
 
   return {
     selectedId,
     setSelectedId,
     selectedShipment,
-    allItems,
-    serviceShipments,
+    shipments,
     serviceLoading,
     handleCreateShipment,
     handleUpdateShipment,

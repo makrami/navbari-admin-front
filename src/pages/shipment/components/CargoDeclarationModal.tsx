@@ -1,14 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
-import { X, Search, Users, CalendarDays, UserIcon } from "lucide-react";
+import {useMemo, useState, useEffect} from "react";
+import {X, Search, Users, CalendarDays, UserIcon} from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
-import { DRIVER_LIST, type Driver } from "../data/drivers";
-import { getFileUrl } from "../../LocalCompanies/utils";
-import { announceSegment } from "../../../services/shipment/shipment.api.service";
-
-import company1 from "../../../assets/images/companieslogo/company1.png";
-import company2 from "../../../assets/images/companieslogo/company2.png";
-import company3 from "../../../assets/images/companieslogo/company3.png";
-import company4 from "../../../assets/images/companieslogo/company4.png";
+import {type Driver} from "../data/drivers";
+import {getFileUrl} from "../../LocalCompanies/utils";
+import {useAnnounceSegment} from "../../../services/shipment/hooks";
 
 export type CargoCompany = {
   id: string;
@@ -21,53 +16,6 @@ export type CargoCompany = {
   availableDrivers: number;
   drivers?: Driver[];
 };
-
-const DEFAULT_COMPANIES: CargoCompany[] = [
-  {
-    id: "cntrans",
-    name: "CNTRANS",
-    country: "China",
-    countryCode: "CN",
-    admin: "Lee Sin",
-    registeredAt: "2023-10-26",
-    logoUrl: company1,
-    availableDrivers: 5,
-    drivers: DRIVER_LIST.slice(0, 4),
-  },
-  {
-    id: "namous",
-    name: "NAMOUS Transport",
-    country: "United States",
-    countryCode: "US",
-    admin: "Lee Sin",
-    registeredAt: "2023-10-26",
-    logoUrl: company2,
-    availableDrivers: 5,
-    drivers: DRIVER_LIST.slice(1, 5),
-  },
-  {
-    id: "ups",
-    name: "UPS Transport",
-    country: "United States",
-    countryCode: "US",
-    admin: "Lee Sin",
-    registeredAt: "2023-10-26",
-    logoUrl: company3,
-    availableDrivers: 5,
-    drivers: DRIVER_LIST.slice(0, 3),
-  },
-  {
-    id: "dhl",
-    name: "DHL Transport",
-    country: "Germany",
-    countryCode: "DE",
-    admin: "Lee Sin",
-    registeredAt: "2023-10-26",
-    logoUrl: company4,
-    availableDrivers: 5,
-    drivers: DRIVER_LIST.slice(0, 4),
-  },
-];
 
 type CargoDeclarationModalProps = {
   open: boolean;
@@ -82,7 +30,7 @@ export default function CargoDeclarationModal({
   open,
   onClose,
   onSelect,
-  companies = DEFAULT_COMPANIES,
+  companies,
   defaultSelectedIds,
   segmentId,
 }: CargoDeclarationModalProps) {
@@ -90,13 +38,13 @@ export default function CargoDeclarationModal({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     new Set(defaultSelectedIds ?? [])
   );
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const announceSegmentMutation = useAnnounceSegment();
 
   const filtered = useMemo(() => {
     if (!query.trim()) return companies;
     const q = query.toLowerCase();
-    return companies.filter((c) => c.name.toLowerCase().includes(q));
+    return companies?.filter((c) => c.name.toLowerCase().includes(q));
   }, [companies, query]);
 
   // Clear error when modal opens or closes
@@ -156,7 +104,7 @@ export default function CargoDeclarationModal({
         {/* List */}
         <div className="px-5 py-4">
           <div className="grid  bg-white rounded-xl p-4">
-            {filtered.map((co) => (
+            {filtered?.map((co) => (
               <label
                 key={co.id}
                 className="flex items-center justify-between gap-4 b  border-b  border-slate-100 p-3 hover:bg-slate-50 cursor-pointer"
@@ -184,7 +132,7 @@ export default function CargoDeclarationModal({
                       <ReactCountryFlag
                         svg
                         countryCode={co.countryCode}
-                        style={{ width: 18, height: 12, borderRadius: 2 }}
+                        style={{width: 18, height: 12, borderRadius: 2}}
                       />
 
                       {co.name}
@@ -228,20 +176,24 @@ export default function CargoDeclarationModal({
           <button
             type="button"
             className="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
-            disabled={selectedIds.size === 0 || isLoading}
+            disabled={
+              selectedIds.size === 0 || announceSegmentMutation.isPending
+            }
             onClick={async () => {
-              const list = companies.filter((c) => selectedIds.has(c.id));
-              if (!list.length) return;
+              const list = companies?.filter((c) => selectedIds.has(c.id));
+              if (!list?.length) return;
 
               // If segmentId is provided, call the announce API
               if (segmentId) {
-                setIsLoading(true);
                 setError(null);
                 try {
-                  const companyIds = list.map((c) => c.id);
-                  await announceSegment(segmentId, companyIds);
+                  const companyIds = list?.map((c) => c.id);
+                  await announceSegmentMutation.mutateAsync({
+                    id: segmentId,
+                    companyIds,
+                  });
                   // Call onSelect callback after successful API call
-                  onSelect(list);
+                  onSelect(list ?? []);
                   // Close modal on success
                   onClose();
                 } catch (err) {
@@ -251,16 +203,14 @@ export default function CargoDeclarationModal({
                       : "Failed to announce segment";
                   setError(errorMessage);
                   console.error("Failed to announce segment:", err);
-                } finally {
-                  setIsLoading(false);
                 }
               } else {
                 // If no segmentId, just call onSelect (backward compatibility)
-                onSelect(list);
+                onSelect(list ?? []);
               }
             }}
           >
-            {isLoading ? "Announcing..." : "Select"}
+            {announceSegmentMutation.isPending ? "Announcing..." : "Select"}
           </button>
         </div>
       </div>
