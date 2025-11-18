@@ -1,14 +1,11 @@
-import ReactCountryFlag from "react-country-flag";
 import { Button } from "./Button";
 import { cn } from "../../utils/cn";
 import {
-  User as UserIcon,
-  Users as UsersIcon,
   Truck as TruckIcon,
-  Clock as ClockIcon,
-  Phone as PhoneIcon,
   X as XIcon,
   Check as CheckIcon,
+  ScanLine as ScanLineIcon,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import { STATUS_TO_COLOR } from "./entity-card-constants";
 import type { EntityStatus } from "./entity-card-constants";
@@ -32,6 +29,12 @@ export type EntityCardData = {
   name: string;
   logoUrl?: string;
   avatarUrl?: string;
+  companyName?: string;
+  vehicleTypes?: ("tented" | "refrigerated")[];
+  vehicleType?: "tented" | "refrigerated";
+  vehiclePlate?: string;
+  vehicleCapacity?: number;
+  lostShipments?: number;
   status: EntityStatus;
   country: string;
   city: string;
@@ -72,11 +75,6 @@ export function EntityCard({
   onApprove,
   onReject,
   onView,
-  statsLabels = {
-    driversLabel: "drivers",
-    activeLabel: "active",
-    lastActivityLabel: "",
-  },
   actionLabels = {
     approveLabel: "Approve",
     rejectLabel: "Reject",
@@ -110,26 +108,47 @@ export function EntityCard({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            {entity.logoUrl || entity.avatarUrl ? (
+            {entity.avatarUrl ? (
               <img
-                src={entity.logoUrl || entity.avatarUrl}
-                alt={entity.logoUrl ? "logo" : "avatar"}
+                src={entity.avatarUrl}
+                alt={"avatar"}
                 className={cn(
-                  "h-8 w-8",
+                  "size-14",
                   entity.avatarUrl ? "rounded-full object-cover" : "rounded"
                 )}
               />
             ) : (
               <div className="h-8 w-8 rounded bg-slate-200 grid place-items-center text-xs font-semibold"></div>
             )}
-            <p
-              className={cn(
-                "font-semibold truncate",
-                selected ? "text-white" : "text-slate-900"
-              )}
-            >
-              {entity.name}
-            </p>
+            <div className="flex flex-col gap-1">
+              <p
+                className={cn(
+                  "font-semibold truncate",
+                  selected ? "text-white" : "text-slate-900"
+                )}
+              >
+                {entity.name}
+              </p>
+              <div
+                className={cn(
+                  "flex items-center justify-between text-sm",
+                  selected ? "text-white" : "text-slate-900"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {entity.logoUrl && (
+                    <img
+                      src={entity.logoUrl}
+                      alt="company logo"
+                      className="size-4 rounded object-cover"
+                    />
+                  )}
+                  <span className="flex text-xs items-center gap-1 font-bold">
+                    {entity.companyName || entity.name}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
           <span
             className={cn(
@@ -144,94 +163,100 @@ export function EntityCard({
         </div>
 
         {/* Location & Manager */}
-        <div
-          className={cn(
-            "flex items-center justify-between text-sm",
-            selected ? "text-white" : "text-slate-900"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <ReactCountryFlag
-              svg
-              countryCode={entity.countryCode}
-              style={{ width: 22, height: 16, borderRadius: 2 }}
-            />
-            <span className="flex text-xs items-center gap-1 font-bold">
-              {entity.country} <span>/</span>{" "}
-              <span className="font-normal">{entity.city}</span>
-            </span>
-          </div>
-        </div>
 
         <div
-          className={cn(
-            "flex items-center justify-between gap-2 text-sm",
-            selected ? "text-white/80" : "text-slate-600"
-          )}
-        >
-          <span className="inline-flex items-center gap-2 text-xs">
-            <UserIcon className="size-3" />
-            {entity.managerName}
-          </span>
-          <div className="flex items-center gap-2">
-            <PhoneIcon className="size-4" />
-            <span
-              className={cn(
-                "text-mainBlue cursor-pointer select-none",
-                selected ? "text-white" : "text-blue-600"
-              )}
-            >
-              {entity.phone}
-            </span>
-          </div>
-        </div>
-
-        <div className=" h-[1px] bg-slate-100" />
+          className={cn("h-[0.5px]", selected ? "bg-blue-700" : "bg-slate-200")}
+        />
 
         {/* Stats */}
-        <div
-          className={cn(
-            "flex  justify-between items-center flex-1 gap-2 text-xs",
-            selected ? "text-white/80" : "text-slate-600"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <UsersIcon className="size-3" />
-            <span>
+        <div className={cn("flex flex-col gap-3 p-3 rounded-lg")}>
+          {/* Top Row */}
+          <div className="flex justify-between items-start gap-4">
+            {/* Vehicle */}
+            <div className="flex flex-col gap-1 flex-1">
+              <div className="flex items-center gap-2">
+                <TruckIcon
+                  className={cn(
+                    "size-3",
+                    selected ? "text-white" : "text-slate-600"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-[10px] font-semibold uppercase tracking-wide",
+                    selected ? "text-white/80" : "text-slate-600"
+                  )}
+                >
+                  Vehicle
+                </span>
+              </div>
               <span
                 className={cn(
-                  "text-xs font-medium",
+                  "text-xs  mt-0.5",
                   selected ? "text-white" : "text-slate-900"
                 )}
               >
-                {entity.numDrivers ?? entity.numShipments ?? 0}
-              </span>{" "}
-              {statsLabels.driversLabel}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <TruckIcon className="size-3" />
-            <span>
+                {entity.vehicleType
+                  ? entity.vehicleType.charAt(0).toUpperCase() +
+                    entity.vehicleType.slice(1)
+                  : "N/A"}
+              </span>
+            </div>
+
+            {/* Plate Number */}
+            <div className="flex flex-col gap-1 flex-1">
+              <div className="flex items-center gap-2">
+                <ScanLineIcon
+                  className={cn(
+                    "size-3",
+                    selected ? "text-white" : "text-slate-600"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-[10px] font-semibold uppercase tracking-wide",
+                    selected ? "text-white/80" : "text-slate-600"
+                  )}
+                >
+                  Plate Number
+                </span>
+              </div>
               <span
                 className={cn(
-                  "text-xs font-medium",
+                  "text-xs  mt-0.5",
                   selected ? "text-white" : "text-slate-900"
                 )}
               >
-                {entity.numActiveVehicles}
-              </span>{" "}
-              {statsLabels.activeLabel}
-            </span>
+                {entity.vehiclePlate || "N/A"}
+              </span>
+            </div>
           </div>
+
+          {/* Bottom Row */}
           <div className="flex items-center gap-2">
-            <ClockIcon className="size-3" />
+            <CalendarIcon
+              className={cn(
+                "size-3",
+                selected ? "text-white" : "text-slate-600"
+              )}
+            />
             <span
               className={cn(
-                "text-xs font-medium",
-                selected ? "text-white" : "text-slate-900"
+                "text-[10px] font-semibold uppercase tracking-wide",
+                selected ? "text-white/80" : "text-slate-600"
               )}
             >
-              {entity.lastActivity}
+              Lost Shipment:{" "}
+              <span
+                className={cn(
+                  "font-medium",
+                  selected ? "text-white" : "text-slate-900"
+                )}
+              >
+                {entity.lostShipments && entity.lostShipments > 0
+                  ? entity.lostShipments
+                  : "-"}
+              </span>
             </span>
           </div>
         </div>

@@ -27,8 +27,8 @@ const FILTER_META: Record<
     className: "bg-amber-50 text-amber-700 hover:bg-amber-100",
     activeRing: "ring-2 ring-amber-200",
   },
-  active: {
-    label: "Active",
+  approved: {
+    label: "Approved",
     className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     activeRing: "ring-2 ring-emerald-200",
   },
@@ -75,7 +75,7 @@ export function StatusFilterChips({
   const keys: FilterKey[] = [
     "all",
     "pending",
-    "active",
+    "approved",
     "rejected",
     "inactive",
   ];

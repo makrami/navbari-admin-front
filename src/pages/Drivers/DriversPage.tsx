@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EntityCard } from "../../shared/components/ui/EntityCard";
-import { DRIVERS } from "./data";
 import { StatusFilterChips } from "./components/StatusFilterChips";
 import type { FilterKey } from "./components/StatusFilterChips";
 import { ListPanel } from "../../shared/components/ui/ListPanel";
 import { DetailsPanel } from "../shipment/details/DetailsPanel";
 import { DriverDetails } from "./components/DriverDetails";
-import { AddDriver } from "./components/AddDriver";
 import { PanelRightClose } from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
 import { DriversPageSkeleton } from "./components/DriversSkeleton";
+import { useDrivers } from "../../services/driver/hooks";
+import { formatDriverForEntityCard } from "./utils";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
@@ -20,38 +20,40 @@ export function DriversPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
+  const { data: drivers = [], isLoading, isError, error } = useDrivers();
 
-  useEffect(() => {
-    // Simulate loading for 2 seconds
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const formattedDrivers = useMemo(() => {
+    return drivers.map(formatDriverForEntityCard);
+  }, [drivers]);
 
   const filteredDrivers = useMemo(() => {
-    if (activeFilter === "all") return DRIVERS;
-    return DRIVERS.filter((d) => d.status === activeFilter);
-  }, [activeFilter]);
+    if (activeFilter === "all") return formattedDrivers;
+    return formattedDrivers.filter((d) => d.status === activeFilter);
+  }, [activeFilter, formattedDrivers]);
 
   const countByFilter = useMemo(() => {
     const counts: Record<FilterKey, number> = {
-      all: DRIVERS.length,
+      all: formattedDrivers.length,
       pending: 0,
-      active: 0,
+      approved: 0,
       rejected: 0,
       inactive: 0,
     };
-    for (const d of DRIVERS) counts[d.status] += 1;
+    for (const d of formattedDrivers) {
+      const status = d.status as FilterKey;
+      if (status in counts) {
+        counts[status] += 1;
+      }
+    }
     return counts;
-  }, []);
+  }, [formattedDrivers]);
 
   // Determine selected driver for split view; keep hooks before any early returns
-  const selectedDriver =
-    DRIVERS.find((d) => d.id === selectedId) ?? filteredDrivers[0];
+  // Find the original driver object for DriverDetails component
+  const selectedDriver = selectedId
+    ? drivers.find((d) => d.id === selectedId)
+    : null;
 
   useEffect(() => {
     if (selectedDriver) {
@@ -61,6 +63,26 @@ export function DriversPage() {
 
   if (isLoading) {
     return <DriversPageSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="py-6 space-y-6 min-h-screen max-w-7xl mx-auto flex flex-col items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold text-red-600 mb-2">
+            {t("drivers.page.error.title", "Error loading drivers")}
+          </h1>
+          <p className="text-slate-600">
+            {error instanceof Error
+              ? error.message
+              : t(
+                  "drivers.page.error.message",
+                  "Failed to load drivers. Please try again."
+                )}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Default wrapped layout view - left-aligned
@@ -115,7 +137,6 @@ export function DriversPage() {
           counts={countByFilter as Record<FilterKey, number>}
           isListPanel={selectedDriver !== null}
         />
-        <AddDriver />
         <div className="grid gap-4">
           {filteredDrivers.map((d) => (
             <div key={d.id} className="w-full">
@@ -180,7 +201,7 @@ export function DriversPage() {
                     </button>
                   </div>
                   <DriverDetails driver={selectedDriver} />
-                  <RecentActivities />
+                  <RecentActivities driver={selectedDriver} />
                   <DocumentsList />
                   <InternalNotes />
                 </div>

@@ -1,31 +1,47 @@
 import type { Driver } from "../types";
-import ReactCountryFlag from "react-country-flag";
 import {
   Phone as PhoneIcon,
   Users as UsersIcon,
   Truck as TruckIcon,
-  User as UserIcon,
   Calendar as CalendarIcon,
-  Plus as PlusIcon,
-  Pencil as PencilIcon,
+  ScanBarcode,
+  Weight,
 } from "lucide-react";
 import { STATUS_TO_COLOR } from "../types";
+import { formatDriverForEntityCard } from "../utils";
+import { ENV } from "../../../lib/env";
 
 type Props = {
   driver: Driver;
 };
 
+function getFileUrl(filePath: string | null | undefined): string | undefined {
+  if (!filePath) return undefined;
+  if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+    return filePath;
+  }
+  const cleanPath = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+  return `${ENV.FILE_BASE_URL}/${cleanPath}`;
+}
+
 export function DriverDetails({ driver }: Props) {
   const colors = STATUS_TO_COLOR[driver.status];
+  const driverCard = formatDriverForEntityCard(driver);
+  const driverName = driver.user?.fullName || "Unknown Driver";
+  const phone = driver.user?.phoneNumber || "N/A";
 
   const statusDotColor =
-    driver.status === "active"
+    driver.status === "approved"
       ? "bg-green-500"
       : driver.status === "pending"
       ? "bg-amber-500"
       : driver.status === "rejected"
       ? "bg-rose-500"
       : "bg-slate-500";
+
+  const joinDate = driver.createdAt
+    ? new Date(driver.createdAt).toLocaleDateString()
+    : "N/A";
 
   return (
     <section className="bg-white rounded-2xl p-4 flex flex-col gap-4">
@@ -36,7 +52,7 @@ export function DriverDetails({ driver }: Props) {
           <div className="h-24 w-24 rounded-full bg-slate-50 overflow-hidden grid place-items-center">
             {driver.avatarUrl ? (
               <img
-                src={driver.avatarUrl}
+                src={getFileUrl(driver.avatarUrl)}
                 alt="avatar"
                 className="h-full w-full object-cover"
               />
@@ -48,31 +64,32 @@ export function DriverDetails({ driver }: Props) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="text-slate-900 font-bold text-xl leading-none truncate">
-                {driver.name}
+                {driverName}
               </p>
-              <PencilIcon className="size-4 text-slate-400" />
+              {/* <PencilIcon className="size-4 text-slate-400" /> */}
             </div>
 
             <div className="mt-2 flex items-center gap-2 text-xs text-slate-900">
-              <ReactCountryFlag
-                svg
-                countryCode={driver.countryCode}
-                className=" text-2xl"
-              />
+              {driver.company.logoUrl && (
+                <img
+                  src={getFileUrl(driver.company.logoUrl)}
+                  alt="Company Logo"
+                  className=" h-4 w-7 rounded object-cover"
+                />
+              )}
               <span className="flex items-center gap-1 font-bold">
-                {driver.country} <span>/</span>
-                <span className="font-normal">{driver.city}</span>
+                {driver.company.name}
               </span>
             </div>
 
             <div className="mt-2 flex items-center gap-6 text-xs text-slate-900">
               <div className="flex items-center gap-2">
-                <UserIcon className="size-3.5 text-slate-400" />
-                <span>{driver.managerName}</span>
+                <PhoneIcon className="size-3.5 text-slate-400" />
+                <span> {phone}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CalendarIcon className="size-3.5 text-slate-400" />
-                <span>Join: 2023-10-26</span>
+                <span>Register: {joinDate}</span>
               </div>
             </div>
           </div>
@@ -91,14 +108,14 @@ export function DriverDetails({ driver }: Props) {
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
             <UsersIcon className="size-4 text-blue-600" />
             <span className="text-xs font-bold text-blue-600">
-              {driver.numShipments}
+              {driver.totalDeliveries || 0}
             </span>
             <span className="text-xs text-blue-600">Shipments</span>
           </div>
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
             <TruckIcon className="size-4 text-blue-600" />
             <span className="text-xs font-bold text-blue-600">
-              {driver.numActiveVehicles}
+              {driverCard.numActiveVehicles}
             </span>
             <span className="text-xs text-blue-600">Vehicles</span>
           </div>
@@ -109,42 +126,42 @@ export function DriverDetails({ driver }: Props) {
 
       {/* Bottom contacts */}
       <div className="flex items-center gap-4 text-xs text-slate-900">
-        <PhoneIcon className="size-6 text-slate-400" />
-
         <div className="flex items-center gap-6">
           <div className="flex flex-col gap-1 min-w-[7.5rem]">
-            <p className="text-slate-400 font-semibold">Driver</p>
-            <p>{driver.phone}</p>
+            <p className="text-slate-400 flex items-center gap-2 font-semibold">
+              <TruckIcon className="size-4  text-slate-400" />
+              VEHICLE
+            </p>
+
+            <p>
+              {driver.vehicleType
+                ? driver.vehicleType.charAt(0).toUpperCase() +
+                  driver.vehicleType.slice(1)
+                : ""}
+            </p>
           </div>
 
           <div className="h-10 border-l border-slate-200" />
 
           <div className="flex flex-col gap-1 min-w-[7.5rem]">
-            <p className="text-slate-400 font-semibold">Emergency Contact</p>
-            <p>{driver.phone}</p>
+            <p className="text-slate-400 flex items-center gap-2 font-semibold">
+              <ScanBarcode className="size-4  text-slate-400" />
+              PLATE NUMBER
+            </p>
+
+            <p>{driver.vehiclePlate}</p>
           </div>
 
           <div className="h-10 border-l border-slate-200" />
 
           <div className="flex flex-col gap-1 min-w-[7.5rem]">
-            <p className="text-slate-400 font-semibold">Supervisor</p>
-            <p>{driver.phone}</p>
-          </div>
-        </div>
+            <p className="text-slate-400 flex items-center gap-2 font-semibold">
+              <Weight className="size-4  text-slate-400" />
+              CAPACITY
+            </p>
 
-        <div className="ml-auto flex items-center gap-3">
-          <button
-            type="button"
-            className="bg-white border border-slate-200 rounded-lg p-2"
-          >
-            <PlusIcon className="size-5 text-slate-400" />
-          </button>
-          <button
-            type="button"
-            className="bg-white border border-slate-200 rounded-lg p-2"
-          >
-            <PencilIcon className="size-5 text-slate-400" />
-          </button>
+            <p>{(driver.vehicleCapacity / 1000).toFixed(2)} Tons</p>
+          </div>
         </div>
       </div>
     </section>

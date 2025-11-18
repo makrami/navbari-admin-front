@@ -364,6 +364,31 @@ export async function getShipmentSegments(id: string): Promise<Segment[]> {
 }
 
 /**
+ * List all segments with optional driver filter
+ */
+export async function listSegments(driverId?: string): Promise<Segment[]> {
+  try {
+    const params = new URLSearchParams();
+    if (driverId) {
+      params.append("driverId", driverId);
+    }
+
+    const queryString = params.toString();
+    const url = `/segments${queryString ? `?${queryString}` : ""}`;
+
+    const response = await http.get<Segment[]>(url);
+    return response.data.map((dto, index) =>
+      mapSegmentDtoToSegmentData(dto, index + 1)
+    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to fetch segments");
+  }
+}
+
+/**
  * Get shipment activity log
  */
 export async function getShipmentActivityLog(
