@@ -1,16 +1,16 @@
-import {useState, useRef, useEffect, useMemo, useCallback} from "react";
-import {useSearchParams} from "react-router-dom";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   useShipments,
   useCreateShipment,
   useUpdateShipment,
 } from "../../../services/shipment/hooks";
-import type {UpdateShipmentDto} from "../../../services/shipment/shipment.api.service";
-import type {Shipment} from "../../../shared/types/shipment";
+import type { UpdateShipmentDto } from "../../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../../shared/types/shipment";
 
 export function useShipmentSelection() {
   const [searchParams] = useSearchParams();
-  const {data: shipments, loading: serviceLoading} = useShipments();
+  const { data: shipments, loading: serviceLoading } = useShipments();
   const createShipmentMutation = useCreateShipment();
   const updateShipmentMutation = useUpdateShipment();
   const hasInitializedRef = useRef(false);
@@ -85,18 +85,16 @@ export function useShipmentSelection() {
         // Extract origin/destination from shipment data
         // The form provides 'from' and 'to' as city names in the segments
         // We'll extract from the first segment's place or use defaults
-        const firstSegment = shipment.segments?.[0];
-        const originCity =
-          firstSegment?.place || shipment.fromCountryCode || "Unknown";
+        const originCity = shipment.originCity || "Unknown";
         const destinationCity =
-          shipment.destination || shipment.toCountryCode || "Unknown";
+          shipment.destinationCity || shipment.destinationCountry || "Unknown";
         // Use city names as both city and country (backend requires both, but form only has cities)
-        const originCountry = shipment.fromCountryCode || originCity;
-        const destinationCountry = shipment.toCountryCode || destinationCity;
-        const cargoWeight = shipment.weight
-          ? parseFloat(shipment.weight.replace(/[^0-9.]/g, ""))
+        const originCountry = shipment.originCountry || originCity;
+        const destinationCountry =
+          shipment.destinationCountry || destinationCity;
+        const cargoWeight = shipment.cargoWeight
+          ? parseFloat(shipment.cargoWeight.replace(/[^0-9.]/g, ""))
           : 0;
-        const segmentCount = shipment.segments?.length || 1;
 
         // Create via API using mutation hook
         const createdShipment = await createShipmentMutation.mutateAsync({
@@ -107,7 +105,7 @@ export function useShipmentSelection() {
           destinationCity: destinationCity,
           cargoType: "General",
           cargoWeight: cargoWeight,
-          segmentCount: segmentCount,
+          segmentCount: 1,
         });
 
         // Update selected ID to the new shipment ID from API (UUID) immediately
@@ -131,8 +129,8 @@ export function useShipmentSelection() {
         // Map update to UpdateShipmentDto format
         const updateDto: UpdateShipmentDto = {};
         if (update.title) updateDto.title = update.title;
-        if (update.weight) {
-          const weight = parseFloat(update.weight.replace(/[^0-9.]/g, ""));
+        if (update.cargoWeight) {
+          const weight = parseFloat(update.cargoWeight.replace(/[^0-9.]/g, ""));
           if (!isNaN(weight)) updateDto.cargoWeight = weight;
         }
         // Note: Other fields like origin/destination would need to be mapped if available

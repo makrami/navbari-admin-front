@@ -1,13 +1,13 @@
-import type { SegmentData } from "../types/segmentData";
+import type { Segment } from "../types/segmentData";
 import { SEGMENT_STATUS } from "../../services/shipment/shipment.api.service";
 import type { SegmentProgressStage } from "../../pages/shipment/segments/components/SegmentProgress";
 
 /**
- * Computes UI fields from SegmentData
+ * Computes UI fields from Segment
  * These are pure functions - no mapping, just computation
  */
 
-export function computeSegmentPlace(segment: SegmentData): string {
+export function computeSegmentPlace(segment: Segment): string {
   if (segment.place) return segment.place;
   if (segment.originCity && segment.originCountry) {
     return `${segment.originCity}, ${segment.originCountry}`;
@@ -15,7 +15,9 @@ export function computeSegmentPlace(segment: SegmentData): string {
   return segment.originCity || segment.originCountry || "";
 }
 
-export function computeSegmentNextPlace(segment: SegmentData): string | undefined {
+export function computeSegmentNextPlace(
+  segment: Segment
+): string | undefined {
   if (segment.nextPlace) return segment.nextPlace;
   if (segment.destinationCity && segment.destinationCountry) {
     return `${segment.destinationCity}, ${segment.destinationCountry}`;
@@ -26,20 +28,24 @@ export function computeSegmentNextPlace(segment: SegmentData): string | undefine
 /**
  * Formats distanceKm to display string (e.g., "24 KM")
  */
-export function formatDistance(distanceKm: number | null | undefined): string | undefined {
+export function formatDistance(
+  distanceKm: number | null | undefined
+): string | undefined {
   if (distanceKm === null || distanceKm === undefined) return undefined;
   return `${Math.round(distanceKm)} KM`;
 }
 
-export function computeIsCompleted(segment: SegmentData): boolean {
+export function computeIsCompleted(segment: Segment): boolean {
   if (segment.isCompleted !== undefined) return segment.isCompleted;
   return segment.status === SEGMENT_STATUS.DELIVERED;
 }
 
-export function computeHasDisruption(segment: SegmentData): boolean {
+export function computeHasDisruption(segment: Segment): boolean {
   if (segment.hasDisruption !== undefined) return segment.hasDisruption;
-  return segment.status === SEGMENT_STATUS.CANCELLED || 
-         segment.status === SEGMENT_STATUS.AT_ORIGIN;
+  return (
+    segment.status === SEGMENT_STATUS.CANCELLED ||
+    segment.status === SEGMENT_STATUS.AT_ORIGIN
+  );
 }
 
 /**
@@ -50,19 +56,29 @@ export function getProgressStageFromStatus(
   isCompleted: boolean
 ): SegmentProgressStage | undefined {
   if (isCompleted) return "delivered";
-  
+
   switch (status) {
+    case SEGMENT_STATUS.PENDING_ASSIGNMENT:
+      return "pending_assignment";
+    case SEGMENT_STATUS.ASSIGNED:
+      return "assigned";
+    case SEGMENT_STATUS.TO_ORIGIN:
+      return "to_origin";
     case SEGMENT_STATUS.AT_ORIGIN:
-      return "in_origin";
+      return "at_origin";
     case SEGMENT_STATUS.LOADING:
       return "loading";
-    case SEGMENT_STATUS.TO_DESTINATION:
     case SEGMENT_STATUS.IN_CUSTOMS:
-      return "to_dest";
+      return "in_customs";
+    case SEGMENT_STATUS.TO_DESTINATION:
+      return "to_destination";
+    case SEGMENT_STATUS.AT_DESTINATION:
+      return "at_destination";
     case SEGMENT_STATUS.DELIVERED:
       return "delivered";
+    case SEGMENT_STATUS.CANCELLED:
+      return "cancelled";
     default:
       return undefined;
   }
 }
-

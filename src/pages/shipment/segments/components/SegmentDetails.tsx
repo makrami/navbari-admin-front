@@ -1,7 +1,7 @@
-import {useMemo, useState, useEffect, type ReactNode} from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import SegmentProgress from "./SegmentProgress";
-import {cn} from "../../../../shared/utils/cn";
-import {CITY_OPTIONS} from "../../data/cities";
+import { cn } from "../../../../shared/utils/cn";
+import { CITY_OPTIONS } from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -9,31 +9,28 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
+import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type {SegmentData} from "../../../../shared/types/segmentData";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import {
-  SegmentAssignmentStatus,
-  type Shipment,
-} from "../../../../shared/types/shipment";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
-import {ShipmentLinkSection} from "./ShipmentLinkSection";
-import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service";
-import {useCompanies} from "../../../../services/company/hooks";
+import { ShipmentLinkSection } from "./ShipmentLinkSection";
+import type { SegmentReadDto } from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
+import { useCompanies } from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
 } from "../../../../services/shipment/hooks";
-import type {CompanyReadDto} from "../../../../services/company/company.service";
+import type { CompanyReadDto } from "../../../../services/company/company.service";
 import {
   computeSegmentPlace,
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
 
-type DocumentItem = NonNullable<SegmentData["documents"]>[number];
+type DocumentItem = NonNullable<Segment["documents"]>[number];
 
 // Helper function to map country name to ISO country code
 function getCountryCode(countryName: string): string {
@@ -82,13 +79,13 @@ function transformCompanyToCargoCompany(company: CompanyReadDto): CargoCompany {
 
 type SegmentDetailsProps = {
   className?: string;
-  data: SegmentData;
+  data: Segment;
   shipment: Shipment;
   defaultOpen?: boolean;
   open?: boolean;
   onToggle?: () => void;
   children?: ReactNode;
-  onSave?: (update: Partial<SegmentData>) => void;
+  onSave?: (update: Partial<Segment>) => void;
   editable?: boolean;
   locked?: boolean;
   segmentId?: string;
@@ -102,7 +99,6 @@ export function SegmentDetails({
   defaultOpen = false,
   open: controlledOpen,
   onToggle: controlledOnToggle,
-  children,
   onSave,
   editable = false,
   locked = false,
@@ -193,11 +189,12 @@ export function SegmentDetails({
   ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
-  const [pendingUpdate, setPendingUpdate] =
-    useState<Partial<SegmentData> | null>(null);
+  const [pendingUpdate, setPendingUpdate] = useState<Partial<Segment> | null>(
+    null
+  );
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): {city: string; country: string} => {
+  const parsePlace = (place: string): { city: string; country: string } => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -205,11 +202,11 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return {city: place, country: ""};
+    return { city: place, country: "" };
   };
 
   // Fetch companies from API
-  const {data: companies = []} = useCompanies();
+  const { data: companies = [] } = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -217,47 +214,60 @@ export function SegmentDetails({
   }, [companies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
-  const {data: announcements = []} = useSegmentAnnouncements(
+  const { data: announcements = [] } = useSegmentAnnouncements(
     data.hasPendingAnnouncements && segmentId ? segmentId : null
   );
 
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
 
   // helper state derived inline by Field components when needed
-  const step = data.step ?? 0;
-  const headerId = `segment-header-${step}`;
 
   useMemo<DocumentItem[]>(() => {
     return data.documents ?? [];
   }, [data.documents]);
 
+  // Determine if segment is assigned
+  const isAssigned =
+    data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+    data.status !== undefined;
+
+  // Determine background color - all segments should have white background
+  const getBackgroundColor = () => {
+    return "bg-white";
+  };
+
   // Determine border color based on segment status
   const getBorderColor = () => {
     if (locked) return "border-transparent";
-    if (editable) return "border-dotted border-blue-500";
 
     // Check for error/alert state first (highest priority)
     const hasError =
-      data.hasDisruption ||
-      data.status === SEGMENT_STATUS.CANCELLED ||
-      data.status === SEGMENT_STATUS.LOADING;
+      data.hasDisruption || data.status === SEGMENT_STATUS.CANCELLED;
     if (hasError) {
       return "border-red-600";
     }
 
     // Check for delivered state
-    if (data.progressStage === "delivered") {
+    if (data.status === SEGMENT_STATUS.DELIVERED || data.isCompleted) {
       return "border-green-600";
     }
 
-    // Check for in-progress state (any active progressStage except delivered)
-    // This includes: in_origin, loading, to_dest, in_customs, to_origin, start
-    // or if segment is marked as current
-    if (data.progressStage || data.isCurrent) {
+    // Also check for active progress stages or current segment
+    const isActive =
+      (data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+        data.status !== SEGMENT_STATUS.DELIVERED) ||
+      data.isCurrent;
+
+    if (isAssigned || isActive) {
       return "border-yellow-600";
     }
 
-    // Not started yet (upcoming states) or no progressStage
+    // Editable segments that are pending assignment get blue border
+    if (editable && data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT) {
+      return "border-dotted border-blue-500";
+    }
+
+    // Not started yet (pending assignment or no status)
     return "border-slate-200";
   };
 
@@ -265,77 +275,67 @@ export function SegmentDetails({
     <div
       className={cn(
         "relative border-2 rounded-xl shadow-[0_0_0_1px_rgba(99,102,241,0.04)]",
-        locked ? "bg-slate-50 border-transparent" : "bg-white",
+        getBackgroundColor(),
         getBorderColor(),
         className
       )}
       data-name="Segment Item"
     >
       <SegmentHeader
-        step={step}
-        place={place}
-        nextPlace={data.isPlaceholder ? undefined : nextPlace}
+        order={data.order}
+        segmentStatus={data.status as SEGMENT_STATUS | undefined}
+        originCity={data.originCity ?? undefined}
+        originCountry={data.originCountry ?? undefined}
+        destinationCity={data.destinationCity ?? undefined}
+        destinationCountry={data.destinationCountry ?? undefined}
         isCompleted={data.isCompleted}
         open={open}
         isCurrent={data.isCurrent ?? false}
-        distanceKm={data.distanceKm}
+        distanceKm={data.distanceKm ? parseFloat(data.distanceKm) : null}
         eta={(data.estimatedFinishTime ?? null) as string | null}
-        avatarUrl={data.assigneeAvatarUrl ?? undefined}
-        assigneeName={data.assigneeName ?? undefined}
-        locked={locked}
+        avatarUrl={data.assigneeAvatarUrl ?? data.driverAvatarUrl ?? undefined}
+        assigneeName={data.assigneeName ?? data.driverName ?? undefined}
         editable={editable}
-        headerId={headerId}
+        segmentId={data.id}
         onToggle={handleToggle}
         showCargoButton={
-          !open &&
-          editable &&
-          Boolean(data.destinationCity) &&
-          Boolean(data.originCity) &&
-          !data.isCompleted
+          !open && editable && data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT
         }
         onCargoClick={(e) => {
           e.stopPropagation();
           setPendingUpdate({});
           setShowCargoModal(true);
         }}
-        assignmentStatus={
-          data.status === SEGMENT_STATUS.ASSIGNED
-            ? SegmentAssignmentStatus.ASSIGNED
-            : data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT
-            ? SegmentAssignmentStatus.PENDING_ASSIGNMENT
-            : undefined
-        }
+        isAssigned={isAssigned}
       />
 
-      {data.progressStage && !open && (
+      {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT && !open && (
         <div className="px-3 pb-3">
           <SegmentProgress
-            current={data.progressStage}
+            current={data.status as SEGMENT_STATUS}
             dateTime={
               (data.estimatedStartTime ?? undefined) as string | undefined
             }
             showWarningIcon={data.hasDisruption ?? false}
+            segment={data}
           />
         </div>
       )}
 
       {/* Expandable content container */}
       <div
-        id={`segment-content-${step}`}
+        id={data.id}
         className={cn(
           "grid transition-[grid-template-rows] duration-300 ease-in-out",
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
         aria-hidden={!open}
         role="region"
-        aria-labelledby={headerId}
+        aria-labelledby={data.id}
       >
         <div className="overflow-hidden">
           <div
-            className={cn(
-              "px-3 bg-slate-100 py-2 gap-6",
-              open && "rounded-b-xl"
-            )}
+            className={cn("px-3 bg-white py-2 gap-6", open && "rounded-b-xl")}
           >
             {/* Shipment Link Section - only shown when shipmentLinkProps is provided */}
             {shipment && linkShipment && (
@@ -345,24 +345,26 @@ export function SegmentDetails({
                   shipmentId={shipment.id}
                   fromPlace={shipment.originCity ?? ""}
                   toPlace={shipment.destinationCity}
-                  fromCountryCode={shipment.fromCountryCode}
-                  toCountryCode={shipment.toCountryCode ?? ""}
+                  fromCountryCode={shipment.originCountry}
+                  toCountryCode={shipment.destinationCountry ?? ""}
                   step={data.step ?? 0}
                 />
               </div>
             )}
 
             {/* Segment progress appears here only for non-current segments */}
-            {children ? (
-              <div>{children}</div>
-            ) : !data.isCurrent && data.progressStage && !locked ? (
+            {!data.isCurrent &&
+            data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+            !locked ? (
               <SegmentProgress
-                current={data.progressStage}
+                current={data.status as SEGMENT_STATUS}
                 showWarningIcon={data.hasDisruption ?? false}
+                segment={data}
               />
             ) : null}
 
-            {editable ? (
+            {/* Show form only when editable AND segment is pending assignment */}
+            {editable && data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ? (
               <div className=" rounded-xl  grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FieldBoxSelect
                   label="FROM"
@@ -430,7 +432,8 @@ export function SegmentDetails({
                       return;
                     }
                     try {
-                      const update: Partial<SegmentData> = {
+                      const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
+                      const update: Partial<Segment> = {
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
                         estimatedStartTime: combineDateTime(
@@ -441,7 +444,8 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFee: parseFloat(baseFee),
+                        baseFee:
+                          baseFeeNum !== null ? String(baseFeeNum) : null,
                         isPlaceholder: false,
                       };
 
@@ -464,7 +468,7 @@ export function SegmentDetails({
                               estFinishDateValue.trim(),
                               estFinishTimeValue.trim()
                             ),
-                            baseFee: parseFloat(baseFee),
+                            baseFee: baseFeeNum ?? undefined,
                           };
                           console.log("Calling updateSegment API with:", {
                             segmentId,
@@ -492,7 +496,7 @@ export function SegmentDetails({
 
                       // Use API response if available, otherwise use local update
                       if (apiResponse) {
-                        // Map API response back to SegmentData format
+                        // Map API response back to Segment format
                         const originPlace =
                           apiResponse.originCity && apiResponse.originCountry
                             ? `${apiResponse.originCity}, ${apiResponse.originCountry}`
@@ -514,7 +518,9 @@ export function SegmentDetails({
                             apiResponse.estimatedStartTime || undefined,
                           estimatedFinishTime:
                             apiResponse.estimatedFinishTime || undefined,
-                          baseFee: apiResponse.baseFee ?? undefined,
+                          baseFee: apiResponse.baseFee
+                            ? String(apiResponse.baseFee)
+                            : null,
                           isPlaceholder: false,
                         });
                       } else {
@@ -527,6 +533,7 @@ export function SegmentDetails({
                     } catch (error) {
                       console.error("Failed to update segment:", error);
                       // Still call onSave for local state update even if API fails
+                      const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
                       onSave?.({
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
@@ -538,7 +545,8 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFee: parseFloat(baseFee),
+                        baseFee:
+                          baseFeeNum !== null ? String(baseFeeNum) : null,
                         isPlaceholder: false,
                       });
                     }
@@ -556,7 +564,8 @@ export function SegmentDetails({
                       return;
                     }
                     try {
-                      const update: Partial<SegmentData> = {
+                      const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
+                      const update: Partial<Segment> = {
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
                         estimatedStartTime: combineDateTime(
@@ -567,7 +576,8 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFee: parseFloat(baseFee),
+                        baseFee:
+                          baseFeeNum !== null ? String(baseFeeNum) : null,
                         isPlaceholder: false,
                       };
 
@@ -590,7 +600,7 @@ export function SegmentDetails({
                               estFinishDateValue.trim(),
                               estFinishTimeValue.trim()
                             ),
-                            baseFee: parseFloat(baseFee),
+                            baseFee: baseFeeNum ?? undefined,
                           };
                           console.log(
                             "Calling updateSegment API (Save & Declare) with:",
@@ -624,7 +634,7 @@ export function SegmentDetails({
 
                       // Use API response if available, otherwise use local update
                       if (apiResponse) {
-                        // Map API response back to SegmentData format
+                        // Map API response back to Segment format
                         const originPlace =
                           apiResponse.originCity && apiResponse.originCountry
                             ? `${apiResponse.originCity}, ${apiResponse.originCountry}`
@@ -646,7 +656,9 @@ export function SegmentDetails({
                             apiResponse.estimatedStartTime || undefined,
                           estimatedFinishTime:
                             apiResponse.estimatedFinishTime || undefined,
-                          baseFee: apiResponse.baseFee ?? undefined,
+                          baseFee: apiResponse.baseFee
+                            ? String(apiResponse.baseFee)
+                            : null,
                           isPlaceholder: false,
                         });
                       } else {
@@ -656,6 +668,7 @@ export function SegmentDetails({
                     } catch (error) {
                       console.error("Failed to update segment:", error);
                       // Still proceed with cargo modal even if API fails
+                      const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
                       setPendingUpdate({
                         place: fromValue.trim(),
                         nextPlace: toValue.trim(),
@@ -667,7 +680,8 @@ export function SegmentDetails({
                           estFinishDateValue.trim(),
                           estFinishTimeValue.trim()
                         ),
-                        baseFee: parseFloat(baseFee),
+                        baseFee:
+                          baseFeeNum !== null ? String(baseFeeNum) : null,
                         isPlaceholder: false,
                       });
                       setShowCargoModal(true);
@@ -723,7 +737,7 @@ export function SegmentDetails({
         defaultSelectedIds={data.cargoCompanies?.map((c) => c.id)}
         segmentId={segmentId}
         onSelect={(companies) => {
-          const update: Partial<SegmentData> = {
+          const update: Partial<Segment> = {
             ...(pendingUpdate ?? {}),
             localCompany: companies.map((c) => c.name).join(", "),
             cargoCompanies: companies,

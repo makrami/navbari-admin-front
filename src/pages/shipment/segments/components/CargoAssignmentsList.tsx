@@ -1,29 +1,42 @@
-import {RefreshCcw} from "lucide-react";
-import {ENV} from "../../../../lib/env";
-import type {SegmentAnnouncementReadDto} from "../../../../services/shipment/shipment.api.service";
-import {getFileUrl} from "../../../LocalCompanies/utils";
+import { RefreshCcw } from "lucide-react";
+import type { SegmentAnnouncementReadDto } from "../../../../services/shipment/shipment.api.service";
+import { getFileUrl } from "../../../LocalCompanies/utils";
+import { useAssignSegment } from "../../../../services/shipment/hooks";
+import { useState } from "react";
 
 type CargoAssignmentsListProps = {
   announcements: SegmentAnnouncementReadDto[];
 };
 
-const getLogoUrl = (logoPath: string | null | undefined): string => {
-  if (!logoPath) return "";
-
-  // If already a full URL, return as is
-  if (logoPath.startsWith("http://") || logoPath.startsWith("https://")) {
-    return logoPath;
-  }
-
-  // Construct full URL from relative path
-  // Remove leading slash if present to avoid double slash
-  const cleanPath = logoPath.startsWith("/") ? logoPath.slice(1) : logoPath;
-  return `${ENV.FILE_BASE_URL}/${cleanPath}`;
-};
-
 export default function CargoAssignmentsList({
   announcements,
 }: CargoAssignmentsListProps) {
+  const assignSegmentMutation = useAssignSegment();
+  const [assigningId, setAssigningId] = useState<string | null>(null);
+
+  const handleAssign = async (announcement: SegmentAnnouncementReadDto) => {
+    if (!announcement.driverId) {
+      // Driver ID is required for assignment
+      alert("Driver ID is required for assignment");
+      return;
+    }
+
+    setAssigningId(announcement.id);
+    try {
+      await assignSegmentMutation.mutateAsync({
+        id: announcement.segmentId,
+        data: {
+          companyId: announcement.companyId,
+          driverId: announcement.driverId,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to assign segment:", error);
+      alert("Failed to assign segment. Please try again.");
+    } finally {
+      setAssigningId(null);
+    }
+  };
   return (
     <div className="rounded-xl bg-white">
       <div className="grid gap-3">
@@ -35,7 +48,7 @@ export default function CargoAssignmentsList({
             {/* Left: company */}
             <div className="flex items-center gap-2 min-w-0">
               <img
-                src={getLogoUrl(announcement.companyLogoUrl)}
+                src={getFileUrl(announcement.companyLogoUrl)}
                 alt=""
                 className="h-5 w-5 rounded bg-white object-contain"
               />
@@ -61,6 +74,9 @@ export default function CargoAssignmentsList({
                       </span>
                     )}
                   </span>
+                  <span className="text-xs font-medium text-slate-900 truncate">
+                    {announcement.driverName}
+                  </span>
                 </div>
               ) : (
                 <div className="text-xs font-semibold text-amber-600 inline-flex items-center gap-1">
@@ -83,18 +99,14 @@ export default function CargoAssignmentsList({
             ) : announcement.status === "accepted" ? (
               <div className="shrink-0 flex gap-2">
                 <button
-                  className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded hover:bg-green-200 transition"
-                  // TODO: implement accept action
+                  className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded hover:bg-green-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => handleAssign(announcement)}
+                  disabled={
+                    assigningId === announcement.id || !announcement.driverId
+                  }
                   type="button"
                 >
-                  Accept
-                </button>
-                <button
-                  className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-1 rounded hover:bg-red-200 transition"
-                  // TODO: implement reject action
-                  type="button"
-                >
-                  Reject
+                  {assigningId === announcement.id ? "Assigning..." : "Assign"}
                 </button>
               </div>
             ) : announcement.status === "rejected" ? (

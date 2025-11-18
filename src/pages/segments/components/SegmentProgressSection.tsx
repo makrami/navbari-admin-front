@@ -1,21 +1,25 @@
 import SegmentProgress from "../../shipment/segments/components/SegmentProgress";
-import type {SegmentData} from "../../../shared/types/segmentData";
-import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
+import type { Segment } from "../../../shared/types/segmentData";
+import { SEGMENT_STATUS } from "../../../services/shipment/shipment.api.service";
 
 type SegmentProgressSectionProps = {
-  segment: SegmentData;
+  segment: Segment;
 };
 
-export function SegmentProgressSection({segment}: SegmentProgressSectionProps) {
+export function SegmentProgressSection({
+  segment,
+}: SegmentProgressSectionProps) {
   if (
     segment.isCompleted ||
     !segment.status ||
-    ![
-      SEGMENT_STATUS.AT_ORIGIN,
-      SEGMENT_STATUS.LOADING,
-      SEGMENT_STATUS.TO_DESTINATION,
-      SEGMENT_STATUS.IN_CUSTOMS,
-    ].includes(segment.status as any)
+    !(
+      [
+        SEGMENT_STATUS.AT_ORIGIN,
+        SEGMENT_STATUS.LOADING,
+        SEGMENT_STATUS.TO_DESTINATION,
+        SEGMENT_STATUS.IN_CUSTOMS,
+      ] as SEGMENT_STATUS[]
+    ).includes(segment.status)
   ) {
     return null;
   }
@@ -25,10 +29,12 @@ export function SegmentProgressSection({segment}: SegmentProgressSectionProps) {
       <SegmentProgress
         current={
           segment.status === SEGMENT_STATUS.TO_DESTINATION
-            ? "to_dest"
+            ? "to_destination"
             : segment.status === SEGMENT_STATUS.LOADING
             ? "loading"
-            : "in_origin"
+            : segment.status === SEGMENT_STATUS.AT_ORIGIN
+            ? "at_origin"
+            : "assigned"
         }
       />
     </div>

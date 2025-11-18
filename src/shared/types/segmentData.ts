@@ -1,19 +1,70 @@
-import type { SegmentReadDto } from "../../services/shipment/shipment.api.service";
-import type { SegmentProgressStage } from "../../pages/shipment/segments/components/SegmentProgress";
 import type { CargoCompany } from "../../pages/shipment/components/CargoDeclarationModal";
 
 /**
- * SegmentData - Extends SegmentReadDto with UI-specific computed fields only
- * Uses backend enums directly (SEGMENT_STATUS) - no mapping needed
- * Uses baseFee (not baseFeeUsd) and distanceKm (not distance) from API
+ * SegmentStatus - All possible segment status values
  */
-export type SegmentData = SegmentReadDto & {
+export const SegmentStatus = {
+  PENDING_ASSIGNMENT: "pending_assignment",
+  ASSIGNED: "assigned",
+  TO_ORIGIN: "to_origin",
+  AT_ORIGIN: "at_origin",
+  LOADING: "loading",
+  IN_CUSTOMS: "in_customs",
+  TO_DESTINATION: "to_destination",
+  AT_DESTINATION: "at_destination",
+  DELIVERED: "delivered",
+  CANCELLED: "cancelled",
+} as const;
+
+export type SegmentStatusType =
+  (typeof SegmentStatus)[keyof typeof SegmentStatus];
+
+/**
+ * Segment - Base interface matching the API response structure
+ */
+export interface Segment {
+  id: string;
+  shipmentId: string;
+  order: number;
+  companyId: string | null;
+  driverId: string | null;
+  driverName: string | null;
+  driverAvatarUrl: string | null;
+  shipmentWeight: string | null;
+  originCountry: string | null;
+  originCity: string | null;
+  destinationCountry: string | null;
+  destinationCity: string | null;
+  status: SegmentStatusType | string;
+  eta: string | null;
+  currentLatitude: number | null;
+  currentLongitude: number | null;
+  lastGpsUpdate: string | null;
+  startedAt: string | null;
+  arrivedOriginAt: string | null;
+  startLoadingAt: string | null;
+  arrivedDestinationAt: string | null;
+  deliveredAt: string | null;
+  etaToOrigin: string | null;
+  etaToDestination: string | null;
+  estimatedStartTime: string | null;
+  estimatedFinishTime: string | null;
+  distanceKm: string | null;
+  baseFee: string | null;
+  companyName: string | null;
+  shipmentTitle: string | null;
+  vehicleType: string | null;
+  contractAccepted: boolean;
+  contractAcceptedAt: string | null;
+  hasPendingAnnouncements: boolean;
+  hasDisruption: boolean;
+  createdAt: string;
+  updatedAt: string;
+
   // UI-specific computed fields (optional)
   step?: number;
   isCurrent?: boolean;
   isPlaceholder?: boolean;
-  progressStage?: SegmentProgressStage;
-  hasDisruption?: boolean;
 
   // Computed location strings (for display)
   place?: string; // Computed from originCity + originCountry
@@ -22,7 +73,6 @@ export type SegmentData = SegmentReadDto & {
   // UI display fields (from separate lookups)
   assigneeName?: string; // Driver name (from driverId lookup)
   assigneeAvatarUrl?: string; // Driver photo (from driverId lookup)
-  driverName?: string; // Alias for assigneeName
   driverPhoto?: string; // Alias for assigneeAvatarUrl
   driverRating?: number;
   vehicleLabel?: string;
@@ -43,15 +93,19 @@ export type SegmentData = SegmentReadDto & {
   cargoCompanies?: CargoCompany[];
 
   // Shipment context (optional, for segments displayed with shipment info)
-  shipmentTitle?: string;
   shipmentStatus?: string;
   shipmentFromCountryCode?: string;
   shipmentToCountryCode?: string;
-  hasPendingAnnouncements?: boolean;
 
   // Source indicator
   source?: "api";
 
   // Computed completion status
-  isCompleted?: boolean; // Computed from status === SEGMENT_STATUS.DELIVERED
-};
+  isCompleted?: boolean; // Computed from status === SegmentStatus.DELIVERED
+}
+
+/**
+ * @deprecated Use Segment instead
+ * SegmentData is kept for backward compatibility but will be removed
+ */
+export type SegmentData = Segment;

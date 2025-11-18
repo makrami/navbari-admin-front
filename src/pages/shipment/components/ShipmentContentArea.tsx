@@ -1,16 +1,18 @@
-import {useMemo, useState, useEffect} from "react";
-import {Segments} from "../segments/Segments";
+import { useMemo, useState, useEffect } from "react";
+import { Segments } from "../segments/Segments";
 import NavigatingInfo from "../details/components/NavigatingInfo";
 import ActivitySection from "../Activity/components/ActivitySection";
 import AddShipmentModal, {
   type AddShipmentInput as AddShipmentFormInput,
 } from "./AddShipmentModal";
-import {SegmentItem} from "./SegmentItem";
-import {useSegmentScroll} from "../hooks/useSegmentScroll";
-import {SegmentDetailsSkeleton} from "./ShipmentSkeleton";
-import type {Shipment} from "../../../shared/types/shipment";
-import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
-import type {SegmentData} from "../../../shared/types/segmentData";
+import { SegmentItem } from "./SegmentItem";
+import { useSegmentScroll } from "../hooks/useSegmentScroll";
+import { SegmentDetailsSkeleton } from "./ShipmentSkeleton";
+import type { Shipment } from "../../../shared/types/shipment";
+import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
+import type { SegmentData } from "../../../shared/types/segmentData";
+import { SegmentStatus } from "../../../shared/types/segmentData";
+import { getFileUrl } from "../../LocalCompanies/utils";
 
 type ShipmentContentAreaProps = {
   selectedShipment: Shipment;
@@ -82,6 +84,137 @@ export function ShipmentContentArea({
 
   const renderSegments = segmentsToRender;
 
+  // Find first in-progress segment (not completed, not cancelled, not pending_assignment)
+  const inProgressSegment = useMemo(() => {
+    return renderSegments.find(
+      (seg) =>
+        seg.status !== SegmentStatus.DELIVERED &&
+        seg.status !== SegmentStatus.CANCELLED &&
+        seg.status !== SegmentStatus.PENDING_ASSIGNMENT &&
+        !seg.isCompleted
+    );
+  }, [renderSegments]);
+
+  // Extract driver info from first in-progress segment
+  const driverName =
+    inProgressSegment?.driverName || inProgressSegment?.assigneeName || "";
+  const driverPhoto =
+    inProgressSegment?.driverAvatarUrl ||
+    inProgressSegment?.assigneeAvatarUrl ||
+    inProgressSegment?.driverPhoto ||
+    "";
+
+  // Extract vehicle info from segment
+  const vehicle =
+    inProgressSegment?.vehicleLabel || inProgressSegment?.vehicleType || "";
+
+  // Extract local company info from segment
+  const localCompany =
+    inProgressSegment?.localCompany || inProgressSegment?.companyName || "";
+
+  // Extract destination from shipment (prioritize shipment over segment)
+  const destination = useMemo(() => {
+    // Prioritize shipment destination
+    if (
+      selectedShipment.destinationCity &&
+      selectedShipment.destinationCountry
+    ) {
+      return `${selectedShipment.destinationCity}, ${selectedShipment.destinationCountry}`;
+    }
+    if (selectedShipment.destinationCity) {
+      return selectedShipment.destinationCity;
+    }
+    // Fall back to segment destination only if shipment doesn't have it
+    if (
+      inProgressSegment?.destinationCity &&
+      inProgressSegment?.destinationCountry
+    ) {
+      return `${inProgressSegment.destinationCity}, ${inProgressSegment.destinationCountry}`;
+    }
+    if (inProgressSegment?.destinationCity) {
+      return inProgressSegment.destinationCity;
+    }
+    return "";
+  }, [inProgressSegment, selectedShipment]);
+
+  // Extract last activity info
+  const { lastActivity, lastActivityTime } = useMemo(() => {
+    // Try to get GPS update time first
+    const gpsUpdate = inProgressSegment?.lastGpsUpdate;
+    const updatedAt =
+      inProgressSegment?.updatedAt || selectedShipment.updatedAt;
+
+    // Determine activity status based on segment status
+    let activity = "";
+    if (inProgressSegment) {
+      const status = inProgressSegment.status;
+      if (status === SegmentStatus.TO_DESTINATION) {
+        activity = "In Transit";
+      } else if (
+        status === SegmentStatus.AT_ORIGIN ||
+        status === SegmentStatus.TO_ORIGIN
+      ) {
+        activity = "At Origin";
+      } else if (status === SegmentStatus.AT_DESTINATION) {
+        activity = "At Destination";
+      } else if (status === SegmentStatus.LOADING) {
+        activity = "Loading";
+      } else if (status === SegmentStatus.IN_CUSTOMS) {
+        activity = "In Customs";
+      } else if (status === SegmentStatus.DELIVERED) {
+        activity = "Delivered";
+      } else if (status === SegmentStatus.ASSIGNED) {
+        activity = "Assigned";
+      } else {
+        activity = "Active";
+      }
+    } else {
+      activity = selectedShipment.status || "Pending";
+    }
+
+    // Format time
+    let timeStr = "";
+    if (gpsUpdate) {
+      try {
+        const date = new Date(gpsUpdate);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) {
+          timeStr = "Just now";
+        } else if (diffMins < 60) {
+          timeStr = `${diffMins}m ago`;
+        } else if (diffHours < 24) {
+          timeStr = `${diffHours}h ago`;
+        } else if (diffDays < 7) {
+          timeStr = `${diffDays}d ago`;
+        } else {
+          timeStr = date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+        }
+      } catch {
+        timeStr = "";
+      }
+    } else if (updatedAt) {
+      try {
+        const date = new Date(updatedAt);
+        timeStr = date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      } catch {
+        timeStr = "";
+      }
+    }
+
+    return { lastActivity: activity, lastActivityTime: timeStr };
+  }, [inProgressSegment, selectedShipment]);
+
   // Manage which segment is open (accordion behavior - only one at a time)
   const [openSegmentStep, setOpenSegmentStep] = useState<number | undefined>(
     segmentStep
@@ -100,11 +233,6 @@ export function ShipmentContentArea({
 
   const isReadOnlySelected = false;
 
-  const currentSegment =
-    selectedShipment.currentSegmentIndex &&
-    selectedShipment.currentSegmentIndex >= 0
-      ? renderSegments[selectedShipment.currentSegmentIndex]
-      : undefined;
   useSegmentScroll(segmentStep, selectedShipment);
 
   return (
@@ -117,16 +245,20 @@ export function ShipmentContentArea({
             onCreate={onCreateShipment}
           />
           <NavigatingInfo
+            vehicle={vehicle}
+            weight={
+              selectedShipment.cargoWeight
+                ? `${selectedShipment.cargoWeight} KG`
+                : ""
+            }
+            localCompany={localCompany}
+            destination={destination}
+            lastActivity={lastActivity}
+            lastActivityTime={lastActivityTime}
             title={selectedShipment.title}
             shipmentId={selectedShipment.id}
-            driverName={currentSegment?.driverName || ""}
-            driverPhoto={currentSegment?.driverPhoto}
-            vehicle={selectedShipment.vehicle || ""}
-            weight={selectedShipment.weight || ""}
-            localCompany={selectedShipment.localCompany || ""}
-            destination={selectedShipment.destination || ""}
-            lastActivity={selectedShipment.lastActivity || ""}
-            lastActivityTime={selectedShipment.lastActivityTime || ""}
+            driverName={driverName}
+            driverPhoto={driverPhoto ? getFileUrl(driverPhoto) : undefined}
             onClose={onDeselect}
           />
 
@@ -141,7 +273,7 @@ export function ShipmentContentArea({
           >
             {segmentsLoading
               ? // Show skeleton loading state while fetching segments
-                Array.from({length: 3}).map((_, index) => (
+                Array.from({ length: 3 }).map((_, index) => (
                   <SegmentDetailsSkeleton key={`skeleton-${index}`} />
                 ))
               : renderSegments.map((seg: SegmentData, idx: number) => {
@@ -179,10 +311,7 @@ export function ShipmentContentArea({
                   );
                 })}
           </Segments>
-          <ActivitySection
-            items={selectedShipment.activities ?? []}
-            defaultOpen={false}
-          />
+          <ActivitySection items={[]} defaultOpen={false} />
         </div>
       </div>
     </div>

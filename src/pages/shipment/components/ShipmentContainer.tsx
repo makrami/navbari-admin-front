@@ -1,16 +1,16 @@
-import {useState, useEffect} from "react";
-import {useSearchParams} from "react-router-dom";
-import {ShipmentDetailsView} from "./ShipmentDetailsView";
-import {useShipmentSelection} from "../hooks/useShipmentSelection";
-import {useSegmentHandlers} from "../hooks/useSegmentHandlers";
-import {useShipmentSegments} from "../../../services/shipment/hooks";
-import type {SegmentData} from "../../../shared/types/segmentData";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { ShipmentDetailsView } from "./ShipmentDetailsView";
+import { useShipmentSelection } from "../hooks/useShipmentSelection";
+import { useSegmentHandlers } from "../hooks/useSegmentHandlers";
+import { useShipmentSegments } from "../../../services/shipment/hooks";
+import type { Segment } from "../../../shared/types/segmentData";
 
 export function ShipmentContainer() {
   const [searchParams] = useSearchParams();
   const [showAddShipment, setShowAddShipment] = useState(false);
   const [editedSegmentsByShipmentId, setEditedSegmentsByShipmentId] = useState<
-    Record<string, SegmentData[]>
+    Record<string, Segment[]>
   >({});
 
   const {
@@ -34,7 +34,7 @@ export function ShipmentContainer() {
   );
 
   // Fetch segments when a shipment is selected
-  const {data: fetchedSegments, loading: segmentsLoading} =
+  const { data: fetchedSegments, loading: segmentsLoading } =
     useShipmentSegments(selectedId);
 
   // Update editedSegmentsByShipmentId when segments are fetched

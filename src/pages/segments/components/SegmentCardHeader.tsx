@@ -8,11 +8,11 @@ import {
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../shared/utils/cn";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import type { Segment } from "../../../shared/types/segmentData";
 import SegmentProgress from "../../shipment/segments/components/SegmentProgress";
 
 type SegmentCardHeaderProps = {
-  segment: SegmentData;
+  segment: Segment;
   shipment?: DomainShipment;
   isExpanded: boolean;
   onToggle: () => void;

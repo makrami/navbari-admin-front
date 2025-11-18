@@ -1,12 +1,12 @@
 import {useRef, useEffect, useCallback} from "react";
 import type {Shipment} from "../../../shared/types/shipment";
-import type {SegmentData} from "../../../shared/types/segmentData";
+import type {Segment} from "../../../shared/types/segmentData";
 
 export function useSegmentHandlers(
   allItems: Shipment[],
-  _editedSegmentsByShipmentId: Record<string, SegmentData[]>,
+  _editedSegmentsByShipmentId: Record<string, Segment[]>,
   setEditedSegmentsByShipmentId: React.Dispatch<
-    React.SetStateAction<Record<string, SegmentData[]>>
+    React.SetStateAction<Record<string, Segment[]>>
   >
 ) {
   const timeoutsRef = useRef<number[]>([]);
@@ -22,7 +22,7 @@ export function useSegmentHandlers(
     (
       shipmentId: string,
       segmentIndex: number,
-      update: Partial<SegmentData>
+      update: Partial<Segment>
     ) => {
       setEditedSegmentsByShipmentId((prev) => {
         const shipment = allItems.find((s) => s.id === shipmentId);
@@ -51,7 +51,7 @@ export function useSegmentHandlers(
           isPlaceholder:
             update.isPlaceholder ?? base[segmentIndex].isPlaceholder,
           isCompleted: update.isCompleted ?? base[segmentIndex].isCompleted,
-        } as SegmentData;
+        } as Segment;
 
         return {...prev, [shipmentId]: base};
       });
@@ -60,7 +60,7 @@ export function useSegmentHandlers(
   );
 
   const handleSegmentSave = useCallback(
-    (shipmentId: string, segmentStep: number, update: Partial<SegmentData>) => {
+    (shipmentId: string, segmentStep: number, update: Partial<Segment>) => {
       setEditedSegmentsByShipmentId((prev) => {
         const shipment = allItems.find((s) => s.id === shipmentId);
         if (!shipment) return prev;
@@ -84,7 +84,7 @@ export function useSegmentHandlers(
           driverPhoto: update.assigneeAvatarUrl ?? base[index].driverPhoto,
           isPlaceholder: update.isPlaceholder ?? base[index].isPlaceholder,
           isCompleted: update.isCompleted ?? base[index].isCompleted,
-        } as SegmentData;
+        } as Segment;
 
         return {...prev, [shipmentId]: base};
       });
@@ -106,7 +106,7 @@ export function useSegmentHandlers(
           step: nextStep,
           place: "Assign Previous Segment First",
           nextPlace: "Assign Previous Segment First",
-        } as SegmentData);
+        } as Segment);
         return {...prev, [shipmentId]: base};
       });
     },

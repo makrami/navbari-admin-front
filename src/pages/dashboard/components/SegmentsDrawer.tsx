@@ -1,12 +1,12 @@
 import { SegmentsPage } from "../../segments/SegmentsPage";
 import { cn } from "../../../shared/utils/cn";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import type { Segment } from "../../../shared/types/segmentData";
 
 type SegmentsDrawerProps = {
   open: boolean;
   onClose: () => void;
   selectedSegmentId: string | null;
-  extraSegments?: SegmentData[];
+  extraSegments?: Segment[];
 };
 
 export function SegmentsDrawer({

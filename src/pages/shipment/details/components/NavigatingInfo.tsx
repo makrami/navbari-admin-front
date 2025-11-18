@@ -18,11 +18,14 @@ import {
   Paperclip,
   ListCheck,
 } from "lucide-react";
+import Map, { type MapRef } from "react-map-gl/mapbox";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { MAPBOX_TOKEN } from "../../../dashboard/constants";
 
 type NavigatingInfoProps = PropsWithChildren<{
   className?: string;
-  title?: string;
-  shipmentId?: string;
+  title: string;
+  shipmentId: string;
   driverName: string;
   driverPhoto?: string; // Optional - if not provided, show user icon
   vehicle: string;
@@ -36,12 +39,12 @@ type NavigatingInfoProps = PropsWithChildren<{
 
 // Figma snapshot image URLs (used as static assets to match design)
 
-import navigatemap from "../../../../assets/images/navigatemap.png";
 import avatarImg from "../../../../assets/images/avatar.png";
+import { getFileUrl } from "../../../LocalCompanies/utils";
 export function NavigatingInfo({
   className,
-  title = "Electronic Shipment n.21",
-  shipmentId = "#6c23m68",
+  title,
+  shipmentId,
   driverName,
   driverPhoto,
   vehicle,
@@ -54,14 +57,17 @@ export function NavigatingInfo({
 }: NavigatingInfoProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
-  const hasDetails = Boolean(
-    (driverName && driverName.trim()) ||
-      (vehicle && vehicle.trim()) ||
-      (weight && weight.trim()) ||
-      (localCompany && localCompany.trim()) ||
-      (destination && destination.trim()) ||
-      (lastActivity && lastActivity.trim())
-  );
+  const mapRef = useRef<MapRef | null>(null);
+
+  // Default map viewport (can be updated with actual coordinates if available)
+  const [viewport, setViewport] = useState({
+    longitude: 116.4074, // Beijing, China (default)
+    latitude: 39.9042,
+    zoom: 10,
+  });
+  // Show details if we have a shipment selected (title and shipmentId are required props)
+  // This ensures the details section always shows when a shipment is selected
+  const hasDetails = Boolean(title && shipmentId);
 
   useEffect(() => {
     if (!showNotifications) return;
@@ -107,6 +113,7 @@ export function NavigatingInfo({
       highlight: false,
     },
   ];
+
   return (
     <section className="flex flex-col   gap-4 p-4 bg-white rounded-[16px]">
       <div
@@ -253,7 +260,7 @@ export function NavigatingInfo({
               <div className="flex items-center gap-4 min-w-0">
                 {driverPhoto ? (
                   <img
-                    src={driverPhoto}
+                    src={driverPhoto ? getFileUrl(driverPhoto) : undefined}
                     alt="Driver avatar"
                     className="size-7 rounded-full object-cover"
                   />
@@ -358,24 +365,49 @@ export function NavigatingInfo({
               {/* Right vehicle image with controls */}
             </div>
           </div>
-          <div className=" relative h-auto max-h-[240px] w-1/2">
-            <img
-              src={navigatemap}
-              alt="Overlay"
-              className="size-full object-cover rounded-2xl"
+          <div className="relative h-auto max-h-[240px] w-1/2 rounded-2xl overflow-hidden">
+            <Map
+              ref={mapRef}
+              mapboxAccessToken={MAPBOX_TOKEN}
+              {...viewport}
+              onMove={(evt) => setViewport(evt.viewState)}
+              style={{ width: "100%", height: "100%", minHeight: "240px" }}
+              mapStyle="mapbox://styles/mapbox/navigation-day-v1"
             />
 
             {/* Zoom & locate controls */}
-            <div className="absolute top-4 right-4 flex flex-col gap-2 w-[30px]">
+            <div className="absolute top-4 right-4 flex flex-col gap-2 w-[30px] z-10">
               <div className="flex flex-col overflow-hidden rounded-[8px] shadow-sm">
-                <button className="bg-white p-2">
+                <button
+                  className="bg-white p-2 hover:bg-slate-50 transition-colors"
+                  onClick={() => {
+                    mapRef.current?.zoomIn({ duration: 300 });
+                  }}
+                >
                   <PlusIcon className="size-[14px] text-slate-500" />
                 </button>
-                <button className="bg-white border-t border-slate-300 p-2">
+                <button
+                  className="bg-white border-t border-slate-300 p-2 hover:bg-slate-50 transition-colors"
+                  onClick={() => {
+                    mapRef.current?.zoomOut({ duration: 300 });
+                  }}
+                >
                   <MinusIcon className="size-[14px] text-slate-500" />
                 </button>
               </div>
-              <button className="bg-white rounded-[8px] p-2">
+              <button
+                className="bg-white rounded-[8px] p-2 hover:bg-slate-50 transition-colors"
+                onClick={() => {
+                  if (mapRef.current) {
+                    // Reset to initial viewport
+                    mapRef.current.flyTo({
+                      center: [viewport.longitude, viewport.latitude],
+                      zoom: viewport.zoom,
+                      duration: 1000,
+                    });
+                  }
+                }}
+              >
                 <LocateFixedIcon className="size-[14px] text-slate-500" />
               </button>
             </div>

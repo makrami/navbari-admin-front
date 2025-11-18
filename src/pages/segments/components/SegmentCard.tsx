@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "../../../shared/utils/cn";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import type { Segment } from "../../../shared/types/segmentData";
 import { SegmentCardHeader } from "./SegmentCardHeader";
 import { SegmentInfoBanner } from "./SegmentInfoBanner";
 import { SegmentInfoGrid } from "./SegmentInfoGrid";
@@ -9,7 +9,7 @@ import { FinancialSection } from "../../shipment/segments/components/FinancialSe
 import { DocumentsSection } from "../../shipment/segments/components/DocumentsSection";
 
 type SegmentCardProps = {
-  segment: SegmentData;
+  segment: Segment;
   shipment?: DomainShipment;
   isExpanded: boolean;
   onToggle: () => void;

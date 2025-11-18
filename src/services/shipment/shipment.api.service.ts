@@ -1,6 +1,7 @@
-import {http} from "../../lib/http";
-import type {Shipment} from "../../shared/types/shipment";
-import type {SegmentData} from "../../shared/types/segmentData";
+import { http } from "../../lib/http";
+import type { Shipment } from "../../shared/types/shipment";
+import type { Segment } from "../../shared/types/segmentData";
+import { SegmentStatus } from "../../shared/types/segmentData";
 
 // Enums matching API
 export const SHIPMENT_STATUS = {
@@ -10,17 +11,18 @@ export const SHIPMENT_STATUS = {
   CANCELLED: "cancelled",
 } as const;
 
+// Keep SEGMENT_STATUS for backward compatibility, but use SegmentStatus enum from types
 export const SEGMENT_STATUS = {
-  PENDING_ASSIGNMENT: "pending_assignment",
-  ASSIGNED: "assigned",
-  TO_ORIGIN: "to_origin",
-  AT_ORIGIN: "at_origin",
-  LOADING: "loading",
-  IN_CUSTOMS: "in_customs",
-  TO_DESTINATION: "to_destination",
-  AT_DESTINATION: "at_destination",
-  DELIVERED: "delivered",
-  CANCELLED: "cancelled",
+  PENDING_ASSIGNMENT: SegmentStatus.PENDING_ASSIGNMENT,
+  ASSIGNED: SegmentStatus.ASSIGNED,
+  TO_ORIGIN: SegmentStatus.TO_ORIGIN,
+  AT_ORIGIN: SegmentStatus.AT_ORIGIN,
+  LOADING: SegmentStatus.LOADING,
+  IN_CUSTOMS: SegmentStatus.IN_CUSTOMS,
+  TO_DESTINATION: SegmentStatus.TO_DESTINATION,
+  AT_DESTINATION: SegmentStatus.AT_DESTINATION,
+  DELIVERED: SegmentStatus.DELIVERED,
+  CANCELLED: SegmentStatus.CANCELLED,
 } as const;
 
 export const ACTIVITY_TYPE = {
@@ -50,37 +52,9 @@ export type SEGMENT_STATUS =
   (typeof SEGMENT_STATUS)[keyof typeof SEGMENT_STATUS];
 export type ACTIVITY_TYPE = (typeof ACTIVITY_TYPE)[keyof typeof ACTIVITY_TYPE];
 
-// Segment Read DTO type
-export interface SegmentReadDto {
-  id: string;
-  shipmentId: string;
-  companyId?: string | null;
-  driverId?: string | null;
-  originCountry?: string | null;
-  originCity?: string | null;
-  destinationCountry?: string | null;
-  destinationCity?: string | null;
-  status: SEGMENT_STATUS;
-  eta?: string | null;
-  currentLatitude?: number | null;
-  currentLongitude?: number | null;
-  lastGpsUpdate?: string | null;
-  startedAt?: string | null;
-  arrivedOriginAt?: string | null;
-  startLoadingAt?: string | null;
-  arrivedDestinationAt?: string | null;
-  deliveredAt?: string | null;
-  etaToOrigin?: string | null;
-  etaToDestination?: string | null;
-  estimatedStartTime?: string | null;
-  estimatedFinishTime?: string | null;
-  baseFee?: number | null;
-  distanceKm?: number | null;
-  contractAccepted: boolean;
-  contractAcceptedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+// Segment Read DTO type - now using Segment interface
+// Keep as type alias for backward compatibility
+export type SegmentReadDto = Segment;
 
 // Shipment Read DTO type
 export interface ShipmentReadDto {
@@ -96,7 +70,7 @@ export interface ShipmentReadDto {
   status: SHIPMENT_STATUS;
   createdAt: string;
   updatedAt: string;
-  segments?: SegmentReadDto[];
+  segments?: Segment[];
   [key: string]: unknown;
 }
 
@@ -149,7 +123,7 @@ export type ShipmentFilters = {
  */
 function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
   // Map segments if available - directly use SegmentReadDto, only add step and source
-  const segments: SegmentData[] = dto.segments
+  const segments: Segment[] = dto.segments
     ? dto.segments.map((seg, index) => ({
         ...seg, // All fields from SegmentReadDto (including baseFee and distanceKm)
         step: index + 1,
@@ -191,6 +165,12 @@ function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
     progressPercent,
     source: "api",
     segments,
+    // Required fields from DTO
+    cargoType: dto.cargoType,
+    cargoWeight: dto.cargoWeight?.toString() || "0",
+    cargoDescription: dto.cargoDescription ?? null,
+    createdAt: dto.createdAt,
+    updatedAt: dto.updatedAt,
     // Additional fields
     userName: undefined,
     rating: undefined,
@@ -210,12 +190,9 @@ function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
 }
 
 /**
- * Maps SegmentReadDto to SegmentData
+ * Maps Segment to SegmentData (adds UI-specific fields)
  */
-function mapSegmentDtoToSegmentData(
-  dto: SegmentReadDto,
-  step?: number
-): SegmentData {
+function mapSegmentDtoToSegmentData(dto: Segment, step?: number): Segment {
   return {
     ...dto,
     step: step,
@@ -262,7 +239,7 @@ export async function listShipments(
       const shipment = mapShipmentDtoToShipment(dto);
       // Only use segments if they're included in the response
       // Segments will be fetched separately when a shipment is selected
-      if (dto.segments && dto.segments.length > 0) {
+      if (dto.segments && dto.segments.length > 0 && shipment.segments) {
         // Ensure segments have step numbers
         shipment.segments = shipment.segments.map((seg, segIndex) => ({
           ...seg,
@@ -292,7 +269,11 @@ export async function getShipment(id: string): Promise<Shipment | undefined> {
     const shipment = mapShipmentDtoToShipment(response.data);
     // Only use segments if they're included in the response
     // Segments will be fetched separately when a shipment is selected
-    if (response.data.segments && response.data.segments.length > 0) {
+    if (
+      response.data.segments &&
+      response.data.segments.length > 0 &&
+      shipment.segments
+    ) {
       // Ensure segments have step numbers
       shipment.segments = shipment.segments.map((seg, segIndex) => ({
         ...seg,
@@ -355,13 +336,9 @@ export async function deleteShipment(id: string): Promise<void> {
 /**
  * Get shipment segments (internal - returns DTOs for use in mapping)
  */
-async function getShipmentSegmentsInternal(
-  id: string
-): Promise<SegmentReadDto[]> {
+async function getShipmentSegmentsInternal(id: string): Promise<Segment[]> {
   try {
-    const response = await http.get<SegmentReadDto[]>(
-      `/shipments/${id}/segments`
-    );
+    const response = await http.get<Segment[]>(`/shipments/${id}/segments`);
     return response.data;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -374,7 +351,7 @@ async function getShipmentSegmentsInternal(
 /**
  * Get shipment segments
  */
-export async function getShipmentSegments(id: string): Promise<SegmentData[]> {
+export async function getShipmentSegments(id: string): Promise<Segment[]> {
   try {
     const dtos = await getShipmentSegmentsInternal(id);
     return dtos.map((dto, index) => mapSegmentDtoToSegmentData(dto, index + 1));
@@ -422,10 +399,10 @@ export interface UpdateSegmentDto {
 export async function updateSegment(
   id: string,
   data: UpdateSegmentDto
-): Promise<SegmentData> {
+): Promise<Segment> {
   try {
     // Normalize datetime strings to ISO 8601 format (ensure seconds are included)
-    const normalizedData = {...data};
+    const normalizedData = { ...data };
 
     // Helper function to normalize datetime string to ISO 8601 format
     // Backend @IsDateString() requires strict ISO 8601 format (e.g., 2024-01-01T12:00:00.000Z)
@@ -491,10 +468,7 @@ export async function updateSegment(
 
     console.log("Normalized data before sending:", normalizedData);
 
-    const response = await http.put<SegmentReadDto>(
-      `/segments/${id}`,
-      normalizedData
-    );
+    const response = await http.put<Segment>(`/segments/${id}`, normalizedData);
     return mapSegmentDtoToSegmentData(response.data);
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -510,12 +484,11 @@ export async function updateSegment(
 export async function announceSegment(
   id: string,
   companyIds: string[]
-): Promise<SegmentData> {
+): Promise<Segment> {
   try {
-    const response = await http.post<SegmentReadDto>(
-      `/segments/${id}/announce`,
-      {companyIds}
-    );
+    const response = await http.post<Segment>(`/segments/${id}/announce`, {
+      companyIds,
+    });
     return mapSegmentDtoToSegmentData(response.data);
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -562,5 +535,29 @@ export async function getSegmentAnnouncements(
       throw error;
     }
     throw new Error("Failed to fetch segment announcements");
+  }
+}
+
+// Assign Segment DTO type
+export interface AssignSegmentDto {
+  companyId: string;
+  driverId: string;
+}
+
+/**
+ * Assign a segment to a company and driver
+ */
+export async function assignSegment(
+  id: string,
+  data: AssignSegmentDto
+): Promise<Segment> {
+  try {
+    const response = await http.post<Segment>(`/segments/${id}/assign`, data);
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to assign segment");
   }
 }

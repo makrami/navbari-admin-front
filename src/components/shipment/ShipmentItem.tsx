@@ -1,54 +1,76 @@
 import ReactCountryFlag from "react-country-flag";
 import { ArrowRight, UsersIcon } from "lucide-react";
 import { cn } from "../../shared/utils/cn";
-import imgAvatar from "../../assets/images/avatar.png";
+import type { Shipment } from "../../shared/types/shipment";
+import type { Segment } from "../../shared/types/segmentData";
+import { SegmentStatus } from "../../shared/types/segmentData";
+import { getFileUrl } from "../../pages/LocalCompanies/utils";
 
-export type ShipmentStatus =
-  | "Pending"
-  | "In Origin"
-  | "Delivered"
-  | "Loading"
-  | "In Transit"
-  | "Customs"
-  | "Cancelled";
+type FormattedSegment = {
+  step: number;
+  place: string;
+  datetime: string; // e.g., 06/11 - 17:45
+  isCompleted?: boolean;
+};
 
-type ShipmentItemProps = {
+type ShipmentItemProps = Omit<Partial<Shipment>, "segments"> & {
   className?: string;
-  title?: string;
-  id?: string;
-  status?: ShipmentStatus;
-  fromCountryCode?: string; // ISO 3166-1 alpha-2, e.g., "CN"
-  toCountryCode?: string; // ISO 3166-1 alpha-2, e.g., "RU"
+  fromCountryCode?: string; // ISO 3166-1 alpha-2, e.g., "CN" (maps to originCountry)
+  toCountryCode?: string; // ISO 3166-1 alpha-2, e.g., "RU" (maps to destinationCountry)
   progressPercent?: number; // 0-100
   userName?: string;
   rating?: number;
   selected?: boolean;
   onClick?: () => void;
-  segments?: {
-    step: number;
-    place: string;
-    datetime: string; // e.g., 06/11 - 17:45
-    isCompleted?: boolean;
-  }[];
+  segments?: FormattedSegment[]; // Formatted segments for display in timeline
+  fullSegments?: Segment[]; // Full segment data for driver info extraction
   segmentsLoading?: boolean;
 };
 
 export function ShipmentItem({
   className,
-  title = "Origin Shipment n.21",
-  id = "#6c23m68",
-  status = "In Origin",
-  fromCountryCode = "CN",
-  toCountryCode = "RU",
+  title,
+  id,
+  status,
+  originCountry,
+  destinationCountry,
+  fromCountryCode,
+  toCountryCode,
   progressPercent = 25,
   userName,
   selected = false,
   onClick,
   segments = [],
+  fullSegments = [],
   segmentsLoading = false,
 }: ShipmentItemProps) {
   const clampedProgress = Math.max(0, Math.min(100, progressPercent));
   const isDelivered = status === "Delivered";
+
+  // Use Shipment fields if available, fallback to legacy props
+  const fromCode = originCountry || fromCountryCode || "CN";
+  const toCode = destinationCountry || toCountryCode || "RU";
+
+  // Find first in-progress segment (not completed, not cancelled, not pending_assignment)
+  const inProgressSegment = fullSegments.find(
+    (seg) =>
+      seg.status !== SegmentStatus.DELIVERED &&
+      seg.status !== SegmentStatus.CANCELLED &&
+      seg.status !== SegmentStatus.PENDING_ASSIGNMENT &&
+      !seg.isCompleted
+  );
+
+  // Extract driver info from first in-progress segment
+  const driverName =
+    inProgressSegment?.driverName ||
+    inProgressSegment?.assigneeName ||
+    userName ||
+    null;
+  const driverAvatarUrl =
+    inProgressSegment?.driverAvatarUrl ||
+    inProgressSegment?.assigneeAvatarUrl ||
+    inProgressSegment?.driverPhoto ||
+    null;
 
   return (
     <button
@@ -74,7 +96,7 @@ export function ShipmentItem({
             {title}
           </p>
           <p className={cn(selected ? "text-white/70" : "text-slate-400")}>
-            {id.split("-").pop()}
+            {id?.split("-").pop() ?? ""}
           </p>
         </div>
         <div
@@ -95,11 +117,11 @@ export function ShipmentItem({
       </div>
 
       {/* Progress or Not Assigned */}
-      {userName ? (
+      {status !== "Pending Assignment" ? (
         <div className="mt-4 flex w-full items-center gap-2">
           <ReactCountryFlag
             svg
-            countryCode={fromCountryCode}
+            countryCode={fromCode}
             style={{ width: 22, height: 16, borderRadius: 2 }}
           />
           <div
@@ -128,7 +150,7 @@ export function ShipmentItem({
           />
           <ReactCountryFlag
             svg
-            countryCode={toCountryCode}
+            countryCode={toCode}
             style={{ width: 22, height: 16, borderRadius: 2 }}
           />
         </div>
@@ -144,44 +166,32 @@ export function ShipmentItem({
           </span>
         </div>
       )}
-      {/* Divider */}
-      <div
-        className={cn("mt-4 h-px", selected ? "bg-white/20" : "bg-slate-100")}
-      />
+      {/* Divider and expanded details (only when selected) */}
+      {selected && (
+        <>
+          {/* Divider */}
+          <div className="mt-4 h-px bg-white/20" />
 
-      {/* Expanded details (selected) */}
-      <div className="mt-4 flex items-center justify-between">
-        <div
-          className={cn(
-            "flex items-center gap-2",
-            selected ? "text-white/80" : "text-slate-600"
-          )}
-        >
-          <UsersIcon
-            className={cn(
-              "h-3.5 w-3.5",
-              selected ? "text-white/70" : "text-slate-400"
-            )}
-          />
-          {userName ? (
-            <>
-              <img
-                src={imgAvatar}
-                alt="Avatar"
-                className="size-4 rounded-full"
-              />
-              <span
-                className={cn(
-                  "text-xs font-medium",
-                  selected ? "text-white" : "text-slate-900"
-                )}
-              >
-                {userName}
-              </span>
-            </>
-          ) : null}
-        </div>
-      </div>
+          {/* Expanded details */}
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-white/80">
+              <UsersIcon className="h-3.5 w-3.5 text-white/70" />
+              {driverName ? (
+                <>
+                  <img
+                    src={getFileUrl(driverAvatarUrl)}
+                    alt={driverName}
+                    className="size-4 rounded-full"
+                  />
+                  <span className="text-xs font-medium text-white">
+                    {driverName}
+                  </span>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </>
+      )}
       {/* Segments timeline (selected) */}
       {selected && (
         <>
@@ -213,7 +223,7 @@ export function ShipmentItem({
             segments &&
             segments.length > 0 && (
               <div className="mt-4 grid gap-3">
-                {segments.map((seg, idx) => (
+                {segments.map((seg: FormattedSegment, idx) => (
                   <div
                     key={`${seg.step}-${seg.place}`}
                     className="grid grid-cols-[14px_1fr_auto] items-start gap-2"

@@ -1,4 +1,4 @@
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listShipments,
   getShipment,
@@ -10,10 +10,12 @@ import {
   announceSegment,
   getShipmentActivityLog,
   getSegmentAnnouncements,
+  assignSegment,
   type ShipmentFilters,
   type CreateShipmentDto,
   type UpdateShipmentDto,
   type UpdateSegmentDto,
+  type AssignSegmentDto,
 } from "./shipment.api.service";
 
 // Query keys
@@ -104,7 +106,7 @@ export function useCreateShipment() {
     mutationFn: (data: CreateShipmentDto) => createShipment(data),
     onSuccess: () => {
       // Invalidate and refetch shipments list
-      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
     },
   });
 }
@@ -116,12 +118,12 @@ export function useUpdateShipment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id, data}: {id: string; data: UpdateShipmentDto}) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateShipmentDto }) =>
       updateShipment(id, data),
     onSuccess: (data) => {
       // Invalidate and refetch shipment queries
-      queryClient.invalidateQueries({queryKey: shipmentKeys.detail(data.id)});
-      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
     },
   });
 }
@@ -136,7 +138,7 @@ export function useDeleteShipment() {
     mutationFn: (id: string) => deleteShipment(id),
     onSuccess: () => {
       // Invalidate and refetch shipments list
-      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
     },
   });
 }
@@ -148,7 +150,7 @@ export function useUpdateSegment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id, data}: {id: string; data: UpdateSegmentDto}) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateSegmentDto }) =>
       updateSegment(id, data),
     onSuccess: (data) => {
       // Invalidate shipment and segments queries
@@ -158,7 +160,7 @@ export function useUpdateSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.detail(data.shipmentId),
       });
-      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
     },
   });
 }
@@ -170,7 +172,7 @@ export function useAnnounceSegment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id, companyIds}: {id: string; companyIds: string[]}) =>
+    mutationFn: ({ id, companyIds }: { id: string; companyIds: string[] }) =>
       announceSegment(id, companyIds),
     onSuccess: (data) => {
       // Invalidate shipment and segments queries
@@ -180,7 +182,7 @@ export function useAnnounceSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.detail(data.shipmentId),
       });
-      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
       // Invalidate announcements query for this segment
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.segmentAnnouncements(data.id),
@@ -197,5 +199,31 @@ export function useSegmentAnnouncements(segmentId: string | null) {
     queryKey: shipmentKeys.segmentAnnouncements(segmentId!),
     queryFn: () => getSegmentAnnouncements(segmentId!),
     enabled: !!segmentId,
+  });
+}
+
+/**
+ * Mutation hook for assigning segment to company and driver
+ */
+export function useAssignSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: AssignSegmentDto }) =>
+      assignSegment(id, data),
+    onSuccess: (data) => {
+      // Invalidate shipment and segments queries
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segments(data.shipmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.detail(data.shipmentId),
+      });
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      // Invalidate announcements query for this segment
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segmentAnnouncements(data.id),
+      });
+    },
   });
 }

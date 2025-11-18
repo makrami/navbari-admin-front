@@ -1,35 +1,24 @@
-import type {SegmentProgressStage} from "../segments/components/SegmentProgress";
-import type {Shipment} from "../../../shared/types/shipment";
-import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../../shared/types/shipment";
+import { SEGMENT_STATUS } from "../../../services/shipment/shipment.api.service";
 
 /**
  * Maps shipment status to SegmentProgressStage
  */
-export function getShipmentProgressStage(
-  shipment: Shipment
-): SegmentProgressStage {
-  if (shipment.isNew) return "start";
-
-  const statusMap: Record<string, SegmentProgressStage> = {
+export function getShipmentProgressStage(shipment: Shipment): SEGMENT_STATUS {
+  const statusMap: Record<string, SEGMENT_STATUS> = {
+    [SEGMENT_STATUS.PENDING_ASSIGNMENT]: "pending_assignment",
+    [SEGMENT_STATUS.ASSIGNED]: "assigned",
+    [SEGMENT_STATUS.TO_ORIGIN]: "to_origin",
+    [SEGMENT_STATUS.AT_ORIGIN]: "at_origin",
     [SEGMENT_STATUS.LOADING]: "loading",
-    [SEGMENT_STATUS.AT_ORIGIN]: "in_origin",
-    [SEGMENT_STATUS.DELIVERED]: "delivered",
-    [SEGMENT_STATUS.TO_DESTINATION]: "to_dest",
     [SEGMENT_STATUS.IN_CUSTOMS]: "in_customs",
+    [SEGMENT_STATUS.TO_DESTINATION]: "to_destination",
+    [SEGMENT_STATUS.AT_DESTINATION]: "at_destination",
+    [SEGMENT_STATUS.DELIVERED]: "delivered",
+    [SEGMENT_STATUS.CANCELLED]: "cancelled",
   };
 
-  // If we have completed segments, determine stage based on status
-  if (shipment.currentSegmentIndex && shipment.currentSegmentIndex > 0) {
-    return statusMap[shipment.status as string] ?? "to_origin";
-  }
-
-  // If no segment is current (unassigned state), return start
-  if (shipment.currentSegmentIndex && shipment.currentSegmentIndex < 0) {
-    return "start";
-  }
-
-  // First segment - could be start or to_origin
-  return statusMap[shipment.status as string] ?? "start";
+  return statusMap[shipment.status as string] ?? "assigned";
 }
 
 /**
@@ -38,24 +27,28 @@ export function getShipmentProgressStage(
 export function getSegmentProgressStage(
   shipment: Shipment,
   isCurrent: boolean
-): SegmentProgressStage | undefined {
-  if (shipment.isNew) return undefined;
-
-  // If no segment is current (unassigned state), no segment should show progress
-  if (shipment.currentSegmentIndex && shipment.currentSegmentIndex < 0) {
-    return undefined;
-  }
-
+): SEGMENT_STATUS | undefined {
   // if (segmentIndex < shipment.currentSegmentIndex) {
   //   return "delivered";
   // }
 
   if (isCurrent) {
-    const statusMap: Record<string, SegmentProgressStage> = {
+    const statusMap: Record<string, SEGMENT_STATUS> = {
+      [SEGMENT_STATUS.PENDING_ASSIGNMENT]: "pending_assignment",
+      [SEGMENT_STATUS.ASSIGNED]: "assigned",
+      [SEGMENT_STATUS.TO_ORIGIN]: "to_origin",
+      [SEGMENT_STATUS.AT_ORIGIN]: "at_origin",
+      [SEGMENT_STATUS.LOADING]: "loading",
+      [SEGMENT_STATUS.IN_CUSTOMS]: "in_customs",
+      [SEGMENT_STATUS.TO_DESTINATION]: "to_destination",
+      [SEGMENT_STATUS.AT_DESTINATION]: "at_destination",
+      [SEGMENT_STATUS.DELIVERED]: "delivered",
+      [SEGMENT_STATUS.CANCELLED]: "cancelled",
+      // Legacy string mappings for backward compatibility
       Loading: "loading",
-      "In Origin": "in_origin",
+      "In Origin": "at_origin",
       Delivered: "delivered",
-      "In Transit": "to_dest",
+      "In Transit": "to_destination",
       Customs: "in_customs",
     };
     return statusMap[shipment.status as string] ?? undefined;

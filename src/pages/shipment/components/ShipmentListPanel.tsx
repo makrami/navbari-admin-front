@@ -3,16 +3,15 @@ import {
   AddShipment,
   SegmentButton,
   ShipmentItem,
-  type ShipmentStatus,
 } from "../../../components";
-import {ListPanel} from "../../../shared/components/ui/ListPanel";
-import type {Shipment} from "../../../shared/types/shipment";
-import type {SegmentData} from "../../../shared/types/segmentData";
-import {useMemo, useState} from "react";
-import {StatusFilterChips, type FilterKey} from "./StatusFilterChips";
+import { ListPanel } from "../../../shared/components/ui/ListPanel";
+import type { Shipment } from "../../../shared/types/shipment";
+import type { Segment } from "../../../shared/types/segmentData";
+import { useMemo, useState } from "react";
+import { StatusFilterChips, type FilterKey } from "./StatusFilterChips";
 
-// Helper function to format SegmentData for ShipmentItem
-function formatSegmentsForShipmentItem(segments: SegmentData[]): Array<{
+// Helper function to format Segment for ShipmentItem
+function formatSegmentsForShipmentItem(segments: Segment[]): Array<{
   step: number;
   place: string;
   datetime: string;
@@ -49,7 +48,7 @@ type ShipmentListPanelProps = {
   selectedId: string;
   onShipmentSelect: (id: string) => void;
   onAddShipment: () => void;
-  editedSegmentsByShipmentId?: Record<string, SegmentData[]>;
+  editedSegmentsByShipmentId?: Record<string, Segment[]>;
   segmentsLoading?: boolean;
 };
 
@@ -122,31 +121,26 @@ export function ShipmentListPanel({
         {filteredShipments.map((item) => {
           // Use the memoized selection map for consistent comparison
           const isSelected = selectionMap.get(item.id) ?? false;
-          // Check if segments are loading for this specific shipment
-          const isLoadingSegments = isSelected && segmentsLoading;
-          // Use fetched segments if available, otherwise use shipment segments
-          const segmentsToDisplay =
-            editedSegmentsByShipmentId[item.id] ?? item.segments;
-          // Format segments for ShipmentItem component
-          // If loading, pass empty array so loading placeholder can be shown
-          const formattedSegments = isLoadingSegments
-            ? []
-            : formatSegmentsForShipmentItem(segmentsToDisplay);
+
+          // Get segments for this shipment (from editedSegmentsByShipmentId)
+          // This allows showing driver info even if shipment is not currently selected
+          const segmentsForItem = editedSegmentsByShipmentId[item.id] ?? [];
+
+          // Format segments for ShipmentItem component (only show timeline when selected)
+          const formattedSegments =
+            isSelected && segmentsForItem.length > 0
+              ? formatSegmentsForShipmentItem(segmentsForItem)
+              : [];
+
           return (
             <ShipmentItem
               key={item.id}
-              title={item.title}
-              id={item.id}
-              status={(item.status as ShipmentStatus) || "Pending"}
-              fromCountryCode={item.fromCountryCode}
-              toCountryCode={item.toCountryCode}
-              progressPercent={item.progressPercent}
-              userName={item.userName}
-              rating={item.rating}
-              segments={formattedSegments}
+              {...item}
               selected={isSelected}
               onClick={() => onShipmentSelect(item.id)}
-              segmentsLoading={isLoadingSegments}
+              segments={formattedSegments}
+              fullSegments={segmentsForItem}
+              segmentsLoading={isSelected && segmentsLoading}
             />
           );
         })}

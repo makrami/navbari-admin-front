@@ -1,23 +1,37 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { cn } from "../../../../shared/utils/cn";
 import { PROGRESS_STEPS_CONFIG } from "../config/progressSteps";
 import { ProgressIconCard, ProgressActiveCard } from "./ProgressStepCards";
 import { getChevronColor, getStepState } from "../utils/progressUtils";
 import type { ProgressExtraField } from "../../utils/progressFlowHelpers";
 import { ChevronsRightIcon } from "lucide-react";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { formatDistance } from "../../../../shared/utils/segmentHelpers";
+import type { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
 
-export type SegmentProgressStage =
-  | "start"
-  | "to_origin"
-  | "in_origin"
-  | "loading"
-  | "in_customs"
-  | "to_dest"
-  | "delivered";
+/**
+ * Formats a date string to "DD MMM - HH:mm" format (e.g., "14 Aug - 03:45")
+ */
+function formatDateTime(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+
+    const day = date.getDate();
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+
+    return `${day} ${month} - ${hours}:${minutes}`;
+  } catch {
+    return "";
+  }
+}
 
 type SegmentProgressProps = {
   className?: string;
-  current: SegmentProgressStage;
+  current: SEGMENT_STATUS;
   badge?: string;
   showWarningIcon?: boolean;
   dateTime?: string;
@@ -25,6 +39,7 @@ type SegmentProgressProps = {
   plannedDate?: string;
   estFinishAt?: string;
   extraFields?: ProgressExtraField[];
+  segment?: Segment | null;
 };
 
 export function SegmentProgress({
@@ -33,7 +48,27 @@ export function SegmentProgress({
   badge,
   showWarningIcon = false,
   dateTime,
+  segment,
 }: SegmentProgressProps) {
+  // Compute date and distance values from segment data
+  const { plannedDate, estFinishAt, distance } = useMemo(() => {
+    if (segment) {
+      return {
+        plannedDate: formatDateTime(segment.estimatedStartTime),
+        estFinishAt: formatDateTime(segment.estimatedFinishTime),
+        distance:
+          formatDistance(
+            segment.distanceKm ? parseFloat(segment.distanceKm) : null
+          ) || "",
+      };
+    }
+    return {
+      plannedDate: "",
+      estFinishAt: "",
+      distance: "",
+    };
+  }, [segment]);
+
   const activeIndex = PROGRESS_STEPS_CONFIG.findIndex((s) => s.key === current);
   const validIndex = activeIndex >= 0 ? activeIndex : 0;
 
@@ -61,9 +96,9 @@ export function SegmentProgress({
                 badge={badge}
                 showWarningIcon={showWarningIcon}
                 dateTime={dateTime}
-                plannedDate={step.plannedDate}
-                estFinishAt={step.estFinishAt}
-                distance={step.distance}
+                plannedDate={plannedDate}
+                estFinishAt={estFinishAt}
+                distance={distance}
               />
             ) : (
               <ProgressIconCard

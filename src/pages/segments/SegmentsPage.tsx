@@ -5,7 +5,7 @@ import {X} from "lucide-react";
 import {useShipments} from "../../services/shipment/hooks";
 import type {FilterType} from "./components/SegmentsFilters";
 import {SegmentsFilters} from "./components/SegmentsFilters";
-import type {SegmentData} from "../../shared/types/segmentData";
+import type {Segment} from "../../shared/types/segmentData";
 import {useSegmentsData} from "./hooks/useSegmentsData";
 import {cn} from "../../shared/utils/cn";
 import {getSegmentListId} from "./utils/getSegmentListId";
@@ -16,7 +16,7 @@ type SegmentsPageProps = {
   selectedSegmentId?: string | null;
   onClose?: () => void;
   className?: string;
-  extraSegments?: SegmentData[];
+  extraSegments?: Segment[];
 };
 
 export function SegmentsPage({
@@ -166,7 +166,7 @@ export function SegmentsPage({
                       !s.isCompleted
                   );
 
-                  // segment is already SegmentData, just ensure it has computed fields
+                  // segment is already Segment, just ensure it has computed fields
                   const segmentData = {
                     ...segment,
                     isCurrent:

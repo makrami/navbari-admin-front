@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../../../shared/types/segmentData";
+import type { Segment } from "../../../shared/types/segmentData";
 import type { FilterType } from "../components/SegmentsFilters";
 import { SEGMENT_STATUS } from "../../../services/shipment/shipment.api.service";
 import {
@@ -13,7 +13,7 @@ export function useSegmentsData(
   serviceShipments: DomainShipment[] | null | undefined,
   filter: FilterType,
   searchQuery: string,
-  extraSegments: SegmentData[] | undefined = []
+  extraSegments: Segment[] | undefined = []
 ) {
   // Convert shipments to segments with shipment context.
   // Show ALL segments (no assignment-status filter).
@@ -41,7 +41,7 @@ export function useSegmentsData(
             : undefined);
 
         return {
-          ...seg, // All fields from SegmentData
+          ...seg, // All fields from Segment
           step: seg.step ?? idx + 1,
           isCurrent,
           isCompleted,
@@ -52,21 +52,21 @@ export function useSegmentsData(
           shipmentStatus: shipment.status,
           shipmentFromCountryCode: shipment.fromCountryCode,
           shipmentToCountryCode: shipment.toCountryCode,
-        } as SegmentData;
+        } as Segment;
       });
     });
   }, [serviceShipments]);
 
   const baseSegments = fromService;
 
-  const allSegments: SegmentData[] = useMemo(() => {
-    let segments: SegmentData[];
+  const allSegments: Segment[] = useMemo(() => {
+    let segments: Segment[];
 
     if (!extraSegments?.length) {
       segments = baseSegments;
     } else {
-      const byKey = new Map<string, SegmentData>();
-      const keyOf = (segment: SegmentData) =>
+      const byKey = new Map<string, Segment>();
+      const keyOf = (segment: Segment) =>
         `${segment.shipmentId}::${segment.step ?? 0}`;
 
       baseSegments.forEach((segment) => {
