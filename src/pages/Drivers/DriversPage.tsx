@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EntityCard } from "../../shared/components/ui/EntityCard";
 import { StatusFilterChips } from "./components/StatusFilterChips";
 import type { FilterKey } from "./components/StatusFilterChips";
@@ -11,8 +12,13 @@ import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
 import { DriversPageSkeleton } from "./components/DriversSkeleton";
-import { useDrivers } from "../../services/driver/hooks";
+import { useDrivers, driverKeys } from "../../services/driver/hooks";
 import { formatDriverForEntityCard } from "./utils";
+import {
+  approveDriver,
+  rejectDriver,
+} from "../../services/driver/driver.service";
+import { RejectionReasonModal } from "./components/RejectionReasonModal";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
@@ -20,7 +26,13 @@ export function DriversPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [driverToReject, setDriverToReject] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { data: drivers = [], isLoading, isError, error } = useDrivers();
 
   const formattedDrivers = useMemo(() => {
@@ -60,6 +72,46 @@ export function DriversPage() {
       setIsActive(selectedDriver.status !== "inactive");
     }
   }, [selectedDriver]);
+
+  // Approve mutation
+  const approveMutation = useMutation({
+    mutationFn: approveDriver,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: driverKeys.list() });
+    },
+  });
+
+  // Reject mutation
+  const rejectMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      rejectDriver(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: driverKeys.list() });
+      setRejectionModalOpen(false);
+      setDriverToReject(null);
+    },
+  });
+
+  const handleApprove = (id: string) => {
+    approveMutation.mutate(id);
+  };
+
+  const handleReject = (id: string) => {
+    const driver = drivers.find((d) => d.id === id);
+    if (driver) {
+      setDriverToReject({
+        id: driver.id,
+        name: driver.user.fullName || driver.user.email,
+      });
+      setRejectionModalOpen(true);
+    }
+  };
+
+  const handleRejectionSubmit = (reason: string) => {
+    if (driverToReject) {
+      rejectMutation.mutate({ id: driverToReject.id, reason });
+    }
+  };
 
   if (isLoading) {
     return <DriversPageSkeleton />;
@@ -115,6 +167,8 @@ export function DriversPage() {
                 entity={d}
                 className="w-full h-full"
                 onView={(id) => setSelectedId(id)}
+                onApprove={handleApprove}
+                onReject={handleReject}
                 statsLabels={{
                   driversLabel: t("drivers.page.stats.shipments"),
                   activeLabel: t("drivers.page.stats.vehicles"),
@@ -123,6 +177,15 @@ export function DriversPage() {
             </div>
           ))}
         </div>
+        <RejectionReasonModal
+          isOpen={rejectionModalOpen}
+          onClose={() => {
+            setRejectionModalOpen(false);
+            setDriverToReject(null);
+          }}
+          onSubmit={handleRejectionSubmit}
+          driverName={driverToReject?.name}
+        />
       </div>
     );
   }
@@ -145,6 +208,8 @@ export function DriversPage() {
                 className="w-full h-full"
                 selected={selectedId === d.id}
                 onView={(id) => setSelectedId(id)}
+                onApprove={handleApprove}
+                onReject={handleReject}
                 statsLabels={{
                   driversLabel: t("drivers.page.stats.shipments"),
                   activeLabel: t("drivers.page.stats.vehicles"),
@@ -210,6 +275,15 @@ export function DriversPage() {
           </div>
         </div>
       </div>
+      <RejectionReasonModal
+        isOpen={rejectionModalOpen}
+        onClose={() => {
+          setRejectionModalOpen(false);
+          setDriverToReject(null);
+        }}
+        onSubmit={handleRejectionSubmit}
+        driverName={driverToReject?.name}
+      />
     </div>
   );
 }
