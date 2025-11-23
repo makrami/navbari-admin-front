@@ -87,6 +87,14 @@ export interface ActivityLogReadDto {
   [key: string]: unknown;
 }
 
+// Activity Log Response type (paginated)
+export interface ActivityLogResponse {
+  logs: ActivityLogReadDto[];
+  total: number;
+  skip: number;
+  take: number;
+}
+
 // Create Shipment DTO type
 export interface CreateShipmentDto {
   title: string;
@@ -395,10 +403,10 @@ export async function getShipmentActivityLog(
   id: string
 ): Promise<ActivityLogReadDto[]> {
   try {
-    const response = await http.get<ActivityLogReadDto[]>(
+    const response = await http.get<ActivityLogResponse>(
       `/shipments/${id}/activity-log`
     );
-    return response.data;
+    return response.data.logs;
   } catch (error: unknown) {
     if (error instanceof Error) {
       throw error;

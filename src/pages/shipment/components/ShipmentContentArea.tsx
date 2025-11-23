@@ -311,7 +311,10 @@ export function ShipmentContentArea({
                   );
                 })}
           </Segments>
-          <ActivitySection items={[]} defaultOpen={false} />
+          <ActivitySection
+            shipmentId={selectedShipment.id}
+            defaultOpen={false}
+          />
         </div>
       </div>
     </div>

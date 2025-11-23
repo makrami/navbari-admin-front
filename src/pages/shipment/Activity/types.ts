@@ -1,21 +1,8 @@
-export type ActivityType =
-  | "gps_on"
-  | "gps_off"
-  | "driver_changed"
-  | "uploaded"
-  | "arrived";
+import type {
+  ActivityLogReadDto,
+  ACTIVITY_TYPE,
+} from "../../../services/shipment/shipment.api.service";
 
-export type ActivityItemData = {
-  id: string | number;
-  type: ActivityType;
-  actorName: string;
-  actorAvatarUrl?: string;
-  fromName?: string;
-  toName?: string;
-  fileName?: string;
-  locationName?: string;
-  segmentIndex?: number;
-  timestamp: string;
-};
+export type ActivityType = (typeof ACTIVITY_TYPE)[keyof typeof ACTIVITY_TYPE];
 
-
+export type ActivityItemData = ActivityLogReadDto;

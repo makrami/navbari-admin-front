@@ -1,22 +1,51 @@
 import ActivityItem from "../ActivityItem";
 import type { ActivityItemData } from "../types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { getShipmentActivityLog } from "../../../../services/shipment/shipment.api.service";
 
 type ActivitySectionProps = {
-  items: ActivityItemData[];
+  shipmentId: string;
   className?: string;
   defaultOpen?: boolean;
   onToggle?: (open: boolean) => void;
 };
 
 export function ActivitySection({
-  items,
+  shipmentId,
   className,
   defaultOpen = true,
   onToggle,
 }: ActivitySectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const [items, setItems] = useState<ActivityItemData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!shipmentId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchActivityLogs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const logs = await getShipmentActivityLog(shipmentId);
+        setItems(logs);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch activity logs"
+        );
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivityLogs();
+  }, [shipmentId]);
   return (
     <section className={`rounded-xl bg-white ${className ?? ""}`}>
       <header className="flex items-center gap-2  px-5 py-2">
@@ -50,11 +79,25 @@ export function ActivitySection({
       >
         <div className="overflow-hidden">
           <div className="px-3 pb-3">
-            <div className="grid gap-3">
-              {items.map((it) => (
-                <ActivityItem key={it.id} item={it} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-sm text-slate-500 py-4 text-center">
+                Loading activity logs...
+              </div>
+            ) : error ? (
+              <div className="text-sm text-red-500 py-4 text-center">
+                {error}
+              </div>
+            ) : items.length === 0 ? (
+              <div className="text-sm text-slate-500 py-4 text-center">
+                No activity logs available
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {items.map((it) => (
+                  <ActivityItem key={it.id} item={it} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
