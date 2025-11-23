@@ -1,16 +1,17 @@
-import { useState, useEffect, useRef } from "react";
-import { XIcon, Search, ChevronDown, Check } from "lucide-react";
-import { CITY_OPTIONS } from "../data/cities";
+import {useState, useEffect, useRef, useMemo} from "react";
+import {XIcon, Search, ChevronDown, Check} from "lucide-react";
+import {useCities} from "../../../services/geography/hooks";
+import type {City} from "../../../services/geography/geography.service";
 
 const CARGO_CATEGORY_OPTIONS = [
-  { value: "electronics", label: "Electronics" },
-  { value: "textiles", label: "Textiles" },
-  { value: "food", label: "Food" },
-  { value: "medical", label: "Medical" },
-  { value: "machinery", label: "Machinery" },
-  { value: "chemicals", label: "Chemicals" },
-  { value: "automotive", label: "Automotive" },
-  { value: "furniture", label: "Furniture" },
+  {value: "electronics", label: "Electronics"},
+  {value: "textiles", label: "Textiles"},
+  {value: "food", label: "Food"},
+  {value: "medical", label: "Medical"},
+  {value: "machinery", label: "Machinery"},
+  {value: "chemicals", label: "Chemicals"},
+  {value: "automotive", label: "Automotive"},
+  {value: "furniture", label: "Furniture"},
 ];
 
 export type AddShipmentInput = {
@@ -33,6 +34,8 @@ type CityDropdownProps = {
   onChange: (value: string) => void;
   placeholder: string;
   label: string;
+  cities: City[];
+  isLoading?: boolean;
 };
 
 function CityDropdown({
@@ -40,18 +43,33 @@ function CityDropdown({
   onChange,
   placeholder,
   label,
+  cities,
+  isLoading = false,
 }: CityDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Format city display as "city, country"
+  const cityOptions = useMemo(() => {
+    return cities.map((city) => ({
+      ...city,
+      displayLabel: `${city.city}, ${city.country}`,
+    }));
+  }, [cities]);
+
   // Filter cities based on search term - show all when no search term
-  const filteredCities = searchTerm.trim()
-    ? CITY_OPTIONS.filter((city) =>
-        city.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : CITY_OPTIONS;
+  const filteredCities = useMemo(() => {
+    if (!searchTerm.trim()) return cityOptions;
+    const lowerSearch = searchTerm.toLowerCase();
+    return cityOptions.filter(
+      (city) =>
+        city.city.toLowerCase().includes(lowerSearch) ||
+        city.country.toLowerCase().includes(lowerSearch) ||
+        city.displayLabel.toLowerCase().includes(lowerSearch)
+    );
+  }, [cityOptions, searchTerm]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -91,11 +109,11 @@ function CityDropdown({
     const newValue = e.target.value;
     setSearchTerm(newValue);
     // If user types and matches exactly, select it
-    const exactMatch = CITY_OPTIONS.find(
-      (city) => city.toLowerCase() === newValue.toLowerCase()
+    const exactMatch = cityOptions.find(
+      (city) => city.displayLabel.toLowerCase() === newValue.toLowerCase()
     );
     if (exactMatch) {
-      onChange(exactMatch);
+      onChange(exactMatch.displayLabel);
     } else {
       onChange(newValue);
     }
@@ -140,23 +158,29 @@ function CityDropdown({
 
         {isOpen && (
           <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
-            {filteredCities.length > 0 ? (
+            {isLoading ? (
+              <div className="px-3 py-2 text-sm text-slate-500">
+                Loading cities...
+              </div>
+            ) : filteredCities.length > 0 ? (
               filteredCities.map((city) => (
                 <div
-                  key={city}
+                  key={`${city.city}-${city.country}`}
                   className="flex cursor-pointer items-center justify-between px-3 py-2 text-sm hover:bg-slate-50"
-                  onClick={() => handleSelectCity(city)}
+                  onClick={() => handleSelectCity(city.displayLabel)}
                 >
                   <span
                     className={
-                      value === city
+                      value === city.displayLabel
                         ? "font-medium text-slate-900"
                         : "text-slate-700"
                     }
                   >
-                    {city}
+                    {city.displayLabel}
                   </span>
-                  {value === city && <Check className="size-4 text-blue-600" />}
+                  {value === city.displayLabel && (
+                    <Check className="size-4 text-blue-600" />
+                  )}
                 </div>
               ))
             ) : (
@@ -330,6 +354,9 @@ export default function AddShipmentModal({
   const [cargoWeight, setCargoWeight] = useState<string>("");
   const [segmentsAmount, setSegmentsAmount] = useState<string>("");
 
+  // Fetch cities from API
+  const {data: cities = [], isLoading: isLoadingCities} = useCities();
+
   if (!open) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -396,12 +423,16 @@ export default function AddShipmentModal({
               placeholder="Search cities..."
               value={from}
               onChange={setFrom}
+              cities={cities}
+              isLoading={isLoadingCities}
             />
             <CityDropdown
               label="To"
               placeholder="Search cities..."
               value={to}
               onChange={setTo}
+              cities={cities}
+              isLoading={isLoadingCities}
             />
           </div>
 
