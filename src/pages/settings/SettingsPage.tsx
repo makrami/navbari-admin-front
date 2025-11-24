@@ -1,60 +1,131 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { SettingsCard } from "./components/SettingsCard";
-import { GeneralSettings } from "./components/GeneralSettings";
-import { NotificationSettings } from "./components/NotificationSettings";
-import { SystemParametersSettings } from "./components/SystemParametersSettings";
-import { RolesPermissionsSettings } from "./components/RolesPermissionsSettings";
-import type { Role } from "./components/RolesListPanel";
-import type { Permission, User } from "./components/RoleDetailsPanel";
+import {useState, useEffect, useMemo} from "react";
+import {useTranslation} from "react-i18next";
+import {SettingsCard} from "./components/SettingsCard";
+import {GeneralSettings} from "./components/GeneralSettings";
+import {NotificationSettings} from "./components/NotificationSettings";
+import {SystemParametersSettings} from "./components/SystemParametersSettings";
+import {RolesPermissionsSettings} from "./components/RolesPermissionsSettings";
+import type {Role} from "./components/RolesListPanel";
+import type {Permission, User} from "./components/RoleDetailsPanel";
+import {
+  useSettings,
+  useUpdateGeneralSettings,
+  useUpdateNotificationSettings,
+  useUpdateSlaSettings,
+} from "../../services/settings/hooks";
+import {
+  apiDistanceUnitToUi,
+  apiWeightUnitToUi,
+  uiDistanceUnitToApi,
+  uiWeightUnitToApi,
+  apiNotificationChannelsToUi,
+  uiNotificationChannelsToApi,
+} from "./utils";
 
 export function SettingsPage() {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [openSection, setOpenSection] = useState<string | null>(null);
+
+  // Fetch settings from API
+  const {data: settings} = useSettings();
+  const updateGeneralMutation = useUpdateGeneralSettings();
+  const updateNotificationMutation = useUpdateNotificationSettings();
+  const updateSlaMutation = useUpdateSlaSettings();
 
   // General Settings state
   const [companyName, setCompanyName] = useState("");
-  const [timeZone, setTimeZone] = useState("(GMT-05:00) Eastern Time");
-  const [mapStyle, setMapStyle] = useState("Google Maps");
   const [distanceUnit, setDistanceUnit] = useState("Kilometers (KM)");
   const [weightUnit, setWeightUnit] = useState("Kilograms (KG)");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Store original values for change tracking
+  const [originalGeneral, setOriginalGeneral] = useState<{
+    companyName: string;
+    companyLogoUrl: string | null;
+    distanceUnit: string;
+    weightUnit: string;
+  } | null>(null);
 
   // Notification Settings state
   const [driverGpsAlertEnabled, setDriverGpsAlertEnabled] = useState(true);
   const [driverGpsAlertValue, setDriverGpsAlertValue] = useState(35);
   const [delayAlertEnabled, setDelayAlertEnabled] = useState(true);
   const [delayAlertValue, setDelayAlertValue] = useState(4);
-  const [deliveryNotificationEnabled, setDeliveryNotificationEnabled] =
-    useState(true);
-  const [missingDocumentReminderEnabled, setMissingDocumentReminderEnabled] =
-    useState(false);
-  const [missingDocumentReminderValue, setMissingDocumentReminderValue] =
-    useState(24);
   const [inApp, setInApp] = useState(true);
   const [email, setEmail] = useState(false);
   const [sms, setSms] = useState(false);
   const [mobilePush, setMobilePush] = useState(true);
 
-  // Localization Settings state
-  // const [language, setLanguage] = useState("en");
-  // const [baseCurrency, setBaseCurrency] = useState("USD ($)");
-  // const [] = useState([
-  //   { id: "1", country: "United Kingdom", currency: "USD ($)" },
-  // ]);
-  // const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
-  // const [timeFormat, setTimeFormat] = useState("24h");
-  // const [numericSeparator, setNumericSeparator] = useState("Comma (,)");
-  // const [decimalSeparator, setDecimalSeparator] = useState("Period (.)");
+  const [originalNotification, setOriginalNotification] = useState<{
+    gpsOfflineThresholdMin: number | null;
+    delayThresholdHr: number | null;
+    inApp: boolean;
+    email: boolean;
+    sms: boolean;
+    mobilePush: boolean;
+  } | null>(null);
 
-  // System Parameters Settings state
+  // System Parameters Settings state (SLA)
   const [loadingTime, setLoadingTime] = useState(4);
   const [transitTime, setTransitTime] = useState(24);
   const [unloadingTime, setUnloadingTime] = useState(3);
-  const [etaMethod, setEtaMethod] = useState<"gps" | "historical">("gps");
-  const [gpsAlertDistance, setGpsAlertDistance] = useState(10);
-  const [pingInterval, setPingInterval] = useState(5);
-  const [maxConcurrentShipments, setMaxConcurrentShipments] = useState(15);
+
+  const [originalSla, setOriginalSla] = useState<{
+    loadingTimeHours: number | null;
+    transitTimeHours: number | null;
+    unloadingTimeHours: number | null;
+  } | null>(null);
+
+  // Initialize state from API data
+  useEffect(() => {
+    if (settings) {
+      // General Settings
+      const general = settings.general;
+      setCompanyName(general.companyName || "");
+      setDistanceUnit(apiDistanceUnitToUi(general.distanceUnit));
+      setWeightUnit(apiWeightUnitToUi(general.weightUnit));
+      setLogoPreview(general.companyLogoUrl || null);
+      setOriginalGeneral({
+        companyName: general.companyName || "",
+        companyLogoUrl: general.companyLogoUrl || null,
+        distanceUnit: apiDistanceUnitToUi(general.distanceUnit),
+        weightUnit: apiWeightUnitToUi(general.weightUnit),
+      });
+
+      // Notification Settings
+      const notification = settings.notification;
+      const channels = apiNotificationChannelsToUi(
+        notification.notificationChannels
+      );
+      setDriverGpsAlertEnabled(!!notification.gpsOfflineThresholdMin);
+      setDriverGpsAlertValue(notification.gpsOfflineThresholdMin || 35);
+      setDelayAlertEnabled(!!notification.delayThresholdHr);
+      setDelayAlertValue(notification.delayThresholdHr || 4);
+      setInApp(channels.inApp);
+      setEmail(channels.email);
+      setSms(channels.sms);
+      setMobilePush(channels.mobilePush);
+      setOriginalNotification({
+        gpsOfflineThresholdMin: notification.gpsOfflineThresholdMin || null,
+        delayThresholdHr: notification.delayThresholdHr || null,
+        inApp: channels.inApp,
+        email: channels.email,
+        sms: channels.sms,
+        mobilePush: channels.mobilePush,
+      });
+
+      // SLA Settings
+      const sla = settings.sla;
+      setLoadingTime(sla.loadingTimeHours || 4);
+      setTransitTime(sla.transitTimeHours || 24);
+      setUnloadingTime(sla.unloadingTimeHours || 3);
+      setOriginalSla({
+        loadingTimeHours: sla.loadingTimeHours || null,
+        transitTimeHours: sla.transitTimeHours || null,
+        unloadingTimeHours: sla.unloadingTimeHours || null,
+      });
+    }
+  }, [settings]);
 
   // Roles & Permissions Settings state
   const [roles, setRoles] = useState<Role[]>([
@@ -164,8 +235,49 @@ export function SettingsPage() {
     },
   ]);
 
-  // TODO: Get change count from API
-  const changeCount = 0;
+  // Calculate change counts for each section
+  const generalChangeCount = useMemo(() => {
+    if (!originalGeneral) return 0;
+    let count = 0;
+    if (companyName !== originalGeneral.companyName) count++;
+    if (logoPreview !== originalGeneral.companyLogoUrl) count++;
+    if (distanceUnit !== originalGeneral.distanceUnit) count++;
+    if (weightUnit !== originalGeneral.weightUnit) count++;
+    return count;
+  }, [companyName, logoPreview, distanceUnit, weightUnit, originalGeneral]);
+
+  const notificationChangeCount = useMemo(() => {
+    if (!originalNotification) return 0;
+    let count = 0;
+    const gpsValue = driverGpsAlertEnabled ? driverGpsAlertValue : null;
+    const delayValue = delayAlertEnabled ? delayAlertValue : null;
+    if (gpsValue !== originalNotification.gpsOfflineThresholdMin) count++;
+    if (delayValue !== originalNotification.delayThresholdHr) count++;
+    if (inApp !== originalNotification.inApp) count++;
+    if (email !== originalNotification.email) count++;
+    if (sms !== originalNotification.sms) count++;
+    if (mobilePush !== originalNotification.mobilePush) count++;
+    return count;
+  }, [
+    driverGpsAlertEnabled,
+    driverGpsAlertValue,
+    delayAlertEnabled,
+    delayAlertValue,
+    inApp,
+    email,
+    sms,
+    mobilePush,
+    originalNotification,
+  ]);
+
+  const slaChangeCount = useMemo(() => {
+    if (!originalSla) return 0;
+    let count = 0;
+    if (loadingTime !== (originalSla.loadingTimeHours || 4)) count++;
+    if (transitTime !== (originalSla.transitTimeHours || 24)) count++;
+    if (unloadingTime !== (originalSla.unloadingTimeHours || 3)) count++;
+    return count;
+  }, [loadingTime, transitTime, unloadingTime, originalSla]);
 
   const sections = [
     {
@@ -196,23 +308,23 @@ export function SettingsPage() {
   ];
 
   const handleRoleUpdate = (roleId: string, updates: Partial<Role>) => {
-    setRoles(roles.map((r) => (r.id === roleId ? { ...r, ...updates } : r)));
+    setRoles(roles.map((r) => (r.id === roleId ? {...r, ...updates} : r)));
   };
 
   const handleUserRemove = (userId: string) => {
     setUsers(users.filter((u) => u.id !== userId));
   };
 
-  const handleUserAdd = (user: { name: string; email: string }) => {
+  const handleUserAdd = (user: {name: string; email: string}) => {
     const newId = String(Date.now());
     setUsers([
       ...users,
-      { id: newId, name: user.name, email: user.email, status: "Active" },
+      {id: newId, name: user.name, email: user.email, status: "Active"},
     ]);
     if (selectedRoleId) {
       setRoles(
         roles.map((r) =>
-          r.id === selectedRoleId ? { ...r, userCount: r.userCount + 1 } : r
+          r.id === selectedRoleId ? {...r, userCount: r.userCount + 1} : r
         )
       );
     }
@@ -225,7 +337,7 @@ export function SettingsPage() {
   }) => {
     setUsers(
       users.map((u) =>
-        u.id === user.id ? { ...u, name: user.name, email: user.email } : u
+        u.id === user.id ? {...u, name: user.name, email: user.email} : u
       )
     );
   };
@@ -234,14 +346,96 @@ export function SettingsPage() {
     setOpenSection(openSection === key ? null : key);
   };
 
-  const handleRevert = () => {
-    // Handle revert logic
-    console.log("Revert clicked");
+  const handleRevert = (
+    section: "general" | "notifications" | "systemParameters"
+  ) => {
+    if (!settings) return;
+
+    if (section === "general" && originalGeneral) {
+      setCompanyName(originalGeneral.companyName);
+      setDistanceUnit(originalGeneral.distanceUnit);
+      setWeightUnit(originalGeneral.weightUnit);
+      setLogoPreview(originalGeneral.companyLogoUrl);
+    } else if (section === "notifications" && originalNotification) {
+      setDriverGpsAlertEnabled(!!originalNotification.gpsOfflineThresholdMin);
+      setDriverGpsAlertValue(originalNotification.gpsOfflineThresholdMin || 35);
+      setDelayAlertEnabled(!!originalNotification.delayThresholdHr);
+      setDelayAlertValue(originalNotification.delayThresholdHr || 4);
+      setInApp(originalNotification.inApp);
+      setEmail(originalNotification.email);
+      setSms(originalNotification.sms);
+      setMobilePush(originalNotification.mobilePush);
+    } else if (section === "systemParameters" && originalSla) {
+      setLoadingTime(originalSla.loadingTimeHours || 4);
+      setTransitTime(originalSla.transitTimeHours || 24);
+      setUnloadingTime(originalSla.unloadingTimeHours || 3);
+    }
   };
 
-  const handleSave = () => {
-    // Handle save logic
-    console.log("Save clicked");
+  const handleSave = async (
+    section: "general" | "notifications" | "systemParameters"
+  ) => {
+    if (!settings) return;
+
+    try {
+      if (section === "general") {
+        const updateData = {
+          companyName: companyName || undefined,
+          companyLogoUrl: logoPreview || undefined,
+          distanceUnit: uiDistanceUnitToApi(distanceUnit),
+          weightUnit: uiWeightUnitToApi(weightUnit),
+        };
+        await updateGeneralMutation.mutateAsync(updateData);
+        // Update original values after successful save
+        setOriginalGeneral({
+          companyName,
+          companyLogoUrl: logoPreview,
+          distanceUnit,
+          weightUnit,
+        });
+      } else if (section === "notifications") {
+        const updateData = {
+          gpsOfflineThresholdMin: driverGpsAlertEnabled
+            ? driverGpsAlertValue
+            : undefined,
+          delayThresholdHr: delayAlertEnabled ? delayAlertValue : undefined,
+          notificationChannels: uiNotificationChannelsToApi(
+            inApp,
+            email,
+            sms,
+            mobilePush
+          ),
+        };
+        await updateNotificationMutation.mutateAsync(updateData);
+        // Update original values after successful save
+        setOriginalNotification({
+          gpsOfflineThresholdMin: driverGpsAlertEnabled
+            ? driverGpsAlertValue
+            : null,
+          delayThresholdHr: delayAlertEnabled ? delayAlertValue : null,
+          inApp,
+          email,
+          sms,
+          mobilePush,
+        });
+      } else if (section === "systemParameters") {
+        const updateData = {
+          loadingTimeHours: loadingTime,
+          transitTimeHours: transitTime,
+          unloadingTimeHours: unloadingTime,
+        };
+        await updateSlaMutation.mutateAsync(updateData);
+        // Update original values after successful save
+        setOriginalSla({
+          loadingTimeHours: loadingTime,
+          transitTimeHours: transitTime,
+          unloadingTimeHours: unloadingTime,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      // Error handling is done by the mutation hooks
+    }
   };
 
   return (
@@ -270,17 +464,14 @@ export function SettingsPage() {
                     onCompanyNameChange={setCompanyName}
                     logoPreview={logoPreview}
                     onLogoChange={setLogoPreview}
-                    timeZone={timeZone}
-                    onTimeZoneChange={setTimeZone}
-                    mapStyle={mapStyle}
-                    onMapStyleChange={setMapStyle}
                     distanceUnit={distanceUnit}
                     onDistanceUnitChange={setDistanceUnit}
                     weightUnit={weightUnit}
                     onWeightUnitChange={setWeightUnit}
-                    changeCount={changeCount}
-                    onRevert={handleRevert}
-                    onSave={handleSave}
+                    changeCount={generalChangeCount}
+                    onRevert={() => handleRevert("general")}
+                    onSave={() => handleSave("general")}
+                    isLoading={updateGeneralMutation.isPending}
                   />
                 ) : section.key === "notifications" ? (
                   <NotificationSettings
@@ -292,20 +483,6 @@ export function SettingsPage() {
                     onDelayAlertToggle={setDelayAlertEnabled}
                     delayAlertValue={delayAlertValue}
                     onDelayAlertValueChange={setDelayAlertValue}
-                    deliveryNotificationEnabled={deliveryNotificationEnabled}
-                    onDeliveryNotificationToggle={
-                      setDeliveryNotificationEnabled
-                    }
-                    missingDocumentReminderEnabled={
-                      missingDocumentReminderEnabled
-                    }
-                    onMissingDocumentReminderToggle={
-                      setMissingDocumentReminderEnabled
-                    }
-                    missingDocumentReminderValue={missingDocumentReminderValue}
-                    onMissingDocumentReminderValueChange={
-                      setMissingDocumentReminderValue
-                    }
                     inApp={inApp}
                     email={email}
                     sms={sms}
@@ -314,9 +491,10 @@ export function SettingsPage() {
                     onEmailChange={setEmail}
                     onSmsChange={setSms}
                     onMobilePushChange={setMobilePush}
-                    changeCount={changeCount}
-                    onRevert={handleRevert}
-                    onSave={handleSave}
+                    changeCount={notificationChangeCount}
+                    onRevert={() => handleRevert("notifications")}
+                    onSave={() => handleSave("notifications")}
+                    isLoading={updateNotificationMutation.isPending}
                   />
                 ) : //   : section.key === "localization" ? (
                 // <LocalizationSettings
@@ -347,17 +525,10 @@ export function SettingsPage() {
                     onTransitTimeChange={setTransitTime}
                     unloadingTime={unloadingTime}
                     onUnloadingTimeChange={setUnloadingTime}
-                    etaMethod={etaMethod}
-                    onEtaMethodChange={setEtaMethod}
-                    gpsAlertDistance={gpsAlertDistance}
-                    onGpsAlertDistanceChange={setGpsAlertDistance}
-                    pingInterval={pingInterval}
-                    onPingIntervalChange={setPingInterval}
-                    maxConcurrentShipments={maxConcurrentShipments}
-                    onMaxConcurrentShipmentsChange={setMaxConcurrentShipments}
-                    changeCount={changeCount}
-                    onRevert={handleRevert}
-                    onSave={handleSave}
+                    changeCount={slaChangeCount}
+                    onRevert={() => handleRevert("systemParameters")}
+                    onSave={() => handleSave("systemParameters")}
+                    isLoading={updateSlaMutation.isPending}
                   />
                 ) : section.key === "rolesPermissions" ? (
                   <RolesPermissionsSettings
@@ -377,9 +548,9 @@ export function SettingsPage() {
                     onUserAdd={handleUserAdd}
                     onUserUpdate={handleUserUpdate}
                     onUserRemove={handleUserRemove}
-                    changeCount={changeCount}
-                    onRevert={handleRevert}
-                    onSave={handleSave}
+                    changeCount={0}
+                    onRevert={() => {}}
+                    onSave={() => {}}
                   />
                 ) : (
                   <div className="pt-4 text-sm text-slate-500">

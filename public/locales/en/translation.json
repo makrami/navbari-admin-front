@@ -242,7 +242,7 @@
         "title": "General Settings",
         "description": "Configure core company and application settings.",
         "companyName": "Company Name",
-        "companyNamePlaceholder": "Shipment Name...",
+        "companyNamePlaceholder": "Company Name...",
         "companyLogo": "Company Logo",
         "uploadText": "Click upload or drag and drop",
         "uploadHint": "PNG or JPG (Max 2MB)",
@@ -326,4 +326,3 @@
     }
   }
 }
-

@@ -9,17 +9,10 @@ type SystemParametersSettingsProps = {
   onTransitTimeChange: (value: number) => void;
   unloadingTime: number;
   onUnloadingTimeChange: (value: number) => void;
-  etaMethod: "gps" | "historical";
-  onEtaMethodChange: (method: "gps" | "historical") => void;
-  gpsAlertDistance: number;
-  onGpsAlertDistanceChange: (value: number) => void;
-  pingInterval: number;
-  onPingIntervalChange: (value: number) => void;
-  maxConcurrentShipments: number;
-  onMaxConcurrentShipmentsChange: (value: number) => void;
   changeCount: number;
   onRevert: () => void;
   onSave: () => void;
+  isLoading?: boolean;
 };
 
 export function SystemParametersSettings({
@@ -33,6 +26,7 @@ export function SystemParametersSettings({
   changeCount,
   onRevert,
   onSave,
+  isLoading = false,
 }: SystemParametersSettingsProps) {
   return (
     <div className="space-y-6 pt-4">
@@ -63,6 +57,7 @@ export function SystemParametersSettings({
         changeCount={changeCount}
         onRevert={onRevert}
         onSave={onSave}
+        isLoading={isLoading}
       />
     </div>
   );

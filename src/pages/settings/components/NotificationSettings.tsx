@@ -14,14 +14,6 @@ type NotificationSettingsProps = {
   delayAlertValue: number;
   onDelayAlertValueChange: (value: number) => void;
 
-  deliveryNotificationEnabled: boolean;
-  onDeliveryNotificationToggle: (enabled: boolean) => void;
-
-  missingDocumentReminderEnabled: boolean;
-  onMissingDocumentReminderToggle: (enabled: boolean) => void;
-  missingDocumentReminderValue: number;
-  onMissingDocumentReminderValueChange: (value: number) => void;
-
   // Delivery methods
   inApp: boolean;
   email: boolean;
@@ -36,6 +28,7 @@ type NotificationSettingsProps = {
   changeCount: number;
   onRevert: () => void;
   onSave: () => void;
+  isLoading?: boolean;
 };
 
 export function NotificationSettings({
@@ -59,6 +52,7 @@ export function NotificationSettings({
   changeCount,
   onRevert,
   onSave,
+  isLoading = false,
 }: NotificationSettingsProps) {
   return (
     <div className="space-y-6 pt-4">
@@ -127,6 +121,7 @@ export function NotificationSettings({
         changeCount={changeCount}
         onRevert={onRevert}
         onSave={onSave}
+        isLoading={isLoading}
       />
     </div>
   );

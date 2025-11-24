@@ -4,12 +4,14 @@ type SettingsFooterProps = {
   changeCount: number;
   onRevert: () => void;
   onSave: () => void;
+  isLoading?: boolean;
 };
 
 export function SettingsFooter({
   changeCount,
   onRevert,
   onSave,
+  isLoading = false,
 }: SettingsFooterProps) {
   const { t } = useTranslation();
 
@@ -31,16 +33,20 @@ export function SettingsFooter({
         <button
           type="button"
           onClick={onRevert}
-          className="px-3 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm"
+          disabled={isLoading || changeCount === 0}
+          className="px-3 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t("settings.sections.general.revert")}
         </button>
         <button
           type="button"
           onClick={onSave}
-          className="px-3 py-2 bg-[#1B54FE] text-white rounded-lg hover:bg-[#1545d4] transition-colors text-sm font-bold"
+          disabled={isLoading || changeCount === 0}
+          className="px-3 py-2 bg-[#1B54FE] text-white rounded-lg hover:bg-[#1545d4] transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t("settings.sections.general.saveChanges")}
+          {isLoading
+            ? t("settings.sections.general.saving") || "Saving..."
+            : t("settings.sections.general.saveChanges")}
         </button>
       </div>
     </div>

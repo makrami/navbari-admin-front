@@ -1,18 +1,13 @@
-import { CompanyNameField } from "./CompanyNameField";
-import { CompanyLogoUpload } from "./CompanyLogoUpload";
-import { TimeZoneField } from "./TimeZoneField";
-import { MapStyleField } from "./MapStyleField";
-import { SettingsFooter } from "./SettingsFooter";
+import {CompanyNameField} from "./CompanyNameField";
+import {CompanyLogoUpload} from "./CompanyLogoUpload";
+import {SettingsFooter} from "./SettingsFooter";
+import {MeasurementUnitsField} from "./MeasurementUnitsField";
 
 type GeneralSettingsProps = {
   companyName: string;
   onCompanyNameChange: (value: string) => void;
   logoPreview: string | null;
   onLogoChange: (preview: string) => void;
-  timeZone: string;
-  onTimeZoneChange: (value: string) => void;
-  mapStyle: string;
-  onMapStyleChange: (value: string) => void;
   distanceUnit: string;
   onDistanceUnitChange: (value: string) => void;
   weightUnit: string;
@@ -20,6 +15,7 @@ type GeneralSettingsProps = {
   changeCount: number;
   onRevert: () => void;
   onSave: () => void;
+  isLoading?: boolean;
 };
 
 export function GeneralSettings({
@@ -27,14 +23,14 @@ export function GeneralSettings({
   onCompanyNameChange,
   logoPreview,
   onLogoChange,
-  timeZone,
-  onTimeZoneChange,
-  mapStyle,
-  onMapStyleChange,
-
+  distanceUnit,
+  onDistanceUnitChange,
+  weightUnit,
+  onWeightUnitChange,
   changeCount,
   onRevert,
   onSave,
+  isLoading = false,
 }: GeneralSettingsProps) {
   return (
     <div className="space-y-6 pt-4">
@@ -43,20 +39,21 @@ export function GeneralSettings({
         logoPreview={logoPreview}
         onLogoChange={onLogoChange}
       />
-      <div className="grid grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-2 gap-4">
         <TimeZoneField value={timeZone} onChange={onTimeZoneChange} />
         <MapStyleField value={mapStyle} onChange={onMapStyleChange} />
-      </div>
-      {/* <MeasurementUnitsField
+      </div> */}
+      <MeasurementUnitsField
         distanceUnit={distanceUnit}
         weightUnit={weightUnit}
         onDistanceUnitChange={onDistanceUnitChange}
         onWeightUnitChange={onWeightUnitChange}
-      /> */}
+      />
       <SettingsFooter
         changeCount={changeCount}
         onRevert={onRevert}
         onSave={onSave}
+        isLoading={isLoading}
       />
     </div>
   );

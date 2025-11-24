@@ -242,7 +242,7 @@
         "title": "تنظیمات عمومی",
         "description": "پیکربندی تنظیمات اصلی شرکت و برنامه.",
         "companyName": "نام شرکت",
-        "companyNamePlaceholder": "نام محموله...",
+        "companyNamePlaceholder": "نام شرکت...",
         "companyLogo": "لوگوی شرکت",
         "uploadText": "برای آپلود کلیک کنید یا بکشید و رها کنید",
         "uploadHint": "PNG یا JPG (حداکثر 2 مگابایت)",
@@ -326,4 +326,3 @@
     }
   }
 }
-
