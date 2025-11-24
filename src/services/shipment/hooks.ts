@@ -11,6 +11,7 @@ import {
   getShipmentActivityLog,
   getSegmentAnnouncements,
   assignSegment,
+  getSegmentRoute,
   type ShipmentFilters,
   type CreateShipmentDto,
   type UpdateShipmentDto,
@@ -32,6 +33,8 @@ export const shipmentKeys = {
     [...shipmentKeys.detail(shipmentId), "activity-log"] as const,
   segmentAnnouncements: (segmentId: string) =>
     [...shipmentKeys.all, "segment", segmentId, "announcements"] as const,
+  segmentRoute: (segmentId: string) =>
+    [...shipmentKeys.all, "segment", segmentId, "route"] as const,
 };
 
 /**
@@ -225,5 +228,16 @@ export function useAssignSegment() {
         queryKey: shipmentKeys.segmentAnnouncements(data.id),
       });
     },
+  });
+}
+
+/**
+ * Query hook for segment route
+ */
+export function useSegmentRoute(segmentId: string | null) {
+  return useQuery({
+    queryKey: shipmentKeys.segmentRoute(segmentId!),
+    queryFn: () => getSegmentRoute(segmentId!),
+    enabled: !!segmentId,
   });
 }

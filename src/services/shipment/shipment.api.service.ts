@@ -594,3 +594,34 @@ export async function assignSegment(
     throw new Error("Failed to assign segment");
   }
 }
+
+// Segment Route Response DTO type
+export interface SegmentRouteDto {
+  id: string;
+  originLatitude: number;
+  originLongitude: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
+  geometry: string[];
+  distance: number;
+  distanceKm: number;
+  duration: number;
+  routeData: Record<string, unknown>;
+}
+
+/**
+ * Get segment route
+ */
+export async function getSegmentRoute(
+  id: string
+): Promise<SegmentRouteDto> {
+  try {
+    const response = await http.get<SegmentRouteDto>(`/segments/${id}/route`);
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to fetch segment route");
+  }
+}

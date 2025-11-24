@@ -19,18 +19,14 @@ export function useSegmentHandlers(
   }, []);
 
   const handleSegmentUpdate = useCallback(
-    (
-      shipmentId: string,
-      segmentIndex: number,
-      update: Partial<Segment>
-    ) => {
+    (shipmentId: string, segmentIndex: number, update: Partial<Segment>) => {
       setEditedSegmentsByShipmentId((prev) => {
         const shipment = allItems.find((s) => s.id === shipmentId);
         if (!shipment) return prev;
 
         const base = prev[shipmentId]
           ? [...prev[shipmentId]!]
-          : [...shipment.segments];
+          : [...shipment.segments!];
         const segment = base[segmentIndex];
         if (!segment) return prev;
 
@@ -67,7 +63,7 @@ export function useSegmentHandlers(
 
         const base = prev[shipmentId]
           ? [...prev[shipmentId]!]
-          : [...shipment.segments];
+          : [...shipment.segments!];
         const index = base.findIndex((s) => s.step === segmentStep);
         if (index < 0) return prev;
 
@@ -100,7 +96,7 @@ export function useSegmentHandlers(
 
         const base = prev[shipmentId]
           ? [...prev[shipmentId]!]
-          : [...shipment.segments];
+          : [...shipment.segments!];
         const nextStep = base.length + 1;
         base.push({
           step: nextStep,

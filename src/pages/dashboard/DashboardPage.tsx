@@ -1,5 +1,5 @@
 import {useState} from "react";
-import CargoMap, {type Segment} from "../../components/CargoMap";
+import CargoMap from "../../components/CargoMap";
 import {useShipments} from "../../services/shipment/hooks";
 import {MAPBOX_TOKEN} from "./constants";
 import {KPICards} from "./components/KPICards";
@@ -30,14 +30,10 @@ export function DashboardPage() {
   });
   const [openModal, setOpenModal] = useState<string | null>(null);
 
-  const mapSegments = useMapSegments(serviceShipments, statusFilter);
+  const segmentIds = useMapSegments(serviceShipments, statusFilter);
 
-  const handleSegmentClick = (segment: Segment) => {
-    const segmentKey = segment.meta?.segmentKey;
-    if (typeof segmentKey !== "string") {
-      return;
-    }
-    setSelectedSegmentId(segmentKey);
+  const handleSegmentClick = (segmentId: string) => {
+    setSelectedSegmentId(segmentId);
     setIsSegmentsOpen(true);
   };
 
@@ -85,7 +81,7 @@ export function DashboardPage() {
       <div className="h-full w-full max-w-7xl mx-auto p-5 bg-white rounded-xl relative overflow-hidden min-w-0 isolate">
         <div className="absolute inset-0 p-5">
           <CargoMap
-            segments={mapSegments}
+            segmentIds={segmentIds}
             initialView={{longitude: 105.0, latitude: 35.0, zoom: 4}}
             mapboxToken={MAPBOX_TOKEN}
             onSegmentClick={handleSegmentClick}

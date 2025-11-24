@@ -1,7 +1,7 @@
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import {useMemo, useState, useEffect, type ReactNode} from "react";
 import SegmentProgress from "./SegmentProgress";
-import { cn } from "../../../../shared/utils/cn";
-import { CITY_OPTIONS } from "../../data/cities";
+import {cn} from "../../../../shared/utils/cn";
+import {CITY_OPTIONS} from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -9,22 +9,22 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
+import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type { Segment } from "../../../../shared/types/segmentData";
-import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
-import type { Shipment } from "../../../../shared/types/shipment";
+import type {Segment} from "../../../../shared/types/segmentData";
+import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
+import type {Shipment} from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
-import { ShipmentLinkSection } from "./ShipmentLinkSection";
-import type { SegmentReadDto } from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
-import { useCompanies } from "../../../../services/company/hooks";
+import {ShipmentLinkSection} from "./ShipmentLinkSection";
+import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
+import {useCompanies} from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
 } from "../../../../services/shipment/hooks";
-import type { CompanyReadDto } from "../../../../services/company/company.service";
+import type {CompanyReadDto} from "../../../../services/company/company.service";
 import {
   computeSegmentPlace,
   computeSegmentNextPlace,
@@ -155,9 +155,7 @@ export function SegmentDetails({
     return result.t;
   });
 
-  const [baseFee, setBaseFee] = useState<string>(
-    typeof data.baseFee === "number" ? String(data.baseFee) : ""
-  );
+  const [baseFee, setBaseFee] = useState<string>(String(data.baseFee));
 
   const updateSegmentMutation = useUpdateSegment();
 
@@ -179,7 +177,7 @@ export function SegmentDetails({
     const finishResult = splitDateTime(estFinishAt);
     setEstFinishDateValue(finishResult.d);
     setEstFinishTimeValue(finishResult.t);
-    setBaseFee(typeof data.baseFee === "number" ? String(data.baseFee) : "");
+    setBaseFee(String(data.baseFee));
   }, [
     place,
     nextPlace,
@@ -194,7 +192,7 @@ export function SegmentDetails({
   );
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): { city: string; country: string } => {
+  const parsePlace = (place: string): {city: string; country: string} => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -202,11 +200,11 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return { city: place, country: "" };
+    return {city: place, country: ""};
   };
 
   // Fetch companies from API
-  const { data: companies = [] } = useCompanies();
+  const {data: companies = []} = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -214,7 +212,7 @@ export function SegmentDetails({
   }, [companies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
-  const { data: announcements = [] } = useSegmentAnnouncements(
+  const {data: announcements = []} = useSegmentAnnouncements(
     data.hasPendingAnnouncements && segmentId ? segmentId : null
   );
 
@@ -299,7 +297,9 @@ export function SegmentDetails({
         segmentId={data.id}
         onToggle={handleToggle}
         showCargoButton={
-          !open && editable && data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT
+          !!data.originCountry &&
+          !!data.destinationCountry &&
+          data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT
         }
         onCargoClick={(e) => {
           e.stopPropagation();
@@ -446,6 +446,7 @@ export function SegmentDetails({
                         ),
                         baseFee:
                           baseFeeNum !== null ? String(baseFeeNum) : null,
+
                         isPlaceholder: false,
                       };
 

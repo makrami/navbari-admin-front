@@ -1,6 +1,6 @@
-import type { PropsWithChildren } from "react";
-import { useEffect, useRef, useState } from "react";
-import { cn } from "../../../../shared/utils/cn";
+import type {PropsWithChildren} from "react";
+import {useEffect, useRef, useState} from "react";
+import {cn} from "../../../../shared/utils/cn";
 import {
   MapPinIcon,
   MessagesSquareIcon,
@@ -18,11 +18,13 @@ import {
   Paperclip,
   ListCheck,
 } from "lucide-react";
-import Map, { type MapRef } from "react-map-gl/mapbox";
+import {type MapRef} from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { MAPBOX_TOKEN } from "../../../dashboard/constants";
+import {MAPBOX_TOKEN} from "../../../dashboard/constants";
+import type {Segment} from "../../../../shared/types/segmentData";
 
 type NavigatingInfoProps = PropsWithChildren<{
+  segments: Segment[];
   className?: string;
   title: string;
   shipmentId: string;
@@ -40,8 +42,10 @@ type NavigatingInfoProps = PropsWithChildren<{
 // Figma snapshot image URLs (used as static assets to match design)
 
 import avatarImg from "../../../../assets/images/avatar.png";
-import { getFileUrl } from "../../../LocalCompanies/utils";
+import {getFileUrl} from "../../../LocalCompanies/utils";
+import CargoMap from "../../../../components/CargoMap";
 export function NavigatingInfo({
+  segments,
   className,
   title,
   shipmentId,
@@ -60,7 +64,7 @@ export function NavigatingInfo({
   const mapRef = useRef<MapRef | null>(null);
 
   // Default map viewport (can be updated with actual coordinates if available)
-  const [viewport, setViewport] = useState({
+  const [viewport] = useState({
     longitude: 116.4074, // Beijing, China (default)
     latitude: 39.9042,
     zoom: 10,
@@ -366,13 +370,15 @@ export function NavigatingInfo({
             </div>
           </div>
           <div className="relative h-auto max-h-[240px] w-1/2 rounded-2xl overflow-hidden">
-            <Map
-              ref={mapRef}
-              mapboxAccessToken={MAPBOX_TOKEN}
-              {...viewport}
-              onMove={(evt) => setViewport(evt.viewState)}
-              style={{ width: "100%", height: "100%", minHeight: "240px" }}
-              mapStyle="mapbox://styles/mapbox/navigation-day-v1"
+            <CargoMap
+              segmentIds={segments
+                .filter(
+                  (segment) => segment.originCity && segment.destinationCity
+                )
+                .map((segment) => segment.id)
+                .filter((id): id is string => !!id)}
+              initialView={viewport}
+              mapboxToken={MAPBOX_TOKEN}
             />
 
             {/* Zoom & locate controls */}
@@ -381,7 +387,7 @@ export function NavigatingInfo({
                 <button
                   className="bg-white p-2 hover:bg-slate-50 transition-colors"
                   onClick={() => {
-                    mapRef.current?.zoomIn({ duration: 300 });
+                    mapRef.current?.zoomIn({duration: 300});
                   }}
                 >
                   <PlusIcon className="size-[14px] text-slate-500" />
@@ -389,7 +395,7 @@ export function NavigatingInfo({
                 <button
                   className="bg-white border-t border-slate-300 p-2 hover:bg-slate-50 transition-colors"
                   onClick={() => {
-                    mapRef.current?.zoomOut({ duration: 300 });
+                    mapRef.current?.zoomOut({duration: 300});
                   }}
                 >
                   <MinusIcon className="size-[14px] text-slate-500" />

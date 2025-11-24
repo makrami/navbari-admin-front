@@ -1,12 +1,11 @@
-import { useCallback } from "react";
-import { ShipmentListPanel } from "./ShipmentListPanel";
-import { EmptyShipmentView } from "./EmptyShipmentView";
-import { ShipmentContentArea } from "./ShipmentContentArea";
-import { createShipmentFromFormData } from "../utils/shipmentHelpers";
-import type { AddShipmentInput as AddShipmentFormInput } from "./AddShipmentModal";
-import type { Shipment } from "../../../shared/types/shipment";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { Segment } from "../../../shared/types/segmentData";
+import {useCallback} from "react";
+import {ShipmentListPanel} from "./ShipmentListPanel";
+import {EmptyShipmentView} from "./EmptyShipmentView";
+import {ShipmentContentArea} from "./ShipmentContentArea";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
+import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
 
 type ShipmentDetailsViewProps = {
   shipments: Shipment[];
@@ -18,7 +17,7 @@ type ShipmentDetailsViewProps = {
   onAddShipment: () => void;
   showAddShipment: boolean;
   onCloseAddShipment: () => void;
-  onCreateShipment: (shipment: Shipment) => void;
+  onCreateShipment: (data: CreateShipmentDto) => void;
   editedSegmentsByShipmentId: Record<string, Segment[]>;
   onSegmentUpdate: (
     shipmentId: string,
@@ -62,8 +61,8 @@ export function ShipmentDetailsView({
   fetchedSegments = null,
 }: ShipmentDetailsViewProps) {
   const handleCreateShipment = useCallback(
-    (data: AddShipmentFormInput) => {
-      onCreateShipment(createShipmentFromFormData(data));
+    (data: CreateShipmentDto) => {
+      onCreateShipment(data);
     },
     [onCreateShipment]
   );

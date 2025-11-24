@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ReactCountryFlag from "react-country-flag";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import Map, {
   Layer,
   NavigationControl,
@@ -9,34 +8,31 @@ import Map, {
   type MapRef,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type { FeatureCollection, LineString, Position } from "geojson";
-import { TruckIcon } from "lucide-react";
-import type { Map as MapboxMap, MapboxEvent } from "mapbox-gl";
-
-export type Segment = {
-  color: string;
-  path: readonly [number, number][]; // [lng, lat]
-  meta?: Record<string, string | number>;
-};
+import type {FeatureCollection, LineString, Position} from "geojson";
+import {TruckIcon} from "lucide-react";
+import type {Map as MapboxMap, MapboxEvent} from "mapbox-gl";
+import {useQueries} from "@tanstack/react-query";
+import {shipmentKeys} from "../services/shipment/hooks";
+import {getSegmentRoute} from "../services/shipment/shipment.api.service";
 
 type Props = {
-  segments: Segment[];
+  segmentIds: string[];
   initialView?: {
     longitude: number;
     latitude: number;
     zoom: number;
   };
   mapboxToken?: string;
-  onSegmentClick?: (segment: Segment, index: number) => void;
+  onSegmentClick?: (segmentId: string, index: number) => void;
   onMapClick?: () => void;
 };
 
-const SEGMENT_DURATION_MS = 2000;
-const ROUTING_PROFILE = "driving-traffic"; // or "driving"
 const GREEN_MAP_STYLE = "mapbox://styles/mapbox/navigation-day-v1";
+const DEFAULT_COLOR = "#1b54fe";
+const COLORS = ["#1b54fe", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 export function CargoMap({
-  segments,
+  segmentIds,
   initialView,
   mapboxToken,
   onSegmentClick,
@@ -44,14 +40,18 @@ export function CargoMap({
 }: Props) {
   const token =
     mapboxToken ?? (import.meta.env.VITE_MAPBOX_TOKEN as string | undefined);
-  const [progress, setProgress] = useState({ segmentIdx: 0, t: 0 });
-  const rafRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
   const mapRef = useRef<MapRef | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [hoveredSegmentIdx, setHoveredSegmentIdx] = useState<number | null>(
     null
   );
+  const hasFittedBoundsRef = useRef(false);
+  const mapInstanceRef = useRef<MapboxMap | null>(null);
+
+  // Reset bounds fitting when segmentIds change
+  useEffect(() => {
+    hasFittedBoundsRef.current = false;
+  }, [segmentIds]);
 
   const applyGreenPalette = useCallback((map: MapboxMap) => {
     type PaintProperty =
@@ -141,99 +141,53 @@ export function CargoMap({
     (event: MapboxEvent) => {
       const map = event.target as MapboxMap;
       mapRef.current = map as unknown as MapRef;
+      // Store the actual mapbox map instance for fitBounds
+      mapInstanceRef.current = map;
       const applyPalette = () => applyGreenPalette(map);
       applyPalette();
       map.on("styledata", applyPalette);
       map.once("remove", () => {
         map.off("styledata", applyPalette);
+        mapInstanceRef.current = null;
       });
     },
     [applyGreenPalette]
   );
 
-  const allCoords = useMemo(() => segments.flatMap((s) => s.path), [segments]);
+  // Fetch routes using TanStack Query
+  const routeQueries = useQueries({
+    queries: segmentIds.map((segmentId) => ({
+      queryKey: shipmentKeys.segmentRoute(segmentId),
+      queryFn: () => getSegmentRoute(segmentId),
+      enabled: !!segmentId,
+      retry: 1,
+    })),
+  });
 
-  const center = useMemo(() => {
-    const baseView = initialView
-      ? { ...initialView, pitch: 0, bearing: 0 }
-      : allCoords.length === 0
-      ? { longitude: 105.0, latitude: 35.0, zoom: 4, pitch: 0, bearing: 0 }
-      : (() => {
-          const lons = allCoords.map((c) => c[0]);
-          const lats = allCoords.map((c) => c[1]);
-          const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
-          const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
-          return { longitude, latitude, zoom: 4, pitch: 0, bearing: 0 };
-        })();
-    return baseView;
-  }, [allCoords, initialView]);
-
-  useEffect(() => {
-    const tick = (now: number) => {
-      if (startTimeRef.current == null) {
-        // resume from current progress.t
-        startTimeRef.current = now - progress.t * SEGMENT_DURATION_MS;
-      }
-      const elapsed = now - startTimeRef.current;
-      const t = Math.min(1, elapsed / SEGMENT_DURATION_MS);
-      setProgress((prev) => ({ ...prev, t }));
-      if (t >= 1) {
-        setProgress((prev) => {
-          const nextSeg = prev.segmentIdx + 1;
-          if (nextSeg >= segments.length) {
-            startTimeRef.current = now; // restart
-            return { segmentIdx: 0, t: 0 };
-          }
-          startTimeRef.current = now;
-          return { segmentIdx: nextSeg, t: 0 };
-        });
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [segments.length, progress.segmentIdx]);
-
-  const [routeSources, setRouteSources] = useState<
-    {
+  // Process route queries into route sources
+  const routeSources = useMemo(() => {
+    const sources: {
       id: string;
       data: FeatureCollection<LineString>;
       color: string;
+      segmentId: string;
       segmentIdx: number;
-    }[]
-  >([]);
+    }[] = [];
 
-  useEffect(() => {
-    let aborted = false;
-    async function fetchAllRoutes() {
-      if (!token) return;
-      try {
-        const results = await Promise.all(
-          segments.map(async (segment, idx) => {
-            const coordsParam = segment.path
-              .map((p) => `${p[0]},${p[1]}`)
-              .join(";");
-            const url =
-              `https://api.mapbox.com/directions/v5/mapbox/${ROUTING_PROFILE}/` +
-              `${coordsParam}?geometries=geojson&overview=full&steps=false&alternatives=false&access_token=${token}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`Directions error ${res.status}`);
-            const json = (await res.json()) as {
-              routes?: Array<{
-                geometry?: { coordinates?: Position[]; type: string };
-              }>;
-            };
-            const route = json.routes && json.routes[0];
-            const geometry = route?.geometry?.coordinates as
-              | Position[]
-              | undefined;
-            if (!geometry || geometry.length < 2) {
-              return null; // skip rendering if route missing
-            }
+    routeQueries.forEach((query, idx) => {
+      const segmentId = segmentIds[idx];
+      if (!segmentId) return;
+
+      if (query.isError) {
+        return;
+      }
+
+      if (query.data) {
+        const geometry = query.data.geometry;
+        if (geometry && geometry.length > 0) {
+          const coordinates = geometry;
+          if (coordinates.length >= 2) {
+            const color = COLORS[idx % COLORS.length] || DEFAULT_COLOR;
             const data: FeatureCollection<LineString> = {
               type: "FeatureCollection",
               features: [
@@ -242,129 +196,203 @@ export function CargoMap({
                   properties: {},
                   geometry: {
                     type: "LineString",
-                    coordinates: geometry,
+                    coordinates: coordinates as unknown as Position[],
                   },
                 },
               ],
             };
-            return {
+            sources.push({
               id: `segment-${idx}`,
               data,
-              color: segment.color,
+              color,
+              segmentId,
               segmentIdx: idx,
-            };
-          })
-        );
-        if (!aborted) {
-          setRouteSources(
-            results.filter(
-              (
-                r
-              ): r is {
-                id: string;
-                data: FeatureCollection<LineString>;
-                color: string;
-                segmentIdx: number;
-              } => r !== null
-            )
-          );
-        }
-      } catch (e) {
-        if (!aborted) {
-          setRouteSources([]);
-          setMapError((e as Error).message || "Failed to fetch routes");
+            });
+          }
         }
       }
-    }
-    fetchAllRoutes();
-    return () => {
-      aborted = true;
-    };
-  }, [segments, token]);
-
-  const labelPoints = useMemo(() => {
-    if (routeSources.length > 0) {
-      return routeSources.map((src) => {
-        const geom = src.data.features[0]?.geometry;
-        const coords = (geom && (geom as LineString).coordinates) as
-          | Position[]
-          | undefined;
-        const midIdx =
-          coords && coords.length ? Math.floor(coords.length / 2) : 0;
-        const pos =
-          coords && coords[midIdx] ? coords[midIdx] : ([0, 0] as Position);
-        const segIdx = src.segmentIdx;
-        const raw = segments[segIdx]?.meta?.trucksCount as
-          | number
-          | string
-          | undefined;
-        const count =
-          typeof raw === "number" ? raw : raw ? parseInt(raw, 10) : 0;
-        return {
-          id: `label-${segIdx}`,
-          lng: pos[0],
-          lat: pos[1],
-          count,
-          color: src.color,
-        };
-      });
-    }
-    // Fallback to straight midpoint if routes not available
-    return segments.map((segment, idx) => {
-      const a = segment.path[0];
-      const b = segment.path[segment.path.length - 1];
-      const lng = (a[0] + b[0]) / 2;
-      const lat = (a[1] + b[1]) / 2;
-      const raw = segment.meta?.trucksCount as number | string | undefined;
-      const count = typeof raw === "number" ? raw : raw ? parseInt(raw, 10) : 0;
-      return { id: `label-${idx}`, lng, lat, count, color: segment.color };
     });
-  }, [routeSources, segments]);
 
-  const endpointMarkers = useMemo(
-    () =>
-      segments.flatMap((segment, idx) => {
-        const start = segment.path[0];
-        const end = segment.path[segment.path.length - 1];
-        const originFlag =
-          (segment.meta?.originFlag as string | undefined) || "";
-        const destFlag = (segment.meta?.destFlag as string | undefined) || "";
-        const originIso2 =
-          (segment.meta?.originIso2 as string | undefined) || "";
-        const destIso2 = (segment.meta?.destIso2 as string | undefined) || "";
-        const markers: Array<{
-          id: string;
-          lng: number;
-          lat: number;
-          label: string;
-          iso2: string;
-          color: string;
-        }> = [];
-        // Always render endpoint markers; show flag image if available, otherwise emoji, otherwise a colored dot
-        if (start) {
-          markers.push({
-            id: `start-${idx}`,
-            lng: start[0],
-            lat: start[1],
-            label: originFlag,
-            iso2: originIso2,
-            color: segment.color,
-          });
+    return sources;
+  }, [routeQueries, segmentIds]);
+
+  // Calculate center from route data
+  const center = useMemo(() => {
+    if (initialView) {
+      return {...initialView, pitch: 0, bearing: 0};
+    }
+
+    const allCoords: Position[] = [];
+    routeQueries.forEach((query) => {
+      if (query.data?.geometry) {
+        const coords = query.data.geometry as unknown as Position[];
+        allCoords.push(...(coords as Position[]));
+      }
+    });
+
+    if (allCoords.length === 0) {
+      return {longitude: 105.0, latitude: 35.0, zoom: 4, pitch: 0, bearing: 0};
+    }
+
+    const lons = allCoords.map((c) => c[0]);
+    const lats = allCoords.map((c) => c[1]);
+    const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
+    const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
+    return {longitude, latitude, zoom: 4, pitch: 0, bearing: 0};
+  }, [routeQueries, initialView]);
+
+  // Set map error if any query failed
+  useEffect(() => {
+    const errorQuery = routeQueries.find((q) => q.isError);
+    if (errorQuery?.error) {
+      const errorMessage =
+        errorQuery.error instanceof Error
+          ? errorQuery.error.message
+          : "Failed to fetch routes";
+      setMapError(errorMessage);
+    } else {
+      setMapError(null);
+    }
+  }, [routeQueries]);
+
+  // Create endpoint markers from route data
+  const endpointMarkers = useMemo(() => {
+    const markers: Array<{
+      id: string;
+      lng: number;
+      lat: number;
+      color: string;
+    }> = [];
+
+    routeQueries.forEach((query, idx) => {
+      if (query.data) {
+        const route = query.data;
+        const color = COLORS[idx % COLORS.length] || DEFAULT_COLOR;
+
+        // Origin marker
+        markers.push({
+          id: `start-${idx}`,
+          lng: route.originLongitude,
+          lat: route.originLatitude,
+          color,
+        });
+
+        // Destination marker
+        markers.push({
+          id: `end-${idx}`,
+          lng: route.destinationLongitude,
+          lat: route.destinationLatitude,
+          color,
+        });
+      }
+    });
+
+    return markers;
+  }, [routeQueries]);
+
+  // Create label points (midpoint of route)
+  const labelPoints = useMemo(() => {
+    return routeSources.map((src) => {
+      const geom = src.data.features[0]?.geometry;
+      const coords = (geom && (geom as LineString).coordinates) as
+        | Position[]
+        | undefined;
+      const midIdx =
+        coords && coords.length ? Math.floor(coords.length / 2) : 0;
+      const pos =
+        coords && coords[midIdx] ? coords[midIdx] : ([0, 0] as Position);
+      return {
+        id: `label-${src.segmentIdx}`,
+        lng: pos[0],
+        lat: pos[1],
+        color: src.color,
+      };
+    });
+  }, [routeSources]);
+
+  // Fit map bounds to show all routes after they're loaded
+  useEffect(() => {
+    // Only fit bounds if we have routes and haven't done it yet
+    // Note: We'll auto-fit even if initialView is provided, as routes may extend beyond it
+    if (
+      hasFittedBoundsRef.current ||
+      routeSources.length === 0 ||
+      !mapInstanceRef.current
+    ) {
+      return;
+    }
+
+    // Check if all routes are loaded
+    const allLoaded = routeQueries.every(
+      (query) => query.isSuccess || query.isError
+    );
+    if (!allLoaded) {
+      return;
+    }
+
+    // Collect all coordinates from routes
+    const allCoords: Position[] = [];
+    routeSources.forEach((src) => {
+      const geom = src.data.features[0]?.geometry;
+      if (geom && (geom as LineString).coordinates) {
+        const coords = (geom as LineString).coordinates as Position[];
+        allCoords.push(...coords);
+      }
+    });
+
+    // Also include endpoint markers
+    endpointMarkers.forEach((marker) => {
+      allCoords.push([marker.lng, marker.lat] as Position);
+    });
+
+    if (allCoords.length === 0) {
+      return;
+    }
+
+    // Calculate bounds
+    const lons = allCoords.map((c) => c[0]);
+    const lats = allCoords.map((c) => c[1]);
+    const minLon = Math.min(...lons);
+    const maxLon = Math.max(...lons);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+
+    // Add padding to bounds
+    const padding = {
+      top: 50,
+      bottom: 50,
+      left: 50,
+      right: 50,
+    };
+
+    // Fit bounds to show all routes using the actual mapbox map instance
+    // Use a small timeout to ensure map is fully rendered
+    const timeoutId = setTimeout(() => {
+      try {
+        const map = mapInstanceRef.current;
+        if (map && typeof map.fitBounds === "function") {
+          map.fitBounds(
+            [
+              [minLon, minLat],
+              [maxLon, maxLat],
+            ],
+            {
+              padding,
+              duration: 1000, // Animation duration in ms
+            }
+          );
+          hasFittedBoundsRef.current = true;
         }
-        if (end) {
-          markers.push({
-            id: `end-${idx}`,
-            lng: end[0],
-            lat: end[1],
-            label: destFlag,
-            iso2: destIso2,
-            color: segment.color,
-          });
-        }
-        return markers;
-      }),
-    [segments]
-  );
+      } catch (error) {
+        // Ignore errors (e.g., if map is not ready)
+        console.warn("Failed to fit bounds:", error);
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [routeSources, routeQueries, endpointMarkers, segmentIds]);
 
   const interactiveIds = useMemo(
     () => routeSources.map((s) => `${s.id}-line`),
@@ -374,7 +402,6 @@ export function CargoMap({
   const handleMapClick = (e: MapMouseEvent) => {
     const feature = e.features && e.features[0];
     if (!feature || !feature.layer?.id) {
-      // Clicked on map but not on a segment
       onMapClick?.();
       return;
     }
@@ -383,14 +410,12 @@ export function CargoMap({
       const layerId = feature.layer.id as string;
       const i = routeSources.findIndex((s) => `${s.id}-line` === layerId);
       if (i >= 0) {
-        const segIdx = routeSources[i].segmentIdx;
-        onSegmentClick(segments[segIdx], segIdx);
+        const src = routeSources[i];
+        onSegmentClick(src.segmentId, src.segmentIdx);
       } else {
-        // Clicked on map but not on a segment
         onMapClick?.();
       }
     } else {
-      // No segment click handler, but still notify map click
       onMapClick?.();
     }
   };
@@ -450,7 +475,7 @@ export function CargoMap({
           onLoad={handleMapLoad}
           onError={(e) => {
             const msg =
-              (e as unknown as { error?: Error }).error?.message ??
+              (e as unknown as {error?: Error}).error?.message ??
               "Map failed to load";
             setMapError(msg);
           }}
@@ -458,13 +483,13 @@ export function CargoMap({
           bearing={0}
           dragRotate={false}
           touchPitch={false}
-          touchZoomRotate={{ around: "center" }}
+          touchZoomRotate={{around: "center"}}
         >
           <NavigationControl position="top-right" showCompass={false} />
 
           {routeSources.map((src, idx) => {
             const isHovered = hoveredSegmentIdx === idx;
-            const hoverColor = isHovered ? "#ff6b35" : src.color; // Orange color on hover
+            const hoverColor = isHovered ? "#ff6b35" : src.color;
             const lineWidth = isHovered ? 6 : 4;
 
             return (
@@ -472,7 +497,7 @@ export function CargoMap({
                 <Layer
                   id={`${src.id}-line`}
                   type="line"
-                  layout={{ "line-cap": "round", "line-join": "round" }}
+                  layout={{"line-cap": "round", "line-join": "round"}}
                   paint={{
                     "line-color": hoverColor,
                     "line-width": lineWidth,
@@ -490,9 +515,8 @@ export function CargoMap({
               latitude={p.lat}
               anchor="center"
             >
-              <div className="rounded-md bg-white text-slate-900 text-xs p-1 border border-slate-200  flex items-center gap-1">
+              <div className="rounded-md bg-white text-slate-900 text-xs p-1 border border-slate-200 flex items-center gap-1">
                 <TruckIcon className="size-4 text-slate-900" />
-                <span>{p.count}</span>
               </div>
             </Marker>
           ))}
@@ -504,43 +528,17 @@ export function CargoMap({
               latitude={m.lat}
               anchor="center"
             >
-              {m.iso2 ? (
-                <div
-                  className="rounded-md p-1 bg-white flex items-center justify-center "
-                  title={m.iso2}
-                >
-                  <ReactCountryFlag
-                    svg
-                    countryCode={(m.iso2 || "").toUpperCase()}
-                    style={{ width: 20, height: 14, display: "block" }}
-                  />
-                </div>
-              ) : m.label ? (
-                <div
-                  className="rounded-full bg-white flex items-center justify-center border shadow text-base leading-none"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderColor: "rgba(0,0,0,0.2)",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
-                  }}
-                  title={m.label}
-                >
-                  {m.label}
-                </div>
-              ) : (
-                <div
-                  className="rounded-full border shadow"
-                  style={{
-                    width: 14,
-                    height: 14,
-                    backgroundColor: m.color,
-                    borderColor: "rgba(0,0,0,0.2)",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
-                  }}
-                  title="route endpoint"
-                />
-              )}
+              <div
+                className="rounded-full border shadow"
+                style={{
+                  width: 14,
+                  height: 14,
+                  backgroundColor: m.color,
+                  borderColor: "rgba(0,0,0,0.2)",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                }}
+                title="route endpoint"
+              />
             </Marker>
           ))}
         </Map>

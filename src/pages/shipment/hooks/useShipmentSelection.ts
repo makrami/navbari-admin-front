@@ -1,16 +1,19 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import {useState, useRef, useEffect, useMemo, useCallback} from "react";
+import {useSearchParams} from "react-router-dom";
 import {
   useShipments,
   useCreateShipment,
   useUpdateShipment,
 } from "../../../services/shipment/hooks";
-import type { UpdateShipmentDto } from "../../../services/shipment/shipment.api.service";
-import type { Shipment } from "../../../shared/types/shipment";
+import type {
+  CreateShipmentDto,
+  UpdateShipmentDto,
+} from "../../../services/shipment/shipment.api.service";
+import type {Shipment} from "../../../shared/types/shipment";
 
 export function useShipmentSelection() {
   const [searchParams] = useSearchParams();
-  const { data: shipments, loading: serviceLoading } = useShipments();
+  const {data: shipments, loading: serviceLoading} = useShipments();
   const createShipmentMutation = useCreateShipment();
   const updateShipmentMutation = useUpdateShipment();
   const hasInitializedRef = useRef(false);
@@ -69,44 +72,11 @@ export function useShipmentSelection() {
   }, [searchParams, shipments?.length ?? 0]);
 
   const handleCreateShipment = useCallback(
-    async (shipment: Shipment) => {
-      // Update ref immediately BEFORE any state updates to prevent race conditions
-      selectedIdRef.current = shipment.id;
-      // Mark as initialized to prevent auto-selection effect from interfering
-      hasInitializedRef.current = true;
-
-      // Use functional updates to ensure we're working with the latest state
-      // This ensures the previous selection is cleared before adding the new shipment
-      setSelectedId(() => shipment.id);
-
+    async (data: CreateShipmentDto) => {
       // Create shipment via API
       try {
-        // Map ShipmentData to CreateShipmentDto format
-        // Extract origin/destination from shipment data
-        // The form provides 'from' and 'to' as city names in the segments
-        // We'll extract from the first segment's place or use defaults
-        const originCity = shipment.originCity || "Unknown";
-        const destinationCity =
-          shipment.destinationCity || shipment.destinationCountry || "Unknown";
-        // Use city names as both city and country (backend requires both, but form only has cities)
-        const originCountry = shipment.originCountry || originCity;
-        const destinationCountry =
-          shipment.destinationCountry || destinationCity;
-        const cargoWeight = shipment.cargoWeight
-          ? parseFloat(shipment.cargoWeight.replace(/[^0-9.]/g, ""))
-          : 0;
-
         // Create via API using mutation hook
-        const createdShipment = await createShipmentMutation.mutateAsync({
-          title: shipment.title,
-          originCountry: originCountry,
-          originCity: originCity,
-          destinationCountry: destinationCountry,
-          destinationCity: destinationCity,
-          cargoType: "General",
-          cargoWeight: cargoWeight,
-          segmentCount: 1,
-        });
+        const createdShipment = await createShipmentMutation.mutateAsync(data);
 
         // Update selected ID to the new shipment ID from API (UUID) immediately
         setSelectedId(createdShipment.id);

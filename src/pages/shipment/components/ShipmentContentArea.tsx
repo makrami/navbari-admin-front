@@ -1,18 +1,17 @@
-import { useMemo, useState, useEffect } from "react";
-import { Segments } from "../segments/Segments";
+import {useMemo, useState, useEffect} from "react";
+import {Segments} from "../segments/Segments";
 import NavigatingInfo from "../details/components/NavigatingInfo";
 import ActivitySection from "../Activity/components/ActivitySection";
-import AddShipmentModal, {
-  type AddShipmentInput as AddShipmentFormInput,
-} from "./AddShipmentModal";
-import { SegmentItem } from "./SegmentItem";
-import { useSegmentScroll } from "../hooks/useSegmentScroll";
-import { SegmentDetailsSkeleton } from "./ShipmentSkeleton";
-import type { Shipment } from "../../../shared/types/shipment";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { SegmentData } from "../../../shared/types/segmentData";
-import { SegmentStatus } from "../../../shared/types/segmentData";
-import { getFileUrl } from "../../LocalCompanies/utils";
+import AddShipmentModal from "./AddShipmentModal";
+import {SegmentItem} from "./SegmentItem";
+import {useSegmentScroll} from "../hooks/useSegmentScroll";
+import {SegmentDetailsSkeleton} from "./ShipmentSkeleton";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
+import {SegmentStatus} from "../../../shared/types/segmentData";
+import {getFileUrl} from "../../LocalCompanies/utils";
+import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
 
 type ShipmentContentAreaProps = {
   selectedShipment: Shipment;
@@ -20,26 +19,26 @@ type ShipmentContentAreaProps = {
   segmentStep?: number;
   showAddShipment: boolean;
   onCloseAddShipment: () => void;
-  onCreateShipment: (data: AddShipmentFormInput) => void;
+  onCreateShipment: (data: CreateShipmentDto) => void;
   onDeselect: () => void;
-  editedSegmentsByShipmentId: Record<string, SegmentData[]>;
+  editedSegmentsByShipmentId: Record<string, Segment[]>;
   onSegmentUpdate: (
     shipmentId: string,
     segmentIndex: number,
-    update: Partial<SegmentData>
+    update: Partial<Segment>
   ) => void;
   onAddSegment: (shipmentId: string) => void;
   onSegmentSave: (
     shipmentId: string,
     segmentStep: number,
-    update: Partial<SegmentData>
+    update: Partial<Segment>
   ) => void;
   serviceShipments: DomainShipment[] | undefined;
   timeoutsRef: React.MutableRefObject<number[]>;
   onShipmentIsNewOverride: (shipmentId: string, isNew: boolean) => void;
   onUpdateShipment: (shipmentId: string, update: Partial<Shipment>) => void;
   segmentsLoading?: boolean;
-  fetchedSegments?: SegmentData[] | null;
+  fetchedSegments?: Segment[] | null;
 };
 
 export function ShipmentContentArea({
@@ -138,7 +137,7 @@ export function ShipmentContentArea({
   }, [inProgressSegment, selectedShipment]);
 
   // Extract last activity info
-  const { lastActivity, lastActivityTime } = useMemo(() => {
+  const {lastActivity, lastActivityTime} = useMemo(() => {
     // Try to get GPS update time first
     const gpsUpdate = inProgressSegment?.lastGpsUpdate;
     const updatedAt =
@@ -212,7 +211,7 @@ export function ShipmentContentArea({
       }
     }
 
-    return { lastActivity: activity, lastActivityTime: timeStr };
+    return {lastActivity: activity, lastActivityTime: timeStr};
   }, [inProgressSegment, selectedShipment]);
 
   // Manage which segment is open (accordion behavior - only one at a time)
@@ -245,6 +244,7 @@ export function ShipmentContentArea({
             onCreate={onCreateShipment}
           />
           <NavigatingInfo
+            segments={renderSegments}
             vehicle={vehicle}
             weight={
               selectedShipment.cargoWeight
@@ -273,20 +273,23 @@ export function ShipmentContentArea({
           >
             {segmentsLoading
               ? // Show skeleton loading state while fetching segments
-                Array.from({ length: 3 }).map((_, index) => (
+                Array.from({length: 3}).map((_, index) => (
                   <SegmentDetailsSkeleton key={`skeleton-${index}`} />
                 ))
-              : renderSegments.map((seg: SegmentData, idx: number) => {
+              : renderSegments.map((seg: Segment, idx: number) => {
                   const domainSelected = serviceShipments?.find(
                     (s) => s.id === selectedId
                   );
 
                   if (idx == 0) {
                     seg.originCity = selectedShipment.originCity;
+                    seg.originCountry = selectedShipment.originCountry;
                   }
 
                   if (idx == renderSegments.length - 1) {
                     seg.destinationCity = selectedShipment.destinationCity;
+                    seg.destinationCountry =
+                      selectedShipment.destinationCountry;
                   }
                   return (
                     <SegmentItem

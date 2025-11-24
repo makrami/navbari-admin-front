@@ -1,11 +1,10 @@
-import { useMemo } from "react";
-import type { ChatAlert } from "../data";
-import { ChatSection } from "./ChatSection";
-import { ShipmentHeader } from "./ShipmentHeader";
-import { DriverAndShipmentInfo } from "./DriverAndShipmentInfo";
-import { FinancialCards } from "./FinancialCards";
-import { SegmentSection } from "./SegmentSection";
-import type { Segment } from "../../../components/CargoMap";
+import {useMemo} from "react";
+import type {ChatAlert} from "../data";
+import {ChatSection} from "./ChatSection";
+import {ShipmentHeader} from "./ShipmentHeader";
+import {DriverAndShipmentInfo} from "./DriverAndShipmentInfo";
+import {FinancialCards} from "./FinancialCards";
+import {SegmentSection} from "./SegmentSection";
 
 type ChatAlertDetailsProps = {
   chatAlert: ChatAlert;
@@ -40,19 +39,10 @@ export function ChatAlertDetails({
   // Default messages - should come from API
   const messages: any[] = [];
   const actionableAlerts: any[] = [];
-  const mapSegments = useMemo<Segment[]>(
-    () => [
-      {
-        color: "#1b54fe",
-        path: chatAlert.segmentPath,
-        meta: {
-          vehicleId: chatAlert.vehicle,
-          driverId: chatAlert.driverId,
-        },
-      },
-    ],
-    [chatAlert.segmentPath, chatAlert.vehicle, chatAlert.driverId]
-  );
+  // Extract segmentIds from chatAlert (if available)
+  // Note: ChatAlert type doesn't have segmentId yet, so using empty array for now
+  // TODO: Add segmentId to ChatAlert type when API provides it
+  const segmentIds = useMemo<string[]>(() => [], []);
 
   const initialView = useMemo(() => {
     if (chatAlert.segmentPath.length === 0) {
@@ -113,7 +103,7 @@ export function ChatAlertDetails({
 
         <DriverAndShipmentInfo
           chatAlert={chatAlert}
-          mapSegments={mapSegments}
+          segmentIds={segmentIds}
           initialView={initialView}
         />
 

@@ -6,14 +6,14 @@ import {
   WeightIcon,
   Target,
 } from "lucide-react";
-import { InfoCard } from "../../../shared/components/ui/InfoCard";
-import CargoMap, { type Segment } from "../../../components/CargoMap";
-import { MAPBOX_TOKEN } from "../../dashboard/constants";
-import type { ChatAlert } from "../data";
+import {InfoCard} from "../../../shared/components/ui/InfoCard";
+import CargoMap from "../../../components/CargoMap";
+import {MAPBOX_TOKEN} from "../../dashboard/constants";
+import type {ChatAlert} from "../data";
 
 interface DriverAndShipmentInfoProps {
   chatAlert: ChatAlert;
-  mapSegments: Segment[];
+  segmentIds: string[];
   initialView: {
     longitude: number;
     latitude: number;
@@ -23,7 +23,7 @@ interface DriverAndShipmentInfoProps {
 
 export function DriverAndShipmentInfo({
   chatAlert,
-  mapSegments,
+  segmentIds,
   initialView,
 }: DriverAndShipmentInfoProps) {
   return (
@@ -92,7 +92,7 @@ export function DriverAndShipmentInfo({
       <div className="flex-1 min-w-0">
         <div className="rounded-xl border border-slate-200 overflow-hidden w-full h-[240px]">
           <CargoMap
-            segments={mapSegments}
+            segmentIds={segmentIds}
             initialView={initialView}
             mapboxToken={MAPBOX_TOKEN}
           />

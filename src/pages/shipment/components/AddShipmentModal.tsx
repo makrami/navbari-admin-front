@@ -2,6 +2,7 @@ import {useState, useEffect, useRef, useMemo} from "react";
 import {XIcon, Search, ChevronDown, Check} from "lucide-react";
 import {useCities} from "../../../services/geography/hooks";
 import type {City} from "../../../services/geography/geography.service";
+import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
 
 const CARGO_CATEGORY_OPTIONS = [
   {value: "electronics", label: "Electronics"},
@@ -13,21 +14,6 @@ const CARGO_CATEGORY_OPTIONS = [
   {value: "automotive", label: "Automotive"},
   {value: "furniture", label: "Furniture"},
 ];
-
-export type AddShipmentInput = {
-  id: string;
-  title: string;
-  destination: string;
-  from?: string;
-  to?: string;
-  place: string; // initial segment place
-  datetime: string; // initial segment datetime
-  driverName: string; // initial segment + userName
-  driverRating: number;
-  driverPhoto?: string;
-  cargoWeight?: number;
-  segmentsAmount?: number;
-};
 
 type CityDropdownProps = {
   value: string;
@@ -338,7 +324,7 @@ function CargoCategoryDropdown({
 type AddShipmentModalProps = {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: AddShipmentInput) => void;
+  onCreate: (data: CreateShipmentDto) => void;
 };
 
 export default function AddShipmentModal({
@@ -362,23 +348,15 @@ export default function AddShipmentModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return;
-    // Generate a more unique ID using timestamp + random string
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).slice(2, 9);
-    const genId = `#${timestamp}-${random}`;
     onCreate({
-      id: genId,
       title: name,
-      destination: to,
-      from,
-      to,
-      place: "",
-      datetime: "",
-      driverName: "",
-      driverRating: 0,
-      driverPhoto: undefined,
-      cargoWeight: cargoWeight ? parseFloat(cargoWeight) : undefined,
-      segmentsAmount: segmentsAmount ? parseInt(segmentsAmount, 10) : undefined,
+      originCountry: from.split(",")[1].trim(),
+      originCity: from.split(",")[0].trim(),
+      destinationCountry: to.split(",")[1].trim(),
+      destinationCity: to.split(",")[0].trim(),
+      cargoType: cargoCategory,
+      cargoWeight: cargoWeight ? parseFloat(cargoWeight) : 0,
+      segmentCount: segmentsAmount ? parseInt(segmentsAmount, 10) : 0,
     });
     // reset
     setName("");

@@ -7,10 +7,10 @@ import {
   MessagesSquare,
   MapPin,
 } from "lucide-react";
-import { cn } from "../../../../shared/utils/cn";
-import { formatDistance } from "../../../../shared/utils/segmentHelpers";
-import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
-import { getFileUrl } from "../../../LocalCompanies/utils";
+import {cn} from "../../../../shared/utils/cn";
+import {formatDistance} from "../../../../shared/utils/segmentHelpers";
+import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
+import {getFileUrl} from "../../../LocalCompanies/utils";
 
 type SegmentHeaderProps = {
   order: number;
@@ -104,13 +104,13 @@ export default function SegmentHeader({
       <div className="flex-1 flex items-center justify-center gap-2 min-w-0">
         <span className="text-sm font-bold text-slate-900 ">
           {originCity && originCity.trim()
-            ? originCity + " " + originCountry
+            ? originCity + ", " + originCountry
             : "NOT ASSIGNED"}
         </span>
         <ArrowRight className="size-3.5 text-slate-400" />
         <span className="text-sm font-bold text-slate-900 ">
           {destinationCity
-            ? destinationCity + " " + destinationCountry
+            ? destinationCity + ", " + destinationCountry
             : editable
             ? "NOT ASSIGNED"
             : "(DESTINATION)"}

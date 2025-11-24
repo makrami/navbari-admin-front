@@ -1,5 +1,5 @@
-import { DollarSign } from "lucide-react";
-import { cn } from "../../../../../shared/utils/cn";
+import {DollarSign} from "lucide-react";
+import {cn} from "../../../../../shared/utils/cn";
 
 type BaseFeeFieldProps = {
   value: string;
