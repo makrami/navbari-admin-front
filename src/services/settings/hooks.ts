@@ -4,6 +4,7 @@ import {
   getSettingsByCategory,
   updateSettingsByCategory,
   getAvailableOptions,
+  uploadLogo,
   type SettingCategory,
   type UpdateGeneralSettings,
   type UpdateNotificationSettings,
@@ -105,6 +106,15 @@ export function useUpdateSlaSettings() {
       queryClient.invalidateQueries({ queryKey: settingsKeys.all });
       queryClient.invalidateQueries({ queryKey: settingsKeys.detail("sla") });
     },
+  });
+}
+
+/**
+ * Mutation hook for uploading logo
+ */
+export function useUploadLogo() {
+  return useMutation({
+    mutationFn: (file: File) => uploadLogo(file),
   });
 }
 

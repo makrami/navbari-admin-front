@@ -254,7 +254,8 @@
         "weightUnit": "Kilograms (KG)",
         "changesCount": "There are {{count}} changes",
         "revert": "Revert",
-        "saveChanges": "Save Changes"
+        "saveChanges": "Save Changes",
+        "saving": "Saving..."
       },
       "notifications": {
         "title": "Notification & Alerts",
@@ -321,7 +322,12 @@
         "users": "Users",
         "addUser": "Add User",
         "nameEmail": "Name & Email",
-        "actions": "Actions"
+        "actions": "Actions",
+        "cancel": "Cancel",
+        "confirmDelete": "Confirm Delete",
+        "deleteUser": "Delete User",
+        "deleteUserConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+        "deleting": "Deleting..."
       }
     }
   }

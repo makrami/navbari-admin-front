@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { ChevronDown, MoreVertical } from "lucide-react";
-import type { Role } from "./RolesListPanel";
-import { UsersTable } from "./UsersTable";
+import {useState, useRef, useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {ChevronDown, MoreVertical} from "lucide-react";
+import type {Role} from "./RolesListPanel";
+import {UsersTable} from "./UsersTable";
 
 export type Permission = {
   module: string;
@@ -12,12 +12,11 @@ export type Permission = {
   approve: boolean;
 };
 
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  status: "Active" | "Suspended";
-};
+// Import User type from RolesListPanel to keep them in sync
+import type {User} from "./RolesListPanel";
+
+// Re-export for backward compatibility
+export type {User};
 
 type RoleDetailsPanelProps = {
   role: Role | null;
@@ -28,6 +27,7 @@ type RoleDetailsPanelProps = {
   onUserAdd: () => void;
   onUserEdit: (userId: string) => void;
   onUserRemove: (userId: string) => void;
+  onUserStatusChange: (userId: string, isActive: boolean) => void;
 };
 
 export function RoleDetailsPanel({
@@ -37,8 +37,9 @@ export function RoleDetailsPanel({
   onUserAdd,
   onUserEdit,
   onUserRemove,
+  onUserStatusChange,
 }: RoleDetailsPanelProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   if (!role) {
     return (
@@ -81,7 +82,7 @@ export function RoleDetailsPanel({
           <input
             type="text"
             value={role.name}
-            onChange={(e) => onRoleUpdate({ name: e.target.value })}
+            onChange={(e) => onRoleUpdate({name: e.target.value})}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B54FE] focus:border-transparent bg-white text-slate-900"
           />
         </div>
@@ -93,11 +94,11 @@ export function RoleDetailsPanel({
           <input
             type="text"
             value={role.description}
-            onChange={(e) => onRoleUpdate({ description: e.target.value })}
+            onChange={(e) => onRoleUpdate({description: e.target.value})}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B54FE] focus:border-transparent bg-white text-slate-900"
           />
         </div>
-        <div>
+        {/* <div>
           <label className="block text-xs text-slate-900 mb-2">
             {t("settings.sections.rolesPermissions.geographicalAccess")}
           </label>
@@ -113,7 +114,7 @@ export function RoleDetailsPanel({
               })
             }
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Users Table */}
@@ -122,6 +123,7 @@ export function RoleDetailsPanel({
         onUserAdd={() => onUserAdd()}
         onUserEdit={onUserEdit}
         onUserRemove={onUserRemove}
+        onUserStatusChange={onUserStatusChange}
       />
     </div>
   );
@@ -134,12 +136,7 @@ type DropdownFieldProps = {
   onChange: (value: string) => void;
 };
 
-function DropdownField({
-  label,
-  value,
-  options,
-  onChange,
-}: DropdownFieldProps) {
+function DropdownField({label, value, options, onChange}: DropdownFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

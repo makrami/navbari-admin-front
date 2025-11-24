@@ -1,12 +1,9 @@
-import { RolesListPanel, type Role } from "./RolesListPanel";
-import {
-  RoleDetailsPanel,
-  type Permission,
-  type User,
-} from "./RoleDetailsPanel";
-import { SettingsFooter } from "./SettingsFooter";
-import { useMemo, useState } from "react";
-import { AddEditUserModal } from "./AddEditUserModal";
+import {RolesListPanel, type Role} from "./RolesListPanel";
+import {RoleDetailsPanel, type Permission, type User} from "./RoleDetailsPanel";
+import {SettingsFooter} from "./SettingsFooter";
+import {useMemo, useState} from "react";
+import {AddEditUserModal} from "./AddEditUserModal";
+import {useCreateUser, useUpdateUser} from "../../../services/admin/hooks";
 
 type RolesPermissionsSettingsProps = {
   roles: Role[];
@@ -17,12 +14,21 @@ type RolesPermissionsSettingsProps = {
   users: User[];
   onRoleUpdate: (role: Partial<Role>) => void;
   onPermissionsChange: (permissions: Permission[]) => void;
-  onUserAdd: (user: { name: string; email: string }) => void;
-  onUserUpdate: (user: { id: string; name: string; email: string }) => void;
+  onUserAdd: (user: {name: string; email: string; password: string}) => void;
+  onUserUpdate: (user: {
+    id: string;
+    name: string;
+    email: string;
+    password?: string;
+  }) => void;
   onUserRemove: (userId: string) => void;
+  onUserStatusChange: (userId: string, isActive: boolean) => void;
   changeCount: number;
   onRevert: () => void;
   onSave: () => void;
+  isLoadingRoles?: boolean;
+  rolesError?: Error | null;
+  isSavingRole?: boolean;
 };
 
 export function RolesPermissionsSettings({
@@ -37,12 +43,19 @@ export function RolesPermissionsSettings({
   onUserAdd,
   onUserUpdate,
   onUserRemove,
+  onUserStatusChange,
   changeCount,
   onRevert,
   onSave,
+  isLoadingRoles = false,
+  rolesError = null,
+  isSavingRole = false,
 }: RolesPermissionsSettingsProps) {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editUserId, setEditUserId] = useState<string | null>(null);
+
+  const createUserMutation = useCreateUser();
+  const updateUserMutation = useUpdateUser();
 
   const roleName = useMemo(() => selectedRole?.name ?? "", [selectedRole]);
   const editUser = useMemo(
@@ -64,11 +77,21 @@ export function RolesPermissionsSettings({
     id?: string;
     name: string;
     email: string;
+    password?: string;
   }) => {
     if (data.id) {
-      onUserUpdate({ id: data.id, name: data.name, email: data.email });
+      onUserUpdate({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
     } else {
-      onUserAdd({ name: data.name, email: data.email });
+      onUserAdd({
+        name: data.name,
+        email: data.email,
+        password: data.password || "",
+      });
     }
     setIsUserModalOpen(false);
   };
@@ -81,6 +104,8 @@ export function RolesPermissionsSettings({
           selectedRoleId={selectedRoleId}
           onRoleSelect={onRoleSelect}
           onAddRole={handleOpenAddUser}
+          isLoading={isLoadingRoles}
+          error={rolesError}
         />
         <RoleDetailsPanel
           role={selectedRole}
@@ -91,26 +116,32 @@ export function RolesPermissionsSettings({
           onUserEdit={handleOpenEditUser}
           onUserRemove={onUserRemove}
           onUserAdd={handleOpenAddUser}
+          onUserStatusChange={onUserStatusChange}
         />
       </div>
 
-      <SettingsFooter
-        changeCount={changeCount}
-        onRevert={onRevert}
-        onSave={onSave}
-      />
+      {changeCount > 0 && (
+        <SettingsFooter
+          changeCount={changeCount}
+          onRevert={onRevert}
+          onSave={onSave}
+          isLoading={isSavingRole}
+        />
+      )}
 
       <AddEditUserModal
         open={isUserModalOpen}
         mode={editUserId ? "edit" : "add"}
         roleName={roleName}
+        roleId={selectedRoleId}
         initialUser={
           editUser
-            ? { id: editUser.id, name: editUser.name, email: editUser.email }
+            ? {id: editUser.id, name: editUser.name, email: editUser.email}
             : null
         }
         onClose={() => setIsUserModalOpen(false)}
         onSubmit={handleSubmitUser}
+        isLoading={createUserMutation.isPending || updateUserMutation.isPending}
       />
     </div>
   );

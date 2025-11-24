@@ -232,3 +232,22 @@ export async function getSettingByKey(key: string): Promise<{ key: string; value
   }
 }
 
+/**
+ * Upload logo file
+ */
+export async function uploadLogo(file: File): Promise<{ url: string }> {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const response = await http.post<{ url: string }>("/settings/logo", formData);
+    
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to upload logo");
+  }
+}
+

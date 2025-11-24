@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 type CompanyLogoUploadProps = {
   logoPreview: string | null;
   onLogoChange: (preview: string) => void;
+  onFileSelect?: (file: File | null) => void;
 };
 
 export function CompanyLogoUpload({
   logoPreview,
   onLogoChange,
+  onFileSelect,
 }: CompanyLogoUploadProps) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,6 +23,9 @@ export function CompanyLogoUpload({
         onLogoChange(reader.result as string);
       };
       reader.readAsDataURL(file);
+      onFileSelect?.(file);
+    } else {
+      onFileSelect?.(null);
     }
   };
 
@@ -43,6 +48,7 @@ export function CompanyLogoUpload({
         onLogoChange(reader.result as string);
       };
       reader.readAsDataURL(file);
+      onFileSelect?.(file);
     }
   };
 

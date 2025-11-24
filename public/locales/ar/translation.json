@@ -138,5 +138,60 @@
       "openMenu": "فتح القائمة",
       "menuLabel": "القائمة"
     }
+  },
+  "settings": {
+    "page": {
+      "title": "الإعدادات"
+    },
+    "sections": {
+      "general": {
+        "title": "الإعدادات العامة",
+        "description": "تكوين إعدادات الشركة والتطبيق الأساسية.",
+        "companyName": "اسم الشركة",
+        "companyNamePlaceholder": "اسم الشركة...",
+        "companyLogo": "شعار الشركة",
+        "uploadText": "انقر للتحميل أو اسحب وأفلت",
+        "uploadHint": "PNG أو JPG (حد أقصى 2 ميجابايت)",
+        "uploadButton": "تحميل",
+        "timeZone": "المنطقة الزمنية",
+        "mapStyle": "نمط الخريطة",
+        "measurementUnits": "وحدات القياس",
+        "distanceUnit": "كيلومتر (KM)",
+        "weightUnit": "كيلوغرام (KG)",
+        "changesCount": "هناك {{count}} تغييرات",
+        "revert": "إرجاع",
+        "saveChanges": "حفظ التغييرات",
+        "saving": "جاري الحفظ..."
+      },
+      "rolesPermissions": {
+        "title": "الأدوار والصلاحيات",
+        "description": "إدارة وصول المستخدمين والصلاحيات عبر المنصة.",
+        "addNewRole": "إضافة دور جديد",
+        "search": "البحث عن الأدوار...",
+        "user": "المستخدم",
+        "selectRole": "اختر دوراً لعرض التفاصيل",
+        "roleDetails": "تفاصيل الدور",
+        "roleName": "اسم الدور",
+        "roleDescription": "الوصف",
+        "status": "الحالة",
+        "dataVisibilityScope": "نطاق رؤية البيانات",
+        "geographicalAccess": "الوصول الجغرافي",
+        "permissions": "الصلاحيات",
+        "modules": "الوحدات",
+        "view": "عرض",
+        "createEdit": "إنشاء/تعديل",
+        "delete": "حذف",
+        "approve": "الموافقة",
+        "users": "المستخدمون",
+        "addUser": "إضافة مستخدم",
+        "nameEmail": "الاسم والبريد الإلكتروني",
+        "actions": "الإجراءات",
+        "cancel": "إلغاء",
+        "confirmDelete": "تأكيد الحذف",
+        "deleteUser": "حذف المستخدم",
+        "deleteUserConfirm": "هل أنت متأكد أنك تريد حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+        "deleting": "جاري الحذف..."
+      }
+    }
   }
 }

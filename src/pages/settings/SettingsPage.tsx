@@ -6,13 +6,16 @@ import {NotificationSettings} from "./components/NotificationSettings";
 import {SystemParametersSettings} from "./components/SystemParametersSettings";
 import {RolesPermissionsSettings} from "./components/RolesPermissionsSettings";
 import type {Role} from "./components/RolesListPanel";
-import type {Permission, User} from "./components/RoleDetailsPanel";
+import type {Permission} from "./components/RoleDetailsPanel";
 import {
   useSettings,
   useUpdateGeneralSettings,
   useUpdateNotificationSettings,
   useUpdateSlaSettings,
+  useUploadLogo,
 } from "../../services/settings/hooks";
+import {useRoles, useUpdateRole} from "../../services/roles/hooks";
+import {useCreateUser, useUpdateUser} from "../../services/admin/hooks";
 import {
   apiDistanceUnitToUi,
   apiWeightUnitToUi,
@@ -21,6 +24,7 @@ import {
   apiNotificationChannelsToUi,
   uiNotificationChannelsToApi,
 } from "./utils";
+import {mapApiRoleToUi} from "./utils/roles";
 
 export function SettingsPage() {
   const {t} = useTranslation();
@@ -31,12 +35,29 @@ export function SettingsPage() {
   const updateGeneralMutation = useUpdateGeneralSettings();
   const updateNotificationMutation = useUpdateNotificationSettings();
   const updateSlaMutation = useUpdateSlaSettings();
+  const uploadLogoMutation = useUploadLogo();
+
+  // Fetch roles from API
+  const {
+    data: apiRoles,
+    isLoading: isLoadingRoles,
+    error: rolesError,
+  } = useRoles();
+
+  // Only show loading if we're loading AND don't have data yet
+  const isRolesLoading = isLoadingRoles && apiRoles === undefined;
+
+  // User mutations
+  const createUserMutation = useCreateUser();
+  const updateUserMutation = useUpdateUser();
+  const updateRoleMutation = useUpdateRole();
 
   // General Settings state
   const [companyName, setCompanyName] = useState("");
   const [distanceUnit, setDistanceUnit] = useState("Kilometers (KM)");
   const [weightUnit, setWeightUnit] = useState("Kilograms (KG)");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedLogoFile, setSelectedLogoFile] = useState<File | null>(null);
 
   // Store original values for change tracking
   const [originalGeneral, setOriginalGeneral] = useState<{
@@ -128,37 +149,45 @@ export function SettingsPage() {
   }, [settings]);
 
   // Roles & Permissions Settings state
-  const [roles, setRoles] = useState<Role[]>([
-    {
-      id: "1",
-      name: "Support Staff",
-      description: "View-only access for support",
-      userCount: 6,
-      status: "Active",
-    },
-    {
-      id: "2",
-      name: "Driver Coordinator",
-      description: "Limited to driver management",
-      userCount: 6,
-      status: "Suspended",
-    },
-    {
-      id: "3",
-      name: "Administrator",
-      description: "Full access to all modules",
-      userCount: 6,
-      status: "Active",
-    },
-    {
-      id: "4",
-      name: "Operations Manager",
-      description: "Manages shipments and drivers",
-      userCount: 6,
-      status: "Suspended",
-    },
-  ]);
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>("3");
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+  const [originalRoles, setOriginalRoles] = useState<
+    Map<string, {name: string; description: string}>
+  >(new Map());
+
+  // Map API roles to UI roles when data is fetched
+  useEffect(() => {
+    if (apiRoles !== undefined) {
+      const mappedRoles = apiRoles.map(mapApiRoleToUi);
+      setRoles(mappedRoles);
+      // Store original values for change tracking
+      const originalMap = new Map<
+        string,
+        {name: string; description: string}
+      >();
+      mappedRoles.forEach((role) => {
+        originalMap.set(role.id, {
+          name: role.name,
+          description: role.description,
+        });
+      });
+      setOriginalRoles(originalMap);
+      // Select first role by default if none selected and roles exist
+      if (!selectedRoleId && mappedRoles.length > 0) {
+        setSelectedRoleId(mappedRoles[0].id);
+      }
+    }
+  }, [apiRoles]);
+
+  // Clear selection if selected role no longer exists
+  useEffect(() => {
+    if (selectedRoleId && roles.length > 0) {
+      const roleExists = roles.find((r) => r.id === selectedRoleId);
+      if (!roleExists) {
+        setSelectedRoleId(roles.length > 0 ? roles[0].id : null);
+      }
+    }
+  }, [selectedRoleId, roles]);
   const [permissions, setPermissions] = useState<Permission[]>([
     {
       module: "Shipments",
@@ -196,55 +225,32 @@ export function SettingsPage() {
       approve: true,
     },
   ]);
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      status: "Active",
-    },
-    {
-      id: "2",
-      name: "Alistair Valerian",
-      email: "valerian.alistair@sample.com",
-      status: "Suspended",
-    },
-    {
-      id: "3",
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      status: "Active",
-    },
-    {
-      id: "4",
-      name: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      status: "Active",
-    },
-    {
-      id: "5",
-      name: "Michael Brown",
-      email: "michael.brown@example.com",
-      status: "Suspended",
-    },
-    {
-      id: "6",
-      name: "Emily Davis",
-      email: "emily.davis@example.com",
-      status: "Active",
-    },
-  ]);
+
+  // Get users from selected role
+  const selectedRole = roles.find((r) => r.id === selectedRoleId);
+  const users = selectedRole?.users || [];
 
   // Calculate change counts for each section
   const generalChangeCount = useMemo(() => {
     if (!originalGeneral) return 0;
     let count = 0;
     if (companyName !== originalGeneral.companyName) count++;
-    if (logoPreview !== originalGeneral.companyLogoUrl) count++;
+    if (
+      logoPreview !== originalGeneral.companyLogoUrl ||
+      selectedLogoFile !== null
+    )
+      count++;
     if (distanceUnit !== originalGeneral.distanceUnit) count++;
     if (weightUnit !== originalGeneral.weightUnit) count++;
     return count;
-  }, [companyName, logoPreview, distanceUnit, weightUnit, originalGeneral]);
+  }, [
+    companyName,
+    logoPreview,
+    selectedLogoFile,
+    distanceUnit,
+    weightUnit,
+    originalGeneral,
+  ]);
 
   const notificationChangeCount = useMemo(() => {
     if (!originalNotification) return 0;
@@ -279,6 +285,18 @@ export function SettingsPage() {
     return count;
   }, [loadingTime, transitTime, unloadingTime, originalSla]);
 
+  // Calculate role change count for selected role
+  const roleChangeCount = useMemo(() => {
+    if (!selectedRoleId || originalRoles.size === 0) return 0;
+    const selectedRole = roles.find((r) => r.id === selectedRoleId);
+    const originalRole = originalRoles.get(selectedRoleId);
+    if (!selectedRole || !originalRole) return 0;
+    let count = 0;
+    if (selectedRole.name !== originalRole.name) count++;
+    if (selectedRole.description !== originalRole.description) count++;
+    return count;
+  }, [selectedRoleId, roles, originalRoles]);
+
   const sections = [
     {
       key: "general",
@@ -307,39 +325,94 @@ export function SettingsPage() {
     },
   ];
 
-  const handleRoleUpdate = (roleId: string, updates: Partial<Role>) => {
-    setRoles(roles.map((r) => (r.id === roleId ? {...r, ...updates} : r)));
+  const handleRoleUpdate = (updates: Partial<Role>) => {
+    if (!selectedRoleId) return;
+    setRoles(
+      roles.map((r) => (r.id === selectedRoleId ? {...r, ...updates} : r))
+    );
   };
 
   const handleUserRemove = (userId: string) => {
-    setUsers(users.filter((u) => u.id !== userId));
+    if (!selectedRoleId) return;
+    setRoles(
+      roles.map((r) =>
+        r.id === selectedRoleId
+          ? {
+              ...r,
+              users: r.users.filter((u) => u.id !== userId),
+              userCount: r.users.filter((u) => u.id !== userId).length,
+            }
+          : r
+      )
+    );
   };
 
-  const handleUserAdd = (user: {name: string; email: string}) => {
-    const newId = String(Date.now());
-    setUsers([
-      ...users,
-      {id: newId, name: user.name, email: user.email, status: "Active"},
-    ]);
-    if (selectedRoleId) {
-      setRoles(
-        roles.map((r) =>
-          r.id === selectedRoleId ? {...r, userCount: r.userCount + 1} : r
-        )
-      );
+  const handleUserAdd = async (user: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    if (!selectedRoleId) return;
+
+    try {
+      await createUserMutation.mutateAsync({
+        email: user.email,
+        fullName: user.name,
+        password: user.password,
+        roleId: selectedRoleId,
+        appScope: "head_office",
+        isActive: true,
+      });
+      // Roles will be refetched automatically due to query invalidation
+    } catch (error) {
+      console.error("Failed to create user:", error);
+      throw error; // Re-throw to let the modal handle it
     }
   };
 
-  const handleUserUpdate = (user: {
+  const handleUserUpdate = async (user: {
     id: string;
     name: string;
     email: string;
+    password?: string;
   }) => {
-    setUsers(
-      users.map((u) =>
-        u.id === user.id ? {...u, name: user.name, email: user.email} : u
-      )
-    );
+    if (!selectedRoleId) return;
+
+    try {
+      const updateData: {
+        fullName?: string;
+        password?: string;
+        isActive?: boolean;
+      } = {
+        fullName: user.name,
+      };
+
+      // Only include password if provided
+      if (user.password) {
+        updateData.password = user.password;
+      }
+
+      await updateUserMutation.mutateAsync({
+        id: user.id,
+        data: updateData,
+      });
+      // Roles will be refetched automatically due to query invalidation
+    } catch (error) {
+      console.error("Failed to update user:", error);
+      throw error; // Re-throw to let the modal handle it
+    }
+  };
+
+  const handleUserStatusChange = async (userId: string, isActive: boolean) => {
+    try {
+      await updateUserMutation.mutateAsync({
+        id: userId,
+        data: {isActive},
+      });
+      // Roles will be refetched automatically due to query invalidation
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+    }
   };
 
   const handleCardClick = (key: string) => {
@@ -356,6 +429,7 @@ export function SettingsPage() {
       setDistanceUnit(originalGeneral.distanceUnit);
       setWeightUnit(originalGeneral.weightUnit);
       setLogoPreview(originalGeneral.companyLogoUrl);
+      setSelectedLogoFile(null);
     } else if (section === "notifications" && originalNotification) {
       setDriverGpsAlertEnabled(!!originalNotification.gpsOfflineThresholdMin);
       setDriverGpsAlertValue(originalNotification.gpsOfflineThresholdMin || 35);
@@ -379,9 +453,23 @@ export function SettingsPage() {
 
     try {
       if (section === "general") {
+        let logoUrl = logoPreview;
+
+        // If a new file was selected, upload it first
+        if (selectedLogoFile) {
+          const uploadResult = await uploadLogoMutation.mutateAsync(
+            selectedLogoFile
+          );
+          logoUrl = uploadResult.url;
+          // Update preview with the uploaded URL
+          setLogoPreview(logoUrl);
+          // Clear the selected file since it's been uploaded
+          setSelectedLogoFile(null);
+        }
+
         const updateData = {
           companyName: companyName || undefined,
-          companyLogoUrl: logoPreview || undefined,
+          companyLogoUrl: logoUrl || undefined,
           distanceUnit: uiDistanceUnitToApi(distanceUnit),
           weightUnit: uiWeightUnitToApi(weightUnit),
         };
@@ -389,7 +477,7 @@ export function SettingsPage() {
         // Update original values after successful save
         setOriginalGeneral({
           companyName,
-          companyLogoUrl: logoPreview,
+          companyLogoUrl: logoUrl,
           distanceUnit,
           weightUnit,
         });
@@ -464,6 +552,7 @@ export function SettingsPage() {
                     onCompanyNameChange={setCompanyName}
                     logoPreview={logoPreview}
                     onLogoChange={setLogoPreview}
+                    onFileSelect={setSelectedLogoFile}
                     distanceUnit={distanceUnit}
                     onDistanceUnitChange={setDistanceUnit}
                     weightUnit={weightUnit}
@@ -471,7 +560,10 @@ export function SettingsPage() {
                     changeCount={generalChangeCount}
                     onRevert={() => handleRevert("general")}
                     onSave={() => handleSave("general")}
-                    isLoading={updateGeneralMutation.isPending}
+                    isLoading={
+                      updateGeneralMutation.isPending ||
+                      uploadLogoMutation.isPending
+                    }
                   />
                 ) : section.key === "notifications" ? (
                   <NotificationSettings
@@ -540,17 +632,54 @@ export function SettingsPage() {
                     }
                     permissions={permissions}
                     users={users}
-                    onRoleUpdate={(updates) =>
-                      selectedRoleId &&
-                      handleRoleUpdate(selectedRoleId, updates)
-                    }
+                    onRoleUpdate={handleRoleUpdate}
                     onPermissionsChange={setPermissions}
                     onUserAdd={handleUserAdd}
                     onUserUpdate={handleUserUpdate}
                     onUserRemove={handleUserRemove}
-                    changeCount={0}
-                    onRevert={() => {}}
-                    onSave={() => {}}
+                    onUserStatusChange={handleUserStatusChange}
+                    changeCount={roleChangeCount}
+                    onRevert={() => {
+                      if (!selectedRoleId) return;
+                      const originalRole = originalRoles.get(selectedRoleId);
+                      if (originalRole) {
+                        handleRoleUpdate({
+                          name: originalRole.name,
+                          description: originalRole.description,
+                        });
+                      }
+                    }}
+                    onSave={async () => {
+                      if (!selectedRoleId) return;
+                      const selectedRole = roles.find(
+                        (r) => r.id === selectedRoleId
+                      );
+                      if (!selectedRole) return;
+                      try {
+                        await updateRoleMutation.mutateAsync({
+                          id: selectedRoleId,
+                          data: {
+                            title: selectedRole.name,
+                            description: selectedRole.description || null,
+                          },
+                        });
+                        // Update original values after successful save
+                        setOriginalRoles((prev) => {
+                          const newMap = new Map(prev);
+                          newMap.set(selectedRoleId, {
+                            name: selectedRole.name,
+                            description: selectedRole.description,
+                          });
+                          return newMap;
+                        });
+                      } catch (error) {
+                        console.error("Failed to save role:", error);
+                        // Error handling is done by the mutation hooks
+                      }
+                    }}
+                    isLoadingRoles={isRolesLoading}
+                    rolesError={rolesError}
+                    isSavingRole={updateRoleMutation.isPending}
                   />
                 ) : (
                   <div className="pt-4 text-sm text-slate-500">

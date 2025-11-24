@@ -1,13 +1,24 @@
-import { MoreVertical } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import {MoreVertical} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 export type Role = {
   id: string;
   name: string;
   description: string;
-  userCount: number;
+  userCount: number; // Calculated from users.length
+  users: User[]; // Users assigned to this role
   status: "Active" | "Suspended";
   geographicalAccess?: "All Countries" | "Selected Countries";
+};
+
+export type User = {
+  id?: string; // May not be in API response
+  email: string;
+  phoneNumber?: string | null;
+  country?: string | null;
+  fullName?: string | null;
+  name: string; // Mapped from fullName
+  status: "Active" | "Suspended"; // Mapped from isActive
 };
 
 type RolesListPanelProps = {
@@ -21,8 +32,53 @@ export function RolesListPanel({
   roles,
   selectedRoleId,
   onRoleSelect,
-}: RolesListPanelProps) {
-  const { t } = useTranslation();
+  isLoading,
+  error,
+}: RolesListPanelProps & {
+  isLoading?: boolean;
+  error?: Error | null;
+}) {
+  const {t} = useTranslation();
+
+  // Show error first if there's an error
+  if (error) {
+    return (
+      <div className="w-[40%] border-r border-slate-200 pr-4">
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="p-4 text-sm text-red-600">
+            {error instanceof Error ? error.message : "Failed to load roles"}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading only if we're loading AND have no roles to display yet
+  if (isLoading && roles.length === 0) {
+    return (
+      <div className="w-[40%] border-r border-slate-200 pr-4">
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="p-4 text-sm text-slate-500">
+            {t("common.loading") || "Loading roles..."}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if we're not loading and have no roles
+  if (!isLoading && roles.length === 0) {
+    return (
+      <div className="w-[40%] border-r border-slate-200 pr-4">
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="p-4 text-sm text-slate-500">
+            {t("settings.sections.rolesPermissions.noRoles") ||
+              "No roles found"}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-[40%] border-r border-slate-200 pr-4">

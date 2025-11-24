@@ -138,5 +138,60 @@
       "openMenu": "Открыть меню",
       "menuLabel": "Меню"
     }
+  },
+  "settings": {
+    "page": {
+      "title": "Настройки"
+    },
+    "sections": {
+      "general": {
+        "title": "Общие настройки",
+        "description": "Настройка основных параметров компании и приложения.",
+        "companyName": "Название компании",
+        "companyNamePlaceholder": "Название компании...",
+        "companyLogo": "Логотип компании",
+        "uploadText": "Нажмите для загрузки или перетащите файл",
+        "uploadHint": "PNG или JPG (макс. 2 МБ)",
+        "uploadButton": "Загрузить",
+        "timeZone": "Часовой пояс",
+        "mapStyle": "Стиль карты",
+        "measurementUnits": "Единицы измерения",
+        "distanceUnit": "Километры (KM)",
+        "weightUnit": "Килограммы (KG)",
+        "changesCount": "Есть {{count}} изменений",
+        "revert": "Отменить",
+        "saveChanges": "Сохранить изменения",
+        "saving": "Сохранение..."
+      },
+      "rolesPermissions": {
+        "title": "Роли и разрешения",
+        "description": "Управление доступом пользователей и разрешениями на платформе.",
+        "addNewRole": "Добавить новую роль",
+        "search": "Поиск ролей...",
+        "user": "Пользователь",
+        "selectRole": "Выберите роль для просмотра деталей",
+        "roleDetails": "Детали роли",
+        "roleName": "Название роли",
+        "roleDescription": "Описание",
+        "status": "Статус",
+        "dataVisibilityScope": "Область видимости данных",
+        "geographicalAccess": "Географический доступ",
+        "permissions": "Разрешения",
+        "modules": "Модули",
+        "view": "Просмотр",
+        "createEdit": "Создать/Редактировать",
+        "delete": "Удалить",
+        "approve": "Утвердить",
+        "users": "Пользователи",
+        "addUser": "Добавить пользователя",
+        "nameEmail": "Имя и Email",
+        "actions": "Действия",
+        "cancel": "Отмена",
+        "confirmDelete": "Подтвердить удаление",
+        "deleteUser": "Удалить пользователя",
+        "deleteUserConfirm": "Вы уверены, что хотите удалить \"{{name}}\"? Это действие нельзя отменить.",
+        "deleting": "Удаление..."
+      }
+    }
   }
 }

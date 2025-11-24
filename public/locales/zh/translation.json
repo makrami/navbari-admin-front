@@ -138,5 +138,60 @@
       "openMenu": "打开菜单",
       "menuLabel": "菜单"
     }
+  },
+  "settings": {
+    "page": {
+      "title": "设置"
+    },
+    "sections": {
+      "general": {
+        "title": "常规设置",
+        "description": "配置核心公司和应用程序设置。",
+        "companyName": "公司名称",
+        "companyNamePlaceholder": "公司名称...",
+        "companyLogo": "公司标志",
+        "uploadText": "点击上传或拖放",
+        "uploadHint": "PNG 或 JPG（最大 2MB）",
+        "uploadButton": "上传",
+        "timeZone": "时区",
+        "mapStyle": "地图样式",
+        "measurementUnits": "测量单位",
+        "distanceUnit": "公里 (KM)",
+        "weightUnit": "公斤 (KG)",
+        "changesCount": "有 {{count}} 个更改",
+        "revert": "还原",
+        "saveChanges": "保存更改",
+        "saving": "保存中..."
+      },
+      "rolesPermissions": {
+        "title": "角色和权限",
+        "description": "管理平台上的用户访问和权限。",
+        "addNewRole": "添加新角色",
+        "search": "搜索角色...",
+        "user": "用户",
+        "selectRole": "选择角色以查看详细信息",
+        "roleDetails": "角色详情",
+        "roleName": "角色名称",
+        "roleDescription": "描述",
+        "status": "状态",
+        "dataVisibilityScope": "数据可见性范围",
+        "geographicalAccess": "地理访问",
+        "permissions": "权限",
+        "modules": "模块",
+        "view": "查看",
+        "createEdit": "创建/编辑",
+        "delete": "删除",
+        "approve": "批准",
+        "users": "用户",
+        "addUser": "添加用户",
+        "nameEmail": "姓名和邮箱",
+        "actions": "操作",
+        "cancel": "取消",
+        "confirmDelete": "确认删除",
+        "deleteUser": "删除用户",
+        "deleteUserConfirm": "您确定要删除 \"{{name}}\" 吗？此操作无法撤销。",
+        "deleting": "删除中..."
+      }
+    }
   }
 }

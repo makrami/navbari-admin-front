@@ -254,7 +254,8 @@
         "weightUnit": "کیلوگرم (KG)",
         "changesCount": "{{count}} تغییر وجود دارد",
         "revert": "بازگشت",
-        "saveChanges": "ذخیره تغییرات"
+        "saveChanges": "ذخیره تغییرات",
+        "saving": "در حال ذخیره..."
       },
       "notifications": {
         "title": "اعلان و هشدارها",
@@ -321,7 +322,12 @@
         "users": "کاربران",
         "addUser": "افزودن کاربر",
         "nameEmail": "نام و ایمیل",
-        "actions": "عملیات"
+        "actions": "عملیات",
+        "cancel": "لغو",
+        "confirmDelete": "تأیید حذف",
+        "deleteUser": "حذف کاربر",
+        "deleteUserConfirm": "آیا مطمئن هستید که می‌خواهید \"{{name}}\" را حذف کنید؟ این عمل قابل بازگشت نیست.",
+        "deleting": "در حال حذف..."
       }
     }
   }

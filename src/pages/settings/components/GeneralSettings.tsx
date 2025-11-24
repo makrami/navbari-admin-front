@@ -8,6 +8,7 @@ type GeneralSettingsProps = {
   onCompanyNameChange: (value: string) => void;
   logoPreview: string | null;
   onLogoChange: (preview: string) => void;
+  onFileSelect?: (file: File | null) => void;
   distanceUnit: string;
   onDistanceUnitChange: (value: string) => void;
   weightUnit: string;
@@ -23,6 +24,7 @@ export function GeneralSettings({
   onCompanyNameChange,
   logoPreview,
   onLogoChange,
+  onFileSelect,
   distanceUnit,
   onDistanceUnitChange,
   weightUnit,
@@ -38,6 +40,7 @@ export function GeneralSettings({
       <CompanyLogoUpload
         logoPreview={logoPreview}
         onLogoChange={onLogoChange}
+        onFileSelect={onFileSelect}
       />
       {/* <div className="grid grid-cols-2 gap-4">
         <TimeZoneField value={timeZone} onChange={onTimeZoneChange} />
