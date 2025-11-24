@@ -1,10 +1,11 @@
 import ReactCountryFlag from "react-country-flag";
-import { ArrowRight, UsersIcon } from "lucide-react";
-import { cn } from "../../shared/utils/cn";
-import type { Shipment } from "../../shared/types/shipment";
-import type { Segment } from "../../shared/types/segmentData";
-import { SegmentStatus } from "../../shared/types/segmentData";
-import { getFileUrl } from "../../pages/LocalCompanies/utils";
+import {ArrowRight, UsersIcon} from "lucide-react";
+import {cn} from "../../shared/utils/cn";
+import type {Shipment} from "../../shared/types/shipment";
+import type {Segment} from "../../shared/types/segmentData";
+import {SegmentStatus} from "../../shared/types/segmentData";
+import {getFileUrl} from "../../pages/LocalCompanies/utils";
+import {getCountryCode} from "../../shared/utils/countryCode";
 
 type FormattedSegment = {
   step: number;
@@ -34,8 +35,6 @@ export function ShipmentItem({
   status,
   originCountry,
   destinationCountry,
-  fromCountryCode,
-  toCountryCode,
   progressPercent = 25,
   userName,
   selected = false,
@@ -47,9 +46,9 @@ export function ShipmentItem({
   const clampedProgress = Math.max(0, Math.min(100, progressPercent));
   const isDelivered = status === "Delivered";
 
-  // Use Shipment fields if available, fallback to legacy props
-  const fromCode = originCountry || fromCountryCode || "CN";
-  const toCode = destinationCountry || toCountryCode || "RU";
+  // Convert country names to ISO country codes using library
+  const fromCode = getCountryCode(originCountry ?? "");
+  const toCode = getCountryCode(destinationCountry ?? "");
 
   // Find first in-progress segment (not completed, not cancelled, not pending_assignment)
   const inProgressSegment = fullSegments.find(
@@ -122,7 +121,7 @@ export function ShipmentItem({
           <ReactCountryFlag
             svg
             countryCode={fromCode}
-            style={{ width: 22, height: 16, borderRadius: 2 }}
+            style={{width: 22, height: 16, borderRadius: 2}}
           />
           <div
             className={cn(
@@ -139,7 +138,7 @@ export function ShipmentItem({
                   ? "bg-white"
                   : "bg-[#1b54fe]"
               )}
-              style={{ width: `${clampedProgress}%` }}
+              style={{width: `${clampedProgress}%`}}
             />
           </div>
           <ArrowRight
@@ -151,7 +150,7 @@ export function ShipmentItem({
           <ReactCountryFlag
             svg
             countryCode={toCode}
-            style={{ width: 22, height: 16, borderRadius: 2 }}
+            style={{width: 22, height: 16, borderRadius: 2}}
           />
         </div>
       ) : (
@@ -198,7 +197,7 @@ export function ShipmentItem({
           {segmentsLoading ? (
             // Loading placeholder for segments
             <div className="mt-4 grid gap-3">
-              {Array.from({ length: 3 }).map((_, idx) => (
+              {Array.from({length: 3}).map((_, idx) => (
                 <div
                   key={`loading-${idx}`}
                   className="grid grid-cols-[14px_1fr_auto] items-start gap-2 animate-pulse"

@@ -44,6 +44,8 @@ type NavigatingInfoProps = PropsWithChildren<{
 import avatarImg from "../../../../assets/images/avatar.png";
 import {getFileUrl} from "../../../LocalCompanies/utils";
 import CargoMap from "../../../../components/CargoMap";
+import {getCountryCode} from "../../../../shared/utils/countryCode";
+import ReactCountryFlag from "react-country-flag";
 export function NavigatingInfo({
   segments,
   className,
@@ -362,7 +364,15 @@ export function NavigatingInfo({
                       Destination
                     </span>
                   </div>
-                  <p className="text-[12px] text-slate-900">{destination}</p>
+                  <p className="text-[12px] text-slate-900">
+                    <ReactCountryFlag
+                      className="mr-1 mb-1"
+                      svg
+                      countryCode={getCountryCode(destination.split(", ")[1])}
+                      style={{width: 16, borderRadius: 2}}
+                    />
+                    {destination}
+                  </p>
                 </div>
               </div>
 
