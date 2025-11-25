@@ -34,11 +34,14 @@ export function ChatAlertItem({
       tabIndex={0}
       onKeyDown={(e) => handleChatAlertKeyDown(e, onSelect, chatAlert.id)}
     >
-      <ChatAlertAvatar avatarUrl={chatAlert.avatarUrl} name={chatAlert.name} />
+      <ChatAlertAvatar
+        avatarUrl={chatAlert.avatarUrl || ""}
+        name={chatAlert.name || ""}
+      />
 
       <div className="flex-1 min-w-0">
         <ChatAlertHeader
-          name={chatAlert.name}
+          name={chatAlert.name || ""}
           alerts={chatAlert.alerts}
           messages={chatAlert.messages}
           selected={selected}
@@ -46,8 +49,8 @@ export function ChatAlertItem({
         />
 
         <ChatAlertFooter
-          messagePreview={chatAlert.messagePreview}
-          timestamp={chatAlert.timestamp}
+          messagePreview={chatAlert.messagePreview || ""}
+          timestamp={chatAlert.timestamp || ""}
           selected={selected}
           onMenuClick={handleMenuButtonClick}
         />

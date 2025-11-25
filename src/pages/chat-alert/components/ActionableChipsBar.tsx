@@ -1,20 +1,17 @@
 import { AlertTriangle } from "lucide-react";
+import type { ActionableAlertChip } from "../types/chat";
 
 interface ActionableChipsBarProps {
-  chips: Array<{
-    id: string;
-    label: string;
-    alertType: string;
-  }>;
-  onChipClick?: (label: string) => void;
+  chips: ActionableAlertChip[];
+  onChipClick?: (chip: ActionableAlertChip) => void;
 }
 
 export function ActionableChipsBar({
   chips,
   onChipClick,
 }: ActionableChipsBarProps) {
-  const handleClick = (chipLabel: string) => {
-    onChipClick?.(chipLabel);
+  const handleClick = (chip: ActionableAlertChip) => {
+    onChipClick?.(chip);
   };
 
   return (
@@ -24,7 +21,7 @@ export function ActionableChipsBar({
           <button
             key={chip.id}
             type="button"
-            onClick={() => handleClick(chip.label)}
+            onClick={() => handleClick(chip)}
             className="flex items-center text-yellow-600 gap-2 px-3 py-2 bg-slate-50 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors whitespace-nowrap"
           >
             <AlertTriangle className="size-4" />

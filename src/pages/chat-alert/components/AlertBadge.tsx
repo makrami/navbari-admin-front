@@ -7,8 +7,6 @@ type AlertBadgeProps = {
 };
 
 export function AlertBadge({ count, selected = false }: AlertBadgeProps) {
-  if (count === 0) return null;
-
   return (
     <div
       className={cn(

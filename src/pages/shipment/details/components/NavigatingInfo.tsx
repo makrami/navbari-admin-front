@@ -1,6 +1,6 @@
-import type {PropsWithChildren} from "react";
-import {useEffect, useRef, useState} from "react";
-import {cn} from "../../../../shared/utils/cn";
+import type { PropsWithChildren } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { cn } from "../../../../shared/utils/cn";
 import {
   MapPinIcon,
   MessagesSquareIcon,
@@ -17,11 +17,37 @@ import {
   Check,
   Paperclip,
   ListCheck,
+  MessageSquareText,
+  X,
 } from "lucide-react";
-import {type MapRef} from "react-map-gl/mapbox";
+import { type MapRef } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import {MAPBOX_TOKEN} from "../../../dashboard/constants";
-import type {Segment} from "../../../../shared/types/segmentData";
+import { MAPBOX_TOKEN } from "../../../dashboard/constants";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { ChatSection } from "../../../chat-alert/components/ChatSection";
+import {
+  useChatConversations,
+  useConversationMessages,
+  useSendChatMessage,
+  useSendChatAlert,
+  useMarkConversationRead,
+} from "../../../../services/chat/hooks";
+import { useChatSocket } from "../../../../services/chat/socket";
+import { useCurrentUser } from "../../../../services/user/hooks";
+import {
+  CHAT_RECIPIENT_TYPE,
+  CHAT_MESSAGE_TYPE,
+  CHAT_ALERT_TYPE,
+  type ChatAlertType,
+  type MessageReadDto,
+} from "../../../../services/chat/chat.types";
+import type {
+  ActionableAlertChip,
+  AlertType,
+  Message,
+} from "../../../chat-alert/types/chat";
+import dayjs from "dayjs";
+import { ENV } from "../../../../lib/env";
 
 type NavigatingInfoProps = PropsWithChildren<{
   segments: Segment[];
@@ -42,10 +68,18 @@ type NavigatingInfoProps = PropsWithChildren<{
 // Figma snapshot image URLs (used as static assets to match design)
 
 import avatarImg from "../../../../assets/images/avatar.png";
-import {getFileUrl} from "../../../LocalCompanies/utils";
+import { getFileUrl } from "../../../LocalCompanies/utils";
 import CargoMap from "../../../../components/CargoMap";
-import {getCountryCode} from "../../../../shared/utils/countryCode";
+import { getCountryCode } from "../../../../shared/utils/countryCode";
 import ReactCountryFlag from "react-country-flag";
+
+const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
+  { id: "1", label: "GPS Lost", alertType: "alert" },
+  { id: "2", label: "Delay Expected", alertType: "warning" },
+  { id: "3", label: "Route Cleared", alertType: "success" },
+  { id: "4", label: "Documentation Pending", alertType: "info" },
+];
+
 export function NavigatingInfo({
   segments,
   className,
@@ -62,8 +96,102 @@ export function NavigatingInfo({
   onClose,
 }: NavigatingInfoProps) {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
+
+  // Find first segment with driverId
+  const segmentWithDriver = useMemo(() => {
+    return segments.find((segment) => segment.driverId);
+  }, [segments]);
+
+  const driverId = segmentWithDriver?.driverId || null;
+
+  // Fetch conversations for drivers
+  const { data: conversations = [] } = useChatConversations("driver");
+  const { data: currentUser } = useCurrentUser();
+
+  // Find conversation for this driver
+  const conversation = useMemo(() => {
+    if (!driverId) return null;
+    return conversations.find((conv) => conv.driverId === driverId);
+  }, [conversations, driverId]);
+
+  // Fetch messages if conversation exists
+  const {
+    data: messagesPages,
+    isLoading: messagesLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useConversationMessages(conversation?.id);
+
+  const sendMessageMutation = useSendChatMessage();
+  const sendAlertMutation = useSendChatAlert();
+  const markConversationRead = useMarkConversationRead();
+
+  // Use socket for real-time updates
+  useChatSocket(conversation?.id, setIsTyping);
+
+  // Auto-hide typing indicator after 5 seconds
+  useEffect(() => {
+    if (!isTyping) return;
+    const timeout = setTimeout(() => {
+      setIsTyping(false);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [isTyping]);
+
+  // Mark conversation as read when opened
+  useEffect(() => {
+    if (
+      isChatOpen &&
+      conversation &&
+      (conversation.unreadAlertCount > 0 ||
+        conversation.unreadMessageCount > 0) &&
+      !markConversationRead.isPending
+    ) {
+      markConversationRead.mutate(conversation.id);
+    }
+  }, [isChatOpen, conversation, markConversationRead]);
+
+  // Map messages to UI format
+  const messages = useMemo<Message[]>(() => {
+    if (!conversation) return [];
+    const pages = messagesPages?.pages ?? [];
+    const flattened = pages.flat();
+    const sorted = flattened.sort((a, b) =>
+      dayjs(a.createdAt).diff(dayjs(b.createdAt))
+    );
+    return sorted.map((message) =>
+      mapMessageDtoToUi(message, currentUser?.id ?? "")
+    );
+  }, [messagesPages, currentUser?.id, conversation]);
+
+  const handleSendMessage = (payload: {
+    content: string;
+    file?: File | null;
+  }) => {
+    if (!payload.content && !payload.file) return;
+    if (!driverId) return;
+    sendMessageMutation.mutate({
+      content: payload.content,
+      file: payload.file ?? undefined,
+      recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
+      driverId: driverId,
+    });
+  };
+
+  const handleAlertChipClick = (chip: ActionableAlertChip) => {
+    if (!driverId) return;
+    sendAlertMutation.mutate({
+      alertType: chip.alertType as ChatAlertType,
+      content: chip.label,
+      recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
+      driverId: driverId,
+    });
+  };
 
   // Default map viewport (can be updated with actual coordinates if available)
   const [viewport] = useState({
@@ -138,7 +266,12 @@ export function NavigatingInfo({
 
           <button
             type="button"
-            className="bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto relative"
+            onClick={() => driverId && setIsChatOpen(true)}
+            disabled={!driverId}
+            className={cn(
+              "bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto relative",
+              !driverId && "opacity-50 cursor-not-allowed"
+            )}
             aria-label="Chat"
           >
             <MessagesSquareIcon className="block size-5 text-slate-400" />
@@ -283,8 +416,13 @@ export function NavigatingInfo({
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  onClick={() => driverId && setIsChatOpen(true)}
+                  disabled={!driverId}
                   aria-label="Open chat"
-                  className="bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform"
+                  className={cn(
+                    "bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform",
+                    !driverId && "opacity-50 cursor-not-allowed"
+                  )}
                 >
                   <MessagesSquareIcon className="size-4" />
                 </button>
@@ -369,7 +507,7 @@ export function NavigatingInfo({
                       className="mr-1 mb-1"
                       svg
                       countryCode={getCountryCode(destination.split(", ")[1])}
-                      style={{width: 16, borderRadius: 2}}
+                      style={{ width: 16, borderRadius: 2 }}
                     />
                     {destination}
                   </p>
@@ -397,7 +535,7 @@ export function NavigatingInfo({
                 <button
                   className="bg-white p-2 hover:bg-slate-50 transition-colors"
                   onClick={() => {
-                    mapRef.current?.zoomIn({duration: 300});
+                    mapRef.current?.zoomIn({ duration: 300 });
                   }}
                 >
                   <PlusIcon className="size-[14px] text-slate-500" />
@@ -405,7 +543,7 @@ export function NavigatingInfo({
                 <button
                   className="bg-white border-t border-slate-300 p-2 hover:bg-slate-50 transition-colors"
                   onClick={() => {
-                    mapRef.current?.zoomOut({duration: 300});
+                    mapRef.current?.zoomOut({ duration: 300 });
                   }}
                 >
                   <MinusIcon className="size-[14px] text-slate-500" />
@@ -430,8 +568,141 @@ export function NavigatingInfo({
           </div>
         </div>
       ) : null}
+
+      {/* Chat Overlay */}
+      {isChatOpen && driverId && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
+            onClick={() => setIsChatOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Floating Chat Panel */}
+          <div
+            className="fixed bottom-4 right-4 w-full max-w-md h-[600px] bg-white rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="chat-title"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <h2
+                id="chat-title"
+                className="text-lg font-semibold text-slate-900"
+              >
+                Chat with {driverName || "Driver"}
+              </h2>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+                aria-label="Close chat"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            {/* Chat Section */}
+            <div className="flex-1 min-h-0">
+              <ChatSection
+                key={conversation?.id || driverId}
+                messages={messages}
+                actionableAlerts={ACTIONABLE_ALERTS}
+                onSendMessage={handleSendMessage}
+                onAlertChipClick={handleAlertChipClick}
+                isSendingMessage={
+                  sendMessageMutation.isPending || sendAlertMutation.isPending
+                }
+                isLoading={
+                  conversation
+                    ? messagesLoading && messages.length === 0
+                    : false
+                }
+                canLoadMore={Boolean(hasNextPage)}
+                onLoadMore={() => fetchNextPage()}
+                isFetchingMore={isFetchingNextPage}
+                isTyping={isTyping}
+                emptyState={
+                  !conversation && messages.length === 0
+                    ? {
+                        icon: (
+                          <div className="relative inline-block mb-4">
+                            <MessageSquareText className="size-16 text-slate-300" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-12 h-0.5 bg-slate-400 rotate-45" />
+                            </div>
+                          </div>
+                        ),
+                        text: `Start Messaging to ${driverName || "Driver"}`,
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
+}
+
+function mapMessageDtoToUi(
+  message: MessageReadDto,
+  currentUserId: string
+): Message {
+  const date = dayjs(message.createdAt);
+  const today = dayjs();
+  const dateGroup = date.isSame(today, "day")
+    ? "today"
+    : date.isSame(today.subtract(1, "day"), "day")
+    ? "yesterday"
+    : date.format("DD MMM YYYY");
+
+  const fileUrl = message.filePath
+    ? resolveFileUrl(message.filePath)
+    : undefined;
+
+  if (message.messageType === CHAT_MESSAGE_TYPE.ALERT) {
+    const alertType = (message.alertType ??
+      CHAT_ALERT_TYPE.INFO) as ChatAlertType;
+    const alertTitle = message.alertType
+      ? `Alert: ${alertType.toUpperCase()}`
+      : "Alert";
+    return {
+      id: message.id,
+      type: "alert",
+      alertType: alertType as AlertType,
+      title: alertTitle,
+      description: message.content || undefined,
+      timestamp: date.format("HH:mm"),
+      dateGroup,
+      createdAt: message.createdAt,
+      fileUrl,
+      fileName: message.fileName || undefined,
+    };
+  }
+
+  return {
+    id: message.id,
+    type: "chat",
+    text: message.content || undefined,
+    timestamp: date.format("HH:mm"),
+    dateGroup,
+    isOutgoing: message.senderId === currentUserId,
+    createdAt: message.createdAt,
+    fileUrl,
+    fileName: message.fileName || undefined,
+    fileMimeType: message.fileMimeType || undefined,
+  };
+}
+
+function resolveFileUrl(filePath: string) {
+  if (!filePath) return undefined;
+  if (filePath.startsWith("http")) {
+    return filePath;
+  }
+  return `${ENV.FILE_BASE_URL}/${filePath.replace(/^\/+/, "")}`;
 }
 
 export default NavigatingInfo;

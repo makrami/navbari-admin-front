@@ -1,16 +1,20 @@
 export type MessageType = "chat" | "alert";
 
-export type AlertType = "delay" | "delivered" | "gps-lost" | "payment" | "other";
+export type AlertType = "warning" | "alert" | "info" | "success";
 
 export type DateGroup = "today" | "yesterday" | string; // string for other dates
 
 export interface ChatMessage {
   id: string;
   type: "chat";
-  text: string;
+  text?: string;
   timestamp: string; // Format: "HH:mm"
   dateGroup: DateGroup;
   isOutgoing?: boolean; // true for right-aligned (outgoing), false for left-aligned (incoming)
+  createdAt?: string; // ISO 8601
+  fileUrl?: string;
+  fileName?: string;
+  fileMimeType?: string;
 }
 
 export interface AlertMessage {
@@ -19,9 +23,12 @@ export interface AlertMessage {
   alertType: AlertType;
   title: string;
   shipmentId?: string;
-  description: string;
+  description?: string;
   timestamp: string; // Format: "HH:mm"
   dateGroup: DateGroup;
+  createdAt?: string; // ISO 8601
+  fileUrl?: string;
+  fileName?: string;
 }
 
 export type Message = ChatMessage | AlertMessage;
@@ -31,4 +38,3 @@ export interface ActionableAlertChip {
   label: string;
   alertType: AlertType;
 }
-
