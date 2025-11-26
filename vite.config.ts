@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import {defineConfig} from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -48,6 +48,13 @@ export default defineConfig({
             console.log("WebSocket Request to the Target:", req.url);
           });
         },
+      },
+      "/socket.io": {
+        target: "https://api-nav.dimansoft.ir",
+        changeOrigin: true,
+        secure: true,
+        ws: true,
+        cookieDomainRewrite: "",
       },
     },
   },
