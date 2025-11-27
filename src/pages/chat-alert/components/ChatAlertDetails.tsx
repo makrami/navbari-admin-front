@@ -138,6 +138,9 @@ export function ChatAlertDetails({
       totalPages: pages.length,
       totalMessages: flattened.length,
       messageIds: mapped.map((m) => m.id).slice(-5), // Last 5 message IDs
+      messagesWithStatus: mapped
+        .filter((m) => m.status)
+        .map((m) => ({ id: m.id, status: m.status })),
     });
 
     return mapped;
@@ -200,6 +203,8 @@ export function ChatAlertDetails({
       recipientType: conversation.recipientType,
       driverId: conversation.driverId ?? undefined,
       companyId: conversation.companyId ?? undefined,
+      conversationId: conversation.id, // Pass conversationId for optimistic updates
+      senderId: currentUserId, // Pass senderId for optimistic updates
     });
   };
 
@@ -210,6 +215,8 @@ export function ChatAlertDetails({
       recipientType: conversation.recipientType,
       driverId: conversation.driverId ?? undefined,
       companyId: conversation.companyId ?? undefined,
+      conversationId: conversation.id, // Pass conversationId for optimistic updates
+      senderId: currentUserId, // Pass senderId for optimistic updates
     });
   };
 
@@ -302,9 +309,13 @@ function mapMessageDtoToUi(
       description: message.content || undefined,
       timestamp: date.format("HH:mm"),
       dateGroup,
+      isOutgoing: message.senderId === currentUserId, // Determine if alert is outgoing
       createdAt: message.createdAt,
       fileUrl,
       fileName: message.fileName || undefined,
+      status: (
+        message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
+      )._status, // Get status from temporary message
     };
   }
 
@@ -319,6 +330,9 @@ function mapMessageDtoToUi(
     fileUrl,
     fileName: message.fileName || undefined,
     fileMimeType: message.fileMimeType || undefined,
+    status: (
+      message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
+    )._status, // Get status from temporary message
   };
 }
 

@@ -61,6 +61,8 @@ export interface SendChatMessageInput {
   recipientType: ChatRecipientType;
   content?: string;
   file?: File | Blob | null;
+  conversationId?: string; // Optional: for optimistic updates
+  senderId?: string; // Optional: for optimistic updates (to determine isOutgoing)
 }
 
 export interface SendChatAlertInput extends SendChatMessageInput {

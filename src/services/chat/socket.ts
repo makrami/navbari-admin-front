@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { ENV } from "../../lib/env";
@@ -9,12 +9,28 @@ import { chatKeys } from "./hooks";
 // Store polling intervals outside of React component
 const pollingIntervals = new Map<string, ReturnType<typeof setInterval>>();
 
+// Store socket refs for polling checks
+const socketRefs = new Map<string, RefObject<Socket | null>>();
+
 // Polling fallback function - refetches messages if socket is not connected
 function startPollingFallback(
   queryClient: ReturnType<typeof useQueryClient>,
-  conversationId?: string
+  conversationId?: string,
+  socketRef?: RefObject<Socket | null>
 ) {
   if (!conversationId) return;
+
+  // Store socket ref for this conversation
+  if (socketRef) {
+    socketRefs.set(conversationId, socketRef);
+  }
+
+  // Don't start polling if socket is connected
+  const socket = socketRef?.current;
+  if (socket?.connected) {
+    console.log("✅ Socket is connected, skipping polling fallback");
+    return;
+  }
 
   // Check if polling is already running
   if (pollingIntervals.has(conversationId)) {
@@ -24,6 +40,17 @@ function startPollingFallback(
   console.log("🔄 Starting polling fallback for conversation:", conversationId);
 
   const interval = setInterval(() => {
+    // Get current socket reference
+    const currentSocketRef = socketRefs.get(conversationId);
+    const currentSocket = currentSocketRef?.current;
+
+    // Double-check socket is still disconnected before polling
+    if (currentSocket?.connected) {
+      console.log("✅ Socket connected during polling, stopping fallback");
+      stopPollingFallback(queryClient, conversationId);
+      return;
+    }
+
     // Invalidate and refetch messages
     queryClient.invalidateQueries({
       queryKey: chatKeys.messages(conversationId),
@@ -31,7 +58,7 @@ function startPollingFallback(
     queryClient.invalidateQueries({
       queryKey: chatKeys.conversations(),
     });
-  }, 3000); // Poll every 3 seconds
+  }, 15000); // Poll every 15 seconds (reduced frequency)
 
   pollingIntervals.set(conversationId, interval);
 }
@@ -46,6 +73,7 @@ function stopPollingFallback(
   if (interval) {
     clearInterval(interval);
     pollingIntervals.delete(conversationId);
+    socketRefs.delete(conversationId); // Clean up socket ref
     console.log(
       "🛑 Stopped polling fallback for conversation:",
       conversationId
@@ -117,15 +145,19 @@ export function useChatSocket(
         // Server disconnected, reconnect manually
         socket.connect();
       }
-      // Start polling if socket disconnects
-      startPollingFallback(queryClient, activeConversationId);
+      // Start polling if socket disconnects (only if not already polling)
+      if (!pollingIntervals.has(activeConversationId || "")) {
+        startPollingFallback(queryClient, activeConversationId, socketRef);
+      }
     });
 
     socket.on("connect_error", (error) => {
       isConnectedRef.current = false;
       console.error("❌ Socket connection error:", error.message, error);
-      // Start polling fallback if connection fails
-      startPollingFallback(queryClient, activeConversationId);
+      // Start polling fallback if connection fails (only if not already polling)
+      if (!pollingIntervals.has(activeConversationId || "")) {
+        startPollingFallback(queryClient, activeConversationId, socketRef);
+      }
       // Try to reconnect after a delay
       setTimeout(() => {
         if (!socket.connected) {
@@ -199,13 +231,17 @@ export function useChatSocket(
       activeConversationId
     );
 
-    // Start polling fallback immediately if socket doesn't connect within 5 seconds
+    // Start polling fallback only if socket doesn't connect within 10 seconds
+    // Increased timeout to give socket more time to connect
     const connectionTimeout = setTimeout(() => {
-      if (!socket.connected) {
+      if (
+        !socket.connected &&
+        !pollingIntervals.has(activeConversationId || "")
+      ) {
         console.log("⏱️ Socket connection timeout - starting polling fallback");
-        startPollingFallback(queryClient, activeConversationId);
+        startPollingFallback(queryClient, activeConversationId, socketRef);
       }
-    }, 5000);
+    }, 10000); // Increased to 10 seconds
 
     return () => {
       clearTimeout(connectionTimeout);
@@ -337,7 +373,7 @@ function updateCaches(
   }
 }
 
-function appendMessageToCache(
+export function appendMessageToCache(
   queryClient: ReturnType<typeof useQueryClient>,
   message: MessageReadDto
 ) {
@@ -357,6 +393,51 @@ function appendMessageToCache(
             message.id
           );
           return oldData;
+        }
+
+        // Check if there's a temporary message with matching content that should be replaced
+        // This handles the case where socket receives the message we just sent
+        const hasTempMessage = oldData.pages.some((page) =>
+          page.some((item) => {
+            const tempMsg = item as MessageReadDto & {
+              _tempId?: string;
+              _status?: "sending" | "sent" | "failed";
+            };
+            return (
+              tempMsg._status === "sending" &&
+              tempMsg.content === message.content &&
+              tempMsg.conversationId === message.conversationId
+            );
+          })
+        );
+
+        if (hasTempMessage) {
+          console.log(
+            "🔄 Found temporary message, replacing with real message:",
+            message.id
+          );
+          // Replace temporary message with real message
+          const newPages = oldData.pages.map((page) =>
+            page.map((item) => {
+              const tempMsg = item as MessageReadDto & {
+                _tempId?: string;
+                _status?: "sending" | "sent" | "failed";
+              };
+              if (
+                tempMsg._status === "sending" &&
+                tempMsg.content === message.content &&
+                tempMsg.conversationId === message.conversationId
+              ) {
+                // Replace temp message with real message (status will be removed)
+                return message;
+              }
+              return item;
+            })
+          );
+          return {
+            ...oldData,
+            pages: newPages,
+          };
         }
       }
 
@@ -418,7 +499,7 @@ function appendMessageToCache(
   );
 }
 
-function updateConversationCache(
+export function updateConversationCache(
   queryClient: ReturnType<typeof useQueryClient>,
   message: MessageReadDto,
   activeConversationId?: string

@@ -4,6 +4,8 @@ export type AlertType = "warning" | "alert" | "info" | "success";
 
 export type DateGroup = "today" | "yesterday" | string; // string for other dates
 
+export type MessageStatus = "sending" | "sent" | "failed";
+
 export interface ChatMessage {
   id: string;
   type: "chat";
@@ -15,6 +17,7 @@ export interface ChatMessage {
   fileUrl?: string;
   fileName?: string;
   fileMimeType?: string;
+  status?: MessageStatus; // Status for optimistic updates
 }
 
 export interface AlertMessage {
@@ -26,9 +29,11 @@ export interface AlertMessage {
   description?: string;
   timestamp: string; // Format: "HH:mm"
   dateGroup: DateGroup;
+  isOutgoing?: boolean; // true for right-aligned (outgoing), false for left-aligned (incoming)
   createdAt?: string; // ISO 8601
   fileUrl?: string;
   fileName?: string;
+  status?: MessageStatus; // Status for optimistic updates
 }
 
 export type Message = ChatMessage | AlertMessage;

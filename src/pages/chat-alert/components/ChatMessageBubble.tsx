@@ -1,5 +1,5 @@
-import { Paperclip } from "lucide-react";
-import type { ChatMessage } from "../types/chat";
+import { Paperclip, Loader2, Check, AlertTriangle } from "lucide-react";
+import type { ChatMessage, MessageStatus } from "../types/chat";
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
@@ -8,6 +8,16 @@ interface ChatMessageBubbleProps {
 export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   const isOutgoing = message.isOutgoing ?? true; // Default to outgoing
   const hasAttachment = Boolean(message.fileUrl);
+  const status = message.status;
+
+  // Debug: log status for outgoing messages
+  if (isOutgoing && status) {
+    console.log("🔍 Message status:", {
+      id: message.id,
+      status,
+      text: message.text?.substring(0, 30),
+    });
+  }
 
   if (isOutgoing) {
     // Right-aligned blue bubble (outgoing)
@@ -27,9 +37,10 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
               />
             )}
           </div>
-          <span className="text-xs text-slate-500 mt-1 px-1">
-            {message.timestamp}
-          </span>
+          <div className="flex items-center gap-1 mt-1 px-1">
+            <span className="text-xs text-slate-500">{message.timestamp}</span>
+            {status && <MessageStatusIcon status={status} />}
+          </div>
         </div>
       </div>
     );
@@ -57,6 +68,26 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
       </div>
     </div>
   );
+}
+
+function MessageStatusIcon({ status }: { status: MessageStatus }) {
+  switch (status) {
+    case "sending":
+      return (
+        <Loader2
+          className="size-3 text-slate-400 animate-spin"
+          aria-label="Sending"
+        />
+      );
+    case "sent":
+      return <Check className="size-3 text-green-500" aria-label="Sent" />;
+    case "failed":
+      return (
+        <AlertTriangle className="size-3 text-red-500" aria-label="Failed" />
+      );
+    default:
+      return null;
+  }
 }
 
 type AttachmentLinkProps = {
