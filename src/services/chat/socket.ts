@@ -1,7 +1,7 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
-import { ENV } from "../../lib/env";
+
 import type { ConversationReadDto, MessageReadDto } from "./chat.types";
 import { CHAT_MESSAGE_TYPE } from "./chat.types";
 import { chatKeys } from "./hooks";
@@ -9,28 +9,12 @@ import { chatKeys } from "./hooks";
 // Store polling intervals outside of React component
 const pollingIntervals = new Map<string, ReturnType<typeof setInterval>>();
 
-// Store socket refs for polling checks
-const socketRefs = new Map<string, RefObject<Socket | null>>();
-
 // Polling fallback function - refetches messages if socket is not connected
 function startPollingFallback(
   queryClient: ReturnType<typeof useQueryClient>,
-  conversationId?: string,
-  socketRef?: RefObject<Socket | null>
+  conversationId?: string
 ) {
   if (!conversationId) return;
-
-  // Store socket ref for this conversation
-  if (socketRef) {
-    socketRefs.set(conversationId, socketRef);
-  }
-
-  // Don't start polling if socket is connected
-  const socket = socketRef?.current;
-  if (socket?.connected) {
-    console.log("✅ Socket is connected, skipping polling fallback");
-    return;
-  }
 
   // Check if polling is already running
   if (pollingIntervals.has(conversationId)) {
@@ -40,17 +24,6 @@ function startPollingFallback(
   console.log("🔄 Starting polling fallback for conversation:", conversationId);
 
   const interval = setInterval(() => {
-    // Get current socket reference
-    const currentSocketRef = socketRefs.get(conversationId);
-    const currentSocket = currentSocketRef?.current;
-
-    // Double-check socket is still disconnected before polling
-    if (currentSocket?.connected) {
-      console.log("✅ Socket connected during polling, stopping fallback");
-      stopPollingFallback(queryClient, conversationId);
-      return;
-    }
-
     // Invalidate and refetch messages
     queryClient.invalidateQueries({
       queryKey: chatKeys.messages(conversationId),
@@ -58,27 +31,9 @@ function startPollingFallback(
     queryClient.invalidateQueries({
       queryKey: chatKeys.conversations(),
     });
-  }, 15000); // Poll every 15 seconds (reduced frequency)
+  }, 3000); // Poll every 3 seconds
 
   pollingIntervals.set(conversationId, interval);
-}
-
-function stopPollingFallback(
-  _queryClient: ReturnType<typeof useQueryClient>,
-  conversationId?: string
-) {
-  if (!conversationId) return;
-
-  const interval = pollingIntervals.get(conversationId);
-  if (interval) {
-    clearInterval(interval);
-    pollingIntervals.delete(conversationId);
-    socketRefs.delete(conversationId); // Clean up socket ref
-    console.log(
-      "🛑 Stopped polling fallback for conversation:",
-      conversationId
-    );
-  }
 }
 
 export function useChatSocket(
@@ -90,14 +45,14 @@ export function useChatSocket(
   const isConnectedRef = useRef(false);
 
   useEffect(() => {
-    const url = resolveChatSocketUrl();
+    const url = "/ws/chat";
     console.log("🔌 Initializing socket connection:", url);
 
     // Determine if we should use a custom path
     // If URL contains /ws/chat, we might need to adjust the path
     const useCustomPath = url.includes("/ws/chat");
     const socketOptions: Parameters<typeof io>[1] = {
-      transports: ["websocket", "polling"], // Fallback to polling if websocket fails
+      transports: ["websocket"], // Fallback to polling if websocket fails
       withCredentials: true,
       timeout: 20000, // 20 seconds timeout
       reconnection: true,
@@ -106,6 +61,7 @@ export function useChatSocket(
       reconnectionAttempts: 5,
       forceNew: false, // Reuse existing connection if available
       autoConnect: true,
+      path: "/socket.io/",
     };
 
     // Only set path if URL doesn't already include the socket.io path
@@ -134,8 +90,6 @@ export function useChatSocket(
         "Transport:",
         socket.io.engine.transport.name
       );
-      // Stop polling if socket is connected
-      stopPollingFallback(queryClient, activeConversationId);
     });
 
     socket.on("disconnect", (reason) => {
@@ -145,19 +99,15 @@ export function useChatSocket(
         // Server disconnected, reconnect manually
         socket.connect();
       }
-      // Start polling if socket disconnects (only if not already polling)
-      if (!pollingIntervals.has(activeConversationId || "")) {
-        startPollingFallback(queryClient, activeConversationId, socketRef);
-      }
+      // Start polling if socket disconnects
+      startPollingFallback(queryClient, activeConversationId);
     });
 
     socket.on("connect_error", (error) => {
       isConnectedRef.current = false;
       console.error("❌ Socket connection error:", error.message, error);
-      // Start polling fallback if connection fails (only if not already polling)
-      if (!pollingIntervals.has(activeConversationId || "")) {
-        startPollingFallback(queryClient, activeConversationId, socketRef);
-      }
+      // Start polling fallback if connection fails
+      startPollingFallback(queryClient, activeConversationId);
       // Try to reconnect after a delay
       setTimeout(() => {
         if (!socket.connected) {
@@ -231,21 +181,9 @@ export function useChatSocket(
       activeConversationId
     );
 
-    // Start polling fallback only if socket doesn't connect within 10 seconds
-    // Increased timeout to give socket more time to connect
-    const connectionTimeout = setTimeout(() => {
-      if (
-        !socket.connected &&
-        !pollingIntervals.has(activeConversationId || "")
-      ) {
-        console.log("⏱️ Socket connection timeout - starting polling fallback");
-        startPollingFallback(queryClient, activeConversationId, socketRef);
-      }
-    }, 10000); // Increased to 10 seconds
+    // Start polling fallback immediately if socket doesn't connect within 5 seconds
 
     return () => {
-      clearTimeout(connectionTimeout);
-      stopPollingFallback(queryClient, activeConversationId);
       socket.off("message:new", handleMessageEvent);
       socket.off("alert:new", handleMessageEvent);
       socket.off("conversation:updated", handleConversationUpdated);
@@ -320,41 +258,6 @@ export function useChatSocket(
   }, [activeConversationId]);
 
   return socketRef.current;
-}
-
-function resolveChatSocketUrl(): string {
-  const url = ENV.CHAT_SOCKET_URL;
-  const isDev = import.meta.env.DEV;
-  console.log("🔗 Resolving socket URL:", url, "isDev:", isDev);
-
-  if (!url) {
-    console.error("❌ CHAT_SOCKET_URL is not defined!");
-    throw new Error("CHAT_SOCKET_URL is not defined in environment variables");
-  }
-
-  // In development, use relative path (will use Vite proxy)
-  if (isDev && url.startsWith("/")) {
-    console.log("✅ Using relative URL for dev (will use Vite proxy):", url);
-    return url;
-  }
-
-  // If URL is already a full URL (starts with http:// or https:// or ws:// or wss://), return as is
-  if (/^(https?|wss?):\/\//.test(url)) {
-    console.log("✅ Using full URL:", url);
-    return url;
-  }
-
-  // If URL starts with /, it's a relative path - prepend origin
-  if (url.startsWith("/")) {
-    if (typeof window !== "undefined" && window.location) {
-      const fullUrl = `${window.location.origin}${url}`;
-      console.log("✅ Resolved relative URL to:", fullUrl);
-      return fullUrl;
-    }
-  }
-
-  console.log("✅ Using URL as is:", url);
-  return url;
 }
 
 function updateCaches(
