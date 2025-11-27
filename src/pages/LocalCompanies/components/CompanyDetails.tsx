@@ -1,4 +1,4 @@
-import type { CompanyReadDto } from "../../../services/company/company.service";
+import type {CompanyReadDto} from "../../../services/company/company.service";
 import ReactCountryFlag from "react-country-flag";
 import {
   Phone as PhoneIcon,
@@ -14,10 +14,10 @@ import {
   X,
   MessagesSquareIcon,
 } from "lucide-react";
-import { STATUS_TO_COLOR, apiStatusToUiStatus } from "../types";
-import { getCountryCode, getLogoUrl } from "../utils";
-import { useState, useMemo, useEffect } from "react";
-import { ChatSection } from "../../chat-alert/components/ChatSection";
+import {STATUS_TO_COLOR, apiStatusToUiStatus} from "../types";
+import {getLogoUrl} from "../utils";
+import {useState, useMemo, useEffect} from "react";
+import {ChatSection} from "../../chat-alert/components/ChatSection";
 import {
   useChatConversations,
   useConversationMessages,
@@ -25,8 +25,8 @@ import {
   useSendChatAlert,
   useMarkConversationRead,
 } from "../../../services/chat/hooks";
-import { useChatSocket } from "../../../services/chat/socket";
-import { useCurrentUser } from "../../../services/user/hooks";
+import {useChatSocket} from "../../../services/chat/socket";
+import {useCurrentUser} from "../../../services/user/hooks";
 import {
   CHAT_RECIPIENT_TYPE,
   CHAT_MESSAGE_TYPE,
@@ -40,20 +40,21 @@ import type {
   Message,
 } from "../../chat-alert/types/chat";
 import dayjs from "dayjs";
-import { ENV } from "../../../lib/env";
+import {ENV} from "../../../lib/env";
+import {getCountryCode} from "../../../shared/utils/countryCode";
 
 type Props = {
   company: CompanyReadDto;
 };
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
+  {id: "1", label: "GPS Lost", alertType: "alert"},
+  {id: "2", label: "Delay Expected", alertType: "warning"},
+  {id: "3", label: "Route Cleared", alertType: "success"},
+  {id: "4", label: "Documentation Pending", alertType: "info"},
 ];
 
-export function CompanyDetails({ company }: Props) {
+export function CompanyDetails({company}: Props) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const uiStatus = apiStatusToUiStatus(company.status);
@@ -72,8 +73,8 @@ export function CompanyDetails({ company }: Props) {
   const city = company.address?.split(",")[0]?.trim() || company.country;
 
   // Fetch conversations for companies
-  const { data: conversations = [] } = useChatConversations("company");
-  const { data: currentUser } = useCurrentUser();
+  const {data: conversations = []} = useChatConversations("company");
+  const {data: currentUser} = useCurrentUser();
 
   // Find conversation for this company
   const conversation = useMemo(() => {
