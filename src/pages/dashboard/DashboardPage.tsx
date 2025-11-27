@@ -104,9 +104,9 @@ export function DashboardPage() {
         {/* Error Display */}
         {error && (
           <div className="absolute top-5 left-5 right-5 z-50 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg shadow-lg">
-            <p className="font-semibold">خطا در دریافت سگمنت‌های فعال:</p>
+            <p className="font-semibold">Error fetching active segments:</p>
             <p className="text-sm mt-1">
-              {error instanceof Error ? error.message : "خطای نامشخص"}
+              {error instanceof Error ? error.message : "Unknown error"}
             </p>
           </div>
         )}
