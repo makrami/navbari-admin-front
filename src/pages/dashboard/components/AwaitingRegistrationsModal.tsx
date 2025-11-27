@@ -1,24 +1,95 @@
-import {useEffect} from "react";
-import {useTranslation} from "react-i18next";
-import {useNavigate} from "react-router-dom";
-import {Building2, UserIcon, Globe} from "lucide-react";
-import {cn} from "../../../shared/utils/cn";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { Building2, UserIcon, Globe } from "lucide-react";
+import { cn } from "../../../shared/utils/cn";
 import ReactCountryFlag from "react-country-flag";
+import { useRegistrationSummaries } from "../../../services/dashboard/hooks";
+import { getCountryCode } from "../../../shared/utils/countryCode";
+import { ENV } from "../../../lib/env";
+
+/**
+ * Construct full URL for file (avatar, logo, etc.)
+ */
+function getFileUrl(filePath: string | null | undefined): string | undefined {
+  if (!filePath) return undefined;
+
+  // If already a full URL, return as is
+  if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+    return filePath;
+  }
+
+  // Construct full URL from relative path
+  const cleanPath = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+  return `${ENV.FILE_BASE_URL}/${cleanPath}`;
+}
 
 type AwaitingRegistrationsModalProps = {
   open: boolean;
   onClose: () => void;
+  cardPosition: { top: number; left: number; width: number } | null;
 };
 
-// TODO: Replace with real API data
-const MOCK_REGISTRATIONS: never[] = [];
+type Registration = {
+  id: string;
+  name: string;
+  type: "driver" | "company";
+  status: string;
+  avatar?: string;
+  logo?: string;
+  company?: {
+    name: string;
+    logo?: string;
+  };
+  location?: {
+    country: string;
+    city: string;
+    countryCode: string;
+  };
+};
 
 export function AwaitingRegistrationsModal({
   open,
   onClose,
+  cardPosition,
 }: AwaitingRegistrationsModalProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { data: registrationSummaries = [], isLoading } =
+    useRegistrationSummaries();
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
+  // Map API data to component format
+  const registrations: Registration[] = useMemo(() => {
+    return registrationSummaries.map((summary) => {
+      if (summary.type === "driver") {
+        return {
+          id: summary.companyId,
+          name: summary.driverName,
+          type: "driver" as const,
+          status: "Pending",
+          avatar: getFileUrl(summary.driverAvatarUrl),
+          company: {
+            name: summary.companyName,
+            logo: getFileUrl(summary.companyLogo),
+          },
+        };
+      } else {
+        return {
+          id: summary.companyId,
+          name: summary.companyName,
+          type: "company" as const,
+          status: "Pending",
+          logo: getFileUrl(summary.companyLogo),
+          location: {
+            country: summary.companyCountry,
+            city: "", // API doesn't provide city
+            countryCode: getCountryCode(summary.companyCountry),
+          },
+        };
+      }
+    });
+  }, [registrationSummaries]);
 
   const handleShowAll = () => {
     onClose();
@@ -51,14 +122,24 @@ export function AwaitingRegistrationsModal({
       {/* Modal */}
       <div
         className={cn(
-          "fixed left-[35%] top-[38%] -translate-y-1/2 z-[60] bg-black/50 w-full max-w-md rounded-3xl backdrop-blur-[50px] transition-all duration-300 ease-in-out",
+          "fixed z-[60] bg-black/50 w-full max-w-md rounded-3xl backdrop-blur-[50px]  ease-in-out",
           open
             ? "opacity-100 translate-x-0 pointer-events-auto"
-            : "opacity-0  pointer-events-none"
+            : "opacity-0 pointer-events-none"
         )}
         onClick={(e) => e.stopPropagation()}
         style={{
           boxShadow: "0px 4px 6px -4px #0000001A, 0px 10px 15px -3px #0000001A",
+          ...(cardPosition
+            ? {
+                top: `${cardPosition.top + 8}px`,
+                left: `${cardPosition.left}px`,
+              }
+            : {
+                left: "35%",
+                top: "38%",
+                transform: "translateY(-50%)",
+              }),
         }}
         role="dialog"
         aria-modal="true"
@@ -67,34 +148,54 @@ export function AwaitingRegistrationsModal({
         {/* Registrations List */}
         <div className="max-h-[60vh] overflow-y-auto pt-3">
           <div className="space-y-3">
-            {MOCK_REGISTRATIONS.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-8 text-slate-400">Loading...</div>
+            ) : registrations.length === 0 ? (
               <div className="text-center py-8 text-slate-400">
                 No pending registrations
               </div>
             ) : (
-              MOCK_REGISTRATIONS.map((registration: any, index: number) => (
+              registrations.map((registration, index) => (
                 <div
-                  key={registration.id as string}
+                  key={registration.id}
                   className={cn(
                     "flex items-start gap-3 p-3 transition-colors cursor-pointer",
-                    index !== MOCK_REGISTRATIONS.length - 1 &&
+                    index !== registrations.length - 1 &&
                       "border-b-1 border-slate-600"
                   )}
                 >
                   {/* Avatar/Icon */}
                   {registration.type === "driver" ? (
-                    <img
-                      src={registration.avatar}
-                      alt={registration.name}
-                      className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-slate-400"
-                    />
+                    <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0 border border-slate-400 overflow-hidden">
+                      {registration.avatar &&
+                      !imageErrors.has(`avatar-${registration.id}`) ? (
+                        <img
+                          src={registration.avatar}
+                          alt={registration.name}
+                          className="w-full h-full object-cover"
+                          onError={() => {
+                            setImageErrors((prev) =>
+                              new Set(prev).add(`avatar-${registration.id}`)
+                            );
+                          }}
+                        />
+                      ) : (
+                        <UserIcon className="w-6 h-6 text-slate-300" />
+                      )}
+                    </div>
                   ) : (
                     <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-slate-400 overflow-hidden">
-                      {registration.logo ? (
+                      {registration.logo &&
+                      !imageErrors.has(`logo-${registration.id}`) ? (
                         <img
                           src={registration.logo}
                           alt={registration.name}
                           className="w-full h-full object-contain p-1"
+                          onError={() => {
+                            setImageErrors((prev) =>
+                              new Set(prev).add(`logo-${registration.id}`)
+                            );
+                          }}
                         />
                       ) : (
                         <Building2 className="w-6 h-6 text-slate-400" />
@@ -119,17 +220,27 @@ export function AwaitingRegistrationsModal({
                     <div className="flex items-center gap-2 w-full">
                       {registration.type === "driver" ? (
                         <>
-                          {registration.company.logo ? (
+                          {registration.company?.logo &&
+                          !imageErrors.has(
+                            `company-logo-${registration.id}`
+                          ) ? (
                             <img
                               src={registration.company.logo}
                               alt={registration.company.name}
-                              className="size-6 object-contain bg-black/10  rounded-lg p-1"
+                              className="size-6 object-contain bg-black/10 rounded-lg p-1"
+                              onError={() => {
+                                setImageErrors((prev) =>
+                                  new Set(prev).add(
+                                    `company-logo-${registration.id}`
+                                  )
+                                );
+                              }}
                             />
                           ) : (
                             <UserIcon className="size-7 text-white bg-black/10 rounded-lg p-1" />
                           )}
                           <p className="text-sm text-slate-300">
-                            {registration.company.name}
+                            {registration.company?.name || "Unknown"}
                           </p>
                         </>
                       ) : (
@@ -147,8 +258,7 @@ export function AwaitingRegistrationsModal({
                             <Globe className="w-6 h-6 text-slate-300" />
                           )}
                           <p className="text-sm text-slate-300">
-                            {registration.location?.country || "Unknown"} /{" "}
-                            {registration.location?.city || "Unknown"}
+                            {registration.location?.country || "Unknown"}
                           </p>
                         </>
                       )}
