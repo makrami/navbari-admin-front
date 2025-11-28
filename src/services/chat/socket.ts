@@ -1,40 +1,10 @@
-import { useEffect, useRef } from "react";
-import { io, type Socket } from "socket.io-client";
-import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import {useEffect, useRef} from "react";
+import {io, type Socket} from "socket.io-client";
+import {useQueryClient, type InfiniteData} from "@tanstack/react-query";
 
-import type { ConversationReadDto, MessageReadDto } from "./chat.types";
-import { CHAT_MESSAGE_TYPE } from "./chat.types";
-import { chatKeys } from "./hooks";
-
-// Store polling intervals outside of React component
-const pollingIntervals = new Map<string, ReturnType<typeof setInterval>>();
-
-// Polling fallback function - refetches messages if socket is not connected
-function startPollingFallback(
-  queryClient: ReturnType<typeof useQueryClient>,
-  conversationId?: string
-) {
-  if (!conversationId) return;
-
-  // Check if polling is already running
-  if (pollingIntervals.has(conversationId)) {
-    return; // Already polling
-  }
-
-  console.log("🔄 Starting polling fallback for conversation:", conversationId);
-
-  const interval = setInterval(() => {
-    // Invalidate and refetch messages
-    queryClient.invalidateQueries({
-      queryKey: chatKeys.messages(conversationId),
-    });
-    queryClient.invalidateQueries({
-      queryKey: chatKeys.conversations(),
-    });
-  }, 3000); // Poll every 3 seconds
-
-  pollingIntervals.set(conversationId, interval);
-}
+import type {ConversationReadDto, MessageReadDto} from "./chat.types";
+import {CHAT_MESSAGE_TYPE} from "./chat.types";
+import {chatKeys} from "./hooks";
 
 export function useChatSocket(
   activeConversationId?: string,
@@ -52,7 +22,7 @@ export function useChatSocket(
     // If URL contains /ws/chat, we might need to adjust the path
     const useCustomPath = url.includes("/ws/chat");
     const socketOptions: Parameters<typeof io>[1] = {
-      transports: ["websocket"], // Fallback to polling if websocket fails
+      transports: ["websocket"],
       withCredentials: true,
       timeout: 20000, // 20 seconds timeout
       reconnection: true,
@@ -99,22 +69,11 @@ export function useChatSocket(
         // Server disconnected, reconnect manually
         socket.connect();
       }
-      // Start polling if socket disconnects
-      startPollingFallback(queryClient, activeConversationId);
     });
 
     socket.on("connect_error", (error) => {
       isConnectedRef.current = false;
       console.error("❌ Socket connection error:", error.message, error);
-      // Start polling fallback if connection fails
-      startPollingFallback(queryClient, activeConversationId);
-      // Try to reconnect after a delay
-      setTimeout(() => {
-        if (!socket.connected) {
-          console.log("🔄 Attempting to reconnect...");
-          socket.connect();
-        }
-      }, 2000);
     });
 
     socket.on("reconnect", (attemptNumber) => {
@@ -145,7 +104,7 @@ export function useChatSocket(
       // Always add to cache regardless of active conversation
       appendMessageToCache(queryClient, message);
       updateConversationCache(queryClient, message, activeConversationId);
-      queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount() });
+      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
 
       // Stop typing indicator when new message arrives (only for active conversation)
       if (message.conversationId === activeConversationId) {
@@ -153,17 +112,17 @@ export function useChatSocket(
       }
     };
 
-    const handleConversationUpdated = (payload: { conversationId: string }) => {
+    const handleConversationUpdated = (payload: {conversationId: string}) => {
       updateCaches(queryClient, payload.conversationId);
     };
 
-    const handleTypingStart = (payload: { conversationId: string }) => {
+    const handleTypingStart = (payload: {conversationId: string}) => {
       if (payload.conversationId === activeConversationId) {
         onTypingChange?.(true);
       }
     };
 
-    const handleTypingStop = (payload: { conversationId: string }) => {
+    const handleTypingStop = (payload: {conversationId: string}) => {
       if (payload.conversationId === activeConversationId) {
         onTypingChange?.(false);
       }
@@ -180,8 +139,6 @@ export function useChatSocket(
       "👂 Socket event listeners registered for conversation:",
       activeConversationId
     );
-
-    // Start polling fallback immediately if socket doesn't connect within 5 seconds
 
     return () => {
       socket.off("message:new", handleMessageEvent);
@@ -264,8 +221,8 @@ function updateCaches(
   queryClient: ReturnType<typeof useQueryClient>,
   conversationId: string
 ) {
-  queryClient.invalidateQueries({ queryKey: chatKeys.conversations() });
-  queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount() });
+  queryClient.invalidateQueries({queryKey: chatKeys.conversations()});
+  queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
   if (conversationId) {
     queryClient.invalidateQueries({
       queryKey: chatKeys.messages(conversationId),

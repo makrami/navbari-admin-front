@@ -29,35 +29,9 @@ import {
   computeSegmentPlace,
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
+import {getCountryCode} from "../../../../shared/utils/countryCode";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
-
-// Helper function to map country name to ISO country code
-function getCountryCode(countryName: string): string {
-  const countryMap: Record<string, string> = {
-    China: "CN",
-    "United States": "US",
-    Germany: "DE",
-    "United Kingdom": "GB",
-    France: "FR",
-    Italy: "IT",
-    Spain: "ES",
-    Netherlands: "NL",
-    Belgium: "BE",
-    Poland: "PL",
-    Russia: "RU",
-    Turkey: "TR",
-    Iran: "IR",
-    Iraq: "IQ",
-    Afghanistan: "AF",
-    Pakistan: "PK",
-    India: "IN",
-    Kazakhstan: "KZ",
-    Uzbekistan: "UZ",
-    Mongolia: "MN",
-  };
-  return countryMap[countryName] || "US"; // Default to US if not found
-}
 
 // Helper function to transform CompanyReadDto to CargoCompany
 function transformCompanyToCargoCompany(company: CompanyReadDto): CargoCompany {
@@ -65,7 +39,7 @@ function transformCompanyToCargoCompany(company: CompanyReadDto): CargoCompany {
     id: company.id,
     name: company.name,
     country: company.country,
-    countryCode: getCountryCode(company.country),
+    countryCode: getCountryCode(company.country ?? ""),
     admin: company.primaryContactFullName,
     registeredAt: new Date(company.createdAt).toLocaleDateString("en-US", {
       year: "numeric",
@@ -287,12 +261,14 @@ export function SegmentDetails({
         destinationCity={data.destinationCity ?? undefined}
         destinationCountry={data.destinationCountry ?? undefined}
         isCompleted={data.isCompleted}
+        lastGpsUpdate={data.lastGpsUpdate ?? undefined}
         open={open}
         isCurrent={data.isCurrent ?? false}
         distanceKm={data.distanceKm ? parseFloat(data.distanceKm) : null}
         eta={(data.estimatedFinishTime ?? null) as string | null}
-        avatarUrl={data.assigneeAvatarUrl ?? data.driverAvatarUrl ?? undefined}
-        assigneeName={data.assigneeName ?? data.driverName ?? undefined}
+        driverAvatarUrl={data.driverAvatarUrl ?? undefined}
+        driverId={data.driverId ?? undefined}
+        driverName={data.driverName ?? undefined}
         editable={editable}
         segmentId={data.id}
         onToggle={handleToggle}
@@ -694,22 +670,24 @@ export function SegmentDetails({
               <CargoAssignmentsList announcements={announcements ?? []} />
             ) : (
               <SegmentInfoSummary
-                vehicleLabel={
-                  (data.vehicleLabel ?? undefined) as string | undefined
-                }
                 localCompany={
-                  (data.localCompany ?? undefined) as string | undefined
+                  (data.companyName ?? undefined) as string | undefined
                 }
-                startAt={
-                  (data.estimatedStartTime ?? undefined) as string | undefined
-                }
-                finishedAt={
-                  (data.estimatedFinishTime ?? undefined) as string | undefined
-                }
+                companyId={data.companyId || null}
+                estimatedStartTime={data.estimatedStartTime || undefined}
+                estimatedFinishTime={data.estimatedFinishTime || undefined}
+                etaToOrigin={data.etaToOrigin}
+                etaToDestination={data.etaToDestination}
+                vehicleType={data.vehicleType || undefined}
+                lastGpsUpdate={data.lastGpsUpdate || undefined}
+                alertCount={data.alertCount}
+                delaysInMinutes={data.delaysInMinutes}
+                pendingDocuments={0}
                 documents={data.documents?.map((doc) => ({
                   ...doc,
                   sizeLabel: doc.sizeLabel || "0 KB",
                 }))}
+                segmentId={segmentId}
               />
             )}
           </div>

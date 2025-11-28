@@ -1,4 +1,4 @@
-import type { CargoCompany } from "../../pages/shipment/components/CargoDeclarationModal";
+import type {CargoCompany} from "../../pages/shipment/components/CargoDeclarationModal";
 
 /**
  * SegmentStatus - All possible segment status values
@@ -71,11 +71,8 @@ export interface Segment {
   nextPlace?: string; // Computed from destinationCity + destinationCountry
 
   // UI display fields (from separate lookups)
-  assigneeName?: string; // Driver name (from driverId lookup)
-  assigneeAvatarUrl?: string; // Driver photo (from driverId lookup)
-  driverPhoto?: string; // Alias for assigneeAvatarUrl
   driverRating?: number;
-  vehicleLabel?: string;
+
   localCompany?: string;
 
   // Documents (from separate API)
@@ -102,10 +99,8 @@ export interface Segment {
 
   // Computed completion status
   isCompleted?: boolean; // Computed from status === SegmentStatus.DELIVERED
-}
 
-/**
- * @deprecated Use Segment instead
- * SegmentData is kept for backward compatibility but will be removed
- */
-export type SegmentData = Segment;
+  //Summary information
+  alertCount?: number;
+  delaysInMinutes?: number;
+}

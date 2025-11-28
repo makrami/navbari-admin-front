@@ -112,6 +112,46 @@
       "placeholder": "البحث حسب الشحنات، السائقين..."
     }
   },
+  "segments": {
+    "cardHeader": {
+      "destinationFallback": "(الوجهة)"
+    },
+    "infoBanner": {
+      "from": "من",
+      "to": "إلى",
+      "notSet": "غير مضبوط"
+    },
+    "infoGrid": {
+      "startLabel": "البداية",
+      "finishLabel": "الانتهاء المقدر",
+      "vehicleLabel": "مركبة السائق",
+      "localCompanyLabel": "الشركة المحلية",
+      "notSet": "غير مضبوط",
+      "notAssigned": "غير مخصص"
+    },
+    "eta": {
+      "estimatedArrivalToDestination": "الوقت المقدر للوصول إلى الوجهة",
+      "estimatedArrivalToOrigin": "الوقت المقدر للوصول إلى المنشأ",
+      "basedOnLatestGpsUpdate": "(بناءً على آخر تحديث GPS)",
+      "driverNotStartedToOrigin": "لم يبدأ السائق بالقيادة إلى المنشأ",
+      "lastGpsUpdate": "آخر تحديث GPS:",
+      "noGpsUpdateAvailable": "لا يتوفر تحديث GPS",
+      "justNow": "الآن",
+      "minute": "دقيقة",
+      "minutes": "دقائق",
+      "hour": "ساعة",
+      "hours": "ساعات",
+      "minutesAgo": "منذ {{count}} دقيقة",
+      "hoursAgo": "منذ {{count}} ساعة",
+      "daysAgo": "منذ {{count}} يوم"
+    },
+    "page": {
+      "title": "الأقسام",
+      "loading": "جاري تحميل الأقسام...",
+      "closeLabel": "إغلاق",
+      "empty": "لم يتم العثور على أقسام"
+    }
+  },
   "sidebar": {
     "brandAlt": "العلامة التجارية",
     "profileAlt": "الملف الشخصي",

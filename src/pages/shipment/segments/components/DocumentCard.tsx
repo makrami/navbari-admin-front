@@ -1,4 +1,12 @@
-import { FileClock, Check, X, Users, Info } from "lucide-react";
+import {
+  FileClock,
+  Check,
+  X,
+  Users,
+  Info,
+  Eye as EyeIcon,
+  FileText as FileTextIcon,
+} from "lucide-react";
 
 type DocumentCardProps = {
   authorName: string;
@@ -7,9 +15,13 @@ type DocumentCardProps = {
   status: "pending" | "approved" | "rejected";
   avatarUrl?: string;
   className?: string;
+  filePath?: string;
   onApprove?: () => void;
   onReject?: () => void;
   onReasons?: () => void;
+  onPreview?: () => void;
+  onView?: () => void;
+  disabled?: boolean;
 };
 
 export function DocumentCard({
@@ -18,9 +30,13 @@ export function DocumentCard({
   sizeLabel,
   status,
   className,
+  filePath,
   onApprove,
   onReject,
   onReasons,
+  onPreview,
+  onView,
+  disabled = false,
 }: DocumentCardProps) {
   const statusStyles = {
     pending: {
@@ -83,14 +99,16 @@ export function DocumentCard({
           <button
             type="button"
             onClick={onApprove}
-            className="flex-1 rounded-lg bg-green-100 px-3 py-1 text-xs text-green-700 hover:bg-green-200 transition-colors"
+            disabled={disabled}
+            className="flex-1 rounded-lg bg-green-100 px-3 py-1 text-xs text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Approve
           </button>
           <button
             type="button"
             onClick={onReject}
-            className="flex-1 rounded-lg bg-red-100 px-3 py-1 text-xs text-red-700 hover:bg-red-200 transition-colors"
+            disabled={disabled}
+            className="flex-1 rounded-lg bg-red-100 px-3 py-1 text-xs text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Reject
           </button>
@@ -102,7 +120,8 @@ export function DocumentCard({
           <button
             type="button"
             onClick={onApprove}
-            className="flex-1 rounded-lg bg-green-100 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors"
+            disabled={disabled}
+            className="flex-1 rounded-lg bg-green-100 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Approve
           </button>
@@ -120,7 +139,24 @@ export function DocumentCard({
       )}
 
       {status === "approved" && (
-        <div>{/* Approved documents have no action buttons */}</div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onPreview}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+          >
+            Preview
+            <EyeIcon className="size-3" />
+          </button>
+          <button
+            type="button"
+            onClick={onView}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-200 transition-colors"
+          >
+            Open
+            <FileTextIcon className="size-3" />
+          </button>
+        </div>
       )}
     </div>
   );

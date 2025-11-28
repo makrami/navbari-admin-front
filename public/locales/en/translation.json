@@ -129,6 +129,22 @@
       "notSet": "Not set",
       "notAssigned": "Not assigned"
     },
+    "eta": {
+      "estimatedArrivalToDestination": "Estimated arrival in",
+      "estimatedArrivalToOrigin": "Estimated arrival in",
+      "basedOnLatestGpsUpdate": "(based on latest GPS update)",
+      "driverNotStartedToOrigin": "Driver not started driving to the origin",
+      "lastGpsUpdate": "Last GPS update:",
+      "noGpsUpdateAvailable": "No GPS update available",
+      "justNow": "Just now",
+      "minute": "minute",
+      "minutes": "minutes",
+      "hour": "hour",
+      "hours": "hours",
+      "minutesAgo": "{{count}} Minutes ago",
+      "hoursAgo": "{{count}} Hours ago",
+      "daysAgo": "{{count}} Days ago"
+    },
     "page": {
       "title": "Segments",
       "loading": "Loading segments...",

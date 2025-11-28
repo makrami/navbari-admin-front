@@ -112,6 +112,46 @@
       "placeholder": "Поиск по отправлениям, водителям..."
     }
   },
+  "segments": {
+    "cardHeader": {
+      "destinationFallback": "(НАЗНАЧЕНИЕ)"
+    },
+    "infoBanner": {
+      "from": "От",
+      "to": "До",
+      "notSet": "Не установлено"
+    },
+    "infoGrid": {
+      "startLabel": "НАЧАЛО",
+      "finishLabel": "ПРИБ. ЗАВЕРШЕНИЕ",
+      "vehicleLabel": "ТРАНСПОРТ ВОДИТЕЛЯ",
+      "localCompanyLabel": "МЕСТНАЯ КОМПАНИЯ",
+      "notSet": "Не установлено",
+      "notAssigned": "Не назначено"
+    },
+    "eta": {
+      "estimatedArrivalToDestination": "Примерное время прибытия в пункт назначения",
+      "estimatedArrivalToOrigin": "Примерное время прибытия в пункт отправления",
+      "basedOnLatestGpsUpdate": "(на основе последнего обновления GPS)",
+      "driverNotStartedToOrigin": "Водитель не начал движение к пункту отправления",
+      "lastGpsUpdate": "Последнее обновление GPS:",
+      "noGpsUpdateAvailable": "Обновление GPS недоступно",
+      "justNow": "Только что",
+      "minute": "минута",
+      "minutes": "минут",
+      "hour": "час",
+      "hours": "часов",
+      "minutesAgo": "{{count}} Минут назад",
+      "hoursAgo": "{{count}} Часов назад",
+      "daysAgo": "{{count}} Дней назад"
+    },
+    "page": {
+      "title": "Сегменты",
+      "loading": "Загрузка сегментов...",
+      "closeLabel": "Закрыть",
+      "empty": "Сегменты не найдены"
+    }
+  },
   "sidebar": {
     "brandAlt": "Бренд",
     "profileAlt": "Профиль",

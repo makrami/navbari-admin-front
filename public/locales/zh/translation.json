@@ -112,6 +112,46 @@
       "placeholder": "按货运、司机搜索..."
     }
   },
+  "segments": {
+    "cardHeader": {
+      "destinationFallback": "(目的地)"
+    },
+    "infoBanner": {
+      "from": "从",
+      "to": "到",
+      "notSet": "未设置"
+    },
+    "infoGrid": {
+      "startLabel": "开始",
+      "finishLabel": "预计完成",
+      "vehicleLabel": "司机车辆",
+      "localCompanyLabel": "本地公司",
+      "notSet": "未设置",
+      "notAssigned": "未分配"
+    },
+    "eta": {
+      "estimatedArrivalToDestination": "预计到达目的地时间",
+      "estimatedArrivalToOrigin": "预计到达起点时间",
+      "basedOnLatestGpsUpdate": "（基于最新GPS更新）",
+      "driverNotStartedToOrigin": "司机尚未开始向起点行驶",
+      "lastGpsUpdate": "上次GPS更新：",
+      "noGpsUpdateAvailable": "无GPS更新可用",
+      "justNow": "刚刚",
+      "minute": "分钟",
+      "minutes": "分钟",
+      "hour": "小时",
+      "hours": "小时",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
+    "page": {
+      "title": "路段",
+      "loading": "加载路段中...",
+      "closeLabel": "关闭",
+      "empty": "未找到路段"
+    }
+  },
   "sidebar": {
     "brandAlt": "品牌",
     "profileAlt": "个人资料",

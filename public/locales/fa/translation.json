@@ -129,6 +129,22 @@
       "notSet": "تنظیم نشده",
       "notAssigned": "اختصاص داده نشده"
     },
+    "eta": {
+      "estimatedArrivalToDestination": "زمان تخمینی رسیدن به مقصد",
+      "estimatedArrivalToOrigin": "زمان تخمینی رسیدن به مبدأ",
+      "basedOnLatestGpsUpdate": "(بر اساس آخرین بروزرسانی GPS)",
+      "driverNotStartedToOrigin": "راننده شروع به رانندگی به سمت مبدأ نکرده است",
+      "lastGpsUpdate": "آخرین بروزرسانی GPS:",
+      "noGpsUpdateAvailable": "بروزرسانی GPS در دسترس نیست",
+      "justNow": "همین الان",
+      "minute": "دقیقه",
+      "minutes": "دقیقه",
+      "hour": "ساعت",
+      "hours": "ساعت",
+      "minutesAgo": "{{count}} دقیقه پیش",
+      "hoursAgo": "{{count}} ساعت پیش",
+      "daysAgo": "{{count}} روز پیش"
+    },
     "page": {
       "title": "بخش‌ها",
       "loading": "در حال بارگذاری بخش‌ها...",
