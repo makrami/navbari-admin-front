@@ -11,6 +11,7 @@ import {cn} from "../../shared/utils/cn";
 import {getSegmentListId} from "./utils/getSegmentListId";
 import SegmentDetails from "../shipment/segments/components/SegmentDetails";
 import type {Shipment} from "../../shared/types/shipment";
+import {SEGMENT_STATUS} from "../../services/shipment/shipment.api.service";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
@@ -161,9 +162,7 @@ export function SegmentsPage({
                   );
                   const currentSegmentIndex = shipmentSegments.findIndex(
                     (s) =>
-                      s.progressStage &&
-                      s.progressStage !== "delivered" &&
-                      !s.isCompleted
+                      s.status !== SEGMENT_STATUS.DELIVERED && !s.isCompleted
                   );
 
                   // segment is already Segment, just ensure it has computed fields

@@ -1,12 +1,11 @@
-import { useMemo } from "react";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { Segment } from "../../../shared/types/segmentData";
-import type { FilterType } from "../components/SegmentsFilters";
-import { SEGMENT_STATUS } from "../../../services/shipment/shipment.api.service";
+import {useMemo} from "react";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
+import type {FilterType} from "../components/SegmentsFilters";
+import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
 import {
   computeSegmentPlace,
   computeSegmentNextPlace,
-  getProgressStageFromStatus,
 } from "../../../shared/utils/segmentHelpers";
 
 export function useSegmentsData(
@@ -26,12 +25,6 @@ export function useSegmentsData(
         const isCurrent = segmentIndex === shipment.currentSegmentIndex;
         const isCompleted = seg.status === SEGMENT_STATUS.DELIVERED;
 
-        // Use helper function to get progress stage from status
-        const progressStage = getProgressStageFromStatus(
-          seg.status,
-          isCompleted
-        );
-
         // Use helper functions to compute place and nextPlace
         const place = computeSegmentPlace(seg);
         const nextPlace =
@@ -45,7 +38,7 @@ export function useSegmentsData(
           step: seg.step ?? idx + 1,
           isCurrent,
           isCompleted,
-          progressStage,
+          progressStage: seg.status as unknown as SEGMENT_STATUS,
           place,
           nextPlace,
           shipmentTitle: shipment.title,
@@ -111,7 +104,7 @@ export function useSegmentsData(
         (seg) =>
           seg.place?.toLowerCase().includes(query) ||
           seg.nextPlace?.toLowerCase().includes(query) ||
-          seg.assigneeName?.toLowerCase().includes(query) ||
+          seg.driverName?.toLowerCase().includes(query) ||
           seg.shipmentTitle?.toLowerCase().includes(query)
       );
     }

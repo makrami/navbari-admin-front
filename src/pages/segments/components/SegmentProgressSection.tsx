@@ -1,14 +1,12 @@
 import SegmentProgress from "../../shipment/segments/components/SegmentProgress";
-import type { Segment } from "../../../shared/types/segmentData";
-import { SEGMENT_STATUS } from "../../../services/shipment/shipment.api.service";
+import type {Segment} from "../../../shared/types/segmentData";
+import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
 
 type SegmentProgressSectionProps = {
   segment: Segment;
 };
 
-export function SegmentProgressSection({
-  segment,
-}: SegmentProgressSectionProps) {
+export function SegmentProgressSection({segment}: SegmentProgressSectionProps) {
   if (
     segment.isCompleted ||
     !segment.status ||
@@ -19,7 +17,7 @@ export function SegmentProgressSection({
         SEGMENT_STATUS.TO_DESTINATION,
         SEGMENT_STATUS.IN_CUSTOMS,
       ] as SEGMENT_STATUS[]
-    ).includes(segment.status)
+    ).includes(segment.status as unknown as SEGMENT_STATUS)
   ) {
     return null;
   }

@@ -40,7 +40,7 @@ function getCountryCode(countryName: string): string {
 /**
  * Construct full URL for file (avatar, document, etc.)
  */
-function getFileUrl(filePath: string | null | undefined): string | undefined {
+export function getFileUrl(filePath: string | null | undefined): string | undefined {
   if (!filePath) return undefined;
 
   // If already a full URL, return as is

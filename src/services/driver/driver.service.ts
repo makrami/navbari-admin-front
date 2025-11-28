@@ -1,5 +1,5 @@
-import { http } from "../../lib/http";
-import type { Driver } from "../../pages/Drivers/types";
+import {http} from "../../lib/http";
+import type {Driver} from "../../pages/Drivers/types";
 
 /**
  * Fetch list of drivers from API
@@ -26,10 +26,18 @@ export async function updateDriverStatus(
 }
 
 /**
+ * Fetch driver details from API
+ */
+export async function getDriverDetails(driverId: string): Promise<Driver> {
+  const response = await http.get<Driver>(`/drivers/${driverId}`);
+  return response.data;
+}
+
+/**
  * Approve a driver
  */
 export async function approveDriver(id: string): Promise<Driver> {
-  return updateDriverStatus(id, { status: "approved" });
+  return updateDriverStatus(id, {status: "approved"});
 }
 
 /**

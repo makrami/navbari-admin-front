@@ -1,12 +1,10 @@
 import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {EntityCard} from "../../shared/components/ui/EntityCard";
 import {StatusFilterChips} from "./components/StatusFilterChips";
 import type {FilterKey} from "./components/StatusFilterChips";
 import {ListPanel} from "../../shared/components/ui/ListPanel";
 import {DetailsPanel} from "../shipment/details/DetailsPanel";
 import {CompanyDetails} from "./components/CompanyDetails";
-import {AddLocalCompany} from "./components/AddLocalCompany";
 import {PanelRightClose} from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
@@ -18,43 +16,27 @@ import {
   useSuspendCompany,
   useUnsuspendCompany,
 } from "../../services/company/hooks";
-import {COMPANY_STATUS} from "../../services/company/company.service";
 import {apiStatusToUiStatus} from "./types";
 import {CompanyCard} from "./components/CompanyCard";
-
-// Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
 export function LocalCompaniesPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const {t} = useTranslation();
 
-  // Build filters for API call
-  const apiFilters = useMemo(() => {
-    const filters: {status?: COMPANY_STATUS} = {};
-    if (activeFilter !== "all") {
-      // Map UI status to API status
-      if (activeFilter === "active") filters.status = COMPANY_STATUS.APPROVED;
-      else if (activeFilter === "inactive")
-        filters.status = COMPANY_STATUS.SUSPENDED;
-      else if (activeFilter === "pending")
-        filters.status = COMPANY_STATUS.PENDING;
-      else if (activeFilter === "rejected")
-        filters.status = COMPANY_STATUS.REJECTED;
-    }
-    return filters;
-  }, [activeFilter]);
-
-  // Fetch companies
-  const {data: companies = [], isLoading, error} = useCompanies(apiFilters);
+  // Fetch all companies with no filters
+  const {data: companies = [], isLoading, error} = useCompanies({});
   const {data: companyDetails} = useCompanyDetails(selectedId);
   const suspendMutation = useSuspendCompany();
   const unsuspendMutation = useUnsuspendCompany();
 
-  // Filter companies based on UI filter
+  // Filter companies based on UI filter only (all companies are fetched)
   const filteredCompanies = useMemo(() => {
     if (activeFilter === "all") return companies;
-    return companies.filter((c) => c.status === activeFilter);
+    // The filter key is a UI mapping; company.status is the API status
+    return companies.filter(
+      (c) => apiStatusToUiStatus(c.status) === activeFilter
+    );
   }, [companies, activeFilter]);
 
   // Calculate counts by filter
@@ -174,7 +156,6 @@ export function LocalCompaniesPage() {
           counts={countByFilter as Record<FilterKey, number>}
           isListPanel={true}
         />
-        <AddLocalCompany />
         <div className="grid gap-4">
           {filteredCompanies.map((c) => (
             <CompanyCard
@@ -243,10 +224,7 @@ export function LocalCompaniesPage() {
                     companyId={selectedId}
                     initialValue={selectedCompany.internalNote || ""}
                   />
-                  <RecentActivities
-                    companyId={selectedId}
-                    company={companyDetails || selectedCompany}
-                  />
+                  <RecentActivities companyId={selectedId} />
                 </div>
               )}
             </DetailsPanel>

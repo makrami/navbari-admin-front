@@ -1,10 +1,9 @@
 import {useState, useEffect} from "react";
 import {cn} from "../../../shared/utils/cn";
-import {ChevronRight, ChevronLeft, ArrowRight} from "lucide-react";
+import {ArrowRight} from "lucide-react";
 import {listSegments} from "../../../services/shipment/shipment.api.service";
 import type {Segment} from "../../../shared/types/segmentData";
 import {SegmentStatus} from "../../../shared/types/segmentData";
-import type {CompanyReadDto} from "../types";
 
 type Activity = {
   id: string;
@@ -146,10 +145,9 @@ function mapSegmentToActivity(segment: Segment): Activity {
 
 type Props = {
   companyId: string;
-  company?: CompanyReadDto;
 };
 
-export default function RecentActivities({companyId, company}: Props) {
+export default function RecentActivities({companyId}: Props) {
   const [items, setItems] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

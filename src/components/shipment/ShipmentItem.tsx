@@ -60,16 +60,8 @@ export function ShipmentItem({
   );
 
   // Extract driver info from first in-progress segment
-  const driverName =
-    inProgressSegment?.driverName ||
-    inProgressSegment?.assigneeName ||
-    userName ||
-    null;
-  const driverAvatarUrl =
-    inProgressSegment?.driverAvatarUrl ||
-    inProgressSegment?.assigneeAvatarUrl ||
-    inProgressSegment?.driverPhoto ||
-    null;
+  const driverName = inProgressSegment?.driverName || userName || null;
+  const driverAvatarUrl = inProgressSegment?.driverAvatarUrl || undefined;
 
   return (
     <button

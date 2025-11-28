@@ -1,7 +1,5 @@
 import {Button} from "../../../shared/components/ui/Button";
 import type {Company} from "../types";
-import type {CompanyStatus} from "../types";
-import {STATUS_TO_COLOR} from "../types";
 import {cn} from "../../../shared/utils/cn";
 import {
   User as UserIcon,
@@ -45,8 +43,6 @@ export function CompanyCard({
   onReject,
   onView,
 }: Props) {
-  const colors = STATUS_TO_COLOR[company.status as CompanyStatus];
-
   return (
     <div
       className={cn(

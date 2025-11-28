@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {cn} from "../../../shared/utils/cn";
-import {ChevronRight, ChevronLeft, ArrowRight} from "lucide-react";
+import {ArrowRight} from "lucide-react";
 import type {Driver} from "../types";
 import {listSegments} from "../../../services/shipment/shipment.api.service";
 import type {Segment} from "../../../shared/types/segmentData";
@@ -195,7 +195,14 @@ export default function RecentActivities({driver}: Props) {
             Total Delays
           </h3>
           <p className="text-2xl font-bold text-slate-900">
-            {driver?.totalDelays ?? 0}
+            {(() => {
+              const delays = driver?.totalDelays ?? 0;
+              if (delays < 60) {
+                return `${delays} min`;
+              }
+              const hours = (delays / 60).toFixed(1).replace(/\.0$/, "");
+              return `${hours} hr${hours !== "1" ? "s" : ""}`;
+            })()}
           </p>
         </div>
         <div className="bg-white rounded-2xl p-4  border border-slate-100">

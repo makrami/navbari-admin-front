@@ -66,6 +66,7 @@ export interface ShipmentReadDto {
   destinationCity: string;
   cargoType: string;
   cargoWeight: number;
+  progressPercent: number;
   cargoDescription?: string | null;
   status: SHIPMENT_STATUS;
   createdAt: string;
@@ -156,21 +157,13 @@ function mapShipmentDtoToShipment(dto: ShipmentReadDto): Shipment {
       break;
   }
 
-  // Calculate progress based on segments - use SEGMENT_STATUS directly
-  const totalSegments = segments.length;
-  const completedSegments = segments.filter(
-    (s) => s.status === SEGMENT_STATUS.DELIVERED
-  ).length;
-  const progressPercent =
-    totalSegments > 0 ? (completedSegments / totalSegments) * 100 : 0;
-
   return {
     id: dto.id,
     title: dto.title,
     status,
     fromCountryCode: dto.originCountry, // Using country name as code for now
     toCountryCode: dto.destinationCountry, // Using country name as code for now
-    progressPercent,
+    progressPercent: dto.progressPercent,
     source: "api",
     segments,
     // Required fields from DTO

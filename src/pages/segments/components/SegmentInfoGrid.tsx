@@ -34,7 +34,7 @@ export function SegmentInfoGrid({segment}: SegmentInfoGridProps) {
           <span>{t("segments.infoGrid.vehicleLabel")}</span>
         </div>
         <div className="text-xs text-slate-900">
-          {segment.vehicleLabel || t("segments.infoGrid.notAssigned")}
+          {segment.vehicleType || t("segments.infoGrid.notAssigned")}
         </div>
       </div>
       <div className="rounded-lg border border-slate-200 p-3">

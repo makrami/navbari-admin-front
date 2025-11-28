@@ -30,7 +30,6 @@ export function DocumentCard({
   sizeLabel,
   status,
   className,
-  filePath,
   onApprove,
   onReject,
   onReasons,

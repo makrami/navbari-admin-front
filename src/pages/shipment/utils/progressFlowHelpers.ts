@@ -1,6 +1,6 @@
-import type { SegmentProgressStage } from "../segments/components/SegmentProgress";
-import type { Shipment } from "../../../shared/types/shipment";
-import type { Segment } from "../../../shared/types/segmentData";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
+import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
 export type ProgressExtraField = {
   label: string;
   value: string;
@@ -8,7 +8,7 @@ export type ProgressExtraField = {
 };
 
 export type ProgressFlowData = {
-  progressStage: SegmentProgressStage;
+  progressStage: SEGMENT_STATUS;
   badge?: string;
   showWarningIcon: boolean;
   dateTime: string;
@@ -19,7 +19,7 @@ export type ProgressFlowData = {
  * Extracts progress flow data from current segment based on progress stage
  */
 export function getProgressFlowData(
-  progressStage: SegmentProgressStage,
+  progressStage: SEGMENT_STATUS,
   segment: Segment | undefined,
   shipment: Shipment
 ): ProgressFlowData {
@@ -33,11 +33,11 @@ export function getProgressFlowData(
 
   // Determine badge and extra fields based on progress stage
   switch (progressStage) {
-    case "pending_assignment":
+    case SEGMENT_STATUS.PENDING_ASSIGNMENT:
       badge = "Pending";
       showWarningIcon = !segment?.isCompleted;
       break;
-    case "assigned":
+    case SEGMENT_STATUS.ASSIGNED:
       badge = "Planned";
       showWarningIcon = !segment?.isCompleted;
       if (segment?.startedAt) {
@@ -48,10 +48,10 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "to_origin":
+    case SEGMENT_STATUS.TO_ORIGIN:
       badge = "Planned";
       showWarningIcon = !segment?.isCompleted;
-      extraFields.push({ label: "34 KM", value: "" });
+      extraFields.push({label: "34 KM", value: ""});
       if (segment?.estimatedFinishTime) {
         extraFields.push({
           label: "Est. (GPS)",
@@ -60,7 +60,7 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "at_origin":
+    case SEGMENT_STATUS.AT_ORIGIN:
       badge = "Planned";
       showWarningIcon = !segment?.isCompleted;
       if (segment?.startedAt) {
@@ -71,7 +71,7 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "loading":
+    case SEGMENT_STATUS.LOADING:
       badge = "Loading";
       showWarningIcon = !segment?.isCompleted;
       if (segment?.estimatedFinishTime) {
@@ -82,7 +82,7 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "in_customs":
+    case SEGMENT_STATUS.IN_CUSTOMS:
       badge = "Planned";
       if (segment?.estimatedFinishTime) {
         extraFields.push({
@@ -92,9 +92,9 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "to_destination":
+    case SEGMENT_STATUS.TO_DESTINATION:
       badge = "Planned";
-      extraFields.push({ label: "34 KM", value: "" });
+      extraFields.push({label: "34 KM", value: ""});
       if (segment?.estimatedFinishTime) {
         extraFields.push({
           label: "Est. (GPS)",
@@ -103,7 +103,7 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "at_destination":
+    case SEGMENT_STATUS.AT_DESTINATION:
       badge = "At Destination";
       showWarningIcon = !segment?.isCompleted;
       if (segment?.estimatedFinishTime) {
@@ -114,9 +114,9 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "delivered":
+    case SEGMENT_STATUS.DELIVERED:
       badge = "Planned";
-      extraFields.push({ label: "Click to Summary", value: "" });
+      extraFields.push({label: "Click to Summary", value: ""});
       if (segment?.deliveredAt) {
         extraFields.push({
           label: "Delivered At",
@@ -125,11 +125,11 @@ export function getProgressFlowData(
         });
       }
       break;
-    case "cancelled":
+    case SEGMENT_STATUS.CANCELLED:
       badge = "Cancelled";
       showWarningIcon = true;
       break;
   }
 
-  return { progressStage, badge, showWarningIcon, dateTime, extraFields };
+  return {progressStage, badge, showWarningIcon, dateTime, extraFields};
 }

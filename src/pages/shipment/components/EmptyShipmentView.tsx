@@ -1,11 +1,10 @@
-import AddShipmentModal, {
-  type AddShipmentInput as AddShipmentFormInput,
-} from "./AddShipmentModal";
+import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
+import AddShipmentModal from "./AddShipmentModal";
 
 type EmptyShipmentViewProps = {
   showAddShipment: boolean;
   onCloseAddShipment: () => void;
-  onCreateShipment: (data: AddShipmentFormInput) => void;
+  onCreateShipment: (data: CreateShipmentDto) => void;
 };
 
 export function EmptyShipmentView({
@@ -30,4 +29,3 @@ export function EmptyShipmentView({
     </div>
   );
 }
-

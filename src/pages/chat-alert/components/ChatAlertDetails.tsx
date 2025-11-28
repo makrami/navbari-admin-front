@@ -1,18 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 import dayjs from "dayjs";
-import type { ChatAlert } from "../data";
-import { ChatSection } from "./ChatSection";
-import { ShipmentHeader } from "./ShipmentHeader";
-import { DriverAndShipmentInfo } from "./DriverAndShipmentInfo";
-import { FinancialCards } from "./FinancialCards";
-import { SegmentSection } from "./SegmentSection";
+import type {ChatAlert} from "../data";
+import {ChatSection} from "./ChatSection";
+import {ShipmentHeader} from "./ShipmentHeader";
 import {
   useConversationMessages,
   useMarkConversationRead,
   useSendChatAlert,
   useSendChatMessage,
 } from "../../../services/chat/hooks";
-import { useChatSocket } from "../../../services/chat/socket";
+import {useChatSocket} from "../../../services/chat/socket";
 import {
   CHAT_ALERT_TYPE,
   CHAT_MESSAGE_TYPE,
@@ -21,12 +18,12 @@ import {
   type ConversationReadDto,
   type MessageReadDto,
 } from "../../../services/chat/chat.types";
-import type { ActionableAlertChip, AlertType, Message } from "../types/chat";
-import { ENV } from "../../../lib/env";
-import { useDrivers } from "../../../services/driver/hooks";
-import { useCompany } from "../../../services/company/hooks";
-import { DriverDetails } from "../../Drivers/components/DriverDetails";
-import { CompanyDetails } from "../../LocalCompanies/components/CompanyDetails";
+import type {ActionableAlertChip, AlertType, Message} from "../types/chat";
+import {ENV} from "../../../lib/env";
+import {useDriverDetails} from "../../../services/driver/hooks";
+import {useCompanyDetails} from "../../../services/company/hooks";
+import {DriverDetails} from "../../Drivers/components/DriverDetails";
+import {CompanyDetails} from "../../LocalCompanies/components/CompanyDetails";
 
 type ChatAlertDetailsProps = {
   chatAlert: ChatAlert;
@@ -37,10 +34,10 @@ type ChatAlertDetailsProps = {
 };
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
+  {id: "1", label: "GPS Lost", alertType: "alert"},
+  {id: "2", label: "Delay Expected", alertType: "warning"},
+  {id: "3", label: "Route Cleared", alertType: "success"},
+  {id: "4", label: "Documentation Pending", alertType: "info"},
 ];
 
 export function ChatAlertDetails({
@@ -48,23 +45,8 @@ export function ChatAlertDetails({
   conversation,
   currentUserId,
   onClose,
-  currentStateIndex,
 }: ChatAlertDetailsProps) {
   const [isTyping, setIsTyping] = useState(false);
-  const effectiveStateIndex = currentStateIndex ?? 0;
-  const financialData = {
-    estFinish: chatAlert.estFinish || "",
-    totalPaid: chatAlert.totalPaid || "$0",
-    totalPending: chatAlert.totalPending || "$0",
-  };
-
-  const segmentData = chatAlert.currentSegment || {
-    number: 1,
-    from: "",
-    to: "",
-    distance: "",
-  };
-
   const {
     data: messagesPages,
     isLoading: messagesLoading,
@@ -78,24 +60,10 @@ export function ChatAlertDetails({
   const markConversationRead = useMarkConversationRead();
 
   // Fetch driver or company data based on recipient type
-  const { data: drivers = [] } = useDrivers();
-  const selectedDriver = useMemo(() => {
-    if (
-      conversation.recipientType === CHAT_RECIPIENT_TYPE.DRIVER &&
-      conversation.driverId
-    ) {
-      return drivers.find((d) => d.id === conversation.driverId);
-    }
-    return null;
-  }, [drivers, conversation.driverId, conversation.recipientType]);
-
-  const { data: selectedCompany } = useCompany(
-    conversation.recipientType === CHAT_RECIPIENT_TYPE.COMPANY &&
-      conversation.companyId
-      ? conversation.companyId
-      : null
-  );
-
+  const selectedDriver = useDriverDetails(conversation.driverId ?? null);
+  console.log("🚚 Selected driver:", selectedDriver.data);
+  const selectedCompany = useCompanyDetails(conversation.companyId ?? null);
+  console.log("🚚 Selected company:", selectedCompany.data);
   // Listen to typing events via socket
   useChatSocket(conversation.id, setIsTyping);
 
@@ -140,57 +108,11 @@ export function ChatAlertDetails({
       messageIds: mapped.map((m) => m.id).slice(-5), // Last 5 message IDs
       messagesWithStatus: mapped
         .filter((m) => m.status)
-        .map((m) => ({ id: m.id, status: m.status })),
+        .map((m) => ({id: m.id, status: m.status})),
     });
 
     return mapped;
   }, [messagesPages, currentUserId, conversation.id]);
-
-  const segmentIds = useMemo<string[]>(() => [], []);
-
-  const initialView = useMemo(() => {
-    if (!chatAlert.segmentPath || chatAlert.segmentPath.length === 0) {
-      return {
-        longitude: 0,
-        latitude: 0,
-        zoom: 2,
-      };
-    }
-
-    const lons = chatAlert.segmentPath.map((p) => p[0]);
-    const lats = chatAlert.segmentPath.map((p) => p[1]);
-
-    const minLon = Math.min(...lons);
-    const maxLon = Math.max(...lons);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-
-    const centerLon = (minLon + maxLon) / 2;
-    const centerLat = (minLat + maxLat) / 2;
-
-    const lonSpan = maxLon - minLon;
-    const latSpan = maxLat - minLat;
-    const maxSpan = Math.max(lonSpan, latSpan);
-
-    let zoom = 5;
-    if (maxSpan > 50) {
-      zoom = 3;
-    } else if (maxSpan > 20) {
-      zoom = 4;
-    } else if (maxSpan > 10) {
-      zoom = 5;
-    } else if (maxSpan > 5) {
-      zoom = 6;
-    } else {
-      zoom = 7;
-    }
-
-    return {
-      longitude: centerLon,
-      latitude: centerLat,
-      zoom,
-    };
-  }, [chatAlert.segmentPath]);
 
   const handleSendMessage = (payload: {
     content: string;
@@ -232,29 +154,11 @@ export function ChatAlertDetails({
 
         {/* Show Driver or Company Details based on recipient type */}
         {conversation.recipientType === CHAT_RECIPIENT_TYPE.DRIVER &&
-          selectedDriver && <DriverDetails driver={selectedDriver} />}
+          selectedDriver.data && <DriverDetails driver={selectedDriver.data} />}
         {conversation.recipientType === CHAT_RECIPIENT_TYPE.COMPANY &&
-          selectedCompany && <CompanyDetails company={selectedCompany} />}
-
-        {/* Only show DriverAndShipmentInfo for driver conversations */}
-        {conversation.recipientType === CHAT_RECIPIENT_TYPE.DRIVER && (
-          <DriverAndShipmentInfo
-            chatAlert={chatAlert}
-            segmentIds={segmentIds}
-            initialView={initialView}
-          />
-        )}
-
-        <FinancialCards
-          estFinish={financialData.estFinish}
-          totalPaid={financialData.totalPaid}
-          totalPending={financialData.totalPending}
-        />
-
-        <SegmentSection
-          currentSegment={segmentData}
-          currentStateIndex={effectiveStateIndex}
-        />
+          selectedCompany.data && (
+            <CompanyDetails company={selectedCompany.data} />
+          )}
       </div>
 
       {/* Chat Section */}
@@ -314,7 +218,7 @@ function mapMessageDtoToUi(
       fileUrl,
       fileName: message.fileName || undefined,
       status: (
-        message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
+        message as MessageReadDto & {_status?: "sending" | "failed" | "sent"}
       )._status, // Get status from temporary message
     };
   }
@@ -331,7 +235,7 @@ function mapMessageDtoToUi(
     fileName: message.fileName || undefined,
     fileMimeType: message.fileMimeType || undefined,
     status: (
-      message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
+      message as MessageReadDto & {_status?: "sending" | "failed" | "sent"}
     )._status, // Get status from temporary message
   };
 }

@@ -100,6 +100,7 @@ export type Driver = {
   rating: number;
   totalDeliveries: number;
   totalDelays: number;
+  totalShipments: number;
   gpsUptimePercent: number;
   lastGpsLatitude: number;
   lastGpsLongitude: number;
@@ -113,7 +114,7 @@ export type Driver = {
 
 export const STATUS_TO_COLOR: Record<
   DriverStatus,
-  { bar: string; pill: string; pillText: string }
+  {bar: string; pill: string; pillText: string}
 > = {
   pending: {
     bar: "bg-amber-300",

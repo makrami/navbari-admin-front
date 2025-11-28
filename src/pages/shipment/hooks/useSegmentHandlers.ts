@@ -41,9 +41,9 @@ export function useSegmentHandlers(
           baseFee: update.baseFee ?? base[segmentIndex].baseFee,
           cargoCompanies:
             update.cargoCompanies ?? base[segmentIndex].cargoCompanies,
-          driverName: update.assigneeName ?? base[segmentIndex].driverName,
+          driverName: update.driverName ?? base[segmentIndex].driverName,
           driverPhoto:
-            update.assigneeAvatarUrl ?? base[segmentIndex].driverPhoto,
+            update.driverAvatarUrl ?? base[segmentIndex].driverAvatarUrl,
           isPlaceholder:
             update.isPlaceholder ?? base[segmentIndex].isPlaceholder,
           isCompleted: update.isCompleted ?? base[segmentIndex].isCompleted,
@@ -76,8 +76,9 @@ export function useSegmentHandlers(
             update.estimatedFinishTime ?? base[index].estimatedFinishTime,
           baseFee: update.baseFee ?? base[index].baseFee,
           cargoCompanies: update.cargoCompanies ?? base[index].cargoCompanies,
-          driverName: update.assigneeName ?? base[index].driverName,
-          driverPhoto: update.assigneeAvatarUrl ?? base[index].driverPhoto,
+          driverName: update.driverName ?? base[index].driverName,
+          driverAvatarUrl:
+            update.driverAvatarUrl ?? base[index].driverAvatarUrl,
           isPlaceholder: update.isPlaceholder ?? base[index].isPlaceholder,
           isCompleted: update.isCompleted ?? base[index].isCompleted,
         } as Segment;

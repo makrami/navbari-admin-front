@@ -5,11 +5,13 @@ import {
   Check,
   UserRound,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { cn } from "../../../shared/utils/cn";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { Segment } from "../../../shared/types/segmentData";
+import {useTranslation} from "react-i18next";
+import {cn} from "../../../shared/utils/cn";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
 import SegmentProgress from "../../shipment/segments/components/SegmentProgress";
+import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
+import {getFileUrl} from "../../LocalCompanies/utils";
 
 type SegmentCardHeaderProps = {
   segment: Segment;
@@ -25,7 +27,7 @@ export function SegmentCardHeader({
   onToggle,
   isHighlighted = false,
 }: SegmentCardHeaderProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   return (
     <div
       className={cn(
@@ -70,18 +72,19 @@ export function SegmentCardHeader({
               {segment.nextPlace ||
                 t("segments.cardHeader.destinationFallback")}
             </span>
-            {segment.isCompleted && segment.progressStage === "delivered" ? (
+            {segment.isCompleted &&
+            segment.status === SEGMENT_STATUS.DELIVERED ? (
               <Check className="size-[14px] text-green-600 shrink-0" />
             ) : null}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {segment.assigneeName && (
+          {segment.driverName && (
             <>
-              {segment.assigneeAvatarUrl ? (
+              {segment.driverAvatarUrl ? (
                 <img
-                  src={segment.assigneeAvatarUrl}
-                  alt={segment.assigneeName}
+                  src={getFileUrl(segment.driverAvatarUrl)}
+                  alt={segment.driverName}
                   className="size-5 rounded-full"
                 />
               ) : (
@@ -90,7 +93,7 @@ export function SegmentCardHeader({
                 </div>
               )}
               <span className="text-sm text-slate-900">
-                {segment.assigneeName}
+                {segment.driverName}
               </span>
             </>
           )}
@@ -104,9 +107,11 @@ export function SegmentCardHeader({
           </button>
         </div>
       </div>
-      {segment.progressStage && segment.progressStage !== "delivered" ? (
+      {segment.status && segment.status !== SEGMENT_STATUS.DELIVERED ? (
         <div className="px-4 pb-3 pt-2">
-          <SegmentProgress current={segment.progressStage} />
+          <SegmentProgress
+            current={segment.status as unknown as SEGMENT_STATUS}
+          />
         </div>
       ) : null}
     </div>

@@ -1,5 +1,5 @@
 import type {HTMLAttributes} from "react";
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {cn} from "../../../shared/utils/cn";
 import {
   FileText as FileTextIcon,
@@ -63,8 +63,6 @@ function DocumentCard({
   // Check if file is an image
   const isImage =
     fileUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.filePath || "");
-  // Check if file is a PDF
-  const isPdf = fileUrl && /\.pdf$/i.test(doc.filePath || "");
 
   const handleView = () => {
     if (fileUrl) {
@@ -215,9 +213,11 @@ export default function DocumentsList({
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null
   );
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [previewDocument, setPreviewDocument] =
     useState<CompanyDocumentReadDto | null>(null);
+
+  // New ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleApprove = async (id: string) => {
     try {
@@ -262,7 +262,9 @@ export default function DocumentsList({
         documentType,
         file,
       });
-      setShowUploadDialog(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset input to allow uploading the same file again
+      }
     } catch (error) {
       console.error("Failed to upload document:", error);
     }
@@ -276,14 +278,24 @@ export default function DocumentsList({
     <section className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        <button
-          type="button"
-          onClick={() => setShowUploadDialog(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-        >
-          <UploadIcon className="size-4" />
-          Upload
-        </button>
+        <div>
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            style={{display: "none"}}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+          >
+            <UploadIcon className="size-4" />
+            Upload
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -347,30 +359,6 @@ export default function DocumentsList({
         </div>
       )}
 
-      {/* Upload Dialog */}
-      {showUploadDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Upload Document</h3>
-            <input
-              type="file"
-              onChange={handleFileUpload}
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              className="w-full mb-4"
-            />
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowUploadDialog(false)}
-                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* File Preview Modal */}
       {previewDocument && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
@@ -408,8 +396,6 @@ export default function DocumentsList({
                   /\.(jpg|jpeg|png|gif|webp)$/i.test(
                     previewDocument.filePath || ""
                   );
-                const isPdf =
-                  previewUrl && /\.pdf$/i.test(previewDocument.filePath || "");
 
                 if (isImage && previewUrl) {
                   return (
@@ -420,17 +406,6 @@ export default function DocumentsList({
                         previewDocument.documentType
                       }
                       className="max-w-full h-auto mx-auto"
-                    />
-                  );
-                } else if (isPdf && previewUrl) {
-                  return (
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-full min-h-[600px] border-0"
-                      title={
-                        documentTypeLabels[previewDocument.documentType] ||
-                        previewDocument.documentType
-                      }
                     />
                   );
                 } else if (previewUrl) {

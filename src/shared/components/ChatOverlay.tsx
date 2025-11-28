@@ -1,10 +1,7 @@
-import { X, MessageSquareText } from "lucide-react";
-import { ChatSection } from "../../pages/chat-alert/components/ChatSection";
-import type {
-  ActionableAlertChip,
-  Message,
-} from "../../pages/chat-alert/types/chat";
-import type { UseChatWithRecipientReturn } from "../hooks/useChatWithRecipient";
+import {X, MessageSquareText} from "lucide-react";
+import {ChatSection} from "../../pages/chat-alert/components/ChatSection";
+import type {ActionableAlertChip} from "../../pages/chat-alert/types/chat";
+import type {UseChatWithRecipientReturn} from "../hooks/useChatWithRecipient";
 
 export interface ChatOverlayProps {
   isOpen: boolean;
@@ -58,10 +55,7 @@ export function ChatOverlay({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-          <h2
-            id="chat-title"
-            className="text-lg font-semibold text-slate-900"
-          >
+          <h2 id="chat-title" className="text-lg font-semibold text-slate-900">
             Chat with {recipientName}
           </h2>
           <button
@@ -102,7 +96,8 @@ export function ChatOverlay({
                         </div>
                       </div>
                     ),
-                    text: emptyStateText || `Start Messaging to ${recipientName}`,
+                    text:
+                      emptyStateText || `Start Messaging to ${recipientName}`,
                   }
                 : undefined
             }
@@ -112,4 +107,3 @@ export function ChatOverlay({
     </>
   );
 }
-

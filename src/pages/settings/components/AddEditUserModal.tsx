@@ -68,7 +68,6 @@ export function AddEditUserModal({
   open,
   mode,
   roleName,
-  roleId,
   initialUser,
   onClose,
   onSubmit,

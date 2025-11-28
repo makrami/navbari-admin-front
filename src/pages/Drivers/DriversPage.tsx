@@ -267,7 +267,7 @@ export function DriversPage() {
                   </div>
                   <DriverDetails driver={selectedDriver} />
                   <RecentActivities driver={selectedDriver} />
-                  <DocumentsList />
+                  <DocumentsList driverId={selectedDriver.id} />
                   <InternalNotes />
                 </div>
               )}

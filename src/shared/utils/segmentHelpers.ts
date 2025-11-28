@@ -1,6 +1,5 @@
-import type { Segment } from "../types/segmentData";
-import { SEGMENT_STATUS } from "../../services/shipment/shipment.api.service";
-import type { SegmentProgressStage } from "../../pages/shipment/segments/components/SegmentProgress";
+import type {Segment} from "../types/segmentData";
+import {SEGMENT_STATUS} from "../../services/shipment/shipment.api.service";
 
 /**
  * Computes UI fields from Segment
@@ -15,9 +14,7 @@ export function computeSegmentPlace(segment: Segment): string {
   return segment.originCity || segment.originCountry || "";
 }
 
-export function computeSegmentNextPlace(
-  segment: Segment
-): string | undefined {
+export function computeSegmentNextPlace(segment: Segment): string | undefined {
   if (segment.nextPlace) return segment.nextPlace;
   if (segment.destinationCity && segment.destinationCountry) {
     return `${segment.destinationCity}, ${segment.destinationCountry}`;
@@ -46,39 +43,4 @@ export function computeHasDisruption(segment: Segment): boolean {
     segment.status === SEGMENT_STATUS.CANCELLED ||
     segment.status === SEGMENT_STATUS.AT_ORIGIN
   );
-}
-
-/**
- * Get progress stage from segment status (using backend enum directly)
- */
-export function getProgressStageFromStatus(
-  status: SEGMENT_STATUS,
-  isCompleted: boolean
-): SegmentProgressStage | undefined {
-  if (isCompleted) return "delivered";
-
-  switch (status) {
-    case SEGMENT_STATUS.PENDING_ASSIGNMENT:
-      return "pending_assignment";
-    case SEGMENT_STATUS.ASSIGNED:
-      return "assigned";
-    case SEGMENT_STATUS.TO_ORIGIN:
-      return "to_origin";
-    case SEGMENT_STATUS.AT_ORIGIN:
-      return "at_origin";
-    case SEGMENT_STATUS.LOADING:
-      return "loading";
-    case SEGMENT_STATUS.IN_CUSTOMS:
-      return "in_customs";
-    case SEGMENT_STATUS.TO_DESTINATION:
-      return "to_destination";
-    case SEGMENT_STATUS.AT_DESTINATION:
-      return "at_destination";
-    case SEGMENT_STATUS.DELIVERED:
-      return "delivered";
-    case SEGMENT_STATUS.CANCELLED:
-      return "cancelled";
-    default:
-      return undefined;
-  }
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import {useState, useMemo, useEffect} from "react";
 import dayjs from "dayjs";
 import {
   useChatConversations,
@@ -7,8 +7,8 @@ import {
   useSendChatAlert,
   useMarkConversationRead,
 } from "../../services/chat/hooks";
-import { useChatSocket } from "../../services/chat/socket";
-import { useCurrentUser } from "../../services/user/hooks";
+import {useChatSocket} from "../../services/chat/socket";
+import {useCurrentUser} from "../../services/user/hooks";
 import {
   CHAT_RECIPIENT_TYPE,
   CHAT_MESSAGE_TYPE,
@@ -16,13 +16,14 @@ import {
   type ChatAlertType,
   type MessageReadDto,
   type ChatRecipientType,
+  type ConversationReadDto,
 } from "../../services/chat/chat.types";
 import type {
   ActionableAlertChip,
   AlertType,
   Message,
 } from "../../pages/chat-alert/types/chat";
-import { ENV } from "../../lib/env";
+import {ENV} from "../../lib/env";
 
 export interface UseChatWithRecipientOptions {
   recipientType: ChatRecipientType;
@@ -35,14 +36,14 @@ export interface UseChatWithRecipientReturn {
   isChatOpen: boolean;
   setIsChatOpen: (open: boolean) => void;
   isTyping: boolean;
-  conversation: ReturnType<typeof useChatConversations>["data"][number] | undefined;
+  conversation: ConversationReadDto | undefined;
   messages: Message[];
   messagesLoading: boolean;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   sendMessageMutation: ReturnType<typeof useSendChatMessage>;
   sendAlertMutation: ReturnType<typeof useSendChatAlert>;
-  handleSendMessage: (payload: { content: string; file?: File | null }) => void;
+  handleSendMessage: (payload: {content: string; file?: File | null}) => void;
   handleAlertChipClick: (chip: ActionableAlertChip) => void;
   fetchNextPage: () => void;
   canLoadMore: boolean;
@@ -53,14 +54,13 @@ export function useChatWithRecipient({
   recipientType,
   driverId,
   companyId,
-  recipientName,
 }: UseChatWithRecipientOptions): UseChatWithRecipientReturn {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const { data: currentUser } = useCurrentUser();
+  const {data: currentUser} = useCurrentUser();
 
   // Fetch conversations based on recipient type
-  const { data: conversations = [] } = useChatConversations(recipientType);
+  const {data: conversations = []} = useChatConversations(recipientType);
 
   // Find conversation for this recipient
   const conversation = useMemo(() => {
@@ -129,7 +129,7 @@ export function useChatWithRecipient({
     file?: File | null;
   }) => {
     if (!payload.content && !payload.file) return;
-    
+
     const basePayload = {
       content: payload.content,
       file: payload.file ?? undefined,
@@ -245,4 +245,3 @@ function resolveFileUrl(filePath: string) {
   }
   return `${ENV.FILE_BASE_URL}/${filePath.replace(/^\/+/, "")}`;
 }
-

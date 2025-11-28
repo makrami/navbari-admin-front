@@ -9,7 +9,6 @@ import {
   MessagesSquareIcon,
 } from "lucide-react";
 import {STATUS_TO_COLOR} from "../types";
-import {formatDriverForEntityCard} from "../utils";
 import {ENV} from "../../../lib/env";
 import {useChatWithRecipient} from "../../../shared/hooks/useChatWithRecipient";
 import {ChatOverlay} from "../../../shared/components/ChatOverlay";
@@ -38,7 +37,6 @@ function getFileUrl(filePath: string | null | undefined): string | undefined {
 
 export function DriverDetails({driver}: Props) {
   const colors = STATUS_TO_COLOR[driver.status];
-  const driverCard = formatDriverForEntityCard(driver);
   const driverName = driver.user?.fullName || "Unknown Driver";
   const phone = driver.user?.phoneNumber || "N/A";
 
@@ -134,16 +132,9 @@ export function DriverDetails({driver}: Props) {
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
             <UsersIcon className="size-4 text-blue-600" />
             <span className="text-xs font-bold text-blue-600">
-              {driver.totalDeliveries || 0}
+              {driver.totalShipments || 0}
             </span>
             <span className="text-xs text-blue-600">Shipments</span>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
-            <TruckIcon className="size-4 text-blue-600" />
-            <span className="text-xs font-bold text-blue-600">
-              {driverCard.numActiveVehicles}
-            </span>
-            <span className="text-xs text-blue-600">Vehicles</span>
           </div>
         </div>
       </div>
@@ -202,6 +193,5 @@ export function DriverDetails({driver}: Props) {
     </section>
   );
 }
-
 
 export default DriverDetails;
