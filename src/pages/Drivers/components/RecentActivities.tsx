@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { cn } from "../../../shared/utils/cn";
-import { ChevronRight, ChevronLeft, ArrowRight } from "lucide-react";
-import type { Driver } from "../types";
-import { listSegments } from "../../../services/shipment/shipment.api.service";
-import type { Segment } from "../../../shared/types/segmentData";
-import { SegmentStatus } from "../../../shared/types/segmentData";
+import {useState, useEffect} from "react";
+import {cn} from "../../../shared/utils/cn";
+import {ChevronRight, ChevronLeft, ArrowRight} from "lucide-react";
+import type {Driver} from "../types";
+import {listSegments} from "../../../services/shipment/shipment.api.service";
+import type {Segment} from "../../../shared/types/segmentData";
+import {SegmentStatus} from "../../../shared/types/segmentData";
 
 type Activity = {
   id: string;
@@ -13,7 +13,18 @@ type Activity = {
   toCountry: string;
   toCity: string;
   dateRange: string;
-  status: "Loading" | "In-Origin" | "Delivered";
+  status:
+    | "Pending Assignment"
+    | "Assigned"
+    | "To Origin"
+    | "At Origin"
+    | "In Customs"
+    | "To Destination"
+    | "At Destination"
+    | "Delivered"
+    | "Cancelled"
+    | "Loading"
+    | "Unknown";
 };
 
 /**
@@ -21,17 +32,41 @@ type Activity = {
  */
 function mapSegmentStatusToActivityStatus(
   status: string
-): "Loading" | "In-Origin" | "Delivered" {
+):
+  | "Pending Assignment"
+  | "Assigned"
+  | "To Origin"
+  | "At Origin"
+  | "In Customs"
+  | "To Destination"
+  | "At Destination"
+  | "Delivered"
+  | "Cancelled"
+  | "Loading"
+  | "Unknown" {
   switch (status) {
+    case SegmentStatus.PENDING_ASSIGNMENT:
+      return "Pending Assignment";
+    case SegmentStatus.ASSIGNED:
+      return "Assigned";
+    case SegmentStatus.TO_ORIGIN:
+      return "To Origin";
+    case SegmentStatus.AT_ORIGIN:
+      return "At Origin";
     case SegmentStatus.LOADING:
       return "Loading";
-    case SegmentStatus.AT_ORIGIN:
-      return "In-Origin";
+    case SegmentStatus.IN_CUSTOMS:
+      return "In Customs";
+    case SegmentStatus.TO_DESTINATION:
+      return "To Destination";
+    case SegmentStatus.AT_DESTINATION:
+      return "At Destination";
     case SegmentStatus.DELIVERED:
       return "Delivered";
+    case SegmentStatus.CANCELLED:
+      return "Cancelled";
     default:
-      // Default to Loading for other statuses
-      return "Loading";
+      return "Unknown";
   }
 }
 
@@ -112,7 +147,7 @@ function mapSegmentToActivity(segment: Segment): Activity {
 type Props = {
   driver: Driver;
 };
-export default function RecentActivities({ driver }: Props) {
+export default function RecentActivities({driver}: Props) {
   const [items, setItems] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -215,7 +250,7 @@ export default function RecentActivities({ driver }: Props) {
                         "rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap shrink-0",
                         a.status === "Delivered" &&
                           "bg-green-50 text-green-600",
-                        a.status === "In-Origin" &&
+                        a.status === "At Origin" &&
                           "bg-amber-50 text-amber-600",
                         a.status === "Loading" && "bg-orange-50 text-orange-500"
                       )}
@@ -266,7 +301,7 @@ export default function RecentActivities({ driver }: Props) {
                     className={cn(
                       "rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",
                       a.status === "Delivered" && "text-green-600",
-                      a.status === "In-Origin" && "text-amber-600",
+                      a.status === "At Origin" && "text-amber-600",
                       a.status === "Loading" && "text-orange-500"
                     )}
                   >
@@ -279,7 +314,7 @@ export default function RecentActivities({ driver }: Props) {
         )}
 
         {/* Pagination - only show if there are items */}
-        {!isLoading && !error && items.length > 0 && (
+        {/* {!isLoading && !error && items.length > 0 && (
           <div className="flex items-center justify-center gap-3 pt-4 text-sm text-slate-600">
             <button
               className="grid place-items-center rounded-md bg-slate-100 size-6"
@@ -303,7 +338,7 @@ export default function RecentActivities({ driver }: Props) {
               <ChevronRight className="size-4" />
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </section>
   );

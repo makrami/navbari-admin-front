@@ -1,37 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { EntityCard } from "../../shared/components/ui/EntityCard";
-import { StatusFilterChips } from "./components/StatusFilterChips";
-import type { FilterKey } from "./components/StatusFilterChips";
-import { ListPanel } from "../../shared/components/ui/ListPanel";
-import { DetailsPanel } from "../shipment/details/DetailsPanel";
-import { CompanyDetails } from "./components/CompanyDetails";
-import { AddLocalCompany } from "./components/AddLocalCompany";
-import { PanelRightClose } from "lucide-react";
+import {useEffect, useMemo, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {EntityCard} from "../../shared/components/ui/EntityCard";
+import {StatusFilterChips} from "./components/StatusFilterChips";
+import type {FilterKey} from "./components/StatusFilterChips";
+import {ListPanel} from "../../shared/components/ui/ListPanel";
+import {DetailsPanel} from "../shipment/details/DetailsPanel";
+import {CompanyDetails} from "./components/CompanyDetails";
+import {AddLocalCompany} from "./components/AddLocalCompany";
+import {PanelRightClose} from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
-import { LocalCompaniesPageSkeleton } from "./components/LocalCompaniesSkeleton";
+import {LocalCompaniesPageSkeleton} from "./components/LocalCompaniesSkeleton";
 import {
   useCompanies,
   useCompanyDetails,
   useSuspendCompany,
   useUnsuspendCompany,
 } from "../../services/company/hooks";
-import { COMPANY_STATUS } from "../../services/company/company.service";
-import { formatCompanyForEntityCard } from "./utils";
-import { apiStatusToUiStatus } from "./types";
+import {COMPANY_STATUS} from "../../services/company/company.service";
+import {apiStatusToUiStatus} from "./types";
+import {CompanyCard} from "./components/CompanyCard";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
 export function LocalCompaniesPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   // Build filters for API call
   const apiFilters = useMemo(() => {
-    const filters: { status?: COMPANY_STATUS } = {};
+    const filters: {status?: COMPANY_STATUS} = {};
     if (activeFilter !== "all") {
       // Map UI status to API status
       if (activeFilter === "active") filters.status = COMPANY_STATUS.APPROVED;
@@ -46,21 +46,16 @@ export function LocalCompaniesPage() {
   }, [activeFilter]);
 
   // Fetch companies
-  const { data: companies = [], isLoading, error } = useCompanies(apiFilters);
-  const { data: companyDetails } = useCompanyDetails(selectedId);
+  const {data: companies = [], isLoading, error} = useCompanies(apiFilters);
+  const {data: companyDetails} = useCompanyDetails(selectedId);
   const suspendMutation = useSuspendCompany();
   const unsuspendMutation = useUnsuspendCompany();
 
-  // Transform companies for EntityCard
-  const transformedCompanies = useMemo(() => {
-    return companies.map(formatCompanyForEntityCard);
-  }, [companies]);
-
   // Filter companies based on UI filter
   const filteredCompanies = useMemo(() => {
-    if (activeFilter === "all") return transformedCompanies;
-    return transformedCompanies.filter((c) => c.status === activeFilter);
-  }, [transformedCompanies, activeFilter]);
+    if (activeFilter === "all") return companies;
+    return companies.filter((c) => c.status === activeFilter);
+  }, [companies, activeFilter]);
 
   // Calculate counts by filter
   const countByFilter = useMemo(() => {
@@ -156,14 +151,11 @@ export function LocalCompaniesPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
             {filteredCompanies.map((c) => (
-              <EntityCard
+              <CompanyCard
                 key={c.id}
-                entity={c}
-                onView={(id) => setSelectedId(id)}
-                statsLabels={{
-                  driversLabel: t("localCompanies.page.stats.drivers"),
-                  activeLabel: t("localCompanies.page.stats.active"),
-                }}
+                company={c}
+                selected={selectedId === c.id}
+                onView={(id: string) => setSelectedId(id)}
               />
             ))}
           </div>
@@ -185,15 +177,11 @@ export function LocalCompaniesPage() {
         <AddLocalCompany />
         <div className="grid gap-4">
           {filteredCompanies.map((c) => (
-            <EntityCard
+            <CompanyCard
               key={c.id}
-              entity={c}
+              company={c}
               selected={selectedId === c.id}
-              onView={(id) => setSelectedId(id)}
-              statsLabels={{
-                driversLabel: t("localCompanies.page.stats.drivers"),
-                activeLabel: t("localCompanies.page.stats.active"),
-              }}
+              onView={(id: string) => setSelectedId(id)}
             />
           ))}
         </div>
@@ -255,7 +243,10 @@ export function LocalCompaniesPage() {
                     companyId={selectedId}
                     initialValue={selectedCompany.internalNote || ""}
                   />
-                  <RecentActivities />
+                  <RecentActivities
+                    companyId={selectedId}
+                    company={companyDetails || selectedCompany}
+                  />
                 </div>
               )}
             </DetailsPanel>

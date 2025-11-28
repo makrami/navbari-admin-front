@@ -95,17 +95,11 @@ export function ShipmentContentArea({
   }, [renderSegments]);
 
   // Extract driver info from first in-progress segment
-  const driverName =
-    inProgressSegment?.driverName || inProgressSegment?.assigneeName || "";
-  const driverPhoto =
-    inProgressSegment?.driverAvatarUrl ||
-    inProgressSegment?.assigneeAvatarUrl ||
-    inProgressSegment?.driverPhoto ||
-    "";
+  const driverName = inProgressSegment?.driverName || "";
+  const driverPhoto = inProgressSegment?.driverAvatarUrl || "";
 
   // Extract vehicle info from segment
-  const vehicle =
-    inProgressSegment?.vehicleLabel || inProgressSegment?.vehicleType || "";
+  const vehicle = inProgressSegment?.vehicleType || "";
 
   // Extract local company info from segment
   const localCompany =

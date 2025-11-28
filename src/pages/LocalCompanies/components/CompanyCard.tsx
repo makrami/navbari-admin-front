@@ -1,8 +1,8 @@
-import { Button } from "../../../shared/components/ui/Button";
-import type { Company } from "../types";
-import type { CompanyStatus } from "../types";
-import { STATUS_TO_COLOR } from "../types";
-import { cn } from "../../../shared/utils/cn";
+import {Button} from "../../../shared/components/ui/Button";
+import type {Company} from "../types";
+import type {CompanyStatus} from "../types";
+import {STATUS_TO_COLOR} from "../types";
+import {cn} from "../../../shared/utils/cn";
 import {
   User as UserIcon,
   Users as UsersIcon,
@@ -12,6 +12,7 @@ import {
   X as XIcon,
   Check as CheckIcon,
 } from "lucide-react";
+import {getFileUrl} from "../utils";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -55,7 +56,7 @@ export function CompanyCard({
       )}
       aria-pressed={selected}
     >
-      <div className={cn("h-1.5 rounded-full", `${colors.bar}`)} />
+      {/* <div className={cn("h-1.5 rounded-full", `${colors.bar}`)} /> */}
 
       <div className="p-4 space-y-3">
         {/* Header */}
@@ -63,7 +64,7 @@ export function CompanyCard({
           <div className="flex items-center gap-3 min-w-0">
             {company.logoUrl ? (
               <img
-                src={company.logoUrl}
+                src={getFileUrl(company.logoUrl)}
                 alt="logo"
                 className="h-8 w-8 rounded"
               />
@@ -84,7 +85,7 @@ export function CompanyCard({
               "px-2 py-0.5 rounded-full text-[10px]",
               selected
                 ? "bg-white/15 text-white"
-                : `${colors.pill} ${colors.pillText}`
+                : "bg-slate-100 text-slate-600"
             )}
           >
             {company.status.charAt(0).toUpperCase() + company.status.slice(1)}

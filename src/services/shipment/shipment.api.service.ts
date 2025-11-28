@@ -1,7 +1,7 @@
-import { http } from "../../lib/http";
-import type { Shipment } from "../../shared/types/shipment";
-import type { Segment } from "../../shared/types/segmentData";
-import { SegmentStatus } from "../../shared/types/segmentData";
+import {http} from "../../lib/http";
+import type {Shipment} from "../../shared/types/shipment";
+import type {Segment} from "../../shared/types/segmentData";
+import {SegmentStatus} from "../../shared/types/segmentData";
 
 // Enums matching API
 export const SHIPMENT_STATUS = {
@@ -374,11 +374,17 @@ export async function getShipmentSegments(id: string): Promise<Segment[]> {
 /**
  * List all segments with optional driver filter
  */
-export async function listSegments(driverId?: string): Promise<Segment[]> {
+export async function listSegments(
+  driverId?: string,
+  companyId?: string
+): Promise<Segment[]> {
   try {
     const params = new URLSearchParams();
     if (driverId) {
       params.append("driverId", driverId);
+    }
+    if (companyId) {
+      params.append("companyId", companyId);
     }
 
     const queryString = params.toString();
@@ -435,7 +441,7 @@ export async function updateSegment(
 ): Promise<Segment> {
   try {
     // Normalize datetime strings to ISO 8601 format (ensure seconds are included)
-    const normalizedData = { ...data };
+    const normalizedData = {...data};
 
     // Helper function to normalize datetime string to ISO 8601 format
     // Backend @IsDateString() requires strict ISO 8601 format (e.g., 2024-01-01T12:00:00.000Z)
@@ -612,9 +618,7 @@ export interface SegmentRouteDto {
 /**
  * Get segment route
  */
-export async function getSegmentRoute(
-  id: string
-): Promise<SegmentRouteDto> {
+export async function getSegmentRoute(id: string): Promise<SegmentRouteDto> {
   try {
     const response = await http.get<SegmentRouteDto>(`/segments/${id}/route`);
     return response.data;

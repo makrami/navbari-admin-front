@@ -1,6 +1,6 @@
-import type { HTMLAttributes } from "react";
-import { useState } from "react";
-import { cn } from "../../../shared/utils/cn";
+import type {HTMLAttributes} from "react";
+import {useState} from "react";
+import {cn} from "../../../shared/utils/cn";
 import {
   FileText as FileTextIcon,
   Check as CheckIcon,
@@ -20,8 +20,8 @@ import {
   COMPANY_DOCUMENT_TYPE,
   COMPANY_DOCUMENT_STATUS,
 } from "../../../services/company/document.service";
-import type { CompanyDocumentReadDto } from "../../../services/company/document.service";
-import { getFileUrl } from "../utils";
+import type {CompanyDocumentReadDto} from "../../../services/company/document.service";
+import {getFileUrl} from "../utils";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
@@ -49,11 +49,11 @@ function DocumentCard({
   onPreview,
   className,
   ...rest
-}: DocumentCardProps & { onPreview?: () => void }) {
+}: DocumentCardProps & {onPreview?: () => void}) {
   const statusBadge = {
-    approved: { icon: CheckIcon, wrap: "bg-green-100 text-green-600" },
-    rejected: { icon: XIcon, wrap: "bg-red-100 text-red-600" },
-    pending: { icon: FileClock, wrap: "bg-amber-100 text-amber-600" },
+    approved: {icon: CheckIcon, wrap: "bg-green-100 text-green-600"},
+    rejected: {icon: XIcon, wrap: "bg-red-100 text-red-600"},
+    pending: {icon: FileClock, wrap: "bg-amber-100 text-amber-600"},
   }[doc.status];
 
   const documentTitle =
@@ -92,7 +92,7 @@ function DocumentCard({
           {statusBadge.icon && <statusBadge.icon className="size-4" />}
         </span>
       </div>
-      <div className="grid place-items-center rounded-lg bg-slate-100 h-24 overflow-hidden relative">
+      <div className="grid place-items-center rounded-lg bg-slate-100 h-24 overflow-hidden relative group">
         {isImage && fileUrl ? (
           <img
             src={fileUrl}
@@ -110,30 +110,21 @@ function DocumentCard({
               }
             }}
           />
-        ) : isPdf && fileUrl ? (
-          <iframe
-            src={fileUrl}
-            className="w-full h-full"
-            title={documentTitle}
-            onError={() => {
-              // Fallback to icon if PDF fails to load
-              const iframe = document.querySelector(
-                `iframe[title="${documentTitle}"]`
-              );
-              if (iframe) {
-                (iframe as HTMLElement).style.display = "none";
-                const parent = iframe.parentElement;
-                if (parent) {
-                  const icon = document.createElement("div");
-                  icon.className = "grid place-items-center";
-                  icon.innerHTML = `<svg class="size-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
-                  parent.appendChild(icon);
-                }
-              }
-            }}
-          />
         ) : (
           <FileTextIcon className="size-10 text-slate-400" />
+        )}
+        {(doc.status === COMPANY_DOCUMENT_STATUS.PENDING ||
+          doc.status === COMPANY_DOCUMENT_STATUS.REJECTED) && (
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={handleView}
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 shadow-lg"
+            >
+              Open
+              <FileTextIcon className="size-4" />
+            </button>
+          </div>
         )}
       </div>
       {doc.rejectionReason && (
@@ -215,7 +206,7 @@ export default function DocumentsList({
   companyId,
   className,
 }: DocumentsListProps) {
-  const { data: documents = [], isLoading } = useCompanyDocuments(companyId);
+  const {data: documents = [], isLoading} = useCompanyDocuments(companyId);
   const approveMutation = useApproveDocument();
   const rejectMutation = useRejectDocument();
   const uploadMutation = useUploadDocument();

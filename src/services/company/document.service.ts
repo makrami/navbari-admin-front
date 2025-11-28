@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { http } from "../../lib/http";
+import {z} from "zod";
+import {http} from "../../lib/http";
 
 // Enums matching API (using const assertions for erasableSyntaxOnly compatibility)
 export const COMPANY_DOCUMENT_TYPE = {
@@ -17,8 +17,10 @@ export const COMPANY_DOCUMENT_STATUS = {
 } as const;
 
 // Type aliases for the const assertions
-export type COMPANY_DOCUMENT_TYPE = typeof COMPANY_DOCUMENT_TYPE[keyof typeof COMPANY_DOCUMENT_TYPE];
-export type COMPANY_DOCUMENT_STATUS = typeof COMPANY_DOCUMENT_STATUS[keyof typeof COMPANY_DOCUMENT_STATUS];
+export type COMPANY_DOCUMENT_TYPE =
+  (typeof COMPANY_DOCUMENT_TYPE)[keyof typeof COMPANY_DOCUMENT_TYPE];
+export type COMPANY_DOCUMENT_STATUS =
+  (typeof COMPANY_DOCUMENT_STATUS)[keyof typeof COMPANY_DOCUMENT_STATUS];
 
 // Zod schemas
 const documentTypeSchema = z.nativeEnum(COMPANY_DOCUMENT_TYPE);
@@ -37,11 +39,14 @@ const companyDocumentReadDtoSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
-export type CompanyDocumentReadDto = z.infer<typeof companyDocumentReadDtoSchema>;
+export type CompanyDocumentReadDto = z.infer<
+  typeof companyDocumentReadDtoSchema
+>;
 
 // Reject Document DTO schema
 const rejectDocumentDtoSchema = z.object({
   rejectionReason: z.string().min(1).max(500),
+  approvalStatus: z.nativeEnum(COMPANY_DOCUMENT_STATUS),
 });
 
 export type RejectDocumentDto = z.infer<typeof rejectDocumentDtoSchema>;
@@ -62,7 +67,10 @@ export async function uploadDocument(
     formData.append("file", file);
 
     // Don't set Content-Type header - browser will set it with boundary automatically
-    const response = await http.post<CompanyDocumentReadDto>("/company-documents", formData);
+    const response = await http.post<CompanyDocumentReadDto>(
+      "/company-documents",
+      formData
+    );
 
     return companyDocumentReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
@@ -79,9 +87,13 @@ export async function uploadDocument(
 /**
  * List company documents
  */
-export async function listCompanyDocuments(companyId: string): Promise<CompanyDocumentReadDto[]> {
+export async function listCompanyDocuments(
+  companyId: string
+): Promise<CompanyDocumentReadDto[]> {
   try {
-    const response = await http.get<CompanyDocumentReadDto[]>(`/company-documents/company/${companyId}`);
+    const response = await http.get<CompanyDocumentReadDto[]>(
+      `/company-documents/company/${companyId}`
+    );
     return z.array(companyDocumentReadDtoSchema).parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -97,9 +109,13 @@ export async function listCompanyDocuments(companyId: string): Promise<CompanyDo
 /**
  * Approve company document
  */
-export async function approveDocument(id: string): Promise<CompanyDocumentReadDto> {
+export async function approveDocument(
+  id: string
+): Promise<CompanyDocumentReadDto> {
   try {
-    const response = await http.put<CompanyDocumentReadDto>(`/company-documents/${id}/approve`);
+    const response = await http.put<CompanyDocumentReadDto>(
+      `/company-documents/${id}/approve`
+    );
     return companyDocumentReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -115,11 +131,20 @@ export async function approveDocument(id: string): Promise<CompanyDocumentReadDt
 /**
  * Reject company document
  */
-export async function rejectDocument(id: string, rejectionReason: string): Promise<CompanyDocumentReadDto> {
+export async function rejectDocument(
+  id: string,
+  rejectionReason: string
+): Promise<CompanyDocumentReadDto> {
   try {
-    const validatedData = rejectDocumentDtoSchema.parse({ rejectionReason });
-    
-    const response = await http.put<CompanyDocumentReadDto>(`/company-documents/${id}/reject`, validatedData);
+    const validatedData = rejectDocumentDtoSchema.parse({
+      rejectionReason,
+      approvalStatus: "rejected",
+    });
+
+    const response = await http.put<CompanyDocumentReadDto>(
+      `/company-documents/${id}/reject`,
+      validatedData
+    );
     return companyDocumentReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -132,4 +157,3 @@ export async function rejectDocument(id: string, rejectionReason: string): Promi
     throw new Error("Failed to reject document");
   }
 }
-
