@@ -15,6 +15,7 @@ import { DriversPage } from "../../pages/Drivers/DriversPage";
 import { FinancePage } from "../../pages/finance/FinancePage";
 import { ChatAlertPage } from "../../pages/chat-alert/ChatAlertPage";
 import { SettingsPage } from "../../pages/settings/SettingsPage";
+import { ProfilePage } from "../../pages/profile/ProfilePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
 
@@ -104,6 +105,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         ),
       },

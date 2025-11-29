@@ -1,5 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { getCurrentUser } from "./user.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getCurrentUser,
+  resetPassword,
+  updateProfile,
+  type ResetPasswordRequest,
+  type UpdateProfileRequest,
+} from "./user.service";
 
 // Query keys
 export const userKeys = {
@@ -19,3 +25,26 @@ export function useCurrentUser() {
   });
 }
 
+/**
+ * Mutation hook for resetting user password
+ */
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (data: ResetPasswordRequest) => resetPassword(data),
+  });
+}
+
+/**
+ * Mutation hook for updating user profile
+ */
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UpdateProfileRequest) => updateProfile(data),
+    onSuccess: () => {
+      // Invalidate and refetch user data after successful update
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+    },
+  });
+}

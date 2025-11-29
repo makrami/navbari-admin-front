@@ -86,3 +86,20 @@ export async function logout(): Promise<void> {
     useAuthStore.getState().logout();
   }
 }
+
+/**
+ * Logout from all devices function that invalidates all sessions.
+ * Server automatically clears HTTP-only cookies from all devices.
+ */
+export async function logoutAll(): Promise<void> {
+  try {
+    // Call logout-all endpoint - server will clear sessions from all devices
+    await http.post("/auth/logout-all");
+  } catch (error: unknown) {
+    // Handle API errors
+    if (error instanceof Error && error.message) {
+      throw new Error(error.message);
+    }
+    throw new Error("Failed to logout from all devices. Please try again.");
+  }
+}

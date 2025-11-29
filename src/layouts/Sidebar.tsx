@@ -269,7 +269,10 @@ export function Sidebar() {
                 <UserIcon className="size-4 text-slate-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="block text-xs font-semibold uppercase tracking-wide text-slate-700 truncate">
+                <span
+                  onClick={() => navigate("/profile")}
+                  className="block text-xs font-semibold uppercase tracking-wide text-slate-700 truncate cursor-pointer hover:text-[#1B54FE] transition-colors"
+                >
                   {isLoadingUser
                     ? t("common.loading") || "Loading..."
                     : user
