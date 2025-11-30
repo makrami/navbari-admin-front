@@ -10,6 +10,8 @@ const userResponseSchema = z
     emailVerified: z.boolean(),
     phoneNumberVerified: z.boolean(),
     fullName: z.string().nullable(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
     referralCode: z.string().nullable(),
     appScope: z.string(),
     roleId: z.string().uuid(),
@@ -42,15 +44,11 @@ const resetPasswordRequestSchema = z.object({
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 
 // Update profile request schema
-const updateProfileRequestSchema = z.object({
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  phoneNumber: z.string().nullable().optional(),
-  email: z.string().email().optional(),
-  avatarUrl: z.string().nullable().optional(),
-});
-
-export type UpdateProfileRequest = z.infer<typeof updateProfileRequestSchema>;
+export type UpdateProfileRequest = {
+  firstName: string;
+  lastName: string;
+  avatar?: File | null;
+};
 
 /**
  * Fetches the current authenticated user's details
@@ -108,7 +106,7 @@ export async function resetPassword(data: ResetPasswordRequest): Promise<void> {
 
 /**
  * Updates the user's profile
- * @param data Profile update data (firstName, lastName, phoneNumber, email, avatarUrl)
+ * @param data Profile update data (firstName, lastName, avatar)
  * @returns Updated user details
  * @throws Error with user-friendly message on failure
  */
@@ -116,17 +114,20 @@ export async function updateProfile(
   data: UpdateProfileRequest
 ): Promise<UserResponse> {
   try {
-    const validatedData = updateProfileRequestSchema.parse(data);
-    const response = await http.put("/users/update-profile", validatedData);
+    // Create FormData for multipart/form-data request
+    const formData = new FormData();
+    formData.append("firstName", data.firstName);
+    formData.append("lastName", data.lastName);
+
+    // Only append avatar if it exists
+    if (data.avatar) {
+      formData.append("avatar", data.avatar);
+    }
+
+    const response = await http.put("/users/update-profile", formData);
     const userData = userResponseSchema.parse(response.data);
     return userData;
   } catch (error: unknown) {
-    // Handle validation errors
-    if (error instanceof z.ZodError) {
-      const firstError = error.issues[0] as { message: string } | undefined;
-      throw new Error(firstError?.message || "Invalid profile data");
-    }
-
     // Handle API errors (already normalized by http interceptor)
     if (error instanceof Error && error.message) {
       throw new Error(error.message);

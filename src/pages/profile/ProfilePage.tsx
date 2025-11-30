@@ -46,6 +46,7 @@ export function ProfilePage() {
     confirmPassword: "",
   });
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [personalInfoChanges, setPersonalInfoChanges] = useState(0);
   const [accountSettingsChanges, setAccountSettingsChanges] = useState(0);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -63,6 +64,29 @@ export function ProfilePage() {
       lastName: parts.slice(1).join(" "),
     };
   };
+
+  // Get firstName and lastName from user data (prefer direct fields, fallback to parsing fullName)
+  const getUserNames = useCallback(
+    (user: typeof userData): { firstName: string; lastName: string } => {
+      if (!user) return { firstName: "", lastName: "" };
+
+      const userRecord = user as Record<string, unknown>;
+      const firstName = userRecord.firstName as string | undefined;
+      const lastName = userRecord.lastName as string | undefined;
+
+      // If firstName and lastName exist directly, use them
+      if (firstName !== undefined && lastName !== undefined) {
+        return {
+          firstName: firstName || "",
+          lastName: lastName || "",
+        };
+      }
+
+      // Otherwise, parse from fullName
+      return parseFullName(user?.fullName);
+    },
+    []
+  );
 
   // Get role title from user data
   const getUserRole = useCallback((user: typeof userData): string => {
@@ -88,7 +112,7 @@ export function ProfilePage() {
       };
     }
 
-    const { firstName, lastName } = parseFullName(userData.fullName);
+    const { firstName, lastName } = getUserNames(userData);
     const userDataRecord = userData as Record<string, unknown>;
     const avatarUrl =
       (userDataRecord.avatarUrl as string | null | undefined) || null;
@@ -101,7 +125,7 @@ export function ProfilePage() {
       userRole: getUserRole(userData),
       avatarUrl: avatarUrl ? getFileUrl(avatarUrl) || null : null,
     };
-  }, [userData, getUserRole]);
+  }, [userData, getUserRole, getUserNames]);
 
   const initialPasswordForm: PasswordForm = {
     oldPassword: "",
@@ -112,7 +136,7 @@ export function ProfilePage() {
   // Update form when user data is loaded
   useEffect(() => {
     if (userData) {
-      const { firstName, lastName } = parseFullName(userData.fullName);
+      const { firstName, lastName } = getUserNames(userData);
 
       // Get avatarUrl from user data
       const userDataRecord = userData as Record<string, unknown>;
@@ -134,21 +158,29 @@ export function ProfilePage() {
         setProfilePhoto(fullAvatarUrl);
       }
 
+      // Reset avatar file when user data is loaded
+      setAvatarFile(null);
       setPersonalInfoChanges(0);
     }
-  }, [userData, getUserRole]);
+  }, [userData, getUserRole, getUserNames]);
 
   const handlePersonalInfoChange = (
     field: keyof PersonalInfoForm,
     value: string
   ) => {
     setPersonalInfo((prev) => ({ ...prev, [field]: value }));
-    // Calculate changes
+    // Calculate changes - only count firstName, lastName, and avatar
     const updated = { ...personalInfo, [field]: value };
-    const changes = Object.keys(updated).filter(
-      (key) =>
-        updated[key as keyof PersonalInfoForm] !==
-        initialPersonalInfo[key as keyof PersonalInfoForm]
+    const firstNameChanged =
+      (field === "firstName" ? value : updated.firstName) !==
+      initialPersonalInfo.firstName;
+    const lastNameChanged =
+      (field === "lastName" ? value : updated.lastName) !==
+      initialPersonalInfo.lastName;
+    const avatarChanged = avatarFile !== null;
+
+    const changes = [firstNameChanged, lastNameChanged, avatarChanged].filter(
+      Boolean
     ).length;
     setPersonalInfoChanges(changes);
   };
@@ -172,6 +204,7 @@ export function ProfilePage() {
   const handleRevertPersonalInfo = () => {
     setPersonalInfo(initialPersonalInfo);
     setProfilePhoto(initialPersonalInfo.avatarUrl);
+    setAvatarFile(null);
     setPersonalInfoChanges(0);
   };
 
@@ -182,21 +215,55 @@ export function ProfilePage() {
 
   const handleSavePersonalInfo = async () => {
     try {
-      // Extract avatarUrl from profilePhoto (base64) or use existing avatarUrl
-      // If profilePhoto is a base64 string (from file upload), we need to handle it differently
-      // For now, we'll send the avatarUrl from personalInfo
+      // Only send firstName, lastName, and avatar (File)
       const updateData = {
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
-        phoneNumber: personalInfo.phoneNumber || null,
-        email: personalInfo.email,
-        avatarUrl: personalInfo.avatarUrl || null,
+        avatar: avatarFile || null,
       };
 
-      await updateProfileMutation.mutateAsync(updateData);
+      const updatedUser = await updateProfileMutation.mutateAsync(updateData);
 
-      // Reset changes count on success
+      // Update form with new data from server immediately
+      // Prefer firstName and lastName from response, fallback to parsing fullName
+      const userRecord = updatedUser as Record<string, unknown>;
+      const firstNameFromResponse = userRecord.firstName as string | undefined;
+      const lastNameFromResponse = userRecord.lastName as string | undefined;
+
+      const firstName =
+        firstNameFromResponse !== undefined
+          ? firstNameFromResponse || ""
+          : parseFullName(updatedUser.fullName).firstName;
+      const lastName =
+        lastNameFromResponse !== undefined
+          ? lastNameFromResponse || ""
+          : parseFullName(updatedUser.fullName).lastName;
+
+      // Get avatarUrl from updated user data
+      const userDataRecord = updatedUser as Record<string, unknown>;
+      const avatarUrl =
+        (userDataRecord.avatarUrl as string | null | undefined) || null;
+      const fullAvatarUrl = avatarUrl ? getFileUrl(avatarUrl) || null : null;
+
+      // Update personal info with new data from server
+      setPersonalInfo((prev) => ({
+        ...prev,
+        firstName,
+        lastName,
+        avatarUrl: fullAvatarUrl,
+      }));
+
+      // Update profile photo if avatar changed
+      if (fullAvatarUrl) {
+        setProfilePhoto(fullAvatarUrl);
+      }
+
+      // Reset changes count and avatar file on success
       setPersonalInfoChanges(0);
+      setAvatarFile(null);
+
+      // Note: The mutation hook will invalidate and refetch userData,
+      // which will trigger useEffect to update everything including initialPersonalInfo
     } catch (error) {
       // Error is handled by mutation
       if (error instanceof Error) {
@@ -274,11 +341,23 @@ export function ProfilePage() {
     }
   };
 
-  const handlePhotoChange = (photo: string | null) => {
-    setProfilePhoto(photo);
-    // Update avatarUrl in personalInfo as well
-    setPersonalInfo((prev) => ({ ...prev, avatarUrl: photo }));
-    setPersonalInfoChanges((prev) => prev + 1);
+  const handlePhotoChange = (file: File | null, preview: string | null) => {
+    setAvatarFile(file);
+    setProfilePhoto(preview);
+    // Update avatarUrl in personalInfo for display purposes
+    setPersonalInfo((prev) => ({ ...prev, avatarUrl: preview }));
+
+    // Calculate changes - check if firstName, lastName, or avatar changed
+    const firstNameChanged =
+      personalInfo.firstName !== initialPersonalInfo.firstName;
+    const lastNameChanged =
+      personalInfo.lastName !== initialPersonalInfo.lastName;
+    const avatarChanged = file !== null;
+
+    const changes = [firstNameChanged, lastNameChanged, avatarChanged].filter(
+      Boolean
+    ).length;
+    setPersonalInfoChanges(changes);
   };
 
   if (isLoading) {

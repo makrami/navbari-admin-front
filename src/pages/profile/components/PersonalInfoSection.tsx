@@ -18,7 +18,7 @@ type PersonalInfoSectionProps = {
   changesCount: number;
   isSaving?: boolean;
   onFormChange: (field: keyof PersonalInfoForm, value: string) => void;
-  onPhotoChange: (photo: string | null) => void;
+  onPhotoChange: (file: File | null, preview: string | null) => void;
   onRevert: () => void;
   onSave: () => void;
 };
@@ -64,6 +64,7 @@ export function PersonalInfoSection({
           placeholder="+12345678"
           value={formData.phoneNumber}
           onChange={(value) => onFormChange("phoneNumber", value)}
+          disabled={true}
         />
         <FormInput
           label="Email"
@@ -71,6 +72,7 @@ export function PersonalInfoSection({
           placeholder="example@info.com"
           value={formData.email}
           onChange={(value) => onFormChange("email", value)}
+          disabled={true}
         />
       </div>
 

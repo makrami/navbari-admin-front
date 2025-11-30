@@ -4,7 +4,7 @@ import { cn } from "../../../shared/utils/cn";
 
 type ProfilePhotoUploadProps = {
   photo: string | null;
-  onPhotoChange: (photo: string | null) => void;
+  onPhotoChange: (file: File | null, preview: string | null) => void;
 };
 
 export function ProfilePhotoUpload({
@@ -16,13 +16,14 @@ export function ProfilePhotoUpload({
 
   const handleFileSelect = (file: File) => {
     if (file && file.type.startsWith("image/")) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("File size must be less than 2MB");
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB");
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        onPhotoChange(reader.result as string);
+        const preview = reader.result as string;
+        onPhotoChange(file, preview);
       };
       reader.readAsDataURL(file);
     }
@@ -85,7 +86,9 @@ export function ProfilePhotoUpload({
           <p className="text-xs text-slate-900">
             Click upload or drag and drop
           </p>
-          <p className="text-xs text-slate-900">PNG or JPG (Max 2MB)</p>
+          <p className="text-xs text-slate-900">
+            JPEG, PNG, JPG, WEBP (Max 5MB)
+          </p>
         </div>
         <button
           type="button"
@@ -100,7 +103,7 @@ export function ProfilePhotoUpload({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/jpg"
+          accept="image/jpeg,image/png,image/jpg,image/webp"
           onChange={handleFileInputChange}
           className="hidden"
         />

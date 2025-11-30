@@ -20,6 +20,7 @@ import { ActiveIndicator } from "../shared/components";
 import { logout } from "../services/auth.service";
 import { LanguageSelector } from "../components/Ui/LanguageSelector";
 import { useCurrentUser } from "../services/user/hooks";
+import { getFileUrl } from "../pages/Drivers/utils";
 
 export function Sidebar() {
   const navigate = useNavigate();
@@ -45,6 +46,20 @@ export function Sidebar() {
     await logout();
     navigate("/login");
   };
+
+  // Get avatar URL from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const avatarUrl =
+    (userRecord?.avatarUrl as string | null | undefined) || null;
+  const fullAvatarUrl = avatarUrl ? getFileUrl(avatarUrl) || null : null;
+
+  // Get user display name (firstName + lastName or email)
+  const firstName = userRecord?.firstName as string | undefined;
+  const lastName = userRecord?.lastName as string | undefined;
+  const userDisplayName =
+    firstName || lastName
+      ? [firstName, lastName].filter(Boolean).join(" ").trim()
+      : user?.email || "";
 
   return (
     <aside
@@ -265,9 +280,17 @@ export function Sidebar() {
           <div className="w-full space-y-2 border-t border-slate-200 pt-4">
             {/* Profile Info */}
             <div className="flex w-full items-center gap-3 px-5">
-              <div className="grid size-8 place-items-center rounded-full bg-slate-100 ring-2 ring-slate-200">
-                <UserIcon className="size-4 text-slate-600" />
-              </div>
+              {fullAvatarUrl ? (
+                <img
+                  src={fullAvatarUrl}
+                  alt={user?.fullName || user?.email || "User"}
+                  className="size-8 rounded-full object-cover ring-2 ring-slate-200"
+                />
+              ) : (
+                <div className="grid size-8 place-items-center rounded-full bg-slate-100 ring-2 ring-slate-200">
+                  <UserIcon className="size-4 text-slate-600" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <span
                   onClick={() => navigate("/profile")}
@@ -275,9 +298,7 @@ export function Sidebar() {
                 >
                   {isLoadingUser
                     ? t("common.loading") || "Loading..."
-                    : user
-                    ? String(user.fullName || user.email)
-                    : ""}
+                    : userDisplayName}
                 </span>
                 <LanguageSelector />
               </div>
