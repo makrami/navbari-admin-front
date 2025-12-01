@@ -2,17 +2,9 @@ import { Button } from "../../../shared/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { CompanyStatus } from "../types";
+import { useTranslation } from "react-i18next";
 
 export type FilterKey = "all" | CompanyStatus;
-
-// Map UI status to display label
-const STATUS_LABELS: Record<FilterKey, string> = {
-  all: "All",
-  pending: "Pending",
-  active: "Active",
-  rejected: "Rejected",
-  inactive: "Inactive",
-};
 
 type Props = {
   active: FilterKey;
@@ -21,44 +13,45 @@ type Props = {
   isListPanel: boolean;
 };
 
-const FILTER_META: Record<
-  FilterKey,
-  { label: string; className: string; activeRing: string }
-> = {
-  all: {
-    label: STATUS_LABELS.all,
-    className:
-      "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
-    activeRing: "ring-2 ring-slate-300",
-  },
-  pending: {
-    label: STATUS_LABELS.pending,
-    className: "bg-amber-50 text-amber-700 hover:bg-amber-100",
-    activeRing: "ring-2 ring-amber-200",
-  },
-  active: {
-    label: STATUS_LABELS.active,
-    className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-    activeRing: "ring-2 ring-emerald-200",
-  },
-  rejected: {
-    label: STATUS_LABELS.rejected,
-    className: "bg-rose-50 text-rose-700 hover:bg-rose-100",
-    activeRing: "ring-2 ring-rose-200",
-  },
-  inactive: {
-    label: STATUS_LABELS.inactive,
-    className: "bg-slate-200 text-slate-700 hover:bg-slate-200",
-    activeRing: "ring-2 ring-slate-300",
-  },
-};
-
 export function StatusFilterChips({
   active,
   onChange,
   counts,
   isListPanel,
 }: Props) {
+  const { t } = useTranslation();
+
+const FILTER_META: Record<
+  FilterKey,
+  { label: string; className: string; activeRing: string }
+> = {
+  all: {
+      label: t("localCompanies.page.status.all"),
+    className:
+      "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+    activeRing: "ring-2 ring-slate-300",
+  },
+  pending: {
+      label: t("localCompanies.page.status.pending"),
+    className: "bg-amber-50 text-amber-700 hover:bg-amber-100",
+    activeRing: "ring-2 ring-amber-200",
+  },
+  active: {
+      label: t("localCompanies.page.status.active"),
+    className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+    activeRing: "ring-2 ring-emerald-200",
+  },
+  rejected: {
+      label: t("localCompanies.page.status.rejected"),
+    className: "bg-rose-50 text-rose-700 hover:bg-rose-100",
+    activeRing: "ring-2 ring-rose-200",
+  },
+  inactive: {
+      label: t("localCompanies.page.status.inactive"),
+    className: "bg-slate-200 text-slate-700 hover:bg-slate-200",
+    activeRing: "ring-2 ring-slate-300",
+  },
+};
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -100,7 +93,7 @@ export function StatusFilterChips({
         <>
           <button
             type="button"
-            aria-label="Scroll left"
+            aria-label={t("localCompanies.page.scroll.left")}
             className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 grid place-items-center size-7 rounded-full bg-white/90 shadow border border-slate-200 hover:bg-white ${
               canLeft ? "opacity-100" : "opacity-40 cursor-default"
             }`}
@@ -110,7 +103,7 @@ export function StatusFilterChips({
           </button>
           <button
             type="button"
-            aria-label="Scroll right"
+            aria-label={t("localCompanies.page.scroll.right")}
             className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 grid place-items-center size-7 rounded-full bg-white/90 shadow border border-slate-200 hover:bg-white ${
               canRight ? "opacity-100" : "opacity-40 cursor-default"
             }`}

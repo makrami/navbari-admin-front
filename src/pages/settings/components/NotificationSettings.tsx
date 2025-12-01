@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AlertConfigCard } from "./AlertConfigCard";
 import { DeliveryMethodsSection } from "./DeliveryMethodsSection";
 import { SettingsFooter } from "./SettingsFooter";
@@ -54,25 +55,27 @@ export function NotificationSettings({
   onSave,
   isLoading = false,
 }: NotificationSettingsProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6 pt-4">
       {/* Top Row - Alert Configurations */}
       <div className="grid grid-cols-2 gap-4">
         <AlertConfigCard
-          label="Driver GPS Alert after:"
+          label={t("settings.sections.notifications.driverGpsAlert")}
           enabled={driverGpsAlertEnabled}
           onToggle={onDriverGpsAlertToggle}
           value={driverGpsAlertValue}
           onValueChange={onDriverGpsAlertValueChange}
-          unit="MINUTES"
+          unit={t("settings.sections.notifications.minutes")}
         />
         <AlertConfigCard
-          label="Delay Alert after:"
+          label={t("settings.sections.notifications.delayAlert")}
           enabled={delayAlertEnabled}
           onToggle={onDelayAlertToggle}
           value={delayAlertValue}
           onValueChange={onDelayAlertValueChange}
-          unit="HOURS"
+          unit={t("settings.sections.notifications.hours")}
         />
       </div>
 

@@ -1,5 +1,5 @@
-import {MoreVertical} from "lucide-react";
-import {useTranslation} from "react-i18next";
+import { MoreVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export type Role = {
   id: string;
@@ -38,7 +38,7 @@ export function RolesListPanel({
   isLoading?: boolean;
   error?: Error | null;
 }) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   // Show error first if there's an error
   if (error) {
@@ -46,7 +46,10 @@ export function RolesListPanel({
       <div className="w-[40%] border-r border-slate-200 pr-4">
         <div className="space-y-2 max-h-[600px] overflow-y-auto">
           <div className="p-4 text-sm text-red-600">
-            {error instanceof Error ? error.message : "Failed to load roles"}
+            {error instanceof Error
+              ? error.message
+              : t("settings.sections.rolesPermissions.failedToLoadRoles") ||
+                "Failed to load roles"}
           </div>
         </div>
       </div>

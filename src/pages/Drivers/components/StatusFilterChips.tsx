@@ -2,6 +2,7 @@ import { Button } from "../../../shared/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { DriverStatus } from "../types";
+import { useTranslation } from "react-i18next";
 
 export type FilterKey = "all" | DriverStatus;
 
@@ -12,37 +13,39 @@ type Props = {
   isListPanel: boolean;
 };
 
-const FILTER_META: Record<
+const getFilterMeta = (
+  t: (key: string) => string
+): Record<
   FilterKey,
   { label: string; className: string; activeRing: string }
-> = {
+> => ({
   all: {
-    label: "All",
+    label: t("drivers.page.status.all"),
     className:
       "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
     activeRing: "ring-2 ring-slate-300",
   },
   pending: {
-    label: "Pending",
+    label: t("drivers.page.status.pending"),
     className: "bg-amber-50 text-amber-700 hover:bg-amber-100",
     activeRing: "ring-2 ring-amber-200",
   },
   approved: {
-    label: "Approved",
+    label: t("drivers.page.status.approved"),
     className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     activeRing: "ring-2 ring-emerald-200",
   },
   rejected: {
-    label: "Rejected",
+    label: t("drivers.page.status.rejected"),
     className: "bg-rose-50 text-rose-700 hover:bg-rose-100",
     activeRing: "ring-2 ring-rose-200",
   },
   inactive: {
-    label: "Inactive",
+    label: t("drivers.page.status.inactive"),
     className: "bg-slate-200 text-slate-700 hover:bg-slate-200",
     activeRing: "ring-2 ring-slate-300",
   },
-};
+});
 
 export function StatusFilterChips({
   active,
@@ -50,9 +53,11 @@ export function StatusFilterChips({
   counts,
   isListPanel,
 }: Props) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
+  const FILTER_META = getFilterMeta(t);
 
   const updateCanScroll = () => {
     const el = scrollRef.current;
@@ -91,7 +96,7 @@ export function StatusFilterChips({
         <>
           <button
             type="button"
-            aria-label="Scroll left"
+            aria-label={t("drivers.page.scroll.left")}
             className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 grid place-items-center size-7 rounded-full bg-white/90 shadow border border-slate-200 hover:bg-white ${
               canLeft ? "opacity-100" : "opacity-40 cursor-default"
             }`}
@@ -101,7 +106,7 @@ export function StatusFilterChips({
           </button>
           <button
             type="button"
-            aria-label="Scroll right"
+            aria-label={t("drivers.page.scroll.right")}
             className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 grid place-items-center size-7 rounded-full bg-white/90 shadow border border-slate-200 hover:bg-white ${
               canRight ? "opacity-100" : "opacity-40 cursor-default"
             }`}

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 type DeliveryMethodOptionProps = {
   label: string;
   selected: boolean;
@@ -60,34 +62,36 @@ export function DeliveryMethodsSection({
   onSmsChange,
   onMobilePushChange,
 }: DeliveryMethodsSectionProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-3 p-4 rounded-lg bg-slate-100 grid grid-cols-2 gap-3">
       <div>
         <h3 className="text-sm font-bold text-slate-900 mb-2">
-          Delivery Methods
+          {t("settings.sections.notifications.deliveryMethods")}
         </h3>
         <p className="text-sm text-slate-400">
-          Select how you want to receive the enabled alerts
+          {t("settings.sections.notifications.deliveryMethodsDescription")}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <DeliveryMethodOption
-          label="In-App Notif"
+          label={t("settings.sections.notifications.inApp")}
           selected={inApp}
           onToggle={() => onInAppChange(!inApp)}
         />
         <DeliveryMethodOption
-          label="Email"
+          label={t("settings.sections.notifications.email")}
           selected={email}
           onToggle={() => onEmailChange(!email)}
         />
         <DeliveryMethodOption
-          label="SMS"
+          label={t("settings.sections.notifications.sms")}
           selected={sms}
           onToggle={() => onSmsChange(!sms)}
         />
         <DeliveryMethodOption
-          label="Mobile Push"
+          label={t("settings.sections.notifications.mobilePush")}
           selected={mobilePush}
           onToggle={() => onMobilePushChange(!mobilePush)}
         />

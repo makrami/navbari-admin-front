@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { MouseEventHandler, PropsWithChildren } from "react";
 import { cn } from "../../shared/utils/cn";
+import { useTranslation } from "react-i18next";
 
 type SegmentButtonProps = PropsWithChildren<{
   className?: string;
@@ -9,6 +10,7 @@ type SegmentButtonProps = PropsWithChildren<{
 
 export function SegmentButton({ className, onClick }: SegmentButtonProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     if (onClick) {
@@ -29,10 +31,12 @@ export function SegmentButton({ className, onClick }: SegmentButtonProps) {
         "hover:scale-101 active:scale-99",
         className
       )}
-      aria-label="Segment"
+      aria-label={t("shipment.actions.segments")}
       data-name="Segment Button"
     >
-      <span className="text-sm font-bold">Segments</span>
+      <span className="text-sm font-bold">
+        {t("shipment.actions.segments")}
+      </span>
     </button>
   );
 }

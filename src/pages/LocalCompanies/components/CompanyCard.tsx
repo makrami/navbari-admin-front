@@ -1,6 +1,6 @@
-import {Button} from "../../../shared/components/ui/Button";
-import type {Company} from "../types";
-import {cn} from "../../../shared/utils/cn";
+import { Button } from "../../../shared/components/ui/Button";
+import type { Company } from "../types";
+import { cn } from "../../../shared/utils/cn";
 import {
   User as UserIcon,
   Users as UsersIcon,
@@ -10,7 +10,9 @@ import {
   X as XIcon,
   Check as CheckIcon,
 } from "lucide-react";
-import {getFileUrl} from "../utils";
+import { getFileUrl } from "../utils";
+import { useTranslation } from "react-i18next";
+import { apiStatusToUiStatus } from "../types";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -43,8 +45,10 @@ export function CompanyCard({
   onReject,
   onView,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
+      dir="ltr"
       className={cn(
         "relative overflow-hidden p-2 rounded-2xl transition-shadow",
         selected ? "bg-[#1b54fe] text-white shadow" : "bg-white",
@@ -84,7 +88,11 @@ export function CompanyCard({
                 : "bg-slate-100 text-slate-600"
             )}
           >
-            {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
+            {t(
+              `localCompanies.page.status.${apiStatusToUiStatus(
+                company.status
+              )}`
+            )}
           </span>
         </div>
 
@@ -145,7 +153,7 @@ export function CompanyCard({
               >
                 {company.totalDrivers ?? 0}
               </span>{" "}
-              drivers
+              {t("localCompanies.page.card.drivers")}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -159,7 +167,7 @@ export function CompanyCard({
               >
                 {company.vehicleTypes?.length ?? 0}
               </span>{" "}
-              types
+              {t("localCompanies.page.card.types")}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -188,7 +196,7 @@ export function CompanyCard({
               )}
               onClick={() => onApprove?.(company.id)}
             >
-              Approve
+              {t("localCompanies.page.card.approve")}
               <CheckIcon className="size-3 " />
             </Button>
             <Button
@@ -201,7 +209,7 @@ export function CompanyCard({
               )}
               onClick={() => onReject?.(company.id)}
             >
-              Reject
+              {t("localCompanies.page.card.reject")}
               <XIcon className="size-3" />
             </Button>
             <Button
@@ -214,7 +222,7 @@ export function CompanyCard({
               )}
               onClick={() => onView?.(company.id)}
             >
-              View
+              {t("localCompanies.page.card.view")}
               <EyeIcon className="h-4 w-4" />
             </Button>
           </div>
@@ -230,7 +238,7 @@ export function CompanyCard({
               )}
               onClick={() => onView?.(company.id)}
             >
-              View Details
+              {t("localCompanies.page.card.viewDetails")}
               <EyeIcon className="h-4 w-4" />
             </Button>
           </div>

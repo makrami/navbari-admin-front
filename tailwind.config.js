@@ -10,6 +10,9 @@ export default {
         // Design tokens from Figma (optional usage)
         mainBlue: "#1b54fe",
       },
+      fontFamily: {
+        vazir: ["Vazirmatn", "sans-serif"],
+      },
     },
   },
   plugins: [],

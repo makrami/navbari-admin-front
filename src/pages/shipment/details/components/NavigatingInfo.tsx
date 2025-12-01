@@ -26,6 +26,7 @@ import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipi
 import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
 import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
 import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
+import { useTranslation } from "react-i18next";
 
 type NavigatingInfoProps = PropsWithChildren<{
   segments: Segment[];
@@ -73,6 +74,7 @@ export function NavigatingInfo({
   lastActivityTime,
   onClose,
 }: NavigatingInfoProps) {
+  const { t } = useTranslation();
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
@@ -88,7 +90,7 @@ export function NavigatingInfo({
   const chatHook = useChatWithRecipient({
     recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
     driverId: driverId || undefined,
-    recipientName: driverName || "Driver",
+    recipientName: driverName || t("shipment.navigatingInfo.driver"),
   });
 
   // Default map viewport (can be updated with actual coordinates if available)
@@ -113,38 +115,41 @@ export function NavigatingInfo({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showNotifications]);
 
-  const notifications = [
-    {
-      id: 1,
-      time: "13:04",
-      actor: "Oni Chan",
-      text: "Turned their GPS on.",
-      highlight: true,
-    },
-    {
-      id: 2,
-      time: "12:56",
-      actor: "Driver changed from",
-      text: "Xin Zhao to Oni Chan",
-      highlight: true,
-      isChange: true,
-    },
-    {
-      id: 3,
-      time: "11:58",
-      actor: "Xin Zhao",
-      text: "Turned their GPS off.",
-      highlight: true,
-    },
-    {
-      id: 4,
-      time: "11:04",
-      actor: "Oni Chan",
-      text: "Uploaded",
-      link: "photo_616512026.jpg",
-      highlight: false,
-    },
-  ];
+  const notifications = useMemo(
+    () => [
+      {
+        id: 1,
+        time: "13:04",
+        actor: "Oni Chan",
+        text: t("shipment.navigatingInfo.turnedGpsOn"),
+        highlight: true,
+      },
+      {
+        id: 2,
+        time: "12:56",
+        actor: t("shipment.navigatingInfo.driverChangedFrom"),
+        text: "Xin Zhao " + t("shipment.navigatingInfo.to") + " Oni Chan",
+        highlight: true,
+        isChange: true,
+      },
+      {
+        id: 3,
+        time: "11:58",
+        actor: "Xin Zhao",
+        text: t("shipment.navigatingInfo.turnedGpsOff"),
+        highlight: true,
+      },
+      {
+        id: 4,
+        time: "11:04",
+        actor: "Oni Chan",
+        text: t("shipment.navigatingInfo.uploaded"),
+        link: "photo_616512026.jpg",
+        highlight: false,
+      },
+    ],
+    [t]
+  );
 
   return (
     <section className="flex flex-col   gap-4 p-4 bg-white rounded-[16px]">
@@ -170,14 +175,14 @@ export function NavigatingInfo({
               "bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto relative",
               !driverId && "opacity-50 cursor-not-allowed"
             )}
-            aria-label="Chat"
+            aria-label={t("shipment.navigatingInfo.chat")}
           >
             <MessagesSquareIcon className="block size-5 text-slate-400" />
           </button>
           <button
             type="button"
             className="bg-white border hover:scale-105 transition-all duration-300 border-slate-200 rounded-[8px] p-2 size-auto relative"
-            aria-label="Notifications"
+            aria-label={t("shipment.navigatingInfo.notifications")}
             aria-expanded={showNotifications}
             aria-haspopup="menu"
             onClick={() => setShowNotifications((v) => !v)}
@@ -192,13 +197,13 @@ export function NavigatingInfo({
             >
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
                 <h3 className="text-sm font-semibold text-slate-900">
-                  Notifications
+                  {t("shipment.navigatingInfo.notifications")}
                 </h3>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
                     className="inline-flex items-center justify-center rounded-[8px] border border-slate-200 bg-white size-7 text-slate-400 hover:text-slate-600"
-                    aria-label="Filter"
+                    aria-label={t("shipment.navigatingInfo.filter")}
                   >
                     <ListCheck className="size-4" />
                   </button>
@@ -228,7 +233,7 @@ export function NavigatingInfo({
                           {n.isChange ? (
                             <div className="flex items-center gap-2 min-w-0 text-[13px]">
                               <span className="text-slate-700">
-                                Driver changed from
+                                {t("shipment.navigatingInfo.driverChangedFrom")}
                               </span>
                               <span className="inline-flex items-center gap-1 min-w-0">
                                 <span className="inline-flex items-center justify-center rounded-full bg-slate-200 size-5 overflow-hidden">
@@ -242,7 +247,9 @@ export function NavigatingInfo({
                                   Xin Zhao
                                 </span>
                               </span>
-                              <span className="text-slate-400">to</span>
+                              <span className="text-slate-400">
+                                {t("shipment.navigatingInfo.to")}
+                              </span>
                               <span className="font-semibold text-amber-700">
                                 Oni Chan
                               </span>
@@ -277,7 +284,7 @@ export function NavigatingInfo({
           <button
             type="button"
             className="bg-red-500/10 hover:scale-105 transition-all duration-300 rounded-[8px] p-2 size-auto"
-            aria-label="Close"
+            aria-label={t("shipment.navigatingInfo.close")}
             onClick={onClose}
           >
             <XIcon className="block size-5 text-red-500" />
@@ -307,7 +314,7 @@ export function NavigatingInfo({
                   </div>
                 )}
                 <p className="text-slate-900 font-medium">
-                  {driverName || "Unknown"}
+                  {driverName || t("shipment.navigatingInfo.unknown")}
                 </p>
               </div>
 
@@ -316,7 +323,7 @@ export function NavigatingInfo({
                   type="button"
                   onClick={() => driverId && chatHook.setIsChatOpen(true)}
                   disabled={!driverId}
-                  aria-label="Open chat"
+                  aria-label={t("shipment.navigatingInfo.openChat")}
                   className={cn(
                     "bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform",
                     !driverId && "opacity-50 cursor-not-allowed"
@@ -348,11 +355,11 @@ export function NavigatingInfo({
                   <div className="flex items-center gap-2">
                     <CarIcon className="size-[14px] text-slate-300" />
                     <span className="uppercase text-[10px] text-slate-400">
-                      Vehicle
+                      {t("shipment.navigatingInfo.vehicle")}
                     </span>
                   </div>
                   <p className="text-xs text-slate-900">
-                    {vehicle || "Unknown"}
+                    {vehicle || t("shipment.navigatingInfo.unknown")}
                   </p>
                 </div>
 
@@ -360,12 +367,12 @@ export function NavigatingInfo({
                   <div className="flex items-center gap-2">
                     <Building2Icon className="size-[14px] text-slate-300" />
                     <span className="uppercase text-[10px] text-slate-400">
-                      Local Company
+                      {t("shipment.navigatingInfo.localCompany")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-xs text-slate-900">
-                      {localCompany || "N/A"}
+                      {localCompany || t("shipment.navigatingInfo.nA")}
                     </p>
                     <span className="inline-flex items-center justify-center p-1 rounded-full bg-blue-600">
                       <PlaneIcon className="size-3 text-white" />
@@ -376,7 +383,7 @@ export function NavigatingInfo({
                   <div className="flex items-center gap-2">
                     <WeightIcon className="size-[14px] text-slate-300" />
                     <span className="uppercase text-[10px] text-slate-400">
-                      Weight
+                      {t("shipment.navigatingInfo.weight")}
                     </span>
                   </div>
                   <p className="text-[12px] text-slate-900">
@@ -385,11 +392,14 @@ export function NavigatingInfo({
                       const numericValue = parseFloat(
                         weight.replace(/[^0-9.]/g, "")
                       );
-                      if (isNaN(numericValue)) return "0 Tons";
+                      if (isNaN(numericValue))
+                        return `0 ${t("shipment.navigatingInfo.tons")}`;
                       // Convert from kilograms to tons (1 ton = 1000 kg)
                       const tons = numericValue / 1000;
                       // Format to 2 decimal places, remove trailing zeros
-                      return `${tons.toFixed(2).replace(/\.?0+$/, "")} Tons`;
+                      return `${tons.toFixed(2).replace(/\.?0+$/, "")} ${t(
+                        "shipment.navigatingInfo.tons"
+                      )}`;
                     })()}
                   </p>
                 </div>
@@ -397,7 +407,7 @@ export function NavigatingInfo({
                   <div className="flex items-center gap-2">
                     <LocateFixedIcon className="size-[14px] text-slate-300" />
                     <span className="uppercase text-[10px] text-slate-400">
-                      Destination
+                      {t("shipment.navigatingInfo.destination")}
                     </span>
                   </div>
                   <p className="text-[12px] text-slate-900">
@@ -472,7 +482,7 @@ export function NavigatingInfo({
         <ChatOverlay
           isOpen={chatHook.isChatOpen}
           onClose={() => chatHook.setIsChatOpen(false)}
-          recipientName={driverName || "Driver"}
+          recipientName={driverName || t("shipment.navigatingInfo.driver")}
           chatHook={chatHook}
           actionableAlerts={ACTIONABLE_ALERTS}
         />
@@ -480,6 +490,5 @@ export function NavigatingInfo({
     </section>
   );
 }
-
 
 export default NavigatingInfo;

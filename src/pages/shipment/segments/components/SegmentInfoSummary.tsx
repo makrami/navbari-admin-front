@@ -10,24 +10,24 @@ import {
   TriangleAlert,
   MessagesSquareIcon,
 } from "lucide-react";
-import {useTranslation} from "react-i18next";
-import {useEffect, useState} from "react";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 import FinancialSection from "./FinancialSection";
 import DocumentsSection from "./DocumentsSection";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
-import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
-import {cn} from "../../../../shared/utils/cn";
-import {getSegmentFileAttachments} from "../../../../services/file-attachment/file-attachment.service";
-import type {DocumentItem} from "./DocumentsSection";
-import {getFileSizesFromUrls} from "../utils/fileSize";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
+import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
+import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
+import { cn } from "../../../../shared/utils/cn";
+import { getSegmentFileAttachments } from "../../../../services/file-attachment/file-attachment.service";
+import type { DocumentItem } from "./DocumentsSection";
+import { getFileSizesFromUrls } from "../utils/fileSize";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
+  { id: "1", label: "GPS Lost", alertType: "alert" },
+  { id: "2", label: "Delay Expected", alertType: "warning" },
+  { id: "3", label: "Route Cleared", alertType: "success" },
+  { id: "4", label: "Documentation Pending", alertType: "info" },
 ];
 
 type SegmentInfoSummaryProps = {
@@ -118,7 +118,7 @@ function formatEtaDuration(
  */
 function formatTimeAgo(
   timestamp: string | null | undefined,
-  t: (key: string, options?: {count?: number}) => string
+  t: (key: string, options?: { count?: number }) => string
 ): string {
   if (!timestamp) return "";
 
@@ -136,11 +136,11 @@ function formatTimeAgo(
     if (diffMins < 1) {
       return t("segments.eta.justNow");
     } else if (diffMins < 60) {
-      return t("segments.eta.minutesAgo", {count: diffMins});
+      return t("segments.eta.minutesAgo", { count: diffMins });
     } else if (diffHours < 24) {
-      return t("segments.eta.hoursAgo", {count: diffHours});
+      return t("segments.eta.hoursAgo", { count: diffHours });
     } else {
-      return t("segments.eta.daysAgo", {count: diffDays});
+      return t("segments.eta.daysAgo", { count: diffDays });
     }
   } catch {
     return "";
@@ -207,7 +207,7 @@ export default function SegmentInfoSummary({
   documents,
   segmentId,
 }: SegmentInfoSummaryProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [fetchedDocuments, setFetchedDocuments] = useState<DocumentItem[]>([]);
   const [documentsWithSizes, setDocumentsWithSizes] = useState<DocumentItem[]>(
     []
@@ -353,7 +353,7 @@ export default function SegmentInfoSummary({
       : null;
 
   return (
-    <div className="bg-white rounded-xl space-y-4 mt-4">
+    <div dir="ltr" className="bg-white rounded-xl space-y-4 mt-4">
       {/* Estimated Arrival Card */}
       <div className="bg-slate-50 rounded-xl p-4 flex items-center justify-between gap-2">
         {/* Left Section - Text Information */}

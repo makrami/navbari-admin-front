@@ -114,7 +114,13 @@
   },
   "segments": {
     "cardHeader": {
-      "destinationFallback": "(НАЗНАЧЕНИЕ)"
+      "destinationFallback": "(НАЗНАЧЕНИЕ)",
+      "notAssigned": "НЕ НАЗНАЧЕНО",
+      "current": "ТЕКУЩИЙ",
+      "segment": "СЕГМЕНТ",
+      "cargoDeclaration": "Декларация груза",
+      "chatWithDriver": "Чат с водителем",
+      "driver": "Водитель"
     },
     "infoBanner": {
       "from": "От",
@@ -173,6 +179,263 @@
       "closeMenu": "Закрыть меню"
     }
   },
+  "shipment": {
+    "page": {
+      "title": "Отправление",
+      "selectShipment": "Выберите отправление для просмотра деталей",
+      "loading": "Загрузка отправлений..."
+    },
+    "navigatingInfo": {
+      "chat": "Чат",
+      "notifications": "Уведомления",
+      "filter": "Фильтр",
+      "close": "Закрыть",
+      "unknown": "Неизвестно",
+      "openChat": "Открыть чат",
+      "vehicle": "Транспорт",
+      "localCompany": "Местная компания",
+      "nA": "Н/Д",
+      "weight": "Вес",
+      "destination": "Назначение",
+      "tons": "Тонн",
+      "driverChangedFrom": "Водитель изменен с",
+      "to": "на",
+      "turnedGpsOn": "Включил GPS.",
+      "turnedGpsOff": "Выключил GPS.",
+      "uploaded": "Загружено",
+      "driver": "Водитель"
+    },
+    "listPanel": {
+      "title": "Отправление"
+    },
+    "search": {
+      "placeholder": "Поиск...",
+      "filters": "Фильтры"
+    },
+    "actions": {
+      "addShipment": "Добавить отправление",
+      "segments": "Сегменты"
+    },
+    "status": {
+      "all": "Все",
+      "pending": "Ожидание",
+      "inTransit": "В пути",
+      "delivered": "Доставлено",
+      "cancelled": "Отменено",
+      "pendingAssignment": "Ожидание назначения"
+    },
+    "shipmentItem": {
+      "notAssigned": "Не назначено"
+    },
+    "activity": {
+      "inTransit": "В пути",
+      "atOrigin": "В пункте отправления",
+      "atDestination": "В пункте назначения",
+      "loading": "Загрузка",
+      "inCustoms": "На таможне",
+      "delivered": "Доставлено",
+      "assigned": "Назначено",
+      "active": "Активно",
+      "pending": "Ожидание",
+      "justNow": "Только что",
+      "minutesAgo": "{{count}} мин назад",
+      "hoursAgo": "{{count}} ч назад",
+      "daysAgo": "{{count}} дн назад"
+    },
+    "addModal": {
+      "title": "Добавить новое отправление",
+      "close": "Закрыть",
+      "name": "Название",
+      "namePlaceholder": "Название отправления...",
+      "from": "Откуда",
+      "to": "Куда",
+      "searchCities": "Поиск городов...",
+      "cargoCategory": "Категория груза",
+      "searchCategories": "Поиск категорий...",
+      "cargoWeight": "Вес груза",
+      "weightUnit": "КГ",
+      "segmentCount": "Количество сегментов",
+      "segmentCountPlaceholder": "0",
+      "cancel": "Отмена",
+      "create": "Создать",
+      "loadingCities": "Загрузка городов...",
+      "noCitiesFound": "Города не найдены",
+      "noCategoriesFound": "Категории не найдены",
+      "categories": {
+        "electronics": "Электроника",
+        "textiles": "Текстиль",
+        "food": "Продукты питания",
+        "medical": "Медицинские товары",
+        "machinery": "Машины и оборудование",
+        "chemicals": "Химические вещества",
+        "automotive": "Автомобили",
+        "furniture": "Мебель"
+      }
+    },
+    "segments": {
+      "title": "Сегменты",
+      "addSegment": "Добавить сегмент"
+    },
+    "scroll": {
+      "left": "Прокрутить влево",
+      "right": "Прокрутить вправо"
+    }
+  },
+  "drivers": {
+    "page": {
+      "title": "Водители",
+      "stats": {
+        "shipments": "отправления",
+        "vehicles": "транспорт"
+      },
+      "closeDetails": "Закрыть панель деталей",
+      "actions": {
+        "activate": "Активировать",
+        "deactivate": "Деактивировать"
+      },
+      "status": {
+        "all": "Все",
+        "pending": "Ожидание",
+        "approved": "Утверждено",
+        "rejected": "Отклонено",
+        "inactive": "Неактивный"
+      },
+      "scroll": {
+        "left": "Прокрутить влево",
+        "right": "Прокрутить вправо"
+      }
+    },
+    "details": {
+      "unknownDriver": "Неизвестный водитель",
+      "nA": "Н/Д",
+      "avatar": "Аватар",
+      "openChat": "Открыть чат",
+      "companyLogo": "Логотип компании",
+      "register": "Регистрация",
+      "shipments": "Отправления",
+      "vehicle": "ТРАНСПОРТ",
+      "plateNumber": "НОМЕРНОЙ ЗНАК",
+      "capacity": "ВМЕСТИМОСТЬ",
+      "tons": "Тонн",
+      "alerts": {
+        "gpsLost": "GPS потерян",
+        "delayExpected": "Ожидается задержка",
+        "routeCleared": "Маршрут очищен",
+        "documentationPending": "Документация ожидает"
+      }
+    }
+  },
+  "localCompanies": {
+    "page": {
+      "title": "Местные компании",
+      "stats": {
+        "drivers": "водители",
+        "active": "активный"
+      },
+      "closeDetails": "Закрыть панель деталей",
+      "actions": {
+        "activate": "Активировать",
+        "deactivate": "Деактивировать"
+      },
+      "errors": {
+        "loadFailed": "Не удалось загрузить компании"
+      },
+      "empty": "Компании не найдены",
+      "status": {
+        "all": "Все",
+        "pending": "Ожидание",
+        "active": "Активный",
+        "rejected": "Отклонено",
+        "inactive": "Неактивный"
+      },
+      "scroll": {
+        "left": "Прокрутить влево",
+        "right": "Прокрутить вправо"
+      },
+      "card": {
+        "drivers": "водители",
+        "types": "типы",
+        "approve": "Утвердить",
+        "reject": "Отклонить",
+        "view": "Просмотр",
+        "viewDetails": "Просмотр деталей"
+      },
+      "details": {
+        "openChat": "Открыть чат",
+        "register": "Регистрация",
+        "drivers": "Водители",
+        "segments": "Сегменты",
+        "phone": "Телефон",
+        "email": "Электронная почта",
+        "add": "Добавить",
+        "edit": "Редактировать"
+      },
+      "documents": {
+        "title": "Документы",
+        "upload": "Загрузить",
+        "loading": "Загрузка документов...",
+        "empty": "Документы не найдены",
+        "open": "Открыть",
+        "rejectionReason": "Причина отклонения",
+        "approve": "Утвердить",
+        "reject": "Отклонить",
+        "preview": "Просмотр",
+        "rejectDocument": "Отклонить документ",
+        "rejectReasonPrompt": "Пожалуйста, укажите причину отклонения:",
+        "rejectReasonPlaceholder": "Введите причину отклонения...",
+        "cancel": "Отмена",
+        "rejecting": "Отклонение...",
+        "closePreview": "Закрыть просмотр",
+        "previewNotAvailable": "Просмотр недоступен для этого типа файла",
+        "openFile": "Открыть файл",
+        "fileNotAvailable": "Файл недоступен",
+        "openInNewTab": "Открыть в новой вкладке",
+        "close": "Закрыть",
+        "types": {
+          "license": "Лицензия",
+          "insurance": "Страхование",
+          "manager_id": "ID менеджера",
+          "primary_contact_id": "ID основного контакта",
+          "other": "Другой документ"
+        }
+      },
+      "internalNotes": {
+        "title": "Внутренние заметки",
+        "placeholder": "Добавить внутреннюю заметку о компании...",
+        "saving": "Сохранение...",
+        "saveNote": "Сохранить заметку",
+        "saveFailed": "Не удалось сохранить заметку",
+        "saveSuccess": "Заметка успешно сохранена"
+      },
+      "activities": {
+        "title": "Последние активности",
+        "loading": "Загрузка сегментов...",
+        "empty": "Сегменты для этой компании не найдены.",
+        "fetchFailed": "Не удалось загрузить сегменты",
+        "from": "С",
+        "until": "До",
+        "headers": {
+          "id": "ID",
+          "route": "Маршрут",
+          "date": "Дата",
+          "status": "Статус"
+        },
+        "status": {
+          "pendingAssignment": "Ожидание назначения",
+          "assigned": "Назначено",
+          "toOrigin": "К пункту отправления",
+          "atOrigin": "В пункте отправления",
+          "loading": "Загрузка",
+          "inCustoms": "На таможне",
+          "toDestination": "К пункту назначения",
+          "atDestination": "В пункте назначения",
+          "delivered": "Доставлено",
+          "cancelled": "Отменено",
+          "unknown": "Неизвестно"
+        }
+      }
+    }
+  },
   "layout": {
     "app": {
       "openMenu": "Открыть меню",
@@ -203,6 +466,20 @@
         "saveChanges": "Сохранить изменения",
         "saving": "Сохранение..."
       },
+      "notifications": {
+        "title": "Уведомления и оповещения",
+        "description": "Управление автоматическими оповещениями и настройками уведомлений пользователя.",
+        "driverGpsAlert": "Оповещение GPS водителя после:",
+        "delayAlert": "Оповещение о задержке после:",
+        "minutes": "МИНУТЫ",
+        "hours": "ЧАСЫ",
+        "deliveryMethods": "Способы доставки",
+        "deliveryMethodsDescription": "Выберите, как вы хотите получать включенные оповещения",
+        "inApp": "В приложении",
+        "email": "Электронная почта",
+        "sms": "SMS",
+        "mobilePush": "Мобильный пуш"
+      },
       "rolesPermissions": {
         "title": "Роли и разрешения",
         "description": "Управление доступом пользователей и разрешениями на платформе.",
@@ -230,8 +507,104 @@
         "confirmDelete": "Подтвердить удаление",
         "deleteUser": "Удалить пользователя",
         "deleteUserConfirm": "Вы уверены, что хотите удалить \"{{name}}\"? Это действие нельзя отменить.",
-        "deleting": "Удаление..."
+        "deleting": "Удаление...",
+        "failedToLoadRoles": "Не удалось загрузить роли",
+        "editUserIn": "Редактировать пользователя в \"{{roleName}}\"",
+        "addNewUserTo": "Добавить нового пользователя в \"{{roleName}}\"",
+        "name": "Имя",
+        "namePlaceholder": "Имя...",
+        "email": "Электронная почта",
+        "emailPlaceholder": "Электронная почта...",
+        "password": "Пароль",
+        "passwordPlaceholder": "Пароль...",
+        "passwordLeaveEmpty": "оставьте пустым, чтобы сохранить текущий",
+        "passwordRequired": "Пароль обязателен",
+        "passwordMinLength": "Пароль должен содержать не менее 8 символов",
+        "passwordLowercase": "Пароль должен содержать хотя бы одну строчную букву",
+        "passwordUppercase": "Пароль должен содержать хотя бы одну заглавную букву",
+        "passwordNumber": "Пароль должен содержать хотя бы одну цифру",
+        "passwordSpecialChar": "Пароль должен содержать хотя бы один специальный символ (@$!%*?&)",
+        "passwordRequirements": "Должен содержать: строчную букву, заглавную букву, цифру и специальный символ (@$!%*?&)",
+        "save": "Сохранить",
+        "add": "Добавить",
+        "saving": "Сохранение...",
+        "statusActive": "Активный",
+        "statusSuspended": "Приостановлен"
       }
+    }
+  },
+  "chatAlert": {
+    "page": {
+      "title": "Чаты и оповещения"
+    },
+    "search": {
+      "placeholder": "Поиск чатов и оповещений..."
+    },
+    "filters": {
+      "all": "Все",
+      "drivers": "Водители",
+      "localCompanies": "Местные компании"
+    },
+    "selectChat": "Выберите чат",
+    "empty": {
+      "all": "Пока нет чатов",
+      "drivers": "Пока нет чатов с водителями",
+      "companies": "Пока нет чатов с компаниями"
+    },
+    "details": {
+      "title": "Детали",
+      "close": "Закрыть панель деталей"
+    },
+    "shipmentHeader": {
+      "chat": "Чат",
+      "notifications": "Уведомления",
+      "close": "Закрыть"
+    },
+    "chatSection": {
+      "filters": {
+        "all": "Все",
+        "chats": "Чаты",
+        "alerts": "Оповещения"
+      },
+      "loading": "Загрузка...",
+      "loadOlderMessages": "Загрузить старые сообщения"
+    },
+    "messageInput": {
+      "placeholder": "Введите сообщение...",
+      "attachFile": "Прикрепить файл",
+      "sendMessage": "Отправить сообщение",
+      "removeAttachment": "Удалить вложение"
+    },
+    "dateGroup": {
+      "today": "Сегодня",
+      "yesterday": "Вчера"
+    }
+  },
+  "entityCard": {
+    "vehicle": "Транспорт",
+    "plateNumber": "Номерной знак",
+    "lostShipment": "Потерянная отправка",
+    "nA": "Н/Д",
+    "avatar": "Аватар",
+    "companyLogo": "Логотип компании",
+    "status": {
+      "pending": "Ожидание",
+      "active": "Активный",
+      "approved": "Утверждено",
+      "rejected": "Отклонено",
+      "inactive": "Неактивный"
+    },
+    "vehicleType": {
+      "tented": "Тентованный",
+      "refrigerated": "Рефрижераторный",
+      "flatbed": "Бортовой",
+      "double_wall": "Двухстенный"
+    },
+    "actions": {
+      "approve": "Утвердить",
+      "reject": "Отклонить",
+      "view": "Просмотр",
+      "viewDetails": "Просмотр деталей"
     }
   }
 }

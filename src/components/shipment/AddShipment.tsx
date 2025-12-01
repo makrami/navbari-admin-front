@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import type { MouseEventHandler, PropsWithChildren } from "react";
 import { cn } from "../../shared/utils/cn";
+import { useTranslation } from "react-i18next";
 
 type AddShipmentProps = PropsWithChildren<{
   className?: string;
@@ -8,6 +9,7 @@ type AddShipmentProps = PropsWithChildren<{
 }>;
 
 export function AddShipment({ className, onClick }: AddShipmentProps) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -18,10 +20,12 @@ export function AddShipment({ className, onClick }: AddShipmentProps) {
         "hover:scale-101 active:scale-99",
         className
       )}
-      aria-label="Add Shipment"
+      aria-label={t("shipment.actions.addShipment")}
       data-name="Add Shipment"
     >
-      <span className="text-sm font-bold">Add Shipment</span>
+      <span className="text-sm font-bold">
+        {t("shipment.actions.addShipment")}
+      </span>
       <Plus className="h-5 w-5 text-[#1b54fe]" />
     </button>
   );

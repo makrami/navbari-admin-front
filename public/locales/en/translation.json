@@ -114,7 +114,13 @@
   },
   "segments": {
     "cardHeader": {
-      "destinationFallback": "(DESTINATION)"
+      "destinationFallback": "(DESTINATION)",
+      "notAssigned": "NOT ASSIGNED",
+      "current": "CURRENT",
+      "segment": "SEGMENT",
+      "cargoDeclaration": "Cargo Declaration",
+      "chatWithDriver": "Chat with driver",
+      "driver": "Driver"
     },
     "infoBanner": {
       "from": "From",
@@ -181,6 +187,36 @@
       "actions": {
         "activate": "Activate",
         "deactivate": "Deactivate"
+      },
+      "status": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "inactive": "Inactive"
+      },
+      "scroll": {
+        "left": "Scroll left",
+        "right": "Scroll right"
+      }
+    },
+    "details": {
+      "unknownDriver": "Unknown Driver",
+      "nA": "N/A",
+      "avatar": "Avatar",
+      "openChat": "Open chat",
+      "companyLogo": "Company Logo",
+      "register": "Register",
+      "shipments": "Shipments",
+      "vehicle": "VEHICLE",
+      "plateNumber": "PLATE NUMBER",
+      "capacity": "CAPACITY",
+      "tons": "Tons",
+      "alerts": {
+        "gpsLost": "GPS Lost",
+        "delayExpected": "Delay Expected",
+        "routeCleared": "Route Cleared",
+        "documentationPending": "Documentation Pending"
       }
     }
   },
@@ -195,6 +231,103 @@
       "actions": {
         "activate": "Activate",
         "deactivate": "Deactivate"
+      },
+      "errors": {
+        "loadFailed": "Failed to load companies"
+      },
+      "empty": "No companies found",
+      "status": {
+        "all": "All",
+        "pending": "Pending",
+        "active": "Active",
+        "rejected": "Rejected",
+        "inactive": "Inactive"
+      },
+      "scroll": {
+        "left": "Scroll left",
+        "right": "Scroll right"
+      },
+      "card": {
+        "drivers": "drivers",
+        "types": "types",
+        "approve": "Approve",
+        "reject": "Reject",
+        "view": "View",
+        "viewDetails": "View Details"
+      },
+      "details": {
+        "openChat": "Open chat",
+        "register": "Register",
+        "drivers": "Drivers",
+        "segments": "Segments",
+        "phone": "Phone",
+        "email": "Email",
+        "add": "Add",
+        "edit": "Edit"
+      },
+      "documents": {
+        "title": "Documents",
+        "upload": "Upload",
+        "loading": "Loading documents...",
+        "empty": "No documents found",
+        "open": "Open",
+        "rejectionReason": "Rejection reason",
+        "approve": "Approve",
+        "reject": "Reject",
+        "preview": "Preview",
+        "rejectDocument": "Reject Document",
+        "rejectReasonPrompt": "Please provide a reason for rejection:",
+        "rejectReasonPlaceholder": "Enter rejection reason...",
+        "cancel": "Cancel",
+        "rejecting": "Rejecting...",
+        "closePreview": "Close preview",
+        "previewNotAvailable": "Preview not available for this file type",
+        "openFile": "Open File",
+        "fileNotAvailable": "File not available",
+        "openInNewTab": "Open in New Tab",
+        "close": "Close",
+        "types": {
+          "license": "License",
+          "insurance": "Insurance",
+          "manager_id": "Manager ID",
+          "primary_contact_id": "Primary Contact ID",
+          "other": "Other Document"
+        }
+      },
+      "internalNotes": {
+        "title": "Internal Notes",
+        "placeholder": "Add internal note about the company...",
+        "saving": "Saving...",
+        "saveNote": "Save note",
+        "saveFailed": "Failed to save note",
+        "saveSuccess": "Note saved successfully"
+      },
+      "activities": {
+        "title": "Recent Activities",
+        "loading": "Loading segments...",
+        "empty": "No segments found for this company.",
+        "fetchFailed": "Failed to fetch segments",
+        "from": "From",
+        "until": "Until",
+        "headers": {
+          "id": "ID",
+          "route": "Route",
+          "date": "Date",
+          "status": "Status"
+        },
+        "status": {
+          "pendingAssignment": "Pending Assignment",
+          "assigned": "Assigned",
+          "toOrigin": "To Origin",
+          "atOrigin": "At Origin",
+          "loading": "Loading",
+          "inCustoms": "In Customs",
+          "toDestination": "To Destination",
+          "atDestination": "At Destination",
+          "delivered": "Delivered",
+          "cancelled": "Cancelled",
+          "unknown": "Unknown"
+        }
       }
     }
   },
@@ -211,9 +344,44 @@
     "search": {
       "placeholder": "Search chats and alerts..."
     },
+    "filters": {
+      "all": "All",
+      "drivers": "Drivers",
+      "localCompanies": "Local Comp."
+    },
+    "selectChat": "Select a chat",
+    "empty": {
+      "all": "No chats yet",
+      "drivers": "No chats with drivers yet",
+      "companies": "No chats with companies yet"
+    },
     "details": {
       "title": "Details",
       "close": "Close details panel"
+    },
+    "shipmentHeader": {
+      "chat": "Chat",
+      "notifications": "Notifications",
+      "close": "Close"
+    },
+    "chatSection": {
+      "filters": {
+        "all": "All",
+        "chats": "Chats",
+        "alerts": "Alerts"
+      },
+      "loading": "Loading...",
+      "loadOlderMessages": "Load older messages"
+    },
+    "messageInput": {
+      "placeholder": "Type a message...",
+      "attachFile": "Attach file",
+      "sendMessage": "Send message",
+      "removeAttachment": "Remove attachment"
+    },
+    "dateGroup": {
+      "today": "Today",
+      "yesterday": "Yesterday"
     }
   },
   "vehicles": {
@@ -249,6 +417,109 @@
       "closeMenu": "Close menu"
     }
   },
+  "shipment": {
+    "page": {
+      "title": "Shipment",
+      "selectShipment": "Select a shipment to view details",
+      "loading": "Loading shipments..."
+    },
+    "navigatingInfo": {
+      "chat": "Chat",
+      "notifications": "Notifications",
+      "filter": "Filter",
+      "close": "Close",
+      "unknown": "Unknown",
+      "openChat": "Open chat",
+      "vehicle": "Vehicle",
+      "localCompany": "Local Company",
+      "nA": "N/A",
+      "weight": "Weight",
+      "destination": "Destination",
+      "tons": "Tons",
+      "driverChangedFrom": "Driver changed from",
+      "to": "to",
+      "turnedGpsOn": "Turned their GPS on.",
+      "turnedGpsOff": "Turned their GPS off.",
+      "uploaded": "Uploaded",
+      "driver": "Driver"
+    },
+    "listPanel": {
+      "title": "Shipment"
+    },
+    "search": {
+      "placeholder": "Search...",
+      "filters": "Filters"
+    },
+    "actions": {
+      "addShipment": "Add Shipment",
+      "segments": "Segments"
+    },
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "inTransit": "In Transit",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "pendingAssignment": "Pending Assignment"
+    },
+    "shipmentItem": {
+      "notAssigned": "Not Assigned"
+    },
+    "activity": {
+      "inTransit": "In Transit",
+      "atOrigin": "At Origin",
+      "atDestination": "At Destination",
+      "loading": "Loading",
+      "inCustoms": "In Customs",
+      "delivered": "Delivered",
+      "assigned": "Assigned",
+      "active": "Active",
+      "pending": "Pending",
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    },
+    "addModal": {
+      "title": "Add New Shipment",
+      "close": "Close",
+      "name": "Name",
+      "namePlaceholder": "Shipment Name...",
+      "from": "From",
+      "to": "To",
+      "searchCities": "Search cities...",
+      "cargoCategory": "Cargo Category",
+      "searchCategories": "Search categories...",
+      "cargoWeight": "Cargo Weight",
+      "weightUnit": "KG",
+      "segmentCount": "Segment Count",
+      "segmentCountPlaceholder": "0",
+      "cancel": "Cancel",
+      "create": "Create",
+      "loadingCities": "Loading cities...",
+      "noCitiesFound": "No cities found",
+      "noCategoriesFound": "No categories found",
+      "categories": {
+        "electronics": "Electronics",
+        "textiles": "Textiles",
+        "food": "Food",
+        "medical": "Medical",
+        "machinery": "Machinery",
+        "chemicals": "Chemicals",
+        "automotive": "Automotive",
+        "furniture": "Furniture"
+      }
+    },
+    "segments": {
+      "title": "Segments",
+      "addSegment": "Add Segment",
+      "allActivities": "All Activities"
+    },
+    "scroll": {
+      "left": "Scroll left",
+      "right": "Scroll right"
+    }
+  },
   "settings": {
     "page": {
       "title": "Settings"
@@ -275,7 +546,17 @@
       },
       "notifications": {
         "title": "Notification & Alerts",
-        "description": "Manage automated alerts and user notification preferences."
+        "description": "Manage automated alerts and user notification preferences.",
+        "driverGpsAlert": "Driver GPS Alert after:",
+        "delayAlert": "Delay Alert after:",
+        "minutes": "MINUTES",
+        "hours": "HOURS",
+        "deliveryMethods": "Delivery Methods",
+        "deliveryMethodsDescription": "Select how you want to receive the enabled alerts",
+        "inApp": "In-App Notif",
+        "email": "Email",
+        "sms": "SMS",
+        "mobilePush": "Mobile Push"
       },
       "localization": {
         "title": "Localization",
@@ -343,8 +624,57 @@
         "confirmDelete": "Confirm Delete",
         "deleteUser": "Delete User",
         "deleteUserConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-        "deleting": "Deleting..."
+        "deleting": "Deleting...",
+        "failedToLoadRoles": "Failed to load roles",
+        "editUserIn": "Edit User in \"{{roleName}}\"",
+        "addNewUserTo": "Add New User to \"{{roleName}}\"",
+        "name": "Name",
+        "namePlaceholder": "Name...",
+        "email": "Email",
+        "emailPlaceholder": "Email...",
+        "password": "Password",
+        "passwordPlaceholder": "Password...",
+        "passwordLeaveEmpty": "leave empty to keep current",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 8 characters long",
+        "passwordLowercase": "Password must contain at least one lowercase letter",
+        "passwordUppercase": "Password must contain at least one uppercase letter",
+        "passwordNumber": "Password must contain at least one number",
+        "passwordSpecialChar": "Password must contain at least one special character (@$!%*?&)",
+        "passwordRequirements": "Must contain: lowercase, uppercase, number, and special character (@$!%*?&)",
+        "save": "Save",
+        "add": "Add",
+        "saving": "Saving...",
+        "statusActive": "Active",
+        "statusSuspended": "Suspended"
       }
+    }
+  },
+  "entityCard": {
+    "vehicle": "Vehicle",
+    "plateNumber": "Plate Number",
+    "lostShipment": "Lost Shipment",
+    "nA": "N/A",
+    "avatar": "Avatar",
+    "companyLogo": "Company logo",
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "inactive": "Inactive"
+    },
+    "vehicleType": {
+      "tented": "Tented",
+      "refrigerated": "Refrigerated",
+      "flatbed": "Flatbed",
+      "double_wall": "Double Wall"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "view": "View",
+      "viewDetails": "View Details"
     }
   }
 }

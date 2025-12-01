@@ -9,6 +9,7 @@ import type { Shipment } from "../../../shared/types/shipment";
 import type { Segment } from "../../../shared/types/segmentData";
 import { useMemo, useState } from "react";
 import { StatusFilterChips, type FilterKey } from "./StatusFilterChips";
+import { useTranslation } from "react-i18next";
 
 // Helper function to format Segment for ShipmentItem
 function formatSegmentsForShipmentItem(segments: Segment[]): Array<{
@@ -60,6 +61,7 @@ export function ShipmentListPanel({
   editedSegmentsByShipmentId = {},
   segmentsLoading = false,
 }: ShipmentListPanelProps) {
+  const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
   // Calculate counts for each filter based on backend shipment status enum
@@ -104,7 +106,10 @@ export function ShipmentListPanel({
   }, [filteredShipments, selectedId]);
 
   return (
-    <ListPanel title="Shipment" className="w-[372px] min-w-[372px]">
+    <ListPanel
+      title={t("shipment.listPanel.title")}
+      className="w-[372px] min-w-[372px]"
+    >
       <SearchShipment />
       <div className="flex items-center gap-2">
         <AddShipment onClick={onAddShipment} />

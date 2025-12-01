@@ -1,15 +1,21 @@
-import {useEffect, useMemo, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-import type {ChatAlert} from "../data";
-import {ChatSection} from "./ChatSection";
-import {ShipmentHeader} from "./ShipmentHeader";
+import "dayjs/locale/en";
+import "dayjs/locale/fa";
+import "dayjs/locale/ar";
+import "dayjs/locale/ru";
+import "dayjs/locale/zh";
+import { useTranslation } from "react-i18next";
+import type { ChatAlert } from "../data";
+import { ChatSection } from "./ChatSection";
+import { ShipmentHeader } from "./ShipmentHeader";
 import {
   useConversationMessages,
   useMarkConversationRead,
   useSendChatAlert,
   useSendChatMessage,
 } from "../../../services/chat/hooks";
-import {useChatSocket} from "../../../services/chat/socket";
+import { useChatSocket } from "../../../services/chat/socket";
 import {
   CHAT_ALERT_TYPE,
   CHAT_MESSAGE_TYPE,
@@ -18,12 +24,12 @@ import {
   type ConversationReadDto,
   type MessageReadDto,
 } from "../../../services/chat/chat.types";
-import type {ActionableAlertChip, AlertType, Message} from "../types/chat";
-import {ENV} from "../../../lib/env";
-import {useDriverDetails} from "../../../services/driver/hooks";
-import {useCompanyDetails} from "../../../services/company/hooks";
-import {DriverDetails} from "../../Drivers/components/DriverDetails";
-import {CompanyDetails} from "../../LocalCompanies/components/CompanyDetails";
+import type { ActionableAlertChip, AlertType, Message } from "../types/chat";
+import { ENV } from "../../../lib/env";
+import { useDriverDetails } from "../../../services/driver/hooks";
+import { useCompanyDetails } from "../../../services/company/hooks";
+import { DriverDetails } from "../../Drivers/components/DriverDetails";
+import { CompanyDetails } from "../../LocalCompanies/components/CompanyDetails";
 
 type ChatAlertDetailsProps = {
   chatAlert: ChatAlert;
@@ -34,11 +40,19 @@ type ChatAlertDetailsProps = {
 };
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
+  { id: "1", label: "GPS Lost", alertType: "alert" },
+  { id: "2", label: "Delay Expected", alertType: "warning" },
+  { id: "3", label: "Route Cleared", alertType: "success" },
+  { id: "4", label: "Documentation Pending", alertType: "info" },
 ];
+
+const LOCALE_MAP: Record<string, string> = {
+  en: "en",
+  fa: "fa",
+  ar: "ar",
+  ru: "ru",
+  zh: "zh",
+};
 
 export function ChatAlertDetails({
   chatAlert,
@@ -46,7 +60,12 @@ export function ChatAlertDetails({
   currentUserId,
   onClose,
 }: ChatAlertDetailsProps) {
+  const { i18n } = useTranslation();
   const [isTyping, setIsTyping] = useState(false);
+
+  // Set dayjs locale based on current i18n language
+  const currentLocale = LOCALE_MAP[i18n.language] || "en";
+  dayjs.locale(currentLocale);
   const {
     data: messagesPages,
     isLoading: messagesLoading,
@@ -92,6 +111,9 @@ export function ChatAlertDetails({
   ]);
 
   const messages = useMemo<Message[]>(() => {
+    // Ensure locale is set before processing messages
+    dayjs.locale(currentLocale);
+
     const pages = messagesPages?.pages ?? [];
     const flattened = pages.flat();
     const sorted = flattened.sort((a, b) =>
@@ -108,11 +130,11 @@ export function ChatAlertDetails({
       messageIds: mapped.map((m) => m.id).slice(-5), // Last 5 message IDs
       messagesWithStatus: mapped
         .filter((m) => m.status)
-        .map((m) => ({id: m.id, status: m.status})),
+        .map((m) => ({ id: m.id, status: m.status })),
     });
 
     return mapped;
-  }, [messagesPages, currentUserId, conversation.id]);
+  }, [messagesPages, currentUserId, conversation.id, currentLocale]);
 
   const handleSendMessage = (payload: {
     content: string;
@@ -218,7 +240,7 @@ function mapMessageDtoToUi(
       fileUrl,
       fileName: message.fileName || undefined,
       status: (
-        message as MessageReadDto & {_status?: "sending" | "failed" | "sent"}
+        message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
       )._status, // Get status from temporary message
     };
   }
@@ -235,7 +257,7 @@ function mapMessageDtoToUi(
     fileName: message.fileName || undefined,
     fileMimeType: message.fileMimeType || undefined,
     status: (
-      message as MessageReadDto & {_status?: "sending" | "failed" | "sent"}
+      message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
     )._status, // Get status from temporary message
   };
 }

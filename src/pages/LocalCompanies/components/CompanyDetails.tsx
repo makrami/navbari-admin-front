@@ -1,4 +1,4 @@
-import type {CompanyReadDto} from "../../../services/company/company.service";
+import type { CompanyReadDto } from "../../../services/company/company.service";
 import ReactCountryFlag from "react-country-flag";
 import {
   Phone as PhoneIcon,
@@ -12,26 +12,28 @@ import {
   PencilLine,
   MessagesSquareIcon,
 } from "lucide-react";
-import {STATUS_TO_COLOR, apiStatusToUiStatus} from "../types";
-import {getLogoUrl} from "../utils";
-import {getCountryCode} from "../../../shared/utils/countryCode";
-import {useChatWithRecipient} from "../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../shared/components/ChatOverlay";
-import {CHAT_RECIPIENT_TYPE} from "../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../chat-alert/types/chat";
+import { STATUS_TO_COLOR, apiStatusToUiStatus } from "../types";
+import { getLogoUrl } from "../utils";
+import { getCountryCode } from "../../../shared/utils/countryCode";
+import { useChatWithRecipient } from "../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../shared/components/ChatOverlay";
+import { CHAT_RECIPIENT_TYPE } from "../../../services/chat/chat.types";
+import type { ActionableAlertChip } from "../../chat-alert/types/chat";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   company: CompanyReadDto;
 };
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
+  { id: "1", label: "GPS Lost", alertType: "alert" },
+  { id: "2", label: "Delay Expected", alertType: "warning" },
+  { id: "3", label: "Route Cleared", alertType: "success" },
+  { id: "4", label: "Documentation Pending", alertType: "info" },
 ];
 
-export function CompanyDetails({company}: Props) {
+export function CompanyDetails({ company }: Props) {
+  const { t } = useTranslation();
   const uiStatus = apiStatusToUiStatus(company.status);
   const colors = STATUS_TO_COLOR[uiStatus];
 
@@ -81,7 +83,7 @@ export function CompanyDetails({company}: Props) {
                 type="button"
                 onClick={() => chatHook.setIsChatOpen(true)}
                 className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
-                aria-label="Open chat"
+                aria-label={t("localCompanies.page.details.openChat")}
               >
                 <MessagesSquareIcon className="size-4 text-blue-600" />
               </button>
@@ -108,7 +110,8 @@ export function CompanyDetails({company}: Props) {
               <div className="flex items-center gap-2">
                 <CalendarIcon className="size-3.5 text-slate-400" />
                 <span>
-                  Register: {new Date(company.createdAt).toLocaleDateString()}
+                  {t("localCompanies.page.details.register")}:{" "}
+                  {new Date(company.createdAt).toLocaleDateString()}
                 </span>
               </div>
             </div>
@@ -122,7 +125,7 @@ export function CompanyDetails({company}: Props) {
           >
             <span className={`h-1.5 w-1.5 rounded-full ${statusDotColor}`} />
             <span className={`text-xs ${colors.pillText}`}>
-              {uiStatus.charAt(0).toUpperCase() + uiStatus.slice(1)}
+              {t(`localCompanies.page.status.${uiStatus}`)}
             </span>
           </div>
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
@@ -130,14 +133,18 @@ export function CompanyDetails({company}: Props) {
             <span className="text-xs font-bold text-blue-600">
               {company.totalDrivers ?? 0}
             </span>
-            <span className="text-xs text-blue-600">Drivers</span>
+            <span className="text-xs text-blue-600">
+              {t("localCompanies.page.details.drivers")}
+            </span>
           </div>
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
             <TruckIcon className="size-4 text-blue-600" />
             <span className="text-xs font-bold text-blue-600">
               {company.totalSegments ?? 0}
             </span>
-            <span className="text-xs text-blue-600">Segments</span>
+            <span className="text-xs text-blue-600">
+              {t("localCompanies.page.details.segments")}
+            </span>
           </div>
         </div>
       </div>
@@ -149,7 +156,9 @@ export function CompanyDetails({company}: Props) {
         <div className="flex items-center gap-4 text-xs text-slate-900">
           <PhoneIcon className="size-5 text-slate-400" />
           <div className="flex flex-col gap-1">
-            <p className="text-slate-400 font-semibold">Phone</p>
+            <p className="text-slate-400 font-semibold">
+              {t("localCompanies.page.details.phone")}
+            </p>
             <p className="text-xs text-slate-900">{company.phone}</p>
           </div>
         </div>
@@ -157,7 +166,9 @@ export function CompanyDetails({company}: Props) {
         <div className="flex items-center gap-4 text-xs text-slate-900">
           <MailIcon className="size-5 text-slate-400" />
           <div className="flex flex-col gap-1">
-            <p className="text-slate-400 font-semibold">Email</p>
+            <p className="text-slate-400 font-semibold">
+              {t("localCompanies.page.details.email")}
+            </p>
             <p className="text-xs text-slate-900">{company.email}</p>
           </div>
         </div>
@@ -166,14 +177,14 @@ export function CompanyDetails({company}: Props) {
           <button
             type="button"
             className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors"
-            aria-label="Add"
+            aria-label={t("localCompanies.page.details.add")}
           >
             <PlusIcon className="size-5 text-slate-400" />
           </button>
           <button
             type="button"
             className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors"
-            aria-label="Edit"
+            aria-label={t("localCompanies.page.details.edit")}
           >
             <PencilLine className="size-5 text-slate-400" />
           </button>

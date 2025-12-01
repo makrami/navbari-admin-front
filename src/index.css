@@ -9,3 +9,11 @@
     display: none; /* Chrome, Safari and Opera */
   }
 }
+
+@layer base {
+  html[dir="rtl"],
+  html[dir="rtl"] body,
+  html[dir="rtl"] * {
+    font-family: "Vazirmatn", sans-serif !important;
+  }
+}

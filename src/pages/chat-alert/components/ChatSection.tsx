@@ -8,6 +8,7 @@ import { ActionableChipsBar } from "./ActionableChipsBar";
 import { MessageInput } from "./MessageInput";
 import { TypingIndicator } from "./TypingIndicator";
 import type { Message, DateGroup, ActionableAlertChip } from "../types/chat";
+import { useTranslation } from "react-i18next";
 
 type FilterType = "all" | "chats" | "alerts";
 
@@ -70,6 +71,7 @@ export function ChatSection({
   isTyping = false,
   emptyState,
 }: ChatSectionProps) {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterType>("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -167,7 +169,7 @@ export function ChatSection({
               : "bg-slate-50 text-slate-900 hover:bg-slate-100"
           )}
         >
-          All
+          {t("chatAlert.chatSection.filters.all")}
         </button>
         <button
           type="button"
@@ -180,7 +182,7 @@ export function ChatSection({
           )}
         >
           <MessageSquareText className="size-4" />
-          Chats
+          {t("chatAlert.chatSection.filters.chats")}
         </button>
         <button
           type="button"
@@ -193,12 +195,15 @@ export function ChatSection({
           )}
         >
           <AlertTriangle className="size-4" />
-          Alerts
+          {t("chatAlert.chatSection.filters.alerts")}
         </button>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
+      <div
+        dir="ltr"
+        className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6"
+      >
         {isLoading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="size-5 animate-spin text-slate-400" />
@@ -222,7 +227,9 @@ export function ChatSection({
                   disabled={isFetchingMore}
                   className="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-50"
                 >
-                  {isFetchingMore ? "Loading..." : "Load older messages"}
+                  {isFetchingMore
+                    ? t("chatAlert.chatSection.loading")
+                    : t("chatAlert.chatSection.loadOlderMessages")}
                 </button>
               </div>
             )}

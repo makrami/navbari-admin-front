@@ -1,19 +1,9 @@
-import {useState, useEffect, useRef, useMemo} from "react";
-import {XIcon, Search, ChevronDown, Check} from "lucide-react";
-import {useCities} from "../../../services/geography/hooks";
-import type {City} from "../../../services/geography/geography.service";
-import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
-
-const CARGO_CATEGORY_OPTIONS = [
-  {value: "electronics", label: "Electronics"},
-  {value: "textiles", label: "Textiles"},
-  {value: "food", label: "Food"},
-  {value: "medical", label: "Medical"},
-  {value: "machinery", label: "Machinery"},
-  {value: "chemicals", label: "Chemicals"},
-  {value: "automotive", label: "Automotive"},
-  {value: "furniture", label: "Furniture"},
-];
+import { useState, useEffect, useRef, useMemo } from "react";
+import { XIcon, Search, ChevronDown, Check } from "lucide-react";
+import { useCities } from "../../../services/geography/hooks";
+import type { City } from "../../../services/geography/geography.service";
+import type { CreateShipmentDto } from "../../../services/shipment/shipment.api.service";
+import { useTranslation } from "react-i18next";
 
 type CityDropdownProps = {
   value: string;
@@ -32,6 +22,7 @@ function CityDropdown({
   cities,
   isLoading = false,
 }: CityDropdownProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -146,7 +137,7 @@ function CityDropdown({
           <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
             {isLoading ? (
               <div className="px-3 py-2 text-sm text-slate-500">
-                Loading cities...
+                {t("shipment.addModal.loadingCities")}
               </div>
             ) : filteredCities.length > 0 ? (
               filteredCities.map((city) => (
@@ -171,7 +162,7 @@ function CityDropdown({
               ))
             ) : (
               <div className="px-3 py-2 text-sm text-slate-500">
-                No cities found
+                {t("shipment.addModal.noCitiesFound")}
               </div>
             )}
           </div>
@@ -194,10 +185,41 @@ function CargoCategoryDropdown({
   placeholder,
   label,
 }: CargoCategoryDropdownProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get cargo category options with translations
+  const CARGO_CATEGORY_OPTIONS = useMemo(
+    () => [
+      {
+        value: "electronics",
+        label: t("shipment.addModal.categories.electronics"),
+      },
+      { value: "textiles", label: t("shipment.addModal.categories.textiles") },
+      { value: "food", label: t("shipment.addModal.categories.food") },
+      { value: "medical", label: t("shipment.addModal.categories.medical") },
+      {
+        value: "machinery",
+        label: t("shipment.addModal.categories.machinery"),
+      },
+      {
+        value: "chemicals",
+        label: t("shipment.addModal.categories.chemicals"),
+      },
+      {
+        value: "automotive",
+        label: t("shipment.addModal.categories.automotive"),
+      },
+      {
+        value: "furniture",
+        label: t("shipment.addModal.categories.furniture"),
+      },
+    ],
+    [t]
+  );
 
   // Filter categories based on search term
   const filteredCategories = searchTerm.trim()
@@ -311,7 +333,7 @@ function CargoCategoryDropdown({
               ))
             ) : (
               <div className="px-3 py-2 text-sm text-slate-500">
-                No categories found
+                {t("shipment.addModal.noCategoriesFound")}
               </div>
             )}
           </div>
@@ -332,6 +354,7 @@ export default function AddShipmentModal({
   onClose,
   onCreate,
 }: AddShipmentModalProps) {
+  const { t } = useTranslation();
   // Fields per reference design
   const [name, setName] = useState("");
   const [from, setFrom] = useState("");
@@ -341,7 +364,7 @@ export default function AddShipmentModal({
   const [segmentsAmount, setSegmentsAmount] = useState<string>("");
 
   // Fetch cities from API
-  const {data: cities = [], isLoading: isLoadingCities} = useCities();
+  const { data: cities = [], isLoading: isLoadingCities } = useCities();
 
   if (!open) return null;
 
@@ -376,19 +399,23 @@ export default function AddShipmentModal({
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-md p-2 hover:bg-slate-100"
-            aria-label="Close"
+            aria-label={t("shipment.addModal.close")}
             onClick={onClose}
           >
             <XIcon className="size-5 text-slate-500" />
           </button>
-          <h3 className="text-slate-900 font-semibold">Add New Shipment</h3>
+          <h3 className="text-slate-900 font-semibold">
+            {t("shipment.addModal.title")}
+          </h3>
         </div>
         <form onSubmit={handleSubmit} className="px-5 py-4 grid gap-4">
           <div className="grid gap-1">
-            <label className="text-xs text-slate-600">Name</label>
+            <label className="text-xs text-slate-600">
+              {t("shipment.addModal.name")}
+            </label>
             <input
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
-              placeholder="Shipment Name..."
+              placeholder={t("shipment.addModal.namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -397,16 +424,16 @@ export default function AddShipmentModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <CityDropdown
-              label="From"
-              placeholder="Search cities..."
+              label={t("shipment.addModal.from")}
+              placeholder={t("shipment.addModal.searchCities")}
               value={from}
               onChange={setFrom}
               cities={cities}
               isLoading={isLoadingCities}
             />
             <CityDropdown
-              label="To"
-              placeholder="Search cities..."
+              label={t("shipment.addModal.to")}
+              placeholder={t("shipment.addModal.searchCities")}
               value={to}
               onChange={setTo}
               cities={cities}
@@ -416,13 +443,15 @@ export default function AddShipmentModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <CargoCategoryDropdown
-              label="Cargo Category"
-              placeholder="Search categories..."
+              label={t("shipment.addModal.cargoCategory")}
+              placeholder={t("shipment.addModal.searchCategories")}
               value={cargoCategory}
               onChange={setCargoCategory}
             />
             <div className="grid gap-1">
-              <label className="text-xs text-slate-600">Cargo Weight</label>
+              <label className="text-xs text-slate-600">
+                {t("shipment.addModal.cargoWeight")}
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -434,19 +463,21 @@ export default function AddShipmentModal({
                   onChange={(e) => setCargoWeight(e.target.value)}
                 />
                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
-                  KG
+                  {t("shipment.addModal.weightUnit")}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="grid gap-1">
-            <label className="text-xs text-slate-600">Segment Count</label>
+            <label className="text-xs text-slate-600">
+              {t("shipment.addModal.segmentCount")}
+            </label>
             <input
               type="number"
               min="0"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
-              placeholder="0"
+              placeholder={t("shipment.addModal.segmentCountPlaceholder")}
               value={segmentsAmount}
               onChange={(e) => setSegmentsAmount(e.target.value)}
             />
@@ -458,13 +489,13 @@ export default function AddShipmentModal({
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
               onClick={onClose}
             >
-              Cancel
+              {t("shipment.addModal.cancel")}
             </button>
             <button
               type="submit"
               className="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
             >
-              Create
+              {t("shipment.addModal.create")}
             </button>
           </div>
         </form>

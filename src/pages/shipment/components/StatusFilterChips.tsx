@@ -1,6 +1,7 @@
 import { Button } from "../../../shared/components/ui/Button";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Filter keys based on backend shipment status enum (SHIPMENT_STATUS)
 // Maps to: PENDING, IN_TRANSIT, DELIVERED, CANCELLED
@@ -11,52 +12,11 @@ export type FilterKey =
   | "Delivered"
   | "Cancelled";
 
-// Map UI status to display label
-const STATUS_LABELS: Record<FilterKey, string> = {
-  all: "All",
-  Pending: "Pending",
-  "In Transit": "In Transit",
-  Delivered: "Delivered",
-  Cancelled: "Cancelled",
-};
-
 type Props = {
   active: FilterKey;
   onChange: (next: FilterKey) => void;
   counts: Record<FilterKey, number>;
   isListPanel: boolean;
-};
-
-const FILTER_META: Record<
-  FilterKey,
-  { label: string; className: string; activeRing: string }
-> = {
-  all: {
-    label: STATUS_LABELS.all,
-    className:
-      "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
-    activeRing: "ring-2 ring-slate-300",
-  },
-  Pending: {
-    label: STATUS_LABELS.Pending,
-    className: "bg-blue-50 text-blue-700 hover:bg-blue-100",
-    activeRing: "ring-2 ring-blue-200",
-  },
-  "In Transit": {
-    label: STATUS_LABELS["In Transit"],
-    className: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
-    activeRing: "ring-2 ring-indigo-200",
-  },
-  Delivered: {
-    label: STATUS_LABELS.Delivered,
-    className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-    activeRing: "ring-2 ring-emerald-200",
-  },
-  Cancelled: {
-    label: STATUS_LABELS.Cancelled,
-    className: "bg-red-50 text-red-700 hover:bg-red-100",
-    activeRing: "ring-2 ring-red-200",
-  },
 };
 
 export function StatusFilterChips({
@@ -65,9 +25,42 @@ export function StatusFilterChips({
   counts,
   isListPanel,
 }: Props) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
+
+  const FILTER_META: Record<
+    FilterKey,
+    { label: string; className: string; activeRing: string }
+  > = {
+    all: {
+      label: t("shipment.status.all"),
+      className:
+        "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+      activeRing: "ring-2 ring-slate-300",
+    },
+    Pending: {
+      label: t("shipment.status.pending"),
+      className: "bg-blue-50 text-blue-700 hover:bg-blue-100",
+      activeRing: "ring-2 ring-blue-200",
+    },
+    "In Transit": {
+      label: t("shipment.status.inTransit"),
+      className: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
+      activeRing: "ring-2 ring-indigo-200",
+    },
+    Delivered: {
+      label: t("shipment.status.delivered"),
+      className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+      activeRing: "ring-2 ring-emerald-200",
+    },
+    Cancelled: {
+      label: t("shipment.status.cancelled"),
+      className: "bg-red-50 text-red-700 hover:bg-red-100",
+      activeRing: "ring-2 ring-red-200",
+    },
+  };
 
   const updateCanScroll = () => {
     const el = scrollRef.current;
@@ -106,7 +99,7 @@ export function StatusFilterChips({
         <>
           <button
             type="button"
-            aria-label="Scroll left"
+            aria-label={t("shipment.scroll.left")}
             className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 grid place-items-center size-7 rounded-full bg-white/90 shadow border border-slate-200 hover:bg-white ${
               canLeft ? "opacity-100" : "opacity-40 cursor-default"
             }`}
@@ -116,7 +109,7 @@ export function StatusFilterChips({
           </button>
           <button
             type="button"
-            aria-label="Scroll right"
+            aria-label={t("shipment.scroll.right")}
             className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 grid place-items-center size-7 rounded-full bg-white/90 shadow border border-slate-200 hover:bg-white ${
               canRight ? "opacity-100" : "opacity-40 cursor-default"
             }`}

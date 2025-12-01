@@ -1,11 +1,12 @@
 import ReactCountryFlag from "react-country-flag";
-import {ArrowRight, UsersIcon} from "lucide-react";
-import {cn} from "../../shared/utils/cn";
-import type {Shipment} from "../../shared/types/shipment";
-import type {Segment} from "../../shared/types/segmentData";
-import {SegmentStatus} from "../../shared/types/segmentData";
-import {getFileUrl} from "../../pages/LocalCompanies/utils";
-import {getCountryCode} from "../../shared/utils/countryCode";
+import { ArrowRight, UsersIcon } from "lucide-react";
+import { cn } from "../../shared/utils/cn";
+import type { Shipment } from "../../shared/types/shipment";
+import type { Segment } from "../../shared/types/segmentData";
+import { SegmentStatus } from "../../shared/types/segmentData";
+import { getFileUrl } from "../../pages/LocalCompanies/utils";
+import { getCountryCode } from "../../shared/utils/countryCode";
+import { useTranslation } from "react-i18next";
 
 type FormattedSegment = {
   step: number;
@@ -43,8 +44,22 @@ export function ShipmentItem({
   fullSegments = [],
   segmentsLoading = false,
 }: ShipmentItemProps) {
+  const { t } = useTranslation();
   const clampedProgress = Math.max(0, Math.min(100, progressPercent));
   const isDelivered = status === "Delivered";
+
+  // Helper function to translate status
+  const getTranslatedStatus = (status: string | undefined): string => {
+    if (!status) return "";
+    const statusMap: Record<string, string> = {
+      Delivered: t("shipment.status.delivered"),
+      Pending: t("shipment.status.pending"),
+      "In Transit": t("shipment.status.inTransit"),
+      Cancelled: t("shipment.status.cancelled"),
+      "Pending Assignment": t("shipment.status.pendingAssignment"),
+    };
+    return statusMap[status] || status;
+  };
 
   // Convert country names to ISO country codes using library
   const fromCode = getCountryCode(originCountry ?? "");
@@ -67,6 +82,7 @@ export function ShipmentItem({
     <button
       type="button"
       onClick={onClick}
+      dir="ltr"
       className={cn(
         "text-left rounded-2xl p-4 ",
         selected ? "bg-[#1b54fe] text-white" : "bg-white",
@@ -102,7 +118,7 @@ export function ShipmentItem({
               isDelivered ? "text-[#22c55e]" : "text-yellow-600"
             )}
           >
-            {status}
+            {getTranslatedStatus(status)}
           </p>
         </div>
       </div>
@@ -113,7 +129,7 @@ export function ShipmentItem({
           <ReactCountryFlag
             svg
             countryCode={fromCode}
-            style={{width: 22, height: 16, borderRadius: 2}}
+            style={{ width: 22, height: 16, borderRadius: 2 }}
           />
           <div
             className={cn(
@@ -130,7 +146,7 @@ export function ShipmentItem({
                   ? "bg-white"
                   : "bg-[#1b54fe]"
               )}
-              style={{width: `${clampedProgress}%`}}
+              style={{ width: `${clampedProgress}%` }}
             />
           </div>
           <ArrowRight
@@ -142,7 +158,7 @@ export function ShipmentItem({
           <ReactCountryFlag
             svg
             countryCode={toCode}
-            style={{width: 22, height: 16, borderRadius: 2}}
+            style={{ width: 22, height: 16, borderRadius: 2 }}
           />
         </div>
       ) : (
@@ -153,7 +169,7 @@ export function ShipmentItem({
               selected ? "text-white/80" : "text-slate-400"
             )}
           >
-            Not Assigned
+            {t("shipment.shipmentItem.notAssigned")}
           </span>
         </div>
       )}
@@ -189,7 +205,7 @@ export function ShipmentItem({
           {segmentsLoading ? (
             // Loading placeholder for segments
             <div className="mt-4 grid gap-3">
-              {Array.from({length: 3}).map((_, idx) => (
+              {Array.from({ length: 3 }).map((_, idx) => (
                 <div
                   key={`loading-${idx}`}
                   className="grid grid-cols-[14px_1fr_auto] items-start gap-2 animate-pulse"

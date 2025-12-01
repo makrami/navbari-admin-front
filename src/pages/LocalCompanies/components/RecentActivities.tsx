@@ -1,9 +1,10 @@
-import {useState, useEffect} from "react";
-import {cn} from "../../../shared/utils/cn";
-import {ArrowRight} from "lucide-react";
-import {listSegments} from "../../../services/shipment/shipment.api.service";
-import type {Segment} from "../../../shared/types/segmentData";
-import {SegmentStatus} from "../../../shared/types/segmentData";
+import { useState, useEffect } from "react";
+import { cn } from "../../../shared/utils/cn";
+import { ArrowRight } from "lucide-react";
+import { listSegments } from "../../../services/shipment/shipment.api.service";
+import type { Segment } from "../../../shared/types/segmentData";
+import { SegmentStatus } from "../../../shared/types/segmentData";
+import { useTranslation } from "react-i18next";
 
 type Activity = {
   id: string;
@@ -13,59 +14,46 @@ type Activity = {
   toCity: string;
   dateRange: string;
   status:
-    | "Pending Assignment"
-    | "Assigned"
-    | "To Origin"
-    | "At Origin"
-    | "In Customs"
-    | "To Destination"
-    | "At Destination"
-    | "Delivered"
-    | "Cancelled"
-    | "Loading"
-    | "Unknown";
+    | "pendingAssignment"
+    | "assigned"
+    | "toOrigin"
+    | "atOrigin"
+    | "inCustoms"
+    | "toDestination"
+    | "atDestination"
+    | "delivered"
+    | "cancelled"
+    | "loading"
+    | "unknown";
 };
 
 /**
- * Maps segment status to activity status display format
+ * Maps segment status to activity status key for translation
  */
-function mapSegmentStatusToActivityStatus(
-  status: string
-):
-  | "Pending Assignment"
-  | "Assigned"
-  | "To Origin"
-  | "At Origin"
-  | "In Customs"
-  | "To Destination"
-  | "At Destination"
-  | "Delivered"
-  | "Cancelled"
-  | "Loading"
-  | "Unknown" {
+function mapSegmentStatusToActivityStatusKey(status: string): string {
   switch (status) {
     case SegmentStatus.PENDING_ASSIGNMENT:
-      return "Pending Assignment";
+      return "pendingAssignment";
     case SegmentStatus.ASSIGNED:
-      return "Assigned";
+      return "assigned";
     case SegmentStatus.TO_ORIGIN:
-      return "To Origin";
+      return "toOrigin";
     case SegmentStatus.AT_ORIGIN:
-      return "At Origin";
+      return "atOrigin";
     case SegmentStatus.LOADING:
-      return "Loading";
+      return "loading";
     case SegmentStatus.IN_CUSTOMS:
-      return "In Customs";
+      return "inCustoms";
     case SegmentStatus.TO_DESTINATION:
-      return "To Destination";
+      return "toDestination";
     case SegmentStatus.AT_DESTINATION:
-      return "At Destination";
+      return "atDestination";
     case SegmentStatus.DELIVERED:
-      return "Delivered";
+      return "delivered";
     case SegmentStatus.CANCELLED:
-      return "Cancelled";
+      return "cancelled";
     default:
-      return "Unknown";
+      return "unknown";
   }
 }
 
@@ -74,7 +62,8 @@ function mapSegmentStatusToActivityStatus(
  */
 function formatDateRange(
   startTime: string | null,
-  finishTime: string | null
+  finishTime: string | null,
+  t: (key: string) => string
 ): string {
   if (!startTime && !finishTime) {
     return "—";
@@ -100,10 +89,10 @@ function formatDateRange(
     return `${start} - ${end}`;
   }
   if (start) {
-    return `From ${start}`;
+    return `${t("localCompanies.page.activities.from")} ${start}`;
   }
   if (end) {
-    return `Until ${end}`;
+    return `${t("localCompanies.page.activities.until")} ${end}`;
   }
   return "—";
 }
@@ -128,7 +117,10 @@ function getLastPartOfId(id: string): string {
 /**
  * Maps a segment to an activity for display
  */
-function mapSegmentToActivity(segment: Segment): Activity {
+function mapSegmentToActivity(
+  segment: Segment,
+  t: (key: string) => string
+): Activity {
   return {
     id: segment.id,
     fromCountry: segment.originCountry || "—",
@@ -137,9 +129,12 @@ function mapSegmentToActivity(segment: Segment): Activity {
     toCity: segment.destinationCity || "—",
     dateRange: formatDateRange(
       segment.estimatedStartTime,
-      segment.estimatedFinishTime
+      segment.estimatedFinishTime,
+      t
     ),
-    status: mapSegmentStatusToActivityStatus(segment.status),
+    status: mapSegmentStatusToActivityStatusKey(
+      segment.status
+    ) as Activity["status"],
   };
 }
 
@@ -147,7 +142,8 @@ type Props = {
   companyId: string;
 };
 
-export default function RecentActivities({companyId}: Props) {
+export default function RecentActivities({ companyId }: Props) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -158,11 +154,13 @@ export default function RecentActivities({companyId}: Props) {
         setIsLoading(true);
         setError(null);
         const segments = await listSegments(undefined, companyId);
-        const activities = segments.map(mapSegmentToActivity);
+        const activities = segments.map((seg) => mapSegmentToActivity(seg, t));
         setItems(activities);
       } catch (err) {
         setError(
-          err instanceof Error ? err : new Error("Failed to fetch segments")
+          err instanceof Error
+            ? err
+            : new Error(t("localCompanies.page.activities.fetchFailed"))
         );
         setItems([]);
       } finally {
@@ -173,27 +171,27 @@ export default function RecentActivities({companyId}: Props) {
     if (companyId) {
       fetchSegments();
     }
-  }, [companyId]);
+  }, [companyId, t]);
 
   return (
     <section className={cn("space-y-3")}>
       <h2 className="text-base font-semibold text-slate-900">
-        Recent Activities
+        {t("localCompanies.page.activities.title")}
       </h2>
 
       <div className="rounded-2xl bg-white p-4">
         {/* Header - hidden on small screens, shown on larger screens */}
         {!isLoading && items.length > 0 && (
           <div className="hidden xl:grid grid-cols-[1fr_2fr_1fr_1fr] items-center px-3 py-2 text-xs font-semibold text-slate-900">
-            <div>ID</div>
-            <div>Route</div>
-            <div>Date</div>
-            <div>Status</div>
+            <div>{t("localCompanies.page.activities.headers.id")}</div>
+            <div>{t("localCompanies.page.activities.headers.route")}</div>
+            <div>{t("localCompanies.page.activities.headers.date")}</div>
+            <div>{t("localCompanies.page.activities.headers.status")}</div>
           </div>
         )}
         {isLoading ? (
           <div className="flex items-center justify-center py-8 text-slate-500">
-            Loading segments...
+            {t("localCompanies.page.activities.loading")}
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-8 text-red-600">
@@ -201,7 +199,7 @@ export default function RecentActivities({companyId}: Props) {
           </div>
         ) : items.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-slate-500">
-            No segments found for this company.
+            {t("localCompanies.page.activities.empty")}
           </div>
         ) : (
           <ul className="space-y-3 divide-slate-100">
@@ -219,14 +217,13 @@ export default function RecentActivities({companyId}: Props) {
                     <span
                       className={cn(
                         "rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap shrink-0",
-                        a.status === "Delivered" &&
+                        a.status === "delivered" &&
                           "bg-green-50 text-green-600",
-                        a.status === "At Origin" &&
-                          "bg-amber-50 text-amber-600",
-                        a.status === "Loading" && "bg-orange-50 text-orange-500"
+                        a.status === "atOrigin" && "bg-amber-50 text-amber-600",
+                        a.status === "loading" && "bg-orange-50 text-orange-500"
                       )}
                     >
-                      {a.status}
+                      {t(`localCompanies.page.activities.status.${a.status}`)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-900 flex-wrap">
@@ -271,12 +268,12 @@ export default function RecentActivities({companyId}: Props) {
                   <span
                     className={cn(
                       "rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",
-                      a.status === "Delivered" && "text-green-600",
-                      a.status === "At Origin" && "text-amber-600",
-                      a.status === "Loading" && "text-orange-500"
+                      a.status === "delivered" && "text-green-600",
+                      a.status === "atOrigin" && "text-amber-600",
+                      a.status === "loading" && "text-orange-500"
                     )}
                   >
-                    {a.status}
+                    {t(`localCompanies.page.activities.status.${a.status}`)}
                   </span>
                 </div>
               </li>

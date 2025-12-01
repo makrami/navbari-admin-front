@@ -1,6 +1,6 @@
-import type {HTMLAttributes} from "react";
-import {useRef, useState} from "react";
-import {cn} from "../../../shared/utils/cn";
+import type { HTMLAttributes } from "react";
+import { useRef, useState } from "react";
+import { cn } from "../../../shared/utils/cn";
 import {
   FileText as FileTextIcon,
   Check as CheckIcon,
@@ -20,18 +20,11 @@ import {
   COMPANY_DOCUMENT_TYPE,
   COMPANY_DOCUMENT_STATUS,
 } from "../../../services/company/document.service";
-import type {CompanyDocumentReadDto} from "../../../services/company/document.service";
-import {getFileUrl} from "../utils";
+import type { CompanyDocumentReadDto } from "../../../services/company/document.service";
+import { getFileUrl } from "../utils";
+import { useTranslation } from "react-i18next";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
-
-const documentTypeLabels: Record<string, string> = {
-  license: "License",
-  insurance: "Insurance",
-  manager_id: "Manager ID",
-  primary_contact_id: "Primary Contact ID",
-  other: "Other Document",
-};
 
 type DocumentCardProps = HTMLAttributes<HTMLDivElement> & {
   doc: CompanyDocumentReadDto;
@@ -49,15 +42,17 @@ function DocumentCard({
   onPreview,
   className,
   ...rest
-}: DocumentCardProps & {onPreview?: () => void}) {
+}: DocumentCardProps & { onPreview?: () => void }) {
+  const { t } = useTranslation();
   const statusBadge = {
-    approved: {icon: CheckIcon, wrap: "bg-green-100 text-green-600"},
-    rejected: {icon: XIcon, wrap: "bg-red-100 text-red-600"},
-    pending: {icon: FileClock, wrap: "bg-amber-100 text-amber-600"},
+    approved: { icon: CheckIcon, wrap: "bg-green-100 text-green-600" },
+    rejected: { icon: XIcon, wrap: "bg-red-100 text-red-600" },
+    pending: { icon: FileClock, wrap: "bg-amber-100 text-amber-600" },
   }[doc.status];
 
   const documentTitle =
-    documentTypeLabels[doc.documentType] || doc.documentType;
+    t(`localCompanies.page.documents.types.${doc.documentType}`) ||
+    doc.documentType;
   const fileUrl = getFileUrl(doc.filePath);
 
   // Check if file is an image
@@ -119,7 +114,7 @@ function DocumentCard({
               onClick={handleView}
               className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 shadow-lg"
             >
-              Open
+              {t("localCompanies.page.documents.open")}
               <FileTextIcon className="size-4" />
             </button>
           </div>
@@ -127,7 +122,8 @@ function DocumentCard({
       </div>
       {doc.rejectionReason && (
         <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-          <strong>Rejection reason:</strong> {doc.rejectionReason}
+          <strong>{t("localCompanies.page.documents.rejectionReason")}:</strong>{" "}
+          {doc.rejectionReason}
         </div>
       )}
       {doc.status === COMPANY_DOCUMENT_STATUS.PENDING && (
@@ -137,7 +133,7 @@ function DocumentCard({
             onClick={onApprove}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
           >
-            Approve
+            {t("localCompanies.page.documents.approve")}
             <CheckIcon className="size-4" />
           </button>
           <button
@@ -145,7 +141,7 @@ function DocumentCard({
             onClick={onReject}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
           >
-            Reject
+            {t("localCompanies.page.documents.reject")}
             <XIcon className="size-4" />
           </button>
         </div>
@@ -157,7 +153,7 @@ function DocumentCard({
             onClick={onPreview}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-100 py-2 text-xs font-medium text-blue-700 hover:bg-blue-200"
           >
-            Preview
+            {t("localCompanies.page.documents.preview")}
             <EyeIcon className="size-4" />
           </button>
           <button
@@ -165,7 +161,7 @@ function DocumentCard({
             onClick={handleView}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-slate-100 py-2 text-xs font-medium text-slate-900 hover:bg-slate-200"
           >
-            Open
+            {t("localCompanies.page.documents.open")}
             <FileTextIcon className="size-4" />
           </button>
         </div>
@@ -177,14 +173,14 @@ function DocumentCard({
             onClick={onApprove}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-green-100 py-2 text-xs font-medium text-green-700 hover:bg-green-200"
           >
-            Approve
+            {t("localCompanies.page.documents.approve")}
           </button>
           <button
             type="button"
             onClick={onPreview}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-slate-100 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200"
           >
-            Preview
+            {t("localCompanies.page.documents.preview")}
             <EyeIcon className="size-4" />
           </button>
         </div>
@@ -200,11 +196,12 @@ type DocumentsListProps = {
 };
 
 export default function DocumentsList({
-  title = "Documents",
+  title,
   companyId,
   className,
 }: DocumentsListProps) {
-  const {data: documents = [], isLoading} = useCompanyDocuments(companyId);
+  const { t } = useTranslation();
+  const { data: documents = [], isLoading } = useCompanyDocuments(companyId);
   const approveMutation = useApproveDocument();
   const rejectMutation = useRejectDocument();
   const uploadMutation = useUploadDocument();
@@ -277,7 +274,9 @@ export default function DocumentsList({
   return (
     <section className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        <h2 className="text-base font-semibold text-slate-900">
+          {title || t("localCompanies.page.documents.title")}
+        </h2>
         <div>
           {/* Hidden file input */}
           <input
@@ -285,7 +284,7 @@ export default function DocumentsList({
             ref={fileInputRef}
             onChange={handleFileUpload}
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            style={{display: "none"}}
+            style={{ display: "none" }}
           />
           <button
             type="button"
@@ -293,18 +292,18 @@ export default function DocumentsList({
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
           >
             <UploadIcon className="size-4" />
-            Upload
+            {t("localCompanies.page.documents.upload")}
           </button>
         </div>
       </div>
 
       {isLoading ? (
         <div className="text-center py-8 text-slate-500">
-          Loading documents...
+          {t("localCompanies.page.documents.loading")}
         </div>
       ) : documents.length === 0 ? (
         <div className="text-center py-8 text-slate-500">
-          No documents found
+          {t("localCompanies.page.documents.empty")}
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -324,14 +323,18 @@ export default function DocumentsList({
       {showRejectDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Reject Document</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("localCompanies.page.documents.rejectDocument")}
+            </h3>
             <p className="text-sm text-slate-600 mb-4">
-              Please provide a reason for rejection:
+              {t("localCompanies.page.documents.rejectReasonPrompt")}
             </p>
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Enter rejection reason..."
+              placeholder={t(
+                "localCompanies.page.documents.rejectReasonPlaceholder"
+              )}
               className="w-full min-h-24 rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
             <div className="flex gap-3 mt-4">
@@ -344,7 +347,7 @@ export default function DocumentsList({
                 }}
                 className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Cancel
+                {t("localCompanies.page.documents.cancel")}
               </button>
               <button
                 type="button"
@@ -352,7 +355,9 @@ export default function DocumentsList({
                 disabled={!rejectReason.trim() || rejectMutation.isPending}
                 className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
-                {rejectMutation.isPending ? "Rejecting..." : "Reject"}
+                {rejectMutation.isPending
+                  ? t("localCompanies.page.documents.rejecting")
+                  : t("localCompanies.page.documents.reject")}
               </button>
             </div>
           </div>
@@ -365,25 +370,15 @@ export default function DocumentsList({
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <h3 className="text-lg font-semibold text-slate-900">
-                {(() => {
-                  const documentTypeLabels: Record<string, string> = {
-                    license: "License",
-                    insurance: "Insurance",
-                    manager_id: "Manager ID",
-                    primary_contact_id: "Primary Contact ID",
-                    other: "Other Document",
-                  };
-                  return (
-                    documentTypeLabels[previewDocument.documentType] ||
-                    previewDocument.documentType
-                  );
-                })()}
+                {t(
+                  `localCompanies.page.documents.types.${previewDocument.documentType}`
+                ) || previewDocument.documentType}
               </h3>
               <button
                 type="button"
                 onClick={() => setPreviewDocument(null)}
                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                aria-label="Close preview"
+                aria-label={t("localCompanies.page.documents.closePreview")}
               >
                 <CloseIcon className="size-5 text-slate-600" />
               </button>
@@ -402,8 +397,9 @@ export default function DocumentsList({
                     <img
                       src={previewUrl}
                       alt={
-                        documentTypeLabels[previewDocument.documentType] ||
-                        previewDocument.documentType
+                        t(
+                          `localCompanies.page.documents.types.${previewDocument.documentType}`
+                        ) || previewDocument.documentType
                       }
                       className="max-w-full h-auto mx-auto"
                     />
@@ -413,7 +409,7 @@ export default function DocumentsList({
                     <div className="text-center py-12">
                       <FileTextIcon className="size-16 text-slate-400 mx-auto mb-4" />
                       <p className="text-slate-600 mb-4">
-                        Preview not available for this file type
+                        {t("localCompanies.page.documents.previewNotAvailable")}
                       </p>
                       <a
                         href={previewUrl}
@@ -421,7 +417,7 @@ export default function DocumentsList({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                       >
-                        Open File
+                        {t("localCompanies.page.documents.openFile")}
                         <FileTextIcon className="size-4" />
                       </a>
                     </div>
@@ -430,7 +426,9 @@ export default function DocumentsList({
                   return (
                     <div className="text-center py-12">
                       <FileTextIcon className="size-16 text-slate-400 mx-auto mb-4" />
-                      <p className="text-slate-600">File not available</p>
+                      <p className="text-slate-600">
+                        {t("localCompanies.page.documents.fileNotAvailable")}
+                      </p>
                     </div>
                   );
                 }
@@ -447,7 +445,7 @@ export default function DocumentsList({
                 }}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
-                Open in New Tab
+                {t("localCompanies.page.documents.openInNewTab")}
                 <FileTextIcon className="size-4" />
               </button>
               <button
@@ -455,7 +453,7 @@ export default function DocumentsList({
                 onClick={() => setPreviewDocument(null)}
                 className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Close
+                {t("localCompanies.page.documents.close")}
               </button>
             </div>
           </div>

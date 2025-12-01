@@ -1,32 +1,32 @@
-import {useEffect, useMemo, useState} from "react";
-import {useTranslation} from "react-i18next";
-import {StatusFilterChips} from "./components/StatusFilterChips";
-import type {FilterKey} from "./components/StatusFilterChips";
-import {ListPanel} from "../../shared/components/ui/ListPanel";
-import {DetailsPanel} from "../shipment/details/DetailsPanel";
-import {CompanyDetails} from "./components/CompanyDetails";
-import {PanelRightClose} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { StatusFilterChips } from "./components/StatusFilterChips";
+import type { FilterKey } from "./components/StatusFilterChips";
+import { ListPanel } from "../../shared/components/ui/ListPanel";
+import { DetailsPanel } from "../shipment/details/DetailsPanel";
+import { CompanyDetails } from "./components/CompanyDetails";
+import { PanelRightClose } from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
-import {LocalCompaniesPageSkeleton} from "./components/LocalCompaniesSkeleton";
+import { LocalCompaniesPageSkeleton } from "./components/LocalCompaniesSkeleton";
 import {
   useCompanies,
   useCompanyDetails,
   useSuspendCompany,
   useUnsuspendCompany,
 } from "../../services/company/hooks";
-import {apiStatusToUiStatus} from "./types";
-import {CompanyCard} from "./components/CompanyCard";
+import { apiStatusToUiStatus } from "./types";
+import { CompanyCard } from "./components/CompanyCard";
 
 export function LocalCompaniesPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   // Fetch all companies with no filters
-  const {data: companies = [], isLoading, error} = useCompanies({});
-  const {data: companyDetails} = useCompanyDetails(selectedId);
+  const { data: companies = [], isLoading, error } = useCompanies({});
+  const { data: companyDetails } = useCompanyDetails(selectedId);
   const suspendMutation = useSuspendCompany();
   const unsuspendMutation = useUnsuspendCompany();
 
@@ -101,7 +101,9 @@ export function LocalCompaniesPage() {
           </div>
         </div>
         <div className="rounded-lg bg-red-50 p-4 text-red-700">
-          {error instanceof Error ? error.message : "Failed to load companies"}
+          {error instanceof Error
+            ? error.message
+            : t("localCompanies.page.errors.loadFailed")}
         </div>
       </div>
     );
@@ -128,7 +130,7 @@ export function LocalCompaniesPage() {
 
         {filteredCompanies.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
-            No companies found
+            {t("localCompanies.page.empty")}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
@@ -212,7 +214,7 @@ export function LocalCompaniesPage() {
                         ></span>
                       </span>
                       {suspendMutation.isPending || unsuspendMutation.isPending
-                        ? "Loading..."
+                        ? t("common.loading")
                         : isActive
                         ? t("localCompanies.page.actions.deactivate")
                         : t("localCompanies.page.actions.activate")}

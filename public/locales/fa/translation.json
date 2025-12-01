@@ -114,7 +114,13 @@
   },
   "segments": {
     "cardHeader": {
-      "destinationFallback": "(مقصد)"
+      "destinationFallback": "(مقصد)",
+      "notAssigned": "اختصاص داده نشده",
+      "current": "فعلی",
+      "segment": "بخش",
+      "cargoDeclaration": "اعلام بار",
+      "chatWithDriver": "چت با راننده",
+      "driver": "راننده"
     },
     "infoBanner": {
       "from": "از",
@@ -181,6 +187,36 @@
       "actions": {
         "activate": "فعال‌سازی",
         "deactivate": "غیرفعال‌سازی"
+      },
+      "status": {
+        "all": "همه",
+        "pending": "در انتظار",
+        "approved": "تأیید شده",
+        "rejected": "رد شده",
+        "inactive": "غیرفعال"
+      },
+      "scroll": {
+        "left": "اسکرول به چپ",
+        "right": "اسکرول به راست"
+      }
+    },
+    "details": {
+      "unknownDriver": "راننده نامشخص",
+      "nA": "ندارد",
+      "avatar": "آواتار",
+      "openChat": "باز کردن چت",
+      "companyLogo": "لوگوی شرکت",
+      "register": "ثبت نام",
+      "shipments": "محموله‌ها",
+      "vehicle": "وسیله نقلیه",
+      "plateNumber": "شماره پلاک",
+      "capacity": "ظرفیت",
+      "tons": "تن",
+      "alerts": {
+        "gpsLost": "GPS از دست رفته",
+        "delayExpected": "تأخیر پیش‌بینی شده",
+        "routeCleared": "مسیر پاک شد",
+        "documentationPending": "مستندات در انتظار"
       }
     }
   },
@@ -195,6 +231,103 @@
       "actions": {
         "activate": "فعال‌سازی",
         "deactivate": "غیرفعال‌سازی"
+      },
+      "errors": {
+        "loadFailed": "بارگذاری شرکت‌ها ناموفق بود"
+      },
+      "empty": "شرکتی یافت نشد",
+      "status": {
+        "all": "همه",
+        "pending": "در انتظار",
+        "active": "فعال",
+        "rejected": "رد شده",
+        "inactive": "غیرفعال"
+      },
+      "scroll": {
+        "left": "اسکرول به چپ",
+        "right": "اسکرول به راست"
+      },
+      "card": {
+        "drivers": "راننده",
+        "types": "نوع",
+        "approve": "تأیید",
+        "reject": "رد",
+        "view": "مشاهده",
+        "viewDetails": "مشاهده جزئیات"
+      },
+      "details": {
+        "openChat": "باز کردن چت",
+        "register": "ثبت‌نام",
+        "drivers": "رانندگان",
+        "segments": "بخش‌ها",
+        "phone": "تلفن",
+        "email": "ایمیل",
+        "add": "افزودن",
+        "edit": "ویرایش"
+      },
+      "documents": {
+        "title": "اسناد",
+        "upload": "آپلود",
+        "loading": "در حال بارگذاری اسناد...",
+        "empty": "سندی یافت نشد",
+        "open": "باز کردن",
+        "rejectionReason": "دلیل رد",
+        "approve": "تأیید",
+        "reject": "رد",
+        "preview": "پیش‌نمایش",
+        "rejectDocument": "رد سند",
+        "rejectReasonPrompt": "لطفاً دلیل رد را ارائه دهید:",
+        "rejectReasonPlaceholder": "دلیل رد را وارد کنید...",
+        "cancel": "لغو",
+        "rejecting": "در حال رد...",
+        "closePreview": "بستن پیش‌نمایش",
+        "previewNotAvailable": "پیش‌نمایش برای این نوع فایل در دسترس نیست",
+        "openFile": "باز کردن فایل",
+        "fileNotAvailable": "فایل در دسترس نیست",
+        "openInNewTab": "باز کردن در تب جدید",
+        "close": "بستن",
+        "types": {
+          "license": "مجوز",
+          "insurance": "بیمه",
+          "manager_id": "شناسه مدیر",
+          "primary_contact_id": "شناسه تماس اصلی",
+          "other": "سند دیگر"
+        }
+      },
+      "internalNotes": {
+        "title": "یادداشت‌های داخلی",
+        "placeholder": "یادداشت داخلی درباره شرکت اضافه کنید...",
+        "saving": "در حال ذخیره...",
+        "saveNote": "ذخیره یادداشت",
+        "saveFailed": "ذخیره یادداشت ناموفق بود",
+        "saveSuccess": "یادداشت با موفقیت ذخیره شد"
+      },
+      "activities": {
+        "title": "فعالیت‌های اخیر",
+        "loading": "در حال بارگذاری بخش‌ها...",
+        "empty": "بخشی برای این شرکت یافت نشد.",
+        "fetchFailed": "بارگذاری بخش‌ها ناموفق بود",
+        "from": "از",
+        "until": "تا",
+        "headers": {
+          "id": "شناسه",
+          "route": "مسیر",
+          "date": "تاریخ",
+          "status": "وضعیت"
+        },
+        "status": {
+          "pendingAssignment": "در انتظار اختصاص",
+          "assigned": "اختصاص داده شده",
+          "toOrigin": "به سمت مبدأ",
+          "atOrigin": "در مبدأ",
+          "loading": "در حال بارگیری",
+          "inCustoms": "در گمرک",
+          "toDestination": "به سمت مقصد",
+          "atDestination": "در مقصد",
+          "delivered": "تحویل شده",
+          "cancelled": "لغو شده",
+          "unknown": "نامشخص"
+        }
       }
     }
   },
@@ -211,9 +344,44 @@
     "search": {
       "placeholder": "جستجوی چت و هشدارها..."
     },
+    "filters": {
+      "all": "همه",
+      "drivers": "رانندگان",
+      "localCompanies": "شرکت‌های محلی"
+    },
+    "selectChat": "یک چت انتخاب کنید",
+    "empty": {
+      "all": "هنوز چتی وجود ندارد",
+      "drivers": "هنوز چتی با رانندگان وجود ندارد",
+      "companies": "هنوز چتی با شرکت‌ها وجود ندارد"
+    },
     "details": {
       "title": "جزئیات",
       "close": "بستن پنل جزئیات"
+    },
+    "shipmentHeader": {
+      "chat": "چت",
+      "notifications": "اعلان‌ها",
+      "close": "بستن"
+    },
+    "chatSection": {
+      "filters": {
+        "all": "همه",
+        "chats": "چت‌ها",
+        "alerts": "هشدارها"
+      },
+      "loading": "در حال بارگذاری...",
+      "loadOlderMessages": "بارگذاری پیام‌های قدیمی‌تر"
+    },
+    "messageInput": {
+      "placeholder": "پیامی بنویسید...",
+      "attachFile": "ضمیمه کردن فایل",
+      "sendMessage": "ارسال پیام",
+      "removeAttachment": "حذف ضمیمه"
+    },
+    "dateGroup": {
+      "today": "امروز",
+      "yesterday": "دیروز"
     }
   },
   "vehicles": {
@@ -249,6 +417,109 @@
       "closeMenu": "بستن منو"
     }
   },
+  "shipment": {
+    "page": {
+      "title": "محموله",
+      "selectShipment": "یک محموله را برای مشاهده جزئیات انتخاب کنید",
+      "loading": "در حال بارگذاری محموله‌ها..."
+    },
+    "navigatingInfo": {
+      "chat": "چت",
+      "notifications": "اعلان‌ها",
+      "filter": "فیلتر",
+      "close": "بستن",
+      "unknown": "نامشخص",
+      "openChat": "باز کردن چت",
+      "vehicle": "وسیله نقلیه",
+      "localCompany": "شرکت محلی",
+      "nA": "ندارد",
+      "weight": "وزن",
+      "destination": "مقصد",
+      "tons": "تن",
+      "driverChangedFrom": "راننده تغییر کرد از",
+      "to": "به",
+      "turnedGpsOn": "GPS خود را روشن کرد.",
+      "turnedGpsOff": "GPS خود را خاموش کرد.",
+      "uploaded": "آپلود شد",
+      "driver": "راننده"
+    },
+    "listPanel": {
+      "title": "محموله"
+    },
+    "search": {
+      "placeholder": "جستجو...",
+      "filters": "فیلترها"
+    },
+    "actions": {
+      "addShipment": "افزودن محموله",
+      "segments": "بخش‌ها"
+    },
+    "status": {
+      "all": "همه",
+      "pending": "در انتظار",
+      "inTransit": "در حال حمل",
+      "delivered": "تحویل شده",
+      "cancelled": "لغو شده",
+      "pendingAssignment": "در انتظار اختصاص"
+    },
+    "shipmentItem": {
+      "notAssigned": "اختصاص داده نشده"
+    },
+    "activity": {
+      "inTransit": "در حال حمل",
+      "atOrigin": "در مبدأ",
+      "atDestination": "در مقصد",
+      "loading": "در حال بارگیری",
+      "inCustoms": "در گمرک",
+      "delivered": "تحویل شده",
+      "assigned": "اختصاص داده شده",
+      "active": "فعال",
+      "pending": "در انتظار",
+      "justNow": "همین الان",
+      "minutesAgo": "{{count}} دقیقه پیش",
+      "hoursAgo": "{{count}} ساعت پیش",
+      "daysAgo": "{{count}} روز پیش"
+    },
+    "addModal": {
+      "title": "افزودن محموله جدید",
+      "close": "بستن",
+      "name": "نام",
+      "namePlaceholder": "نام محموله...",
+      "from": "از",
+      "to": "به",
+      "searchCities": "جستجوی شهرها...",
+      "cargoCategory": "دسته‌بندی بار",
+      "searchCategories": "جستجوی دسته‌بندی‌ها...",
+      "cargoWeight": "وزن بار",
+      "weightUnit": "کیلوگرم",
+      "segmentCount": "تعداد بخش",
+      "segmentCountPlaceholder": "0",
+      "cancel": "لغو",
+      "create": "ایجاد",
+      "loadingCities": "در حال بارگذاری شهرها...",
+      "noCitiesFound": "شهری یافت نشد",
+      "noCategoriesFound": "دسته‌بندی‌ای یافت نشد",
+      "categories": {
+        "electronics": "الکترونیک",
+        "textiles": "منسوجات",
+        "food": "غذا",
+        "medical": "پزشکی",
+        "machinery": "ماشین‌آلات",
+        "chemicals": "مواد شیمیایی",
+        "automotive": "خودرو",
+        "furniture": "مبلمان"
+      }
+    },
+    "segments": {
+      "title": "بخش‌ها",
+      "addSegment": "افزودن بخش",
+      "allActivities": "همه فعالیت‌ها"
+    },
+    "scroll": {
+      "left": "اسکرول به چپ",
+      "right": "اسکرول به راست"
+    }
+  },
   "settings": {
     "page": {
       "title": "تنظیمات"
@@ -275,7 +546,17 @@
       },
       "notifications": {
         "title": "اعلان و هشدارها",
-        "description": "مدیریت هشدارهای خودکار و تنظیمات اعلان کاربر."
+        "description": "مدیریت هشدارهای خودکار و تنظیمات اعلان کاربر.",
+        "driverGpsAlert": "هشدار GPS راننده پس از:",
+        "delayAlert": "هشدار تأخیر پس از:",
+        "minutes": "دقیقه",
+        "hours": "ساعت",
+        "deliveryMethods": "روش‌های تحویل",
+        "deliveryMethodsDescription": "انتخاب کنید که چگونه می‌خواهید هشدارهای فعال شده را دریافت کنید",
+        "inApp": "اعلان درون برنامه",
+        "email": "ایمیل",
+        "sms": "پیامک",
+        "mobilePush": "اعلان موبایل"
       },
       "localization": {
         "title": "بومی‌سازی",
@@ -343,8 +624,57 @@
         "confirmDelete": "تأیید حذف",
         "deleteUser": "حذف کاربر",
         "deleteUserConfirm": "آیا مطمئن هستید که می‌خواهید \"{{name}}\" را حذف کنید؟ این عمل قابل بازگشت نیست.",
-        "deleting": "در حال حذف..."
+        "deleting": "در حال حذف...",
+        "failedToLoadRoles": "بارگذاری نقش‌ها ناموفق بود",
+        "editUserIn": "ویرایش کاربر در \"{{roleName}}\"",
+        "addNewUserTo": "افزودن کاربر جدید به \"{{roleName}}\"",
+        "name": "نام",
+        "namePlaceholder": "نام...",
+        "email": "ایمیل",
+        "emailPlaceholder": "ایمیل...",
+        "password": "رمز عبور",
+        "passwordPlaceholder": "رمز عبور...",
+        "passwordLeaveEmpty": "خالی بگذارید تا فعلی حفظ شود",
+        "passwordRequired": "رمز عبور الزامی است",
+        "passwordMinLength": "رمز عبور باید حداقل 8 کاراکتر باشد",
+        "passwordLowercase": "رمز عبور باید حداقل یک حرف کوچک داشته باشد",
+        "passwordUppercase": "رمز عبور باید حداقل یک حرف بزرگ داشته باشد",
+        "passwordNumber": "رمز عبور باید حداقل یک عدد داشته باشد",
+        "passwordSpecialChar": "رمز عبور باید حداقل یک کاراکتر خاص (@$!%*?&) داشته باشد",
+        "passwordRequirements": "باید شامل: حرف کوچک، حرف بزرگ، عدد و کاراکتر خاص (@$!%*?&) باشد",
+        "save": "ذخیره",
+        "add": "افزودن",
+        "saving": "در حال ذخیره...",
+        "statusActive": "فعال",
+        "statusSuspended": "معلق"
       }
+    }
+  },
+  "entityCard": {
+    "vehicle": "وسیله نقلیه",
+    "plateNumber": "شماره پلاک",
+    "lostShipment": "محموله گم شده",
+    "nA": "ندارد",
+    "avatar": "آواتار",
+    "companyLogo": "لوگوی شرکت",
+    "status": {
+      "pending": "در انتظار",
+      "active": "فعال",
+      "approved": "تأیید شده",
+      "rejected": "رد شده",
+      "inactive": "غیرفعال"
+    },
+    "vehicleType": {
+      "tented": "چادری",
+      "refrigerated": "یخچالی",
+      "flatbed": "کفی",
+      "double_wall": "دو دیواره"
+    },
+    "actions": {
+      "approve": "تأیید",
+      "reject": "رد",
+      "view": "مشاهده",
+      "viewDetails": "مشاهده جزئیات"
     }
   }
 }

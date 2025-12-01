@@ -1,6 +1,6 @@
-import {useState, useRef, useEffect} from "react";
-import {createPortal} from "react-dom";
-import {useTranslation} from "react-i18next";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import {
   ChevronDown,
   PenLineIcon,
@@ -8,8 +8,8 @@ import {
   X,
   AlertTriangleIcon,
 } from "lucide-react";
-import type {User} from "./RoleDetailsPanel";
-import {useDeleteUser} from "../../../services/admin/hooks";
+import type { User } from "./RoleDetailsPanel";
+import { useDeleteUser } from "../../../services/admin/hooks";
 
 type UsersTableProps = {
   users: User[];
@@ -26,14 +26,16 @@ export function UsersTable({
   onUserAdd,
   onUserStatusChange,
 }: UsersTableProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [deleteDialogUserId, setDeleteDialogUserId] = useState<string | null>(
     null
   );
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const dropdownPositionRef = useRef<{top: number; left: number} | null>(null);
+  const dropdownPositionRef = useRef<{ top: number; left: number } | null>(
+    null
+  );
   const deleteUserMutation = useDeleteUser();
 
   useEffect(() => {
@@ -174,7 +176,11 @@ export function UsersTable({
                           : " text-yellow-500"
                       }`}
                     >
-                      {user.status}
+                      {user.status === "Active"
+                        ? t("settings.sections.rolesPermissions.statusActive")
+                        : t(
+                            "settings.sections.rolesPermissions.statusSuspended"
+                          )}
                       <ChevronDown className="size-4 text-slate-400" />
                     </button>
                   </div>
@@ -230,7 +236,7 @@ export function UsersTable({
                   : ""
               }`}
             >
-              Active
+              {t("settings.sections.rolesPermissions.statusActive")}
             </button>
             <button
               type="button"
@@ -245,7 +251,7 @@ export function UsersTable({
                   : ""
               }`}
             >
-              Suspended
+              {t("settings.sections.rolesPermissions.statusSuspended")}
             </button>
           </div>,
           document.body

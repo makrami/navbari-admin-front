@@ -1,6 +1,7 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import { cn } from "../../../shared/utils/cn";
 import { PlusIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type SegmentsProps = PropsWithChildren<{
   className?: string;
@@ -16,8 +17,9 @@ export function Segments({
   onAddSegment,
   readOnly = false,
 }: SegmentsProps) {
+  const { t } = useTranslation();
   return (
-    <section className={cn(className)} data-name="Segments Section">
+    <section className={cn(className)} data-name="Segments Section" dir="ltr">
       <header className="flex items-center justify-between">
         <h2 className="font-bold text-slate-900">{title}</h2>
         {readOnly
@@ -26,11 +28,11 @@ export function Segments({
               <button
                 type="button"
                 onClick={onAddSegment}
-                aria-label="Add Segment"
+                aria-label={t("shipment.segments.addSegment")}
                 className="inline-flex items-center gap-2 rounded-[8px] px-3 py-2 text-xs font-medium text-blue-600 bg-blue-100 hover:scale-[1.02] active:scale-[0.99] transition-transform"
               >
                 <PlusIcon className="size-4" />
-                <span>Add Segment</span>
+                <span>{t("shipment.segments.addSegment")}</span>
               </button>
             )}
       </header>

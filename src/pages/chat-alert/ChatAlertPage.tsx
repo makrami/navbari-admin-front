@@ -182,7 +182,7 @@ export function ChatAlertPage() {
                   : "bg-white text-slate-700 hover:bg-slate-50 font-medium"
               )}
             >
-              All
+              {t("chatAlert.filters.all")}
             </button>
             <button
               onClick={() => setActiveFilter("driver")}
@@ -199,7 +199,7 @@ export function ChatAlertPage() {
                   activeFilter === "driver" ? "text-blue-700" : "text-slate-500"
                 )}
               />
-              Drivers
+              {t("chatAlert.filters.drivers")}
             </button>
             <button
               onClick={() => setActiveFilter("company")}
@@ -218,7 +218,7 @@ export function ChatAlertPage() {
                     : "text-slate-500"
                 )}
               />
-              Local Comp.
+              {t("chatAlert.filters.localCompanies")}
             </button>
           </div>
 
@@ -229,13 +229,10 @@ export function ChatAlertPage() {
                 <MessagesSquareIcon className="size-12 text-slate-300 mb-4" />
                 <p className="text-slate-500 font-medium text-sm">
                   {activeFilter === "driver"
-                    ? t("chatAlert.empty.drivers", "No chats with drivers yet")
+                    ? t("chatAlert.empty.drivers")
                     : activeFilter === "company"
-                    ? t(
-                        "chatAlert.empty.companies",
-                        "No chats with companies yet"
-                      )
-                    : t("chatAlert.empty.all", "No chats yet")}
+                    ? t("chatAlert.empty.companies")
+                    : t("chatAlert.empty.all")}
                 </p>
               </div>
             ) : (
@@ -259,7 +256,7 @@ export function ChatAlertPage() {
                 <div>
                   <MessagesSquareIcon className="size-16 text-slate-300 mx-auto mb-4" />
                   <p className="text-slate-500 font-medium">
-                    {t("chatAlert.selectChat", "Select a chat")}
+                    {t("chatAlert.selectChat")}
                   </p>
                 </div>
               </div>
@@ -304,7 +301,7 @@ export function ChatAlertPage() {
                 : "bg-white text-slate-700 hover:bg-slate-50 font-medium"
             )}
           >
-            All
+            {t("chatAlert.filters.all")}
           </button>
           <button
             onClick={() => setActiveFilter("driver")}
@@ -321,7 +318,7 @@ export function ChatAlertPage() {
                 activeFilter === "driver" ? "text-blue-700" : "text-slate-500"
               )}
             />
-            Drivers
+            {t("chatAlert.filters.drivers")}
           </button>
           <button
             onClick={() => setActiveFilter("company")}
@@ -338,7 +335,7 @@ export function ChatAlertPage() {
                 activeFilter === "company" ? "text-blue-700" : "text-slate-500"
               )}
             />
-            Local Comp.
+            {t("chatAlert.filters.localCompanies")}
           </button>
         </div>
 
@@ -349,13 +346,10 @@ export function ChatAlertPage() {
               <MessagesSquareIcon className="size-12 text-slate-300 mb-4" />
               <p className="text-slate-500 font-medium text-sm">
                 {activeFilter === "driver"
-                  ? t("chatAlert.empty.drivers", "No chats with drivers yet")
+                  ? t("chatAlert.empty.drivers")
                   : activeFilter === "company"
-                  ? t(
-                      "chatAlert.empty.companies",
-                      "No chats with companies yet"
-                    )
-                  : t("chatAlert.empty.all", "No chats yet")}
+                  ? t("chatAlert.empty.companies")
+                  : t("chatAlert.empty.all")}
               </p>
             </div>
           ) : (
@@ -374,7 +368,10 @@ export function ChatAlertPage() {
       <div className="flex-1 h-screen max-w-4xl mx-auto overflow-hidden">
         <div className="h-full overflow-y-auto no-scrollbar">
           <div className="p-9 flex flex-col gap-4">
-            <DetailsPanel className="min-h-0 p-0" title="Details">
+            <DetailsPanel
+              className="min-h-0 p-0"
+              title={t("chatAlert.details.title")}
+            >
               {selectedAlert && selectedConversation && (
                 <ChatAlertDetails
                   chatAlert={selectedAlert}

@@ -114,7 +114,13 @@
   },
   "segments": {
     "cardHeader": {
-      "destinationFallback": "(目的地)"
+      "destinationFallback": "(目的地)",
+      "notAssigned": "未分配",
+      "current": "当前",
+      "segment": "路段",
+      "cargoDeclaration": "货物申报",
+      "chatWithDriver": "与司机聊天",
+      "driver": "司机"
     },
     "infoBanner": {
       "from": "从",
@@ -173,6 +179,263 @@
       "closeMenu": "关闭菜单"
     }
   },
+  "shipment": {
+    "page": {
+      "title": "货运",
+      "selectShipment": "选择一个货运以查看详细信息",
+      "loading": "加载货运中..."
+    },
+    "navigatingInfo": {
+      "chat": "聊天",
+      "notifications": "通知",
+      "filter": "过滤器",
+      "close": "关闭",
+      "unknown": "未知",
+      "openChat": "打开聊天",
+      "vehicle": "车辆",
+      "localCompany": "本地公司",
+      "nA": "不适用",
+      "weight": "重量",
+      "destination": "目的地",
+      "tons": "吨",
+      "driverChangedFrom": "司机从",
+      "to": "更改为",
+      "turnedGpsOn": "打开了GPS。",
+      "turnedGpsOff": "关闭了GPS。",
+      "uploaded": "已上传",
+      "driver": "司机"
+    },
+    "listPanel": {
+      "title": "货运"
+    },
+    "search": {
+      "placeholder": "搜索...",
+      "filters": "过滤器"
+    },
+    "actions": {
+      "addShipment": "添加货运",
+      "segments": "路段"
+    },
+    "status": {
+      "all": "全部",
+      "pending": "等待中",
+      "inTransit": "运输中",
+      "delivered": "已交付",
+      "cancelled": "已取消",
+      "pendingAssignment": "等待分配"
+    },
+    "shipmentItem": {
+      "notAssigned": "未分配"
+    },
+    "activity": {
+      "inTransit": "运输中",
+      "atOrigin": "在起点",
+      "atDestination": "在目的地",
+      "loading": "装载中",
+      "inCustoms": "在海关",
+      "delivered": "已交付",
+      "assigned": "已分配",
+      "active": "活跃",
+      "pending": "等待中",
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
+    "addModal": {
+      "title": "添加新货运",
+      "close": "关闭",
+      "name": "名称",
+      "namePlaceholder": "货运名称...",
+      "from": "从",
+      "to": "到",
+      "searchCities": "搜索城市...",
+      "cargoCategory": "货物类别",
+      "searchCategories": "搜索类别...",
+      "cargoWeight": "货物重量",
+      "weightUnit": "公斤",
+      "segmentCount": "路段数量",
+      "segmentCountPlaceholder": "0",
+      "cancel": "取消",
+      "create": "创建",
+      "loadingCities": "加载城市中...",
+      "noCitiesFound": "未找到城市",
+      "noCategoriesFound": "未找到类别",
+      "categories": {
+        "electronics": "电子产品",
+        "textiles": "纺织品",
+        "food": "食品",
+        "medical": "医疗用品",
+        "machinery": "机械设备",
+        "chemicals": "化学品",
+        "automotive": "汽车",
+        "furniture": "家具"
+      }
+    },
+    "segments": {
+      "title": "路段",
+      "addSegment": "添加路段"
+    },
+    "scroll": {
+      "left": "向左滚动",
+      "right": "向右滚动"
+    }
+  },
+  "drivers": {
+    "page": {
+      "title": "司机",
+      "stats": {
+        "shipments": "货运",
+        "vehicles": "车辆"
+      },
+      "closeDetails": "关闭详细信息面板",
+      "actions": {
+        "activate": "激活",
+        "deactivate": "停用"
+      },
+      "status": {
+        "all": "全部",
+        "pending": "等待中",
+        "approved": "已批准",
+        "rejected": "已拒绝",
+        "inactive": "非活跃"
+      },
+      "scroll": {
+        "left": "向左滚动",
+        "right": "向右滚动"
+      }
+    },
+    "details": {
+      "unknownDriver": "未知司机",
+      "nA": "不适用",
+      "avatar": "头像",
+      "openChat": "打开聊天",
+      "companyLogo": "公司标志",
+      "register": "注册",
+      "shipments": "货运",
+      "vehicle": "车辆",
+      "plateNumber": "车牌号",
+      "capacity": "容量",
+      "tons": "吨",
+      "alerts": {
+        "gpsLost": "GPS丢失",
+        "delayExpected": "预计延迟",
+        "routeCleared": "路线已清除",
+        "documentationPending": "文件待处理"
+      }
+    }
+  },
+  "localCompanies": {
+    "page": {
+      "title": "本地公司",
+      "stats": {
+        "drivers": "司机",
+        "active": "活跃"
+      },
+      "closeDetails": "关闭详细信息面板",
+      "actions": {
+        "activate": "激活",
+        "deactivate": "停用"
+      },
+      "errors": {
+        "loadFailed": "加载公司失败"
+      },
+      "empty": "未找到公司",
+      "status": {
+        "all": "全部",
+        "pending": "等待中",
+        "active": "活跃",
+        "rejected": "已拒绝",
+        "inactive": "非活跃"
+      },
+      "scroll": {
+        "left": "向左滚动",
+        "right": "向右滚动"
+      },
+      "card": {
+        "drivers": "司机",
+        "types": "类型",
+        "approve": "批准",
+        "reject": "拒绝",
+        "view": "查看",
+        "viewDetails": "查看详细信息"
+      },
+      "details": {
+        "openChat": "打开聊天",
+        "register": "注册",
+        "drivers": "司机",
+        "segments": "路段",
+        "phone": "电话",
+        "email": "电子邮件",
+        "add": "添加",
+        "edit": "编辑"
+      },
+      "documents": {
+        "title": "文件",
+        "upload": "上传",
+        "loading": "加载文件中...",
+        "empty": "未找到文件",
+        "open": "打开",
+        "rejectionReason": "拒绝原因",
+        "approve": "批准",
+        "reject": "拒绝",
+        "preview": "预览",
+        "rejectDocument": "拒绝文件",
+        "rejectReasonPrompt": "请提供拒绝原因：",
+        "rejectReasonPlaceholder": "输入拒绝原因...",
+        "cancel": "取消",
+        "rejecting": "拒绝中...",
+        "closePreview": "关闭预览",
+        "previewNotAvailable": "此文件类型无法预览",
+        "openFile": "打开文件",
+        "fileNotAvailable": "文件不可用",
+        "openInNewTab": "在新标签页中打开",
+        "close": "关闭",
+        "types": {
+          "license": "许可证",
+          "insurance": "保险",
+          "manager_id": "经理ID",
+          "primary_contact_id": "主要联系人ID",
+          "other": "其他文件"
+        }
+      },
+      "internalNotes": {
+        "title": "内部备注",
+        "placeholder": "添加关于公司的内部备注...",
+        "saving": "保存中...",
+        "saveNote": "保存备注",
+        "saveFailed": "保存备注失败",
+        "saveSuccess": "备注已成功保存"
+      },
+      "activities": {
+        "title": "最近活动",
+        "loading": "加载路段中...",
+        "empty": "未找到此公司的路段。",
+        "fetchFailed": "加载路段失败",
+        "from": "从",
+        "until": "直到",
+        "headers": {
+          "id": "ID",
+          "route": "路线",
+          "date": "日期",
+          "status": "状态"
+        },
+        "status": {
+          "pendingAssignment": "等待分配",
+          "assigned": "已分配",
+          "toOrigin": "前往起点",
+          "atOrigin": "在起点",
+          "loading": "装载中",
+          "inCustoms": "在海关",
+          "toDestination": "前往目的地",
+          "atDestination": "在目的地",
+          "delivered": "已交付",
+          "cancelled": "已取消",
+          "unknown": "未知"
+        }
+      }
+    }
+  },
   "layout": {
     "app": {
       "openMenu": "打开菜单",
@@ -203,6 +466,20 @@
         "saveChanges": "保存更改",
         "saving": "保存中..."
       },
+      "notifications": {
+        "title": "通知和警报",
+        "description": "管理自动警报和用户通知首选项。",
+        "driverGpsAlert": "司机GPS警报后:",
+        "delayAlert": "延迟警报后:",
+        "minutes": "分钟",
+        "hours": "小时",
+        "deliveryMethods": "交付方式",
+        "deliveryMethodsDescription": "选择您希望如何接收已启用的警报",
+        "inApp": "应用内通知",
+        "email": "电子邮件",
+        "sms": "短信",
+        "mobilePush": "移动推送"
+      },
       "rolesPermissions": {
         "title": "角色和权限",
         "description": "管理平台上的用户访问和权限。",
@@ -230,8 +507,104 @@
         "confirmDelete": "确认删除",
         "deleteUser": "删除用户",
         "deleteUserConfirm": "您确定要删除 \"{{name}}\" 吗？此操作无法撤销。",
-        "deleting": "删除中..."
+        "deleting": "删除中...",
+        "failedToLoadRoles": "加载角色失败",
+        "editUserIn": "在 \"{{roleName}}\" 中编辑用户",
+        "addNewUserTo": "在 \"{{roleName}}\" 中添加新用户",
+        "name": "姓名",
+        "namePlaceholder": "姓名...",
+        "email": "电子邮件",
+        "emailPlaceholder": "电子邮件...",
+        "password": "密码",
+        "passwordPlaceholder": "密码...",
+        "passwordLeaveEmpty": "留空以保持当前密码",
+        "passwordRequired": "密码是必需的",
+        "passwordMinLength": "密码必须至少8个字符",
+        "passwordLowercase": "密码必须包含至少一个小写字母",
+        "passwordUppercase": "密码必须包含至少一个大写字母",
+        "passwordNumber": "密码必须包含至少一个数字",
+        "passwordSpecialChar": "密码必须包含至少一个特殊字符 (@$!%*?&)",
+        "passwordRequirements": "必须包含: 小写字母、大写字母、数字和特殊字符 (@$!%*?&)",
+        "save": "保存",
+        "add": "添加",
+        "saving": "保存中...",
+        "statusActive": "活跃",
+        "statusSuspended": "已暂停"
       }
+    }
+  },
+  "chatAlert": {
+    "page": {
+      "title": "聊天和警报"
+    },
+    "search": {
+      "placeholder": "搜索聊天和警报..."
+    },
+    "filters": {
+      "all": "全部",
+      "drivers": "司机",
+      "localCompanies": "本地公司"
+    },
+    "selectChat": "选择一个聊天",
+    "empty": {
+      "all": "还没有聊天",
+      "drivers": "还没有与司机的聊天",
+      "companies": "还没有与公司的聊天"
+    },
+    "details": {
+      "title": "详细信息",
+      "close": "关闭详细信息面板"
+    },
+    "shipmentHeader": {
+      "chat": "聊天",
+      "notifications": "通知",
+      "close": "关闭"
+    },
+    "chatSection": {
+      "filters": {
+        "all": "全部",
+        "chats": "聊天",
+        "alerts": "警报"
+      },
+      "loading": "加载中...",
+      "loadOlderMessages": "加载更早的消息"
+    },
+    "messageInput": {
+      "placeholder": "输入消息...",
+      "attachFile": "附加文件",
+      "sendMessage": "发送消息",
+      "removeAttachment": "删除附件"
+    },
+    "dateGroup": {
+      "today": "今天",
+      "yesterday": "昨天"
+    }
+  },
+  "entityCard": {
+    "vehicle": "车辆",
+    "plateNumber": "车牌号",
+    "lostShipment": "丢失的货运",
+    "nA": "不适用",
+    "avatar": "头像",
+    "companyLogo": "公司标志",
+    "status": {
+      "pending": "等待中",
+      "active": "活跃",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "inactive": "非活跃"
+    },
+    "vehicleType": {
+      "tented": "篷车",
+      "refrigerated": "冷藏车",
+      "flatbed": "平板车",
+      "double_wall": "双层壁车"
+    },
+    "actions": {
+      "approve": "批准",
+      "reject": "拒绝",
+      "view": "查看",
+      "viewDetails": "查看详细信息"
     }
   }
 }

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { STATUS_TO_COLOR } from "./entity-card-constants";
 import type { EntityStatus } from "./entity-card-constants";
+import { useTranslation } from "react-i18next";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -30,8 +31,8 @@ export type EntityCardData = {
   logoUrl?: string;
   avatarUrl?: string;
   companyName?: string;
-  vehicleTypes?: ("tented" | "refrigerated")[];
-  vehicleType?: "tented" | "refrigerated";
+  vehicleTypes?: ("tented" | "refrigerated" | "flatbed" | "double_wall")[];
+  vehicleType?: "tented" | "refrigerated" | "flatbed" | "double_wall";
   vehiclePlate?: string;
   vehicleCapacity?: number;
   lostShipments?: number;
@@ -75,14 +76,19 @@ export function EntityCard({
   onApprove,
   onReject,
   onView,
-  actionLabels = {
-    approveLabel: "Approve",
-    rejectLabel: "Reject",
-    viewLabel: "View",
-    viewDetailsLabel: "View Details",
-  },
+  actionLabels,
 }: Props) {
+  const { t } = useTranslation();
   const colors = STATUS_TO_COLOR[entity.status];
+
+  const defaultActionLabels = {
+    approveLabel: t("entityCard.actions.approve"),
+    rejectLabel: t("entityCard.actions.reject"),
+    viewLabel: t("entityCard.actions.view"),
+    viewDetailsLabel: t("entityCard.actions.viewDetails"),
+  };
+
+  const finalActionLabels = { ...defaultActionLabels, ...actionLabels };
 
   return (
     <div
@@ -111,7 +117,7 @@ export function EntityCard({
             {entity.avatarUrl ? (
               <img
                 src={entity.avatarUrl}
-                alt={"avatar"}
+                alt={t("entityCard.avatar")}
                 className={cn(
                   "size-14",
                   entity.avatarUrl ? "rounded-full object-cover" : "rounded"
@@ -139,7 +145,7 @@ export function EntityCard({
                   {entity.logoUrl && (
                     <img
                       src={entity.logoUrl}
-                      alt="company logo"
+                      alt={t("entityCard.companyLogo")}
                       className="size-4 rounded object-cover"
                     />
                   )}
@@ -158,7 +164,7 @@ export function EntityCard({
                 : `${colors.pill} ${colors.pillText}`
             )}
           >
-            {entity.status.charAt(0).toUpperCase() + entity.status.slice(1)}
+            {t(`entityCard.status.${entity.status}`)}
           </span>
         </div>
 
@@ -187,7 +193,7 @@ export function EntityCard({
                     selected ? "text-white/80" : "text-slate-600"
                   )}
                 >
-                  Vehicle
+                  {t("entityCard.vehicle")}
                 </span>
               </div>
               <span
@@ -197,9 +203,8 @@ export function EntityCard({
                 )}
               >
                 {entity.vehicleType
-                  ? entity.vehicleType.charAt(0).toUpperCase() +
-                    entity.vehicleType.slice(1)
-                  : "N/A"}
+                  ? t(`entityCard.vehicleType.${entity.vehicleType}`)
+                  : t("entityCard.nA")}
               </span>
             </div>
 
@@ -218,7 +223,7 @@ export function EntityCard({
                     selected ? "text-white/80" : "text-slate-600"
                   )}
                 >
-                  Plate Number
+                  {t("entityCard.plateNumber")}
                 </span>
               </div>
               <span
@@ -227,7 +232,7 @@ export function EntityCard({
                   selected ? "text-white" : "text-slate-900"
                 )}
               >
-                {entity.vehiclePlate || "N/A"}
+                {entity.vehiclePlate || t("entityCard.nA")}
               </span>
             </div>
           </div>
@@ -246,7 +251,7 @@ export function EntityCard({
                 selected ? "text-white/80" : "text-slate-600"
               )}
             >
-              Lost Shipment:{" "}
+              {t("entityCard.lostShipment")}:{" "}
               <span
                 className={cn(
                   "font-medium",
@@ -277,7 +282,7 @@ export function EntityCard({
                 onApprove?.(entity.id);
               }}
             >
-              {actionLabels.approveLabel}
+              {finalActionLabels.approveLabel}
               <CheckIcon className="size-3 " />
             </Button>
             <Button
@@ -293,7 +298,7 @@ export function EntityCard({
                 onReject?.(entity.id);
               }}
             >
-              {actionLabels.rejectLabel}
+              {finalActionLabels.rejectLabel}
               <XIcon className="size-3" />
             </Button>
           </div>
@@ -312,7 +317,7 @@ export function EntityCard({
                 onView?.(entity.id);
               }}
             >
-              {actionLabels.viewDetailsLabel}
+              {finalActionLabels.viewDetailsLabel}
               <EyeIcon className="h-4 w-4" />
             </Button>
           </div>

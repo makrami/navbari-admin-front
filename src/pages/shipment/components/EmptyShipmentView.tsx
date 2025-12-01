@@ -1,5 +1,6 @@
-import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
+import type { CreateShipmentDto } from "../../../services/shipment/shipment.api.service";
 import AddShipmentModal from "./AddShipmentModal";
+import { useTranslation } from "react-i18next";
 
 type EmptyShipmentViewProps = {
   showAddShipment: boolean;
@@ -12,6 +13,7 @@ export function EmptyShipmentView({
   onCloseAddShipment,
   onCreateShipment,
 }: EmptyShipmentViewProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex-1 h-screen bg-slate-100 max-w-4xl mx-auto overflow-hidden">
       <div className="h-full overflow-y-auto no-scrollbar">
@@ -22,7 +24,7 @@ export function EmptyShipmentView({
             onCreate={onCreateShipment}
           />
           <div className="flex items-center justify-center h-full text-slate-400">
-            <p>Select a shipment to view details</p>
+            <p>{t("shipment.page.selectShipment")}</p>
           </div>
         </div>
       </div>

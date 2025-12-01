@@ -25,6 +25,7 @@ export function ChatAlertItem({
 
   return (
     <div
+      dir="ltr"
       className={cn(
         "flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-colors",
         selected ? "bg-[#1B54FE] text-white" : "bg-white hover:bg-slate-50"

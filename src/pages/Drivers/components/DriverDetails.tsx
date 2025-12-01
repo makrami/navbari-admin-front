@@ -1,4 +1,4 @@
-import type {Driver} from "../types";
+import type { Driver } from "../types";
 import {
   Phone as PhoneIcon,
   Users as UsersIcon,
@@ -8,22 +8,37 @@ import {
   Weight,
   MessagesSquareIcon,
 } from "lucide-react";
-import {STATUS_TO_COLOR} from "../types";
-import {ENV} from "../../../lib/env";
-import {useChatWithRecipient} from "../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../shared/components/ChatOverlay";
-import {CHAT_RECIPIENT_TYPE} from "../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../chat-alert/types/chat";
+import { STATUS_TO_COLOR } from "../types";
+import { ENV } from "../../../lib/env";
+import { useChatWithRecipient } from "../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../shared/components/ChatOverlay";
+import { CHAT_RECIPIENT_TYPE } from "../../../services/chat/chat.types";
+import type { ActionableAlertChip } from "../../chat-alert/types/chat";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   driver: Driver;
 };
 
-const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
+const getActionableAlerts = (
+  t: (key: string) => string
+): ActionableAlertChip[] => [
+  { id: "1", label: t("drivers.details.alerts.gpsLost"), alertType: "alert" },
+  {
+    id: "2",
+    label: t("drivers.details.alerts.delayExpected"),
+    alertType: "warning",
+  },
+  {
+    id: "3",
+    label: t("drivers.details.alerts.routeCleared"),
+    alertType: "success",
+  },
+  {
+    id: "4",
+    label: t("drivers.details.alerts.documentationPending"),
+    alertType: "info",
+  },
 ];
 
 function getFileUrl(filePath: string | null | undefined): string | undefined {
@@ -35,10 +50,12 @@ function getFileUrl(filePath: string | null | undefined): string | undefined {
   return `${ENV.FILE_BASE_URL}/${cleanPath}`;
 }
 
-export function DriverDetails({driver}: Props) {
+export function DriverDetails({ driver }: Props) {
+  const { t } = useTranslation();
   const colors = STATUS_TO_COLOR[driver.status];
-  const driverName = driver.user?.fullName || "Unknown Driver";
-  const phone = driver.user?.phoneNumber || "N/A";
+  const driverName =
+    driver.user?.fullName || t("drivers.details.unknownDriver");
+  const phone = driver.user?.phoneNumber || t("drivers.details.nA");
 
   const statusDotColor =
     driver.status === "approved"
@@ -51,7 +68,7 @@ export function DriverDetails({driver}: Props) {
 
   const joinDate = driver.createdAt
     ? new Date(driver.createdAt).toLocaleDateString()
-    : "N/A";
+    : t("drivers.details.nA");
 
   // Use the reusable chat hook
   const chatHook = useChatWithRecipient({
@@ -70,7 +87,7 @@ export function DriverDetails({driver}: Props) {
             {driver.avatarUrl ? (
               <img
                 src={getFileUrl(driver.avatarUrl)}
-                alt="avatar"
+                alt={t("drivers.details.avatar")}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -87,7 +104,7 @@ export function DriverDetails({driver}: Props) {
                 type="button"
                 onClick={() => chatHook.setIsChatOpen(true)}
                 className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
-                aria-label="Open chat"
+                aria-label={t("drivers.details.openChat")}
               >
                 <MessagesSquareIcon className="size-4 text-blue-600" />
               </button>
@@ -97,7 +114,7 @@ export function DriverDetails({driver}: Props) {
               {driver.company.logoUrl && (
                 <img
                   src={getFileUrl(driver.company.logoUrl)}
-                  alt="Company Logo"
+                  alt={t("drivers.details.companyLogo")}
                   className=" h-4 w-7 rounded object-cover"
                 />
               )}
@@ -113,7 +130,9 @@ export function DriverDetails({driver}: Props) {
               </div>
               <div className="flex items-center gap-2">
                 <CalendarIcon className="size-3.5 text-slate-400" />
-                <span>Register: {joinDate}</span>
+                <span>
+                  {t("drivers.details.register")}: {joinDate}
+                </span>
               </div>
             </div>
           </div>
@@ -126,7 +145,7 @@ export function DriverDetails({driver}: Props) {
           >
             <span className={`h-1.5 w-1.5 rounded-full ${statusDotColor}`} />
             <span className={`text-xs ${colors.pillText}`}>
-              {driver.status.charAt(0).toUpperCase() + driver.status.slice(1)}
+              {t(`drivers.page.status.${driver.status}`)}
             </span>
           </div>
           <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 w-full justify-center bg-blue-600/10">
@@ -134,7 +153,9 @@ export function DriverDetails({driver}: Props) {
             <span className="text-xs font-bold text-blue-600">
               {driver.totalShipments || 0}
             </span>
-            <span className="text-xs text-blue-600">Shipments</span>
+            <span className="text-xs text-blue-600">
+              {t("drivers.details.shipments")}
+            </span>
           </div>
         </div>
       </div>
@@ -147,13 +168,12 @@ export function DriverDetails({driver}: Props) {
           <div className="flex flex-col gap-1 min-w-[7.5rem]">
             <p className="text-slate-400 flex items-center gap-2 font-semibold">
               <TruckIcon className="size-4  text-slate-400" />
-              VEHICLE
+              {t("drivers.details.vehicle")}
             </p>
 
             <p>
               {driver.vehicleType
-                ? driver.vehicleType.charAt(0).toUpperCase() +
-                  driver.vehicleType.slice(1)
+                ? t(`entityCard.vehicleType.${driver.vehicleType}`)
                 : ""}
             </p>
           </div>
@@ -163,7 +183,7 @@ export function DriverDetails({driver}: Props) {
           <div className="flex flex-col gap-1 min-w-[7.5rem]">
             <p className="text-slate-400 flex items-center gap-2 font-semibold">
               <ScanBarcode className="size-4  text-slate-400" />
-              PLATE NUMBER
+              {t("drivers.details.plateNumber")}
             </p>
 
             <p>{driver.vehiclePlate}</p>
@@ -174,10 +194,13 @@ export function DriverDetails({driver}: Props) {
           <div className="flex flex-col gap-1 min-w-[7.5rem]">
             <p className="text-slate-400 flex items-center gap-2 font-semibold">
               <Weight className="size-4  text-slate-400" />
-              CAPACITY
+              {t("drivers.details.capacity")}
             </p>
 
-            <p>{(driver.vehicleCapacity / 1000).toFixed(2)} Tons</p>
+            <p>
+              {(driver.vehicleCapacity / 1000).toFixed(2)}{" "}
+              {t("drivers.details.tons")}
+            </p>
           </div>
         </div>
       </div>
@@ -188,7 +211,7 @@ export function DriverDetails({driver}: Props) {
         onClose={() => chatHook.setIsChatOpen(false)}
         recipientName={driverName}
         chatHook={chatHook}
-        actionableAlerts={ACTIONABLE_ALERTS}
+        actionableAlerts={getActionableAlerts(t)}
       />
     </section>
   );

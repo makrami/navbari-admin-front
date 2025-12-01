@@ -114,7 +114,13 @@
   },
   "segments": {
     "cardHeader": {
-      "destinationFallback": "(الوجهة)"
+      "destinationFallback": "(الوجهة)",
+      "notAssigned": "غير مخصص",
+      "current": "الحالي",
+      "segment": "القسم",
+      "cargoDeclaration": "إعلان البضائع",
+      "chatWithDriver": "الدردشة مع السائق",
+      "driver": "السائق"
     },
     "infoBanner": {
       "from": "من",
@@ -173,6 +179,264 @@
       "closeMenu": "إغلاق القائمة"
     }
   },
+  "shipment": {
+    "page": {
+      "title": "الشحنة",
+      "selectShipment": "اختر شحنة لعرض التفاصيل",
+      "loading": "جارٍ تحميل الشحنات..."
+    },
+    "navigatingInfo": {
+      "chat": "الدردشة",
+      "notifications": "الإشعارات",
+      "filter": "المرشح",
+      "close": "إغلاق",
+      "unknown": "غير معروف",
+      "openChat": "فتح الدردشة",
+      "vehicle": "المركبة",
+      "localCompany": "الشركة المحلية",
+      "nA": "غير متاح",
+      "weight": "الوزن",
+      "destination": "الوجهة",
+      "tons": "أطنان",
+      "driverChangedFrom": "تم تغيير السائق من",
+      "to": "إلى",
+      "turnedGpsOn": "قام بتشغيل GPS.",
+      "turnedGpsOff": "قام بإيقاف GPS.",
+      "uploaded": "تم الرفع",
+      "driver": "السائق"
+    },
+    "listPanel": {
+      "title": "الشحنة"
+    },
+    "search": {
+      "placeholder": "بحث...",
+      "filters": "المرشحات"
+    },
+    "actions": {
+      "addShipment": "إضافة شحنة",
+      "segments": "الأقسام"
+    },
+    "status": {
+      "all": "الكل",
+      "pending": "في الانتظار",
+      "inTransit": "قيد النقل",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغاة",
+      "pendingAssignment": "في انتظار التعيين"
+    },
+    "shipmentItem": {
+      "notAssigned": "غير مخصص"
+    },
+    "activity": {
+      "inTransit": "قيد النقل",
+      "atOrigin": "في المنشأ",
+      "atDestination": "في الوجهة",
+      "loading": "قيد التحميل",
+      "inCustoms": "في الجمارك",
+      "delivered": "تم التسليم",
+      "assigned": "مخصصة",
+      "active": "نشطة",
+      "pending": "في الانتظار",
+      "justNow": "الآن",
+      "minutesAgo": "منذ {{count}} دقيقة",
+      "hoursAgo": "منذ {{count}} ساعة",
+      "daysAgo": "منذ {{count}} يوم"
+    },
+    "addModal": {
+      "title": "إضافة شحنة جديدة",
+      "close": "إغلاق",
+      "name": "الاسم",
+      "namePlaceholder": "اسم الشحنة...",
+      "from": "من",
+      "to": "إلى",
+      "searchCities": "البحث عن المدن...",
+      "cargoCategory": "فئة البضائع",
+      "searchCategories": "البحث عن الفئات...",
+      "cargoWeight": "وزن البضائع",
+      "weightUnit": "كجم",
+      "segmentCount": "عدد الأقسام",
+      "segmentCountPlaceholder": "0",
+      "cancel": "إلغاء",
+      "create": "إنشاء",
+      "loadingCities": "جارٍ تحميل المدن...",
+      "noCitiesFound": "لم يتم العثور على مدن",
+      "noCategoriesFound": "لم يتم العثور على فئات",
+      "categories": {
+        "electronics": "إلكترونيات",
+        "textiles": "منسوجات",
+        "food": "طعام",
+        "medical": "طبي",
+        "machinery": "آلات",
+        "chemicals": "مواد كيميائية",
+        "automotive": "سيارات",
+        "furniture": "أثاث"
+      }
+    },
+    "segments": {
+        "title": "الأقسام",
+      "addSegment": "إضافة قسم",
+      "allActivities": "جميع الأنشطة"
+    },
+    "scroll": {
+      "left": "التمرير لليسار",
+      "right": "التمرير لليمين"
+    }
+  },
+  "drivers": {
+    "page": {
+      "title": "السائقون",
+      "stats": {
+        "shipments": "الشحنات",
+        "vehicles": "المركبات"
+      },
+      "closeDetails": "إغلاق لوحة التفاصيل",
+      "actions": {
+        "activate": "تفعيل",
+        "deactivate": "إلغاء التفعيل"
+      },
+      "status": {
+        "all": "الكل",
+        "pending": "في الانتظار",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض",
+        "inactive": "غير نشط"
+      },
+      "scroll": {
+        "left": "التمرير لليسار",
+        "right": "التمرير لليمين"
+      }
+    },
+    "details": {
+      "unknownDriver": "سائق غير معروف",
+      "nA": "غير متاح",
+      "avatar": "الصورة الرمزية",
+      "openChat": "فتح الدردشة",
+      "companyLogo": "شعار الشركة",
+      "register": "التسجيل",
+      "shipments": "الشحنات",
+      "vehicle": "المركبة",
+      "plateNumber": "رقم اللوحة",
+      "capacity": "السعة",
+      "tons": "أطنان",
+      "alerts": {
+        "gpsLost": "فقدان GPS",
+        "delayExpected": "تأخير متوقع",
+        "routeCleared": "تم مسح المسار",
+        "documentationPending": "الوثائق قيد الانتظار"
+      }
+    }
+  },
+  "localCompanies": {
+    "page": {
+      "title": "الشركات المحلية",
+      "stats": {
+        "drivers": "السائقون",
+        "active": "نشط"
+      },
+      "closeDetails": "إغلاق لوحة التفاصيل",
+      "actions": {
+        "activate": "تفعيل",
+        "deactivate": "إلغاء التفعيل"
+      },
+      "errors": {
+        "loadFailed": "فشل تحميل الشركات"
+      },
+      "empty": "لم يتم العثور على شركات",
+      "status": {
+        "all": "الكل",
+        "pending": "في الانتظار",
+        "active": "نشط",
+        "rejected": "مرفوض",
+        "inactive": "غير نشط"
+      },
+      "scroll": {
+        "left": "التمرير لليسار",
+        "right": "التمرير لليمين"
+      },
+      "card": {
+        "drivers": "السائقون",
+        "types": "الأنواع",
+        "approve": "الموافقة",
+        "reject": "الرفض",
+        "view": "عرض",
+        "viewDetails": "عرض التفاصيل"
+      },
+      "details": {
+        "openChat": "فتح الدردشة",
+        "register": "التسجيل",
+        "drivers": "السائقون",
+        "segments": "الأقسام",
+        "phone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "add": "إضافة",
+        "edit": "تعديل"
+      },
+      "documents": {
+        "title": "الوثائق",
+        "upload": "رفع",
+        "loading": "جارٍ تحميل الوثائق...",
+        "empty": "لم يتم العثور على وثائق",
+        "open": "فتح",
+        "rejectionReason": "سبب الرفض",
+        "approve": "الموافقة",
+        "reject": "الرفض",
+        "preview": "معاينة",
+        "rejectDocument": "رفض الوثيقة",
+        "rejectReasonPrompt": "يرجى تقديم سبب الرفض:",
+        "rejectReasonPlaceholder": "أدخل سبب الرفض...",
+        "cancel": "إلغاء",
+        "rejecting": "جاري الرفض...",
+        "closePreview": "إغلاق المعاينة",
+        "previewNotAvailable": "المعاينة غير متاحة لهذا النوع من الملفات",
+        "openFile": "فتح الملف",
+        "fileNotAvailable": "الملف غير متاح",
+        "openInNewTab": "فتح في تب جديد",
+        "close": "إغلاق",
+        "types": {
+          "license": "الترخيص",
+          "insurance": "التأمين",
+          "manager_id": "معرف المدير",
+          "primary_contact_id": "معرف جهة الاتصال الأساسية",
+          "other": "وثيقة أخرى"
+        }
+      },
+      "internalNotes": {
+        "title": "ملاحظات داخلية",
+        "placeholder": "أضف ملاحظة داخلية حول الشركة...",
+        "saving": "جارٍ الحفظ...",
+        "saveNote": "حفظ الملاحظة",
+        "saveFailed": "فشل حفظ الملاحظة",
+        "saveSuccess": "تم حفظ الملاحظة بنجاح"
+      },
+      "activities": {
+        "title": "الأنشطة الأخيرة",
+        "loading": "جارٍ تحميل الأقسام...",
+        "empty": "لم يتم العثور على أقسام لهذه الشركة.",
+        "fetchFailed": "فشل تحميل الأقسام",
+        "from": "من",
+        "until": "حتى",
+        "headers": {
+          "id": "المعرف",
+          "route": "المسار",
+          "date": "التاريخ",
+          "status": "الحالة"
+        },
+        "status": {
+          "pendingAssignment": "في انتظار التعيين",
+          "assigned": "مخصصة",
+          "toOrigin": "إلى المنشأ",
+          "atOrigin": "في المنشأ",
+          "loading": "قيد التحميل",
+          "inCustoms": "في الجمارك",
+          "toDestination": "إلى الوجهة",
+          "atDestination": "في الوجهة",
+          "delivered": "تم التسليم",
+          "cancelled": "ملغاة",
+          "unknown": "غير معروف"
+        }
+      }
+    }
+  },
   "layout": {
     "app": {
       "openMenu": "فتح القائمة",
@@ -203,6 +467,20 @@
         "saveChanges": "حفظ التغييرات",
         "saving": "جاري الحفظ..."
       },
+      "notifications": {
+        "title": "الإشعارات والتنبيهات",
+        "description": "إدارة التنبيهات التلقائية وتفضيلات إشعارات المستخدم.",
+        "driverGpsAlert": "تنبيه GPS السائق بعد:",
+        "delayAlert": "تنبيه التأخير بعد:",
+        "minutes": "دقائق",
+        "hours": "ساعات",
+        "deliveryMethods": "طرق التسليم",
+        "deliveryMethodsDescription": "اختر كيف تريد استلام التنبيهات المفعلة",
+        "inApp": "إشعار داخل التطبيق",
+        "email": "البريد الإلكتروني",
+        "sms": "رسالة نصية",
+        "mobilePush": "إشعار الجوال"
+      },
       "rolesPermissions": {
         "title": "الأدوار والصلاحيات",
         "description": "إدارة وصول المستخدمين والصلاحيات عبر المنصة.",
@@ -230,8 +508,104 @@
         "confirmDelete": "تأكيد الحذف",
         "deleteUser": "حذف المستخدم",
         "deleteUserConfirm": "هل أنت متأكد أنك تريد حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
-        "deleting": "جاري الحذف..."
+        "deleting": "جاري الحذف...",
+        "failedToLoadRoles": "فشل تحميل الأدوار",
+        "editUserIn": "تعديل المستخدم في \"{{roleName}}\"",
+        "addNewUserTo": "إضافة مستخدم جديد إلى \"{{roleName}}\"",
+        "name": "الاسم",
+        "namePlaceholder": "الاسم...",
+        "email": "البريد الإلكتروني",
+        "emailPlaceholder": "البريد الإلكتروني...",
+        "password": "كلمة المرور",
+        "passwordPlaceholder": "كلمة المرور...",
+        "passwordLeaveEmpty": "اتركه فارغًا للاحتفاظ بالحالي",
+        "passwordRequired": "كلمة المرور مطلوبة",
+        "passwordMinLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+        "passwordLowercase": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل",
+        "passwordUppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
+        "passwordNumber": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",
+        "passwordSpecialChar": "يجب أن تحتوي كلمة المرور على حرف خاص واحد على الأقل (@$!%*?&)",
+        "passwordRequirements": "يجب أن يحتوي على: حرف صغير، حرف كبير، رقم وحرف خاص (@$!%*?&)",
+        "save": "حفظ",
+        "add": "إضافة",
+        "saving": "جاري الحفظ...",
+        "statusActive": "نشط",
+        "statusSuspended": "معلق"
       }
+    }
+  },
+  "chatAlert": {
+    "page": {
+      "title": "الدردشة والتنبيهات"
+    },
+    "search": {
+      "placeholder": "البحث في الدردشات والتنبيهات..."
+    },
+    "filters": {
+      "all": "الكل",
+      "drivers": "السائقون",
+      "localCompanies": "الشركات المحلية"
+    },
+    "selectChat": "اختر محادثة",
+    "empty": {
+      "all": "لا توجد محادثات بعد",
+      "drivers": "لا توجد محادثات مع السائقين بعد",
+      "companies": "لا توجد محادثات مع الشركات بعد"
+    },
+    "details": {
+      "title": "التفاصيل",
+      "close": "إغلاق لوحة التفاصيل"
+    },
+    "shipmentHeader": {
+      "chat": "الدردشة",
+      "notifications": "الإشعارات",
+      "close": "إغلاق"
+    },
+    "chatSection": {
+      "filters": {
+        "all": "الكل",
+        "chats": "الدردشات",
+        "alerts": "التنبيهات"
+      },
+      "loading": "جاري التحميل...",
+      "loadOlderMessages": "تحميل الرسائل الأقدم"
+    },
+    "messageInput": {
+      "placeholder": "اكتب رسالة...",
+      "attachFile": "إرفاق ملف",
+      "sendMessage": "إرسال الرسالة",
+      "removeAttachment": "إزالة المرفق"
+    },
+    "dateGroup": {
+      "today": "اليوم",
+      "yesterday": "أمس"
+    }
+  },
+  "entityCard": {
+    "vehicle": "المركبة",
+    "plateNumber": "رقم اللوحة",
+    "lostShipment": "الشحنة المفقودة",
+    "nA": "غير متاح",
+    "avatar": "الصورة الرمزية",
+    "companyLogo": "شعار الشركة",
+    "status": {
+      "pending": "في الانتظار",
+      "active": "نشط",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "inactive": "غير نشط"
+    },
+    "vehicleType": {
+      "tented": "مغطاة",
+      "refrigerated": "مبردة",
+      "flatbed": "منصة مسطحة",
+      "double_wall": "جدار مزدوج"
+    },
+    "actions": {
+      "approve": "الموافقة",
+      "reject": "الرفض",
+      "view": "عرض",
+      "viewDetails": "عرض التفاصيل"
     }
   }
 }

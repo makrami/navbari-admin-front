@@ -3,6 +3,7 @@ import type { ActivityItemData } from "../types";
 import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { getShipmentActivityLog } from "../../../../services/shipment/shipment.api.service";
+import { t } from "i18next";
 
 type ActivitySectionProps = {
   shipmentId: string;
@@ -68,7 +69,9 @@ export function ActivitySection({
             }`}
           />
         </button>
-        <h2 className="font-bold text-slate-900">All Activities</h2>
+        <h2 className="font-bold text-slate-900">
+          {t("shipment.activity.allActivities")}
+        </h2>
       </header>
       <div
         id="activity-content"

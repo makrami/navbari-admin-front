@@ -1,5 +1,6 @@
-import {X} from "lucide-react";
-import {useEffect, useState} from "react";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Validate password according to requirements:
@@ -8,44 +9,53 @@ import {useEffect, useState} from "react";
  * - At least one number
  * - At least one special character (@$!%*?&)
  */
-function validatePassword(password: string): {valid: boolean; error?: string} {
+function validatePassword(
+  password: string,
+  t: (key: string) => string
+): { valid: boolean; error?: string } {
   if (!password) {
-    return {valid: false, error: "Password is required"};
+    return {
+      valid: false,
+      error: t("settings.sections.rolesPermissions.passwordRequired"),
+    };
   }
 
   if (password.length < 8) {
-    return {valid: false, error: "Password must be at least 8 characters long"};
+    return {
+      valid: false,
+      error: t("settings.sections.rolesPermissions.passwordMinLength"),
+    };
   }
 
   if (!/[a-z]/.test(password)) {
     return {
       valid: false,
-      error: "Password must contain at least one lowercase letter",
+      error: t("settings.sections.rolesPermissions.passwordLowercase"),
     };
   }
 
   if (!/[A-Z]/.test(password)) {
     return {
       valid: false,
-      error: "Password must contain at least one uppercase letter",
+      error: t("settings.sections.rolesPermissions.passwordUppercase"),
     };
   }
 
   if (!/[0-9]/.test(password)) {
     return {
       valid: false,
-      error: "Password must contain at least one number",
+      error: t("settings.sections.rolesPermissions.passwordNumber"),
     };
   }
 
   if (!/[@$!%*?&]/.test(password)) {
     return {
       valid: false,
-      error: "Password must contain at least one special character (@$!%*?&)",
+      error: t("settings.sections.rolesPermissions.passwordSpecialChar"),
     };
   }
 
-  return {valid: true};
+  return { valid: true };
 }
 
 export type AddEditUserModalProps = {
@@ -53,7 +63,7 @@ export type AddEditUserModalProps = {
   mode: "add" | "edit";
   roleName: string;
   roleId: string | null;
-  initialUser?: {id?: string; name: string; email: string} | null;
+  initialUser?: { id?: string; name: string; email: string } | null;
   onClose: () => void;
   onSubmit: (data: {
     id?: string;
@@ -73,6 +83,7 @@ export function AddEditUserModal({
   onSubmit,
   isLoading = false,
 }: AddEditUserModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -90,7 +101,7 @@ export function AddEditUserModal({
       setEmail(initialUser?.email ?? "");
       setPassword(""); // Reset password on open
       setPasswordError(null);
-      setTouched({name: false, email: false, password: false});
+      setTouched({ name: false, email: false, password: false });
     }
   }, [open, initialUser]);
 
@@ -102,7 +113,7 @@ export function AddEditUserModal({
       // Only validate if field has been touched
       if (!isEdit || value.trim()) {
         // For edit mode, only validate if password is provided
-        const validation = validatePassword(value);
+        const validation = validatePassword(value, t);
         setPasswordError(validation.error || null);
       } else {
         setPasswordError(null);
@@ -111,10 +122,10 @@ export function AddEditUserModal({
   };
 
   const handlePasswordBlur = () => {
-    setTouched((prev) => ({...prev, password: true}));
+    setTouched((prev) => ({ ...prev, password: true }));
     if (!isEdit || password.trim()) {
       // For edit mode, only validate if password is provided
-      const validation = validatePassword(password);
+      const validation = validatePassword(password, t);
       setPasswordError(validation.error || null);
     } else {
       setPasswordError(null);
@@ -123,7 +134,7 @@ export function AddEditUserModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({name: true, email: true, password: true});
+    setTouched({ name: true, email: true, password: true });
 
     // Validate name and email
     if (!name.trim() || !email.trim()) {
@@ -134,10 +145,12 @@ export function AddEditUserModal({
     if (!isEdit) {
       // Password required for new users
       if (!password.trim()) {
-        setPasswordError("Password is required");
+        setPasswordError(
+          t("settings.sections.rolesPermissions.passwordRequired")
+        );
         return;
       }
-      const validation = validatePassword(password);
+      const validation = validatePassword(password, t);
       if (!validation.valid) {
         setPasswordError(validation.error || null);
         return;
@@ -145,7 +158,7 @@ export function AddEditUserModal({
     } else {
       // For edit mode, validate password only if provided
       if (password.trim()) {
-        const validation = validatePassword(password);
+        const validation = validatePassword(password, t);
         if (!validation.valid) {
           setPasswordError(validation.error || null);
           return;
@@ -171,7 +184,13 @@ export function AddEditUserModal({
         <div className="w-full max-w-xl rounded-xl bg-white shadow-xl">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
             <h3 className="text-sm font-bold text-slate-900">
-              {isEdit ? "Edit User in" : "Add New User to"} “{roleName}”
+              {isEdit
+                ? t("settings.sections.rolesPermissions.editUserIn", {
+                    roleName,
+                  })
+                : t("settings.sections.rolesPermissions.addNewUserTo", {
+                    roleName,
+                  })}
             </h3>
             <button
               type="button"
@@ -186,11 +205,13 @@ export function AddEditUserModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-slate-900 mb-2">
-                    Name
+                    {t("settings.sections.rolesPermissions.name")}
                   </label>
                   <input
                     type="text"
-                    placeholder="Name..."
+                    placeholder={t(
+                      "settings.sections.rolesPermissions.namePlaceholder"
+                    )}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -199,11 +220,13 @@ export function AddEditUserModal({
                 </div>
                 <div>
                   <label className="block text-xs text-slate-900 mb-2">
-                    Email
+                    {t("settings.sections.rolesPermissions.email")}
                   </label>
                   <input
                     type="email"
-                    placeholder="Email..."
+                    placeholder={t(
+                      "settings.sections.rolesPermissions.emailPlaceholder"
+                    )}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -216,11 +239,17 @@ export function AddEditUserModal({
               </div>
               <div>
                 <label className="block text-xs text-slate-900 mb-2">
-                  Password {isEdit && "(leave empty to keep current)"}
+                  {t("settings.sections.rolesPermissions.password")}
+                  {isEdit &&
+                    ` (${t(
+                      "settings.sections.rolesPermissions.passwordLeaveEmpty"
+                    )})`}
                 </label>
                 <input
                   type="password"
-                  placeholder="Password..."
+                  placeholder={t(
+                    "settings.sections.rolesPermissions.passwordPlaceholder"
+                  )}
                   value={password}
                   onChange={(e) => handlePasswordChange(e.target.value)}
                   onBlur={handlePasswordBlur}
@@ -236,8 +265,9 @@ export function AddEditUserModal({
                 )}
                 {!isEdit && !passwordError && touched.password && (
                   <p className="mt-1 text-xs text-slate-500">
-                    Must contain: lowercase, uppercase, number, and special
-                    character (@$!%*?&)
+                    {t(
+                      "settings.sections.rolesPermissions.passwordRequirements"
+                    )}
                   </p>
                 )}
               </div>
@@ -249,14 +279,18 @@ export function AddEditUserModal({
                 disabled={isLoading}
                 className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cancel
+                {t("settings.sections.rolesPermissions.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
                 className="px-4 py-2 rounded-lg bg-[#1B54FE] text-white hover:bg-[#1545d4] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Saving..." : isEdit ? "Save" : "Add"}
+                {isLoading
+                  ? t("settings.sections.rolesPermissions.saving")
+                  : isEdit
+                  ? t("settings.sections.rolesPermissions.save")
+                  : t("settings.sections.rolesPermissions.add")}
               </button>
             </div>
           </form>

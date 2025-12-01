@@ -7,20 +7,21 @@ import {
   MessagesSquare,
   MapPin,
 } from "lucide-react";
-import {cn} from "../../../../shared/utils/cn";
-import {formatDistance} from "../../../../shared/utils/segmentHelpers";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import {getFileUrl} from "../../../LocalCompanies/utils";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
-import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
+import { cn } from "../../../../shared/utils/cn";
+import { formatDistance } from "../../../../shared/utils/segmentHelpers";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import { getFileUrl } from "../../../LocalCompanies/utils";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
+import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
+import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
+import { useTranslation } from "react-i18next";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
+  { id: "1", label: "GPS Lost", alertType: "alert" },
+  { id: "2", label: "Delay Expected", alertType: "warning" },
+  { id: "3", label: "Route Cleared", alertType: "success" },
+  { id: "4", label: "Documentation Pending", alertType: "info" },
 ];
 
 type SegmentHeaderProps = {
@@ -69,6 +70,7 @@ export default function SegmentHeader({
   onCargoClick,
   isAssigned = false,
 }: SegmentHeaderProps) {
+  const { t } = useTranslation();
   // Only show driver info when backend has approved/assigned the driver
   const distance = formatDistance(distanceKm);
 
@@ -91,12 +93,13 @@ export default function SegmentHeader({
   const chatHook = useChatWithRecipient({
     recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
     driverId: driverId || undefined,
-    recipientName: driverName || "Driver",
+    recipientName: driverName || t("segments.cardHeader.driver"),
   });
 
   return (
     <div
       id={segmentId}
+      dir="ltr"
       className={cn(
         "w-full px-3 py-2 flex items-center justify-between ",
         // Assigned segments always have white background
@@ -128,10 +131,10 @@ export default function SegmentHeader({
               </span>
               <div className="flex flex-col items-center ">
                 <span className="text-[8px] font-bold text-green-600 ">
-                  CURRENT
+                  {t("segments.cardHeader.current")}
                 </span>
                 <span className="text-[8px] font-bold text-green-600 ">
-                  SEGMENT
+                  {t("segments.cardHeader.segment")}
                 </span>
               </div>
             </div>
@@ -143,15 +146,15 @@ export default function SegmentHeader({
         <span className="text-sm font-bold text-slate-900 ">
           {originCity && originCity.trim()
             ? originCity + ", " + originCountry
-            : "NOT ASSIGNED"}
+            : t("segments.cardHeader.notAssigned")}
         </span>
         <ArrowRight className="size-3.5 text-slate-400" />
         <span className="text-sm font-bold text-slate-900 ">
           {destinationCity
             ? destinationCity + ", " + destinationCountry
             : editable
-            ? "NOT ASSIGNED"
-            : "(DESTINATION)"}
+            ? t("segments.cardHeader.notAssigned")
+            : t("segments.cardHeader.destinationFallback")}
         </span>
         {distance ? (
           <div className="flex items-center gap-1">
@@ -174,7 +177,7 @@ export default function SegmentHeader({
             className="px-3 py-1 rounded-lg bg-blue-50 text-blue-600 text-sm font-semibold"
             onClick={onCargoClick}
           >
-            Cargo Declaration
+            {t("segments.cardHeader.cargoDeclaration")}
           </button>
         ) : null}
         {segmentStatus &&
@@ -213,7 +216,7 @@ export default function SegmentHeader({
                   "bg-[#1B54FE]/10 rounded-md p-1.5 hover:bg-[#1B54FE]/20 transition-colors",
                   !driverId && "opacity-50 cursor-not-allowed"
                 )}
-                aria-label="Chat with driver"
+                aria-label={t("segments.cardHeader.chatWithDriver")}
               >
                 <MessagesSquare className="size-3.5 text-[#1B54FE]" />
               </button>
@@ -245,7 +248,7 @@ export default function SegmentHeader({
         <ChatOverlay
           isOpen={chatHook.isChatOpen}
           onClose={() => chatHook.setIsChatOpen(false)}
-          recipientName={driverName || "Driver"}
+          recipientName={driverName || t("segments.cardHeader.driver")}
           chatHook={chatHook}
           actionableAlerts={ACTIONABLE_ALERTS}
         />

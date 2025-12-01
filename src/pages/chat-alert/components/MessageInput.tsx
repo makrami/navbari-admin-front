@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Paperclip, SendHorizonal, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface MessageInputProps {
   onSend?: (payload: { content: string; file?: File | null }) => void;
@@ -16,6 +17,7 @@ const ACCEPTED_FILE_TYPES = [
 ].join(",");
 
 export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
+  const { t } = useTranslation();
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,7 +51,7 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
   const isSubmitDisabled = isSending || (!message.trim() && !attachment);
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-2">
+    <form dir="ltr" onSubmit={handleSubmit} className="p-4 space-y-2">
       {attachment && (
         <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
           <div className="flex items-center gap-2 truncate">
@@ -60,7 +62,7 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
             type="button"
             onClick={handleRemoveAttachment}
             className="text-slate-400 hover:text-red-500 transition-colors"
-            aria-label="Remove attachment"
+            aria-label={t("chatAlert.messageInput.removeAttachment")}
           >
             <X className="size-4" />
           </button>
@@ -72,7 +74,7 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message..."
+          placeholder={t("chatAlert.messageInput.placeholder")}
           className="flex-1 bg-transparent border-none outline-none text-sm text-slate-900 placeholder-slate-400"
           disabled={isSending}
         />
@@ -87,7 +89,7 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
           type="button"
           onClick={() => fileInputRef.current?.click()}
           className="flex-shrink-0 text-slate-500 hover:text-slate-900 transition-colors"
-          aria-label="Attach file"
+          aria-label={t("chatAlert.messageInput.attachFile")}
           disabled={isSending}
         >
           <Paperclip className="size-5" />
@@ -96,7 +98,7 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
           type="submit"
           disabled={isSubmitDisabled}
           className="flex-shrink-0 bg-[#1B54FE] text-white rounded-full p-2 hover:bg-[#1545d4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Send message"
+          aria-label={t("chatAlert.messageInput.sendMessage")}
         >
           <SendHorizonal className="size-4" />
         </button>

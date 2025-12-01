@@ -1,17 +1,18 @@
-import {useMemo, useState, useEffect} from "react";
-import {Segments} from "../segments/Segments";
+import { useMemo, useState, useEffect } from "react";
+import { Segments } from "../segments/Segments";
 import NavigatingInfo from "../details/components/NavigatingInfo";
 import ActivitySection from "../Activity/components/ActivitySection";
 import AddShipmentModal from "./AddShipmentModal";
-import {SegmentItem} from "./SegmentItem";
-import {useSegmentScroll} from "../hooks/useSegmentScroll";
-import {SegmentDetailsSkeleton} from "./ShipmentSkeleton";
-import type {Shipment} from "../../../shared/types/shipment";
-import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
-import type {Segment} from "../../../shared/types/segmentData";
-import {SegmentStatus} from "../../../shared/types/segmentData";
-import {getFileUrl} from "../../LocalCompanies/utils";
-import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
+import { SegmentItem } from "./SegmentItem";
+import { useSegmentScroll } from "../hooks/useSegmentScroll";
+import { SegmentDetailsSkeleton } from "./ShipmentSkeleton";
+import type { Shipment } from "../../../shared/types/shipment";
+import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
+import type { Segment } from "../../../shared/types/segmentData";
+import { SegmentStatus } from "../../../shared/types/segmentData";
+import { getFileUrl } from "../../LocalCompanies/utils";
+import type { CreateShipmentDto } from "../../../services/shipment/shipment.api.service";
+import { useTranslation } from "react-i18next";
 
 type ShipmentContentAreaProps = {
   selectedShipment: Shipment;
@@ -130,8 +131,10 @@ export function ShipmentContentArea({
     return "";
   }, [inProgressSegment, selectedShipment]);
 
+  const { t } = useTranslation();
+
   // Extract last activity info
-  const {lastActivity, lastActivityTime} = useMemo(() => {
+  const { lastActivity, lastActivityTime } = useMemo(() => {
     // Try to get GPS update time first
     const gpsUpdate = inProgressSegment?.lastGpsUpdate;
     const updatedAt =
@@ -142,27 +145,36 @@ export function ShipmentContentArea({
     if (inProgressSegment) {
       const status = inProgressSegment.status;
       if (status === SegmentStatus.TO_DESTINATION) {
-        activity = "In Transit";
+        activity = t("shipment.activity.inTransit");
       } else if (
         status === SegmentStatus.AT_ORIGIN ||
         status === SegmentStatus.TO_ORIGIN
       ) {
-        activity = "At Origin";
+        activity = t("shipment.activity.atOrigin");
       } else if (status === SegmentStatus.AT_DESTINATION) {
-        activity = "At Destination";
+        activity = t("shipment.activity.atDestination");
       } else if (status === SegmentStatus.LOADING) {
-        activity = "Loading";
+        activity = t("shipment.activity.loading");
       } else if (status === SegmentStatus.IN_CUSTOMS) {
-        activity = "In Customs";
+        activity = t("shipment.activity.inCustoms");
       } else if (status === SegmentStatus.DELIVERED) {
-        activity = "Delivered";
+        activity = t("shipment.activity.delivered");
       } else if (status === SegmentStatus.ASSIGNED) {
-        activity = "Assigned";
+        activity = t("shipment.activity.assigned");
       } else {
-        activity = "Active";
+        activity = t("shipment.activity.active");
       }
     } else {
-      activity = selectedShipment.status || "Pending";
+      const shipmentStatus = selectedShipment.status || "Pending";
+      if (shipmentStatus === "Pending") {
+        activity = t("shipment.activity.pending");
+      } else if (shipmentStatus === "In Transit") {
+        activity = t("shipment.activity.inTransit");
+      } else if (shipmentStatus === "Delivered") {
+        activity = t("shipment.activity.delivered");
+      } else {
+        activity = shipmentStatus;
+      }
     }
 
     // Format time
@@ -177,13 +189,13 @@ export function ShipmentContentArea({
         const diffDays = Math.floor(diffMs / 86400000);
 
         if (diffMins < 1) {
-          timeStr = "Just now";
+          timeStr = t("shipment.activity.justNow");
         } else if (diffMins < 60) {
-          timeStr = `${diffMins}m ago`;
+          timeStr = t("shipment.activity.minutesAgo", { count: diffMins });
         } else if (diffHours < 24) {
-          timeStr = `${diffHours}h ago`;
+          timeStr = t("shipment.activity.hoursAgo", { count: diffHours });
         } else if (diffDays < 7) {
-          timeStr = `${diffDays}d ago`;
+          timeStr = t("shipment.activity.daysAgo", { count: diffDays });
         } else {
           timeStr = date.toLocaleDateString("en-US", {
             month: "short",
@@ -205,8 +217,8 @@ export function ShipmentContentArea({
       }
     }
 
-    return {lastActivity: activity, lastActivityTime: timeStr};
-  }, [inProgressSegment, selectedShipment]);
+    return { lastActivity: activity, lastActivityTime: timeStr };
+  }, [inProgressSegment, selectedShipment, t]);
 
   // Manage which segment is open (accordion behavior - only one at a time)
   const [openSegmentStep, setOpenSegmentStep] = useState<number | undefined>(
@@ -258,7 +270,7 @@ export function ShipmentContentArea({
 
           <Segments
             readOnly={isReadOnlySelected}
-            title="Segments"
+            title={t("shipment.segments.title")}
             onAddSegment={
               !isReadOnlySelected && selectedShipment.status !== "Delivered"
                 ? () => onAddSegment(selectedShipment.id)
@@ -267,7 +279,7 @@ export function ShipmentContentArea({
           >
             {segmentsLoading
               ? // Show skeleton loading state while fetching segments
-                Array.from({length: 3}).map((_, index) => (
+                Array.from({ length: 3 }).map((_, index) => (
                   <SegmentDetailsSkeleton key={`skeleton-${index}`} />
                 ))
               : renderSegments.map((seg: Segment, idx: number) => {
