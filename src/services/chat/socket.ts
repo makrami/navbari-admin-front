@@ -24,6 +24,9 @@ export function useChatSocket(
     const socketOptions: Parameters<typeof io>[1] = {
       transports: ["websocket"],
       withCredentials: true,
+      auth: {
+        appScope: "head_office",
+      },
       timeout: 20000, // 20 seconds timeout
       reconnection: true,
       reconnectionDelay: 1000,
