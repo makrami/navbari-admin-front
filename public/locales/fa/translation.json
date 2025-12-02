@@ -513,7 +513,16 @@
     "segments": {
       "title": "بخش‌ها",
       "addSegment": "افزودن بخش",
-      "allActivities": "همه فعالیت‌ها"
+      "allActivities": "همه فعالیت‌ها",
+      "progress": {
+        "alert": {
+          "delayedStartDrivingTime": "راننده هنوز شروع به رانندگی نکرده است - تأخیر در حرکت",
+          "delayedArriveOriginTime": "راننده در رسیدن به محل بارگیری تأخیر دارد",
+          "delayedArriveDestinationTime": "راننده در رسیدن به مقصد تأخیر دارد",
+          "lostGpsSignal": "سیگنال GPS از دست رفته - آخرین بروزرسانی بیشتر از حد انتظار بوده",
+          "delayedLoadingTime": "بارگیری بیشتر از زمان برنامه‌ریزی شده طول می‌کشد"
+        }
+      }
     },
     "scroll": {
       "left": "اسکرول به چپ",

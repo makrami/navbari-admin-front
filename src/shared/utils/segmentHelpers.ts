@@ -1,5 +1,4 @@
 import type {Segment} from "../types/segmentData";
-import {SEGMENT_STATUS} from "../../services/shipment/shipment.api.service";
 
 /**
  * Computes UI fields from Segment
@@ -30,17 +29,4 @@ export function formatDistance(
 ): string | undefined {
   if (distanceKm === null || distanceKm === undefined) return undefined;
   return `${Math.round(distanceKm)} KM`;
-}
-
-export function computeIsCompleted(segment: Segment): boolean {
-  if (segment.isCompleted !== undefined) return segment.isCompleted;
-  return segment.status === SEGMENT_STATUS.DELIVERED;
-}
-
-export function computeHasDisruption(segment: Segment): boolean {
-  if (segment.hasDisruption !== undefined) return segment.hasDisruption;
-  return (
-    segment.status === SEGMENT_STATUS.CANCELLED ||
-    segment.status === SEGMENT_STATUS.AT_ORIGIN
-  );
 }

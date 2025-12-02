@@ -275,7 +275,16 @@
     "segments": {
         "title": "الأقسام",
       "addSegment": "إضافة قسم",
-      "allActivities": "جميع الأنشطة"
+      "allActivities": "جميع الأنشطة",
+      "progress": {
+        "alert": {
+          "delayedStartDrivingTime": "لم يبدأ السائق بالقيادة بعد - تأخير في الانطلاق",
+          "delayedArriveOriginTime": "السائق متأخر في الوصول إلى موقع التحميل",
+          "delayedArriveDestinationTime": "السائق متأخر في الوصول إلى الوجهة",
+          "lostGpsSignal": "فقدان إشارة GPS - آخر تحديث كان أكثر من المتوقع",
+          "delayedLoadingTime": "التحميل يستغرق وقتاً أطول من المجدول"
+        }
+      }
     },
     "scroll": {
       "left": "التمرير لليسار",

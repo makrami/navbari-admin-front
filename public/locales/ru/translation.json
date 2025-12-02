@@ -274,7 +274,17 @@
     },
     "segments": {
       "title": "Сегменты",
-      "addSegment": "Добавить сегмент"
+      "addSegment": "Добавить сегмент",
+      "allActivities": "Все активности",
+      "progress": {
+        "alert": {
+          "delayedStartDrivingTime": "Водитель еще не начал движение - задержка отправления",
+          "delayedArriveOriginTime": "Водитель опаздывает к месту погрузки",
+          "delayedArriveDestinationTime": "Водитель опаздывает к месту назначения",
+          "lostGpsSignal": "Сигнал GPS потерян - последнее обновление было дольше ожидаемого",
+          "delayedLoadingTime": "Загрузка занимает больше времени, чем запланировано"
+        }
+      }
     },
     "scroll": {
       "left": "Прокрутить влево",

@@ -82,19 +82,9 @@ export function useSegmentsData(
 
     // Apply filter
     if (filter === "need-action") {
-      filtered = filtered.filter(
-        (seg) =>
-          !seg.isCompleted &&
-          (seg.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
-            seg.status === SEGMENT_STATUS.ASSIGNED)
-      );
+      filtered = filtered.filter((seg) => seg.needToAction);
     } else if (filter === "alert") {
-      filtered = filtered.filter(
-        (seg) =>
-          !seg.isCompleted &&
-          (seg.status === SEGMENT_STATUS.CANCELLED ||
-            seg.status === SEGMENT_STATUS.AT_ORIGIN)
-      );
+      filtered = filtered.filter((seg) => seg.hasAlerts);
     }
 
     // Apply search
@@ -111,22 +101,10 @@ export function useSegmentsData(
 
     // Sort segments based on active filter
     return [...filtered].sort((a, b) => {
-      const aIsNeedAction =
-        !a.isCompleted &&
-        (a.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
-          a.status === SEGMENT_STATUS.ASSIGNED);
-      const bIsNeedAction =
-        !b.isCompleted &&
-        (b.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
-          b.status === SEGMENT_STATUS.ASSIGNED);
-      const aIsAlert =
-        !a.isCompleted &&
-        (a.status === SEGMENT_STATUS.CANCELLED ||
-          a.status === SEGMENT_STATUS.AT_ORIGIN);
-      const bIsAlert =
-        !b.isCompleted &&
-        (b.status === SEGMENT_STATUS.CANCELLED ||
-          b.status === SEGMENT_STATUS.AT_ORIGIN);
+      const aIsNeedAction = a.needToAction;
+      const bIsNeedAction = b.needToAction;
+      const aIsAlert = a.hasAlerts;
+      const bIsAlert = b.hasAlerts;
       const aIsCompleted = Boolean(a.isCompleted);
       const bIsCompleted = Boolean(b.isCompleted);
 

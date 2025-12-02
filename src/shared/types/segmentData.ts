@@ -103,4 +103,7 @@ export interface Segment {
   //Summary information
   alertCount?: number;
   delaysInMinutes?: number;
+  needToAction?: boolean;
+  hasAlerts?: boolean;
+  alertMessage?: string;
 }

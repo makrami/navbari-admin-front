@@ -274,7 +274,17 @@
     },
     "segments": {
       "title": "路段",
-      "addSegment": "添加路段"
+      "addSegment": "添加路段",
+      "allActivities": "所有活动",
+      "progress": {
+        "alert": {
+          "delayedStartDrivingTime": "司机尚未开始驾驶 - 出发延迟",
+          "delayedArriveOriginTime": "司机到达装货地点延迟",
+          "delayedArriveDestinationTime": "司机到达目的地延迟",
+          "lostGpsSignal": "GPS信号丢失 - 上次更新时间超过预期",
+          "delayedLoadingTime": "装载时间比预定时间长"
+        }
+      }
     },
     "scroll": {
       "left": "向左滚动",
