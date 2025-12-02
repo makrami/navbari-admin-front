@@ -5,6 +5,7 @@ import {useQueryClient, type InfiniteData} from "@tanstack/react-query";
 import type {ConversationReadDto, MessageReadDto} from "./chat.types";
 import {CHAT_MESSAGE_TYPE} from "./chat.types";
 import {chatKeys} from "./hooks";
+import {ENV} from "../../lib/env";
 
 export function useChatSocket(
   activeConversationId?: string,
@@ -15,7 +16,7 @@ export function useChatSocket(
   const isConnectedRef = useRef(false);
 
   useEffect(() => {
-    const url = "/ws/chat";
+    const url = resolveChatSocketUrl();
     console.log("🔌 Initializing socket connection:", url);
 
     // Determine if we should use a custom path
@@ -218,6 +219,35 @@ export function useChatSocket(
   }, [activeConversationId]);
 
   return socketRef.current;
+}
+
+function resolveChatSocketUrl(): string {
+  const url = ENV.CHAT_SOCKET_URL;
+  const isDev = import.meta.env.DEV;
+
+  if (!url) {
+    throw new Error("CHAT_SOCKET_URL is not defined in environment variables");
+  }
+
+  // In development, use relative path (will use Vite proxy)
+  if (isDev && url.startsWith("/")) {
+    return url;
+  }
+
+  // If URL is already a full URL (starts with http:// or https:// or ws:// or wss://), return as is
+  if (/^(https?|wss?):\/\//.test(url)) {
+    return url;
+  }
+
+  // If URL starts with /, it's a relative path - prepend origin
+  if (url.startsWith("/")) {
+    if (typeof window !== "undefined" && window.location) {
+      const fullUrl = `${window.location.origin}${url}`;
+      return fullUrl;
+    }
+  }
+
+  return url;
 }
 
 function updateCaches(
