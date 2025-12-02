@@ -3,7 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import { ShipmentDetailsView } from "./ShipmentDetailsView";
 import { useShipmentSelection } from "../hooks/useShipmentSelection";
 import { useSegmentHandlers } from "../hooks/useSegmentHandlers";
-import { useShipmentSegments } from "../../../services/shipment/hooks";
+import {
+  useShipmentSegments,
+  useCreateSegment,
+} from "../../../services/shipment/hooks";
 import type { Segment } from "../../../shared/types/segmentData";
 
 export function ShipmentContainer() {
@@ -22,20 +25,30 @@ export function ShipmentContainer() {
     handleUpdateShipment,
   } = useShipmentSelection();
 
-  const {
-    handleSegmentUpdate,
-    handleSegmentSave,
-    handleAddSegment,
-    timeoutsRef,
-  } = useSegmentHandlers(
-    shipments ?? [],
-    editedSegmentsByShipmentId,
-    setEditedSegmentsByShipmentId
-  );
+  const { handleSegmentUpdate, handleSegmentSave, timeoutsRef } =
+    useSegmentHandlers(
+      shipments ?? [],
+      editedSegmentsByShipmentId,
+      setEditedSegmentsByShipmentId
+    );
 
   // Fetch segments when a shipment is selected
   const { data: fetchedSegments, loading: segmentsLoading } =
     useShipmentSegments(selectedId);
+
+  // Create segment mutation
+  const createSegmentMutation = useCreateSegment();
+
+  // Handle add segment - calls API
+  const handleAddSegment = async (shipmentId: string) => {
+    try {
+      await createSegmentMutation.mutateAsync({ shipmentId });
+      // The mutation will automatically invalidate and refetch segments
+    } catch (error) {
+      console.error("Failed to create segment:", error);
+      // Optionally show error toast/notification here
+    }
+  };
 
   // Update editedSegmentsByShipmentId when segments are fetched
   // This ensures ShipmentItem can display segments in the list panel

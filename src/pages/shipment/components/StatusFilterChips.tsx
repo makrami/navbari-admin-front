@@ -42,8 +42,8 @@ export function StatusFilterChips({
     },
     Pending: {
       label: t("shipment.status.pending"),
-      className: "bg-blue-50 text-blue-700 hover:bg-blue-100",
-      activeRing: "ring-2 ring-blue-200",
+      className: "bg-yellow-50 text-yellow-700 hover:bg-yellow-100",
+      activeRing: "ring-2 ring-yellow-200",
     },
     "In Transit": {
       label: t("shipment.status.inTransit"),

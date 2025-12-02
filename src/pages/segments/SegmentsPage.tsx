@@ -1,17 +1,18 @@
-import {useEffect, useRef, useState} from "react";
-import {useTranslation} from "react-i18next";
-import {useNavigate} from "react-router-dom";
-import {X} from "lucide-react";
-import {useShipments} from "../../services/shipment/hooks";
-import type {FilterType} from "./components/SegmentsFilters";
-import {SegmentsFilters} from "./components/SegmentsFilters";
-import type {Segment} from "../../shared/types/segmentData";
-import {useSegmentsData} from "./hooks/useSegmentsData";
-import {cn} from "../../shared/utils/cn";
-import {getSegmentListId} from "./utils/getSegmentListId";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
+import { useShipments } from "../../services/shipment/hooks";
+import { useActiveSegments } from "../../services/dashboard/hooks";
+import type { FilterType } from "./components/SegmentsFilters";
+import { SegmentsFilters } from "./components/SegmentsFilters";
+import type { Segment } from "../../shared/types/segmentData";
+import { useSegmentsData } from "./hooks/useSegmentsData";
+import { cn } from "../../shared/utils/cn";
+import { getSegmentListId } from "./utils/getSegmentListId";
 import SegmentDetails from "../shipment/segments/components/SegmentDetails";
-import type {Shipment} from "../../shared/types/shipment";
-import {SEGMENT_STATUS} from "../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../shared/types/shipment";
+import { SEGMENT_STATUS } from "../../services/shipment/shipment.api.service";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
@@ -27,21 +28,25 @@ export function SegmentsPage({
   extraSegments,
 }: SegmentsPageProps = {}) {
   const navigate = useNavigate();
-  const {data: serviceShipments, loading} = useShipments();
+  const { data: serviceShipments, loading } = useShipments();
+  const { data: activeSegments } = useActiveSegments();
   const [filter, setFilter] = useState<FilterType>("need-action");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSegments, setExpandedSegments] = useState<Set<string>>(
-    () => new Set(selectedSegmentId ? [selectedSegmentId] : [])
+    () => new Set()
   );
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  const {needActionCount, alertCount, allSegments, filteredSegments} =
+  // Use activeSegments if extraSegments is not provided (when navigating directly to /segments)
+  const segmentsToUse = extraSegments ?? activeSegments ?? [];
+
+  const { needActionCount, alertCount, allSegments, filteredSegments } =
     useSegmentsData(
       serviceShipments ?? null,
       filter,
       searchQuery,
-      extraSegments ?? []
+      segmentsToUse
     );
 
   const toggleSegment = (segmentId: string) => {
@@ -56,24 +61,91 @@ export function SegmentsPage({
     });
   };
 
+  // Auto-switch to "all" tab if "need-action" tab is empty (only when no segment is selected)
   useEffect(() => {
-    if (!selectedSegmentId) return;
+    if (
+      !selectedSegmentId &&
+      filter === "need-action" &&
+      filteredSegments.length === 0 &&
+      allSegments.length > 0
+    ) {
+      setFilter("all");
+    }
+  }, [selectedSegmentId, filter, filteredSegments.length, allSegments.length]);
+
+  // Auto-switch to correct tab when segment is selected
+  useEffect(() => {
+    if (!selectedSegmentId || !allSegments.length) return;
+
+    // Find the selected segment in allSegments
+    const selectedSegment = allSegments.find(
+      (seg) => seg.id === selectedSegmentId
+    );
+
+    if (!selectedSegment) return;
+
+    // Determine which tab the segment belongs to
+    if (selectedSegment.hasAlerts) {
+      setFilter("alert");
+    } else if (selectedSegment.needToAction) {
+      setFilter("need-action");
+    } else {
+      setFilter("all");
+    }
+  }, [selectedSegmentId, allSegments]);
+
+  // Expand the selected segment when it's available
+  useEffect(() => {
+    if (!selectedSegmentId || !allSegments.length) return;
+
+    // Find the selected segment and get its list ID
+    const selectedSegment = allSegments.find(
+      (seg) => seg.id === selectedSegmentId
+    );
+
+    if (!selectedSegment) return;
+
+    const segmentListId = getSegmentListId(
+      selectedSegment.shipmentId,
+      selectedSegment.step ?? 0
+    );
+
     setExpandedSegments((prev) => {
-      if (prev.has(selectedSegmentId)) {
+      if (prev.has(segmentListId)) {
         return prev;
       }
       const next = new Set(prev);
-      next.add(selectedSegmentId);
+      next.add(segmentListId);
       return next;
     });
-  }, [selectedSegmentId]);
+  }, [selectedSegmentId, allSegments]);
 
+  // Scroll to the selected segment when it's rendered
   useEffect(() => {
-    if (!selectedSegmentId) return;
-    const node = itemRefs.current.get(selectedSegmentId);
-    if (!node) return;
-    node.scrollIntoView({behavior: "smooth", block: "center"});
-  }, [selectedSegmentId, filteredSegments]);
+    if (!selectedSegmentId || !allSegments.length) return;
+
+    // Find the selected segment and get its list ID
+    const selectedSegment = allSegments.find(
+      (seg) => seg.id === selectedSegmentId
+    );
+
+    if (!selectedSegment) return;
+
+    const segmentListId = getSegmentListId(
+      selectedSegment.shipmentId,
+      selectedSegment.step ?? 0
+    );
+
+    // Wait for the segment to be rendered in filteredSegments
+    const timeoutId = setTimeout(() => {
+      const node = itemRefs.current.get(segmentListId);
+      if (node) {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [selectedSegmentId, filteredSegments, allSegments]);
 
   const handleClose = () => {
     if (onClose) {
@@ -134,7 +206,7 @@ export function SegmentsPage({
       {/* Segments List */}
       <div
         className="flex-1 overflow-y-auto no-scrollbar"
-        style={{scrollbarGutter: "stable"}}
+        style={{ scrollbarGutter: "stable" }}
       >
         <div className="max-w-6xl mx-auto pb-6">
           {filteredSegments.length === 0 ? (
@@ -154,7 +226,11 @@ export function SegmentsPage({
                     segment.shipmentId,
                     segment.step ?? 0
                   );
-                  const isExpanded = expandedSegments.has(segmentId);
+                  // Expand if in expandedSegments or if it's the selected segment
+                  const isExpanded =
+                    expandedSegments.has(segmentId) ||
+                    (selectedSegmentId !== null &&
+                      segment.id === selectedSegmentId);
 
                   // Find current segment index for this shipment
                   const shipmentSegments = filteredSegments.filter(

@@ -61,6 +61,39 @@ export function ShipmentItem({
     return statusMap[status] || status;
   };
 
+  // Helper function to get status colors matching StatusFilterChips
+  const getStatusColors = (status: string | undefined) => {
+    switch (status) {
+      case "Pending":
+        return {
+          bg: "bg-yellow-400/10",
+          text: "text-yellow-700",
+        };
+      case "In Transit":
+        return {
+          bg: "bg-indigo-50",
+          text: "text-indigo-700",
+        };
+      case "Delivered":
+        return {
+          bg: "bg-emerald-50",
+          text: "text-emerald-700",
+        };
+      case "Cancelled":
+        return {
+          bg: "bg-red-50",
+          text: "text-red-700",
+        };
+      default:
+        return {
+          bg: "bg-yellow-50",
+          text: "text-yellow-700",
+        };
+    }
+  };
+
+  const statusColors = getStatusColors(status);
+
   // Convert country names to ISO country codes using library
   const fromCode = getCountryCode(originCountry ?? "");
   const toCode = getCountryCode(destinationCountry ?? "");
@@ -106,18 +139,8 @@ export function ShipmentItem({
             {id?.split("-").pop() ?? ""}
           </p>
         </div>
-        <div
-          className={cn(
-            "rounded-md px-2.5 py-2",
-            isDelivered ? "bg-[#22c55e]/10" : "bg-[#CA8A04]/10"
-          )}
-        >
-          <p
-            className={cn(
-              "text-sm font-semibold",
-              isDelivered ? "text-[#22c55e]" : "text-yellow-600"
-            )}
-          >
+        <div className={cn("rounded-md px-2.5 py-2", statusColors.bg)}>
+          <p className={cn("text-sm font-semibold", statusColors.text)}>
             {getTranslatedStatus(status)}
           </p>
         </div>

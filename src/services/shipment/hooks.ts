@@ -7,6 +7,7 @@ import {
   updateShipment,
   deleteShipment,
   updateSegment,
+  createSegment,
   announceSegment,
   getShipmentActivityLog,
   getSegmentAnnouncements,
@@ -16,6 +17,7 @@ import {
   type CreateShipmentDto,
   type UpdateShipmentDto,
   type UpdateSegmentDto,
+  type CreateSegmentDto,
   type AssignSegmentDto,
 } from "./shipment.api.service";
 
@@ -141,6 +143,27 @@ export function useDeleteShipment() {
     mutationFn: (id: string) => deleteShipment(id),
     onSuccess: () => {
       // Invalidate and refetch shipments list
+      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Mutation hook for creating segment
+ */
+export function useCreateSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateSegmentDto) => createSegment(data),
+    onSuccess: (data) => {
+      // Invalidate shipment and segments queries
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segments(data.shipmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.detail(data.shipmentId),
+      });
       queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
     },
   });

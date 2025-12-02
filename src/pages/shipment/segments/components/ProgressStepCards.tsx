@@ -1,11 +1,10 @@
-import {cn} from "../../../../shared/utils/cn";
-import type {StepConfig} from "../config/progressSteps";
-import type {ProgressExtraField} from "../../utils/progressFlowHelpers";
-import {AlertTriangleIcon} from "lucide-react";
-import {useTranslation} from "react-i18next";
+import { cn } from "../../../../shared/utils/cn";
+import type { StepConfig } from "../config/progressSteps";
+import { AlertTriangleIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type ProgressIconCardProps = {
-  Icon: React.ComponentType<{className?: string}>;
+  Icon: React.ComponentType<{ className?: string }>;
   isCompleted: boolean;
   isUpcoming: boolean;
 };
@@ -37,6 +36,7 @@ type ProgressActiveCardProps = {
   estFinishAt?: string;
   distance?: string;
   alertMessage?: string;
+  onAlertClick?: () => void;
 };
 
 export function ProgressActiveCard({
@@ -46,10 +46,18 @@ export function ProgressActiveCard({
   estFinishAt,
   distance,
   alertMessage,
+  onAlertClick,
 }: ProgressActiveCardProps) {
   const Icon = step.icon;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const isDelivered = step.key === "delivered";
+
+  const handleAlertClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAlertClick && alertMessage) {
+      onAlertClick();
+    }
+  };
 
   return (
     <div
@@ -63,13 +71,23 @@ export function ProgressActiveCard({
       {showWarningIcon && (
         <div className="absolute -top-2 -left-3 z-30">
           <div className="relative group">
-            <div className="bg-red-100 rounded-full p-1 border border-red-600 cursor-pointer">
+            <div
+              className="bg-red-100 rounded-full p-1 border border-red-600 cursor-pointer hover:bg-red-200 transition-colors"
+              onClick={handleAlertClick}
+              title={
+                alertMessage
+                  ? t(`shipment.segments.progress.alert.${alertMessage}`)
+                  : undefined
+              }
+            >
               <AlertTriangleIcon className="size-3 text-red-600" />
             </div>
             {/* Tooltip - positioned to the right to avoid overflow clipping */}
             <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block z-50 whitespace-nowrap">
               <div className="bg-red-100 text-red-600 text-xs rounded-md px-2 py-1.5 shadow-lg relative">
-                {t(`shipment.segments.progress.alert.${alertMessage}`)}
+                {alertMessage
+                  ? t(`shipment.segments.progress.alert.${alertMessage}`)
+                  : ""}
                 {/* Arrow pointing left */}
                 <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-b-[6px] border-r-[6px] border-transparent border-r-slate-900" />
               </div>

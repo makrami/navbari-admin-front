@@ -1,13 +1,13 @@
-import {Fragment, useMemo} from "react";
-import {cn} from "../../../../shared/utils/cn";
-import {PROGRESS_STEPS_CONFIG} from "../config/progressSteps";
-import {ProgressIconCard, ProgressActiveCard} from "./ProgressStepCards";
-import {getChevronColor, getStepState} from "../utils/progressUtils";
-import type {ProgressExtraField} from "../../utils/progressFlowHelpers";
-import {ChevronsRightIcon} from "lucide-react";
-import type {Segment} from "../../../../shared/types/segmentData";
-import {formatDistance} from "../../../../shared/utils/segmentHelpers";
-import type {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
+import { Fragment, useMemo } from "react";
+import { cn } from "../../../../shared/utils/cn";
+import { PROGRESS_STEPS_CONFIG } from "../config/progressSteps";
+import { ProgressIconCard, ProgressActiveCard } from "./ProgressStepCards";
+import { getChevronColor, getStepState } from "../utils/progressUtils";
+import type { ProgressExtraField } from "../../utils/progressFlowHelpers";
+import { ChevronsRightIcon } from "lucide-react";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { formatDistance } from "../../../../shared/utils/segmentHelpers";
+import type { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
 
 /**
  * Formats a date string to "DD MMM - HH:mm" format (e.g., "14 Aug - 03:45")
@@ -19,7 +19,7 @@ function formatDateTime(dateString: string | null | undefined): string {
     if (isNaN(date.getTime())) return "";
 
     const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", {month: "short"});
+    const month = date.toLocaleDateString("en-US", { month: "short" });
     const hours = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
 
@@ -40,6 +40,7 @@ type SegmentProgressProps = {
   estFinishAt?: string;
   extraFields?: ProgressExtraField[];
   segment?: Segment | null;
+  onAlertClick?: () => void;
 };
 
 export function SegmentProgress({
@@ -49,9 +50,10 @@ export function SegmentProgress({
   showWarningIcon = false,
   dateTime,
   segment,
+  onAlertClick,
 }: SegmentProgressProps) {
   // Compute date and distance values from segment data
-  const {plannedDate, estFinishAt, distance} = useMemo(() => {
+  const { plannedDate, estFinishAt, distance } = useMemo(() => {
     if (segment) {
       return {
         plannedDate: formatDateTime(segment.estimatedStartTime),
@@ -100,6 +102,7 @@ export function SegmentProgress({
                 estFinishAt={estFinishAt}
                 distance={distance}
                 alertMessage={segment?.alertMessage}
+                onAlertClick={onAlertClick}
               />
             ) : (
               <ProgressIconCard

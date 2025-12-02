@@ -30,6 +30,13 @@ import {
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
 import { getCountryCode } from "../../../../shared/utils/countryCode";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
+import {
+  CHAT_RECIPIENT_TYPE,
+  CHAT_ALERT_TYPE,
+} from "../../../../services/chat/chat.types";
+import { useTranslation } from "react-i18next";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -190,6 +197,35 @@ export function SegmentDetails({
     data.hasPendingAnnouncements && segmentId ? segmentId : null
   );
 
+  const { t } = useTranslation();
+
+  // Use chat hook for driver chat (for alert sending)
+  const chatHook = useChatWithRecipient({
+    recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
+    driverId: data.driverId ?? undefined,
+    recipientName: data.driverName || t("segments.cardHeader.driver"),
+  });
+
+  // Handle alert icon click - send alert message and open chat
+  const handleAlertClick = () => {
+    if (!data.driverId || !data.alertMessage) return;
+
+    // Get translated alert message
+    const alertText = t(
+      `shipment.segments.progress.alert.${data.alertMessage}`
+    );
+
+    // Send alert message
+    chatHook.handleAlertChipClick({
+      id: "alert",
+      label: alertText,
+      alertType: CHAT_ALERT_TYPE.ALERT,
+    });
+
+    // Open chat overlay
+    chatHook.setIsChatOpen(true);
+  };
+
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
 
   // helper state derived inline by Field components when needed
@@ -295,6 +331,7 @@ export function SegmentDetails({
             }
             showWarningIcon={data.hasDisruption ?? false}
             segment={data}
+            onAlertClick={handleAlertClick}
           />
         </div>
       )}
@@ -337,6 +374,7 @@ export function SegmentDetails({
                 current={data.status as SEGMENT_STATUS}
                 showWarningIcon={data.hasDisruption ?? false}
                 segment={data}
+                onAlertClick={handleAlertClick}
               />
             ) : null}
 
@@ -731,6 +769,17 @@ export function SegmentDetails({
           setPendingUpdate(null);
         }}
       />
+
+      {/* Chat Overlay for alert messages */}
+      {data.driverId && (
+        <ChatOverlay
+          isOpen={chatHook.isChatOpen}
+          onClose={() => chatHook.setIsChatOpen(false)}
+          recipientName={data.driverName || t("segments.cardHeader.driver")}
+          chatHook={chatHook}
+          actionableAlerts={[]}
+        />
+      )}
     </div>
   );
 }

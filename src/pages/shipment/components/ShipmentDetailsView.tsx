@@ -1,11 +1,11 @@
-import {useCallback} from "react";
-import {ShipmentListPanel} from "./ShipmentListPanel";
-import {EmptyShipmentView} from "./EmptyShipmentView";
-import {ShipmentContentArea} from "./ShipmentContentArea";
-import type {Shipment} from "../../../shared/types/shipment";
-import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
-import type {Segment} from "../../../shared/types/segmentData";
-import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
+import { useCallback } from "react";
+import { ShipmentListPanel } from "./ShipmentListPanel";
+import { EmptyShipmentView } from "./EmptyShipmentView";
+import { ShipmentContentArea } from "./ShipmentContentArea";
+import type { Shipment } from "../../../shared/types/shipment";
+import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
+import type { Segment } from "../../../shared/types/segmentData";
+import type { CreateShipmentDto } from "../../../services/shipment/shipment.api.service";
 
 type ShipmentDetailsViewProps = {
   shipments: Shipment[];
