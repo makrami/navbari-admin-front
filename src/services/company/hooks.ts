@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
   listCompanies,
   getCompany,
@@ -27,7 +27,8 @@ export const companyKeys = {
   list: (filters: CompanyFilters) => [...companyKeys.lists(), filters] as const,
   details: () => [...companyKeys.all, "detail"] as const,
   detail: (id: string) => [...companyKeys.details(), id] as const,
-  documents: (companyId: string) => [...companyKeys.all, "documents", companyId] as const,
+  documents: (companyId: string) =>
+    [...companyKeys.all, "documents", companyId] as const,
 };
 
 /**
@@ -69,12 +70,12 @@ export function useUpdateCompany() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateCompanyDto }) =>
+    mutationFn: ({id, data}: {id: string; data: UpdateCompanyDto}) =>
       updateCompany(id, data),
     onSuccess: (data) => {
       // Invalidate and refetch company queries
-      queryClient.invalidateQueries({ queryKey: companyKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
+      queryClient.invalidateQueries({queryKey: companyKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: companyKeys.lists()});
     },
   });
 }
@@ -88,8 +89,8 @@ export function useApproveCompany() {
   return useMutation({
     mutationFn: (id: string) => approveCompany(id),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
+      queryClient.invalidateQueries({queryKey: companyKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: companyKeys.lists()});
     },
   });
 }
@@ -101,11 +102,16 @@ export function useRejectCompany() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, rejectionReason }: { id: string; rejectionReason: string }) =>
-      rejectCompany(id, rejectionReason),
+    mutationFn: ({
+      id,
+      rejectionReason,
+    }: {
+      id: string;
+      rejectionReason: string;
+    }) => rejectCompany(id, rejectionReason),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
+      queryClient.invalidateQueries({queryKey: companyKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: companyKeys.lists()});
     },
   });
 }
@@ -119,8 +125,8 @@ export function useSuspendCompany() {
   return useMutation({
     mutationFn: (id: string) => suspendCompany(id),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
+      queryClient.invalidateQueries({queryKey: companyKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: companyKeys.lists()});
     },
   });
 }
@@ -134,8 +140,8 @@ export function useUnsuspendCompany() {
   return useMutation({
     mutationFn: (id: string) => unsuspendCompany(id),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
+      queryClient.invalidateQueries({queryKey: companyKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: companyKeys.lists()});
     },
   });
 }
@@ -149,7 +155,7 @@ export function useDeleteCompany() {
   return useMutation({
     mutationFn: (id: string) => deleteCompany(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
+      queryClient.invalidateQueries({queryKey: companyKeys.lists()});
     },
   });
 }
@@ -182,7 +188,9 @@ export function useUploadDocument() {
       file: File;
     }) => uploadDocument(companyId, documentType, file),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.documents(data.companyId) });
+      queryClient.invalidateQueries({
+        queryKey: companyKeys.documents(data.companyId),
+      });
     },
   });
 }
@@ -196,7 +204,9 @@ export function useApproveDocument() {
   return useMutation({
     mutationFn: (id: string) => approveDocument(id),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.documents(data.companyId) });
+      queryClient.invalidateQueries({
+        queryKey: companyKeys.documents(data.companyId),
+      });
     },
   });
 }
@@ -208,11 +218,17 @@ export function useRejectDocument() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, rejectionReason }: { id: string; rejectionReason: string }) =>
-      rejectDocument(id, rejectionReason),
+    mutationFn: ({
+      id,
+      rejectionReason,
+    }: {
+      id: string;
+      rejectionReason: string;
+    }) => rejectDocument(id, rejectionReason),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.documents(data.companyId) });
+      queryClient.invalidateQueries({
+        queryKey: companyKeys.documents(data.companyId),
+      });
     },
   });
 }
-

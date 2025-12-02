@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { http } from "../../lib/http";
+import {z} from "zod";
+import {http} from "../../lib/http";
 
 // Enums matching API (using const assertions for erasableSyntaxOnly compatibility)
 export const COMPANY_STATUS = {
@@ -22,9 +22,10 @@ export const LANGUAGE = {
 } as const;
 
 // Type aliases for the const assertions
-export type COMPANY_STATUS = typeof COMPANY_STATUS[keyof typeof COMPANY_STATUS];
-export type VEHICLE_TYPE = typeof VEHICLE_TYPE[keyof typeof VEHICLE_TYPE];
-export type LANGUAGE = typeof LANGUAGE[keyof typeof LANGUAGE];
+export type COMPANY_STATUS =
+  (typeof COMPANY_STATUS)[keyof typeof COMPANY_STATUS];
+export type VEHICLE_TYPE = (typeof VEHICLE_TYPE)[keyof typeof VEHICLE_TYPE];
+export type LANGUAGE = (typeof LANGUAGE)[keyof typeof LANGUAGE];
 
 // Zod schemas for validation
 const vehicleTypeSchema = z.nativeEnum(VEHICLE_TYPE);
@@ -60,28 +61,31 @@ const companyReadDtoSchema = z.object({
 export type CompanyReadDto = z.infer<typeof companyReadDtoSchema>;
 
 // Update Company DTO schema (all fields optional)
-const updateCompanyDtoSchema = z.object({
-  name: z.string().min(1).max(200).optional(),
-  country: z.string().min(1).max(100).optional(),
-  address: z.string().max(500).optional(),
-  email: z.string().email().optional(),
-  phone: z.string().min(1).max(50).optional(),
-  registrationId: z.string().max(100).optional(),
-  website: z.string().max(500).optional(),
-  driverCapacityCount: z.number().optional(),
-  vehicleTypes: z.array(vehicleTypeSchema).optional(),
-  primaryContactFullName: z.string().min(1).max(200).optional(),
-  primaryContactEmail: z.string().email().optional(),
-  primaryContactPhoneNumber: z.string().min(1).max(50).optional(),
-  preferredLanguage: languageSchema.optional(),
-  internalNote: z.string().max(2000).optional(),
-}).partial();
+const updateCompanyDtoSchema = z
+  .object({
+    name: z.string().min(1).max(200).optional(),
+    country: z.string().min(1).max(100).optional(),
+    address: z.string().max(500).optional(),
+    email: z.string().email().optional(),
+    phone: z.string().min(1).max(50).optional(),
+    registrationId: z.string().max(100).optional(),
+    website: z.string().max(500).optional(),
+    driverCapacityCount: z.number().optional(),
+    vehicleTypes: z.array(vehicleTypeSchema).optional(),
+    primaryContactFullName: z.string().min(1).max(200).optional(),
+    primaryContactEmail: z.string().email().optional(),
+    primaryContactPhoneNumber: z.string().min(1).max(50).optional(),
+    preferredLanguage: languageSchema.optional(),
+    internalNote: z.string().max(2000).optional(),
+  })
+  .partial();
 
 export type UpdateCompanyDto = z.infer<typeof updateCompanyDtoSchema>;
 
 // Reject Company DTO schema
 const rejectCompanyDtoSchema = z.object({
   rejectionReason: z.string().min(1).max(500),
+  status: z.nativeEnum(COMPANY_STATUS),
 });
 
 export type RejectCompanyDto = z.infer<typeof rejectCompanyDtoSchema>;
@@ -98,20 +102,25 @@ export type CompanyFilters = {
 /**
  * List companies with optional filters
  */
-export async function listCompanies(filters: CompanyFilters = {}): Promise<CompanyReadDto[]> {
+export async function listCompanies(
+  filters: CompanyFilters = {}
+): Promise<CompanyReadDto[]> {
   try {
     const params = new URLSearchParams();
-    if (filters.skip !== undefined) params.append("skip", filters.skip.toString());
-    if (filters.take !== undefined) params.append("take", filters.take.toString());
+    if (filters.skip !== undefined)
+      params.append("skip", filters.skip.toString());
+    if (filters.take !== undefined)
+      params.append("take", filters.take.toString());
     if (filters.status) params.append("status", filters.status);
     if (filters.country) params.append("country", filters.country);
-    if (filters.registrationId) params.append("registrationId", filters.registrationId);
+    if (filters.registrationId)
+      params.append("registrationId", filters.registrationId);
 
     const queryString = params.toString();
     const url = `/companies${queryString ? `?${queryString}` : ""}`;
-    
+
     const response = await http.get<CompanyReadDto[]>(url);
-    
+
     // Validate response array
     return z.array(companyReadDtoSchema).parse(response.data);
   } catch (error: unknown) {
@@ -164,12 +173,18 @@ export async function getCompanyDetails(id: string): Promise<CompanyReadDto> {
 /**
  * Update company
  */
-export async function updateCompany(id: string, data: UpdateCompanyDto): Promise<CompanyReadDto> {
+export async function updateCompany(
+  id: string,
+  data: UpdateCompanyDto
+): Promise<CompanyReadDto> {
   try {
     // Validate input
     const validatedData = updateCompanyDtoSchema.parse(data);
-    
-    const response = await http.put<CompanyReadDto>(`/companies/${id}`, validatedData);
+
+    const response = await http.put<CompanyReadDto>(
+      `/companies/${id}`,
+      validatedData
+    );
     return companyReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -188,7 +203,9 @@ export async function updateCompany(id: string, data: UpdateCompanyDto): Promise
  */
 export async function approveCompany(id: string): Promise<CompanyReadDto> {
   try {
-    const response = await http.patch<CompanyReadDto>(`/companies/${id}/approve`);
+    const response = await http.patch<CompanyReadDto>(
+      `/companies/${id}/approve`
+    );
     return companyReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -204,11 +221,20 @@ export async function approveCompany(id: string): Promise<CompanyReadDto> {
 /**
  * Reject company
  */
-export async function rejectCompany(id: string, rejectionReason: string): Promise<CompanyReadDto> {
+export async function rejectCompany(
+  id: string,
+  rejectionReason: string
+): Promise<CompanyReadDto> {
   try {
-    const validatedData = rejectCompanyDtoSchema.parse({ rejectionReason });
-    
-    const response = await http.patch<CompanyReadDto>(`/companies/${id}/reject`, validatedData);
+    const validatedData = rejectCompanyDtoSchema.parse({
+      rejectionReason,
+      status: "rejected",
+    });
+
+    const response = await http.patch<CompanyReadDto>(
+      `/companies/${id}/reject`,
+      validatedData
+    );
     return companyReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -227,7 +253,9 @@ export async function rejectCompany(id: string, rejectionReason: string): Promis
  */
 export async function suspendCompany(id: string): Promise<CompanyReadDto> {
   try {
-    const response = await http.patch<CompanyReadDto>(`/companies/${id}/suspend`);
+    const response = await http.patch<CompanyReadDto>(
+      `/companies/${id}/suspend`
+    );
     return companyReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -245,7 +273,9 @@ export async function suspendCompany(id: string): Promise<CompanyReadDto> {
  */
 export async function unsuspendCompany(id: string): Promise<CompanyReadDto> {
   try {
-    const response = await http.patch<CompanyReadDto>(`/companies/${id}/unsuspend`);
+    const response = await http.patch<CompanyReadDto>(
+      `/companies/${id}/unsuspend`
+    );
     return companyReadDtoSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -271,4 +301,3 @@ export async function deleteCompany(id: string): Promise<void> {
     throw new Error("Failed to delete company");
   }
 }
-

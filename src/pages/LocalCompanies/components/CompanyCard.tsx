@@ -1,6 +1,6 @@
-import { Button } from "../../../shared/components/ui/Button";
-import type { Company } from "../types";
-import { cn } from "../../../shared/utils/cn";
+import {Button} from "../../../shared/components/ui/Button";
+import type {Company} from "../types";
+import {cn} from "../../../shared/utils/cn";
 import {
   User as UserIcon,
   Users as UsersIcon,
@@ -9,10 +9,16 @@ import {
   Phone as PhoneIcon,
   X as XIcon,
   Check as CheckIcon,
+  AlertTriangleIcon,
 } from "lucide-react";
-import { getFileUrl } from "../utils";
-import { useTranslation } from "react-i18next";
-import { apiStatusToUiStatus } from "../types";
+import {getFileUrl} from "../utils";
+import {
+  useApproveCompany,
+  useRejectCompany,
+} from "../../../services/company/hooks";
+import {useState} from "react";
+import {useTranslation} from "react-i18next";
+import {apiStatusToUiStatus} from "../types";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -32,8 +38,6 @@ type Props = {
   company: Company;
   selected?: boolean;
   className?: string;
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
   onView?: (id: string) => void;
 };
 
@@ -41,11 +45,47 @@ export function CompanyCard({
   company,
   selected = false,
   className,
-  onApprove,
-  onReject,
   onView,
 }: Props) {
-  const { t } = useTranslation();
+  const approveMutation = useApproveCompany();
+  const rejectMutation = useRejectCompany();
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+
+  const handleApprove = async () => {
+    if (window.confirm(`Are you sure you want to approve "${company.name}"?`)) {
+      try {
+        await approveMutation.mutateAsync(company.id);
+      } catch (error) {
+        console.error("Failed to approve company:", error);
+        alert("Failed to approve company. Please try again.");
+      }
+    }
+  };
+
+  const handleReject = () => {
+    setShowRejectDialog(true);
+  };
+
+  const confirmReject = async () => {
+    if (!rejectionReason.trim()) {
+      alert("Please provide a rejection reason");
+      return;
+    }
+
+    try {
+      await rejectMutation.mutateAsync({
+        id: company.id,
+        rejectionReason: rejectionReason.trim(),
+      });
+      setShowRejectDialog(false);
+      setRejectionReason("");
+    } catch (error) {
+      console.error("Failed to reject company:", error);
+      alert("Failed to reject company. Please try again.");
+    }
+  };
+  const {t} = useTranslation();
   return (
     <div
       dir="ltr"
@@ -191,10 +231,10 @@ export function CompanyCard({
               className={cn(
                 "!p-0 h-7 inline-flex items-center gap-1.5",
                 selected
-                  ? "bg-white/15 text-white hover:bg-white/20"
+                  ? "bg-green-500/15 text-green-300 hover:bg-white/20"
                   : "bg-green-600/20 hover:!bg-green-600/30 text-green-600"
               )}
-              onClick={() => onApprove?.(company.id)}
+              onClick={handleApprove}
             >
               {t("localCompanies.page.card.approve")}
               <CheckIcon className="size-3 " />
@@ -204,10 +244,10 @@ export function CompanyCard({
               className={cn(
                 "h-7 !p-0 inline-flex items-center gap-1.5",
                 selected
-                  ? "bg-white/15 text-white hover:bg-white/20"
+                  ? "bg-red-500/15 text-red-300 hover:bg-white/20"
                   : "bg-red-600/20 hover:!bg-red-600/30 text-red-600"
               )}
-              onClick={() => onReject?.(company.id)}
+              onClick={handleReject}
             >
               {t("localCompanies.page.card.reject")}
               <XIcon className="size-3" />
@@ -241,6 +281,47 @@ export function CompanyCard({
               {t("localCompanies.page.card.viewDetails")}
               <EyeIcon className="h-4 w-4" />
             </Button>
+          </div>
+        )}
+        {/* Reject Dialog */}
+        {showRejectDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangleIcon className="size-6 text-red-600" />
+                <h3 className="text-lg font-semibold">Reject Company</h3>
+              </div>
+              <p className="text-sm text-slate-600 mb-4">
+                Are you sure you want to reject "{company.name}"? Please provide
+                a reason:
+              </p>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Enter rejection reason (required)..."
+                className="w-full min-h-24 text-black rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+              />
+              <div className="flex gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRejectDialog(false);
+                    setRejectionReason("");
+                  }}
+                  className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmReject}
+                  disabled={!rejectionReason.trim() || rejectMutation.isPending}
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {rejectMutation.isPending ? "Rejecting..." : "Confirm Reject"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
