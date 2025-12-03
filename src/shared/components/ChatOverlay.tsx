@@ -10,6 +10,7 @@ export interface ChatOverlayProps {
   chatHook: UseChatWithRecipientReturn;
   actionableAlerts: ActionableAlertChip[];
   emptyStateText?: string;
+  initialTab?: "all" | "chats" | "alerts";
 }
 
 export function ChatOverlay({
@@ -19,6 +20,7 @@ export function ChatOverlay({
   chatHook,
   actionableAlerts,
   emptyStateText,
+  initialTab = "all",
 }: ChatOverlayProps) {
   if (!isOpen) return null;
 
@@ -85,6 +87,7 @@ export function ChatOverlay({
             onLoadMore={() => fetchNextPage()}
             isFetchingMore={isFetchingNextPage}
             isTyping={isTyping}
+            initialTab={initialTab}
             emptyState={
               isEmpty
                 ? {

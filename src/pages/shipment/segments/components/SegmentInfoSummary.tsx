@@ -10,24 +10,24 @@ import {
   TriangleAlert,
   MessagesSquareIcon,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import {useTranslation} from "react-i18next";
+import {useEffect, useState} from "react";
 import FinancialSection from "./FinancialSection";
 import DocumentsSection from "./DocumentsSection";
-import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
-import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
-import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
-import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
-import { cn } from "../../../../shared/utils/cn";
-import { getSegmentFileAttachments } from "../../../../services/file-attachment/file-attachment.service";
-import type { DocumentItem } from "./DocumentsSection";
-import { getFileSizesFromUrls } from "../utils/fileSize";
+import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
+import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
+import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
+import {cn} from "../../../../shared/utils/cn";
+import {getSegmentFileAttachments} from "../../../../services/file-attachment/file-attachment.service";
+import type {DocumentItem} from "./DocumentsSection";
+import {getFileSizesFromUrls} from "../utils/fileSize";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
+  {id: "1", label: "GPS Lost", alertType: "alert"},
+  {id: "2", label: "Delay Expected", alertType: "warning"},
+  {id: "3", label: "Route Cleared", alertType: "success"},
+  {id: "4", label: "Documentation Pending", alertType: "info"},
 ];
 
 type SegmentInfoSummaryProps = {
@@ -37,6 +37,8 @@ type SegmentInfoSummaryProps = {
   startedAt?: string;
   localCompany?: string;
   companyId?: string | null;
+  driverId?: string | null;
+  driverName?: string | null;
   finishedAt?: string;
   etaToOrigin?: string | null;
   etaToDestination?: string | null;
@@ -118,7 +120,7 @@ function formatEtaDuration(
  */
 function formatTimeAgo(
   timestamp: string | null | undefined,
-  t: (key: string, options?: { count?: number }) => string
+  t: (key: string, options?: {count?: number}) => string
 ): string {
   if (!timestamp) return "";
 
@@ -136,11 +138,11 @@ function formatTimeAgo(
     if (diffMins < 1) {
       return t("segments.eta.justNow");
     } else if (diffMins < 60) {
-      return t("segments.eta.minutesAgo", { count: diffMins });
+      return t("segments.eta.minutesAgo", {count: diffMins});
     } else if (diffHours < 24) {
-      return t("segments.eta.hoursAgo", { count: diffHours });
+      return t("segments.eta.hoursAgo", {count: diffHours});
     } else {
-      return t("segments.eta.daysAgo", { count: diffDays });
+      return t("segments.eta.daysAgo", {count: diffDays});
     }
   } catch {
     return "";
@@ -195,7 +197,7 @@ export default function SegmentInfoSummary({
   estimatedStartTime,
   startedAt,
   localCompany,
-  companyId,
+  driverName,
   estimatedFinishTime,
   finishedAt,
   etaToOrigin,
@@ -206,12 +208,16 @@ export default function SegmentInfoSummary({
   pendingDocuments = 0,
   documents,
   segmentId,
+  driverId,
 }: SegmentInfoSummaryProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [fetchedDocuments, setFetchedDocuments] = useState<DocumentItem[]>([]);
   const [documentsWithSizes, setDocumentsWithSizes] = useState<DocumentItem[]>(
     []
   );
+  const [chatInitialTab, setChatInitialTab] = useState<
+    "all" | "chats" | "alerts"
+  >("all");
 
   // Fetch file sizes for documents passed as props
   useEffect(() => {
@@ -325,9 +331,9 @@ export default function SegmentInfoSummary({
 
   // Use the reusable chat hook for company chat
   const chatHook = useChatWithRecipient({
-    recipientType: CHAT_RECIPIENT_TYPE.COMPANY,
-    companyId: companyId || undefined,
-    recipientName: localCompany || "Company",
+    recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
+    driverId: driverId || undefined,
+    recipientName: driverName || "Driver",
   });
 
   // Format ETA duration
@@ -434,7 +440,22 @@ export default function SegmentInfoSummary({
           </div>
 
           {/* Alerts Indicator */}
-          <div className="flex flex-col items-center gap-1">
+          <button
+            onClick={() => {
+              if (driverId) {
+                setChatInitialTab("alerts");
+                chatHook.setIsChatOpen(true);
+              }
+            }}
+            disabled={!driverId}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-opacity",
+              driverId
+                ? "cursor-pointer hover:opacity-80"
+                : "cursor-not-allowed opacity-50"
+            )}
+            aria-label="Open chat with alerts"
+          >
             <div className="size-12 rounded-full bg-red-50 flex items-center justify-center">
               <TriangleAlert className="size-5 text-red-600" />
             </div>
@@ -442,7 +463,7 @@ export default function SegmentInfoSummary({
               <span className="font-bold text-red-600">{alertCount ?? 0}</span>{" "}
               <span className="font-normal text-red-600 text-xs">Alerts</span>
             </span>
-          </div>
+          </button>
 
           {/* Pending Indicator */}
           <div className="flex flex-col items-center gap-1">
@@ -558,11 +579,11 @@ export default function SegmentInfoSummary({
             </div>
             {/* Chat Button */}
             <button
-              onClick={() => companyId && chatHook.setIsChatOpen(true)}
-              disabled={!companyId}
+              onClick={() => driverId && chatHook.setIsChatOpen(true)}
+              disabled={!driverId}
               className={cn(
                 "size-8 rounded-lg bg-[#1B54FE]/10 flex items-center justify-center flex-shrink-0 hover:bg-blue-300 transition-colors",
-                !companyId && "opacity-50 cursor-not-allowed"
+                !driverId && "opacity-50 cursor-not-allowed"
               )}
               aria-label="Chat with company"
             >
@@ -619,13 +640,17 @@ export default function SegmentInfoSummary({
       />
 
       {/* Chat Overlay */}
-      {companyId && (
+      {driverId && (
         <ChatOverlay
           isOpen={chatHook.isChatOpen}
-          onClose={() => chatHook.setIsChatOpen(false)}
+          onClose={() => {
+            chatHook.setIsChatOpen(false);
+            setChatInitialTab("all"); // Reset to "all" when closing
+          }}
           recipientName={localCompany || "Company"}
           chatHook={chatHook}
           actionableAlerts={ACTIONABLE_ALERTS}
+          initialTab={chatInitialTab}
         />
       )}
     </div>

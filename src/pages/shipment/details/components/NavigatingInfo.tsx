@@ -1,6 +1,6 @@
-import type { PropsWithChildren } from "react";
-import { useEffect, useRef, useState, useMemo } from "react";
-import { cn } from "../../../../shared/utils/cn";
+import type {PropsWithChildren} from "react";
+import {useEffect, useRef, useState, useMemo} from "react";
+import {cn} from "../../../../shared/utils/cn";
 import {
   MapPinIcon,
   MessagesSquareIcon,
@@ -18,15 +18,15 @@ import {
   Paperclip,
   ListCheck,
 } from "lucide-react";
-import { type MapRef } from "react-map-gl/mapbox";
+import {type MapRef} from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { MAPBOX_TOKEN } from "../../../dashboard/constants";
-import type { Segment } from "../../../../shared/types/segmentData";
-import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
-import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
-import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
-import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
-import { useTranslation } from "react-i18next";
+import {MAPBOX_TOKEN} from "../../../dashboard/constants";
+import type {Segment} from "../../../../shared/types/segmentData";
+import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
+import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
+import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
+import {useTranslation} from "react-i18next";
 
 type NavigatingInfoProps = PropsWithChildren<{
   segments: Segment[];
@@ -47,16 +47,16 @@ type NavigatingInfoProps = PropsWithChildren<{
 // Figma snapshot image URLs (used as static assets to match design)
 
 import avatarImg from "../../../../assets/images/avatar.png";
-import { getFileUrl } from "../../../LocalCompanies/utils";
+import {getFileUrl} from "../../../LocalCompanies/utils";
 import CargoMap from "../../../../components/CargoMap";
-import { getCountryCode } from "../../../../shared/utils/countryCode";
+import {getCountryCode} from "../../../../shared/utils/countryCode";
 import ReactCountryFlag from "react-country-flag";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
+  {id: "1", label: "GPS Lost", alertType: "alert"},
+  {id: "2", label: "Delay Expected", alertType: "warning"},
+  {id: "3", label: "Route Cleared", alertType: "success"},
+  {id: "4", label: "Documentation Pending", alertType: "info"},
 ];
 
 export function NavigatingInfo({
@@ -74,7 +74,7 @@ export function NavigatingInfo({
   lastActivityTime,
   onClose,
 }: NavigatingInfoProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
@@ -415,7 +415,7 @@ export function NavigatingInfo({
                       className="mr-1 mb-1"
                       svg
                       countryCode={getCountryCode(destination.split(", ")[1])}
-                      style={{ width: 16, borderRadius: 2 }}
+                      style={{width: 16, borderRadius: 2}}
                     />
                     {destination}
                   </p>
@@ -431,8 +431,20 @@ export function NavigatingInfo({
                 .filter(
                   (segment) => segment.originCity && segment.destinationCity
                 )
-                .map((segment) => segment.id)
-                .filter((id): id is string => !!id)}
+                .map((segment) => ({
+                  id: segment.id,
+                  currentLatitude: segment.currentLatitude ?? 0,
+                  currentLongitude: segment.currentLongitude ?? 0,
+                }))
+                .filter(
+                  (
+                    segment
+                  ): segment is {
+                    id: string;
+                    currentLatitude: number;
+                    currentLongitude: number;
+                  } => !!segment
+                )}
               initialView={viewport}
               mapboxToken={MAPBOX_TOKEN}
             />
@@ -443,7 +455,7 @@ export function NavigatingInfo({
                 <button
                   className="bg-white p-2 hover:bg-slate-50 transition-colors"
                   onClick={() => {
-                    mapRef.current?.zoomIn({ duration: 300 });
+                    mapRef.current?.zoomIn({duration: 300});
                   }}
                 >
                   <PlusIcon className="size-[14px] text-slate-500" />
@@ -451,7 +463,7 @@ export function NavigatingInfo({
                 <button
                   className="bg-white border-t border-slate-300 p-2 hover:bg-slate-50 transition-colors"
                   onClick={() => {
-                    mapRef.current?.zoomOut({ duration: 300 });
+                    mapRef.current?.zoomOut({duration: 300});
                   }}
                 >
                   <MinusIcon className="size-[14px] text-slate-500" />

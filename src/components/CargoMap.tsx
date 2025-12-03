@@ -16,7 +16,7 @@ import {shipmentKeys} from "../services/shipment/hooks";
 import {getSegmentRoute} from "../services/shipment/shipment.api.service";
 
 type Props = {
-  segmentIds: string[];
+  segmentIds: {id: string; currentLatitude: number; currentLongitude: number}[];
   initialView?: {
     longitude: number;
     latitude: number;
@@ -157,8 +157,8 @@ export function CargoMap({
   // Fetch routes using TanStack Query
   const routeQueries = useQueries({
     queries: segmentIds.map((segmentId) => ({
-      queryKey: shipmentKeys.segmentRoute(segmentId),
-      queryFn: () => getSegmentRoute(segmentId),
+      queryKey: shipmentKeys.segmentRoute(segmentId.id),
+      queryFn: () => getSegmentRoute(segmentId.id),
       enabled: !!segmentId,
       retry: 1,
     })),
@@ -205,7 +205,7 @@ export function CargoMap({
               id: `segment-${idx}`,
               data,
               color,
-              segmentId,
+              segmentId: segmentId.id,
               segmentIdx: idx,
             });
           }
@@ -293,18 +293,20 @@ export function CargoMap({
   // Create label points (midpoint of route)
   const labelPoints = useMemo(() => {
     return routeSources.map((src) => {
-      const geom = src.data.features[0]?.geometry;
-      const coords = (geom && (geom as LineString).coordinates) as
-        | Position[]
-        | undefined;
-      const midIdx =
-        coords && coords.length ? Math.floor(coords.length / 2) : 0;
-      const pos =
-        coords && coords[midIdx] ? coords[midIdx] : ([0, 0] as Position);
+      // const geom = src.data.features[0]?.geometry;
+      // const coords = (geom && (geom as LineString).coordinates) as
+      //   | Position[]
+      //   | undefined;
+      // const midIdx =
+      //   coords && coords.length ? Math.floor(coords.length / 2) : 0;
+      // const pos =
+      //   coords && coords[midIdx] ? coords[midIdx] : ([0, 0] as Position);
       return {
         id: `label-${src.segmentIdx}`,
-        lng: pos[0],
-        lat: pos[1],
+        lng:
+          segmentIds.find((s) => s.id === src.segmentId)?.currentLongitude ?? 0,
+        lat:
+          segmentIds.find((s) => s.id === src.segmentId)?.currentLatitude ?? 0,
         color: src.color,
       };
     });

@@ -27,6 +27,7 @@ interface ChatSectionProps {
     icon: React.ReactNode;
     text: string;
   };
+  initialTab?: FilterType;
 }
 
 // Helper function to check if a message is new (has Date.now() timestamp)
@@ -70,11 +71,17 @@ export function ChatSection({
   isFetchingMore = false,
   isTyping = false,
   emptyState,
+  initialTab = "all",
 }: ChatSectionProps) {
   const { t } = useTranslation();
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [filter, setFilter] = useState<FilterType>(initialTab);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Update filter when initialTab changes
+  useEffect(() => {
+    setFilter(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     return () => {

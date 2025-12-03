@@ -1,21 +1,21 @@
-import { useState, useMemo } from "react";
+import {useState, useMemo} from "react";
 import CargoMap from "../../components/CargoMap";
-import { MAPBOX_TOKEN } from "./constants";
-import { KPICards } from "./components/KPICards";
-import { StatusFilter } from "./components/StatusFilter";
-import { MapLegend } from "./components/MapLegend";
-import { DashboardSearch } from "./components/DashboardSearch";
-import { SegmentsDrawer } from "./components/SegmentsDrawer";
-import { UnreadMessagesModal } from "./components/UnreadMessagesModal";
-import { AwaitingRegistrationsModal } from "./components/AwaitingRegistrationsModal";
-import { SegmentsAwaitingDriverModal } from "./components/SegmentsAwaitingDriverModal";
-import { useActiveSegments } from "../../services/dashboard/hooks";
-import { ChartBarBig } from "lucide-react";
+import {MAPBOX_TOKEN} from "./constants";
+import {KPICards} from "./components/KPICards";
+import {StatusFilter} from "./components/StatusFilter";
+import {MapLegend} from "./components/MapLegend";
+import {DashboardSearch} from "./components/DashboardSearch";
+import {SegmentsDrawer} from "./components/SegmentsDrawer";
+import {UnreadMessagesModal} from "./components/UnreadMessagesModal";
+import {AwaitingRegistrationsModal} from "./components/AwaitingRegistrationsModal";
+import {SegmentsAwaitingDriverModal} from "./components/SegmentsAwaitingDriverModal";
+import {useActiveSegments} from "../../services/dashboard/hooks";
+import {ChartBarBig} from "lucide-react";
 
 type SegmentStatus = "pending" | "normal" | "alert";
 
 export function DashboardPage() {
-  const { data: activeSegments, isLoading, error } = useActiveSegments();
+  const {data: activeSegments, isLoading, error} = useActiveSegments();
   const [isSegmentsOpen, setIsSegmentsOpen] = useState(false);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(
     null
@@ -68,7 +68,7 @@ export function DashboardPage() {
 
   const handleCardClick = (
     cardId: string,
-    position: { top: number; left: number; width: number }
+    position: {top: number; left: number; width: number}
   ) => {
     setCardPosition(position);
     setOpenModal(cardId);
@@ -113,8 +113,14 @@ export function DashboardPage() {
 
         <div className="absolute inset-0 p-5">
           <CargoMap
-            segmentIds={segmentIds}
-            initialView={{ longitude: 105.0, latitude: 35.0, zoom: 4 }}
+            segmentIds={
+              activeSegments?.map((segment) => ({
+                id: segment.id,
+                currentLatitude: segment.currentLatitude ?? 0,
+                currentLongitude: segment.currentLongitude ?? 0,
+              })) ?? []
+            }
+            initialView={{longitude: 105.0, latitude: 35.0, zoom: 4}}
             mapboxToken={MAPBOX_TOKEN}
             onSegmentClick={handleSegmentClick}
             onMapClick={handleMapClick}
