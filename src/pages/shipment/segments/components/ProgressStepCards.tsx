@@ -7,19 +7,29 @@ type ProgressIconCardProps = {
   Icon: React.ComponentType<{ className?: string }>;
   isCompleted: boolean;
   isUpcoming: boolean;
+  isActive?: boolean;
+  activeBgColor?: string;
+  activeIconColor?: string;
 };
 
 export function ProgressIconCard({
   Icon,
   isCompleted,
   isUpcoming,
+  isActive = false,
+  activeBgColor,
+  activeIconColor,
 }: ProgressIconCardProps) {
   return (
     <div
       className={cn(
         "size-12 rounded-lg inline-flex items-center justify-center flex-shrink-0 transition-all",
         isCompleted && "bg-green-50 text-green-600",
-        isUpcoming && "bg-slate-100 text-slate-400"
+        isUpcoming && "bg-slate-100 text-slate-400",
+        isActive &&
+          activeBgColor &&
+          activeIconColor &&
+          `${activeBgColor} ${activeIconColor}`
       )}
     >
       <Icon className="size-3.5" />
@@ -69,7 +79,7 @@ export function ProgressActiveCard({
     >
       {/* Alert icon positioned at top-left, partially overlapping */}
       {showWarningIcon && (
-        <div className="absolute -top-2 -left-3 z-30">
+        <div className="absolute -top-2 -left-3 z-50">
           <div className="relative group">
             <div
               className="bg-red-100 rounded-full p-1 border border-red-600 cursor-pointer hover:bg-red-200 transition-colors"

@@ -1,7 +1,7 @@
-import {useMemo, useState, useEffect, type ReactNode} from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import SegmentProgress from "./SegmentProgress";
-import {cn} from "../../../../shared/utils/cn";
-import {CITY_OPTIONS} from "../../data/cities";
+import { cn } from "../../../../shared/utils/cn";
+import { CITY_OPTIONS } from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -9,34 +9,34 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
+import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type {Segment} from "../../../../shared/types/segmentData";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import type {Shipment} from "../../../../shared/types/shipment";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
-import {ShipmentLinkSection} from "./ShipmentLinkSection";
-import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
-import {useCompanies} from "../../../../services/company/hooks";
+import { ShipmentLinkSection } from "./ShipmentLinkSection";
+import type { SegmentReadDto } from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
+import { useCompanies } from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
 } from "../../../../services/shipment/hooks";
-import type {CompanyReadDto} from "../../../../services/company/company.service";
+import type { CompanyReadDto } from "../../../../services/company/company.service";
 import {
   computeSegmentPlace,
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
-import {getCountryCode} from "../../../../shared/utils/countryCode";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import { getCountryCode } from "../../../../shared/utils/countryCode";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
 import {
   CHAT_RECIPIENT_TYPE,
   CHAT_ALERT_TYPE,
 } from "../../../../services/chat/chat.types";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -173,7 +173,7 @@ export function SegmentDetails({
   );
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): {city: string; country: string} => {
+  const parsePlace = (place: string): { city: string; country: string } => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -181,11 +181,11 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return {city: place, country: ""};
+    return { city: place, country: "" };
   };
 
   // Fetch companies from API
-  const {data: companies = []} = useCompanies();
+  const { data: companies = [] } = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -193,11 +193,11 @@ export function SegmentDetails({
   }, [companies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
-  const {data: announcements = []} = useSegmentAnnouncements(
+  const { data: announcements = [] } = useSegmentAnnouncements(
     data.hasPendingAnnouncements && segmentId ? segmentId : null
   );
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   // Use chat hook for driver chat (for alert sending)
   const chatHook = useChatWithRecipient({
@@ -366,10 +366,8 @@ export function SegmentDetails({
               </div>
             )}
 
-            {/* Segment progress appears here only for non-current segments */}
-            {!data.isCurrent &&
-            data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
-            !locked ? (
+            {/* Segment progress appears here when segment is expanded */}
+            {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT && !locked ? (
               <SegmentProgress
                 current={data.status as SEGMENT_STATUS}
                 showWarningIcon={data.hasDisruption ?? false}
