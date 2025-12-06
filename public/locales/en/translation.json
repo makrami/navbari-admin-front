@@ -567,6 +567,8 @@
         "alert": {
           "delayedStartDrivingTime": "Driver has not started driving yet - departure delayed",
           "delayedArriveOriginTime": "Driver is delayed arriving at pickup location",
+          "delayedStartToDestination": "Driver is delayed starting to drive to destination",
+          "delayedArriveFinalDestinationTime": "Driver is delayed arriving at final destination",
           "delayedArriveDestinationTime": "Driver is delayed arriving at destination",
           "lostGpsSignal": "GPS signal lost - last update was more than expected",
           "delayedLoadingTime": "Loading is taking longer than scheduled"

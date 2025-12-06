@@ -329,6 +329,8 @@
         "alert": {
           "delayedStartDrivingTime": "Водитель еще не начал движение - задержка отправления",
           "delayedArriveOriginTime": "Водитель опаздывает к месту погрузки",
+          "delayedStartToDestination": "Водитель опаздывает с началом движения к месту назначения",
+          "delayedArriveFinalDestinationTime": "Водитель опаздывает к конечному месту назначения",
           "delayedArriveDestinationTime": "Водитель опаздывает к месту назначения",
           "lostGpsSignal": "Сигнал GPS потерян - последнее обновление было дольше ожидаемого",
           "delayedLoadingTime": "Загрузка занимает больше времени, чем запланировано"

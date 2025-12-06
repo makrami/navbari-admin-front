@@ -329,6 +329,8 @@
         "alert": {
           "delayedStartDrivingTime": "司机尚未开始驾驶 - 出发延迟",
           "delayedArriveOriginTime": "司机到达装货地点延迟",
+          "delayedStartToDestination": "司机开始前往目的地延迟",
+          "delayedArriveFinalDestinationTime": "司机到达最终目的地延迟",
           "delayedArriveDestinationTime": "司机到达目的地延迟",
           "lostGpsSignal": "GPS信号丢失 - 上次更新时间超过预期",
           "delayedLoadingTime": "装载时间比预定时间长"

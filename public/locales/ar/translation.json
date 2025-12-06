@@ -329,6 +329,8 @@
         "alert": {
           "delayedStartDrivingTime": "لم يبدأ السائق بالقيادة بعد - تأخير في الانطلاق",
           "delayedArriveOriginTime": "السائق متأخر في الوصول إلى موقع التحميل",
+          "delayedStartToDestination": "السائق متأخر في البدء بالقيادة إلى الوجهة",
+          "delayedArriveFinalDestinationTime": "السائق متأخر في الوصول إلى الوجهة النهائية",
           "delayedArriveDestinationTime": "السائق متأخر في الوصول إلى الوجهة",
           "lostGpsSignal": "فقدان إشارة GPS - آخر تحديث كان أكثر من المتوقع",
           "delayedLoadingTime": "التحميل يستغرق وقتاً أطول من المجدول"

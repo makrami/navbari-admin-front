@@ -567,6 +567,8 @@
         "alert": {
           "delayedStartDrivingTime": "راننده هنوز شروع به رانندگی نکرده است - تأخیر در حرکت",
           "delayedArriveOriginTime": "راننده در رسیدن به محل بارگیری تأخیر دارد",
+          "delayedStartToDestination": "راننده در شروع رانندگی به سمت مقصد تأخیر دارد",
+          "delayedArriveFinalDestinationTime": "راننده در رسیدن به مقصد نهایی تأخیر دارد",
           "delayedArriveDestinationTime": "راننده در رسیدن به مقصد تأخیر دارد",
           "lostGpsSignal": "سیگنال GPS از دست رفته - آخرین بروزرسانی بیشتر از حد انتظار بوده",
           "delayedLoadingTime": "بارگیری بیشتر از زمان برنامه‌ریزی شده طول می‌کشد"
