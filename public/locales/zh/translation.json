@@ -149,13 +149,62 @@
       "hours": "小时",
       "minutesAgo": "{{count}} 分钟前",
       "hoursAgo": "{{count}} 小时前",
-      "daysAgo": "{{count}} 天前"
+      "daysAgo": "{{count}} 天前",
+      "optimalStartTime": "最佳出发时间",
+      "optimalStartToDestination": "最佳出发前往目的地时间",
+      "plannedArrivalToDestination": "计划到达时间",
+      "arrivedAtDestination": "到达目的地时间",
+      "delivered": {
+        "completed": "路段已完成",
+        "startDifference": "出发：{{difference}}",
+        "originDifference": "起点：{{difference}}",
+        "overallDifference": "总计：{{difference}}"
+      }
     },
     "page": {
       "title": "路段",
       "loading": "加载路段中...",
       "closeLabel": "关闭",
       "empty": "未找到路段"
+    },
+    "progressSteps": {
+      "labels": {
+        "start": "开始",
+        "toOrig": "前往起点",
+        "inOrig": "在起点",
+        "loading": "装载中",
+        "inCustoms": "在海关",
+        "toDest": "前往目的地",
+        "atDest": "在目的地",
+        "delivered": "已交付"
+      },
+      "leftLabels": {
+        "assigned": "已分配",
+        "started": "已开始",
+        "arrivedAt": "到达时间",
+        "planned": "计划"
+      },
+      "rightLabels": {
+        "startMovingAt": "开始移动时间",
+        "estArrival": "预计到达",
+        "startLoadingAt": "开始装载时间",
+        "estComplete": "预计完成",
+        "estClear": "预计清关",
+        "arrivedAt": "到达时间",
+        "deliveredAt": "交付时间"
+      },
+      "rightLabelsCompleted": {
+        "startMovingAt": "开始移动时间",
+        "arrivedAt": "到达时间",
+        "startLoadingAt": "开始装载时间",
+        "completedAt": "完成时间",
+        "clearedAt": "清关时间",
+        "deliveredAt": "交付时间"
+      },
+      "centerLabels": {
+        "distance": "距离",
+        "duration": "持续时间"
+      }
     }
   },
   "sidebar": {
@@ -489,6 +538,31 @@
         "email": "电子邮件",
         "sms": "短信",
         "mobilePush": "移动推送"
+      },
+      "systemParameters": {
+        "title": "系统参数",
+        "description": "微调操作逻辑",
+        "slaConfiguration": {
+          "title": "SLA配置",
+          "description": "定义每个货运的服务级别协议",
+          "loadingTime": "装载时间",
+          "transitTime": "运输时间",
+          "unloadingTime": "卸载时间",
+          "customsClearanceTime": "清关时间"
+        },
+        "etaCalculationMethod": {
+          "title": "ETA计算方法",
+          "description": "选择如何定义预计到达时间",
+          "realtimeGps": "基于实时GPS",
+          "historicalData": "基于历史数据"
+        },
+        "gpsTracking": {
+          "title": "GPS和跟踪",
+          "description": "配置位置数据的跟踪方式和警报触发条件",
+          "gpsAlertDistance": "GPS警报距离",
+          "pingInterval": "ping间隔",
+          "maxConcurrentShipments": "每个本地公司的最大并发货运数"
+        }
       },
       "rolesPermissions": {
         "title": "角色和权限",

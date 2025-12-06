@@ -88,12 +88,12 @@ export function SettingsPage() {
 
   // System Parameters Settings state (SLA)
   const [loadingTime, setLoadingTime] = useState(4);
-  const [transitTime, setTransitTime] = useState(24);
+  const [customsClearanceTime, setCustomsClearanceTime] = useState(24);
   const [unloadingTime, setUnloadingTime] = useState(3);
 
   const [originalSla, setOriginalSla] = useState<{
     loadingTimeHours: number | null;
-    transitTimeHours: number | null;
+    customsClearanceTimeHours: number | null;
     unloadingTimeHours: number | null;
   } | null>(null);
 
@@ -138,11 +138,11 @@ export function SettingsPage() {
       // SLA Settings
       const sla = settings.sla;
       setLoadingTime(sla.loadingTimeHours || 4);
-      setTransitTime(sla.transitTimeHours || 24);
+      setCustomsClearanceTime(sla.customsClearanceTimeHours || 24);
       setUnloadingTime(sla.unloadingTimeHours || 3);
       setOriginalSla({
         loadingTimeHours: sla.loadingTimeHours || null,
-        transitTimeHours: sla.transitTimeHours || null,
+        customsClearanceTimeHours: sla.customsClearanceTimeHours || null,
         unloadingTimeHours: sla.unloadingTimeHours || null,
       });
     }
@@ -280,10 +280,11 @@ export function SettingsPage() {
     if (!originalSla) return 0;
     let count = 0;
     if (loadingTime !== (originalSla.loadingTimeHours || 4)) count++;
-    if (transitTime !== (originalSla.transitTimeHours || 24)) count++;
+    if (customsClearanceTime !== (originalSla.customsClearanceTimeHours || 24))
+      count++;
     if (unloadingTime !== (originalSla.unloadingTimeHours || 3)) count++;
     return count;
-  }, [loadingTime, transitTime, unloadingTime, originalSla]);
+  }, [loadingTime, customsClearanceTime, unloadingTime, originalSla]);
 
   // Calculate role change count for selected role
   const roleChangeCount = useMemo(() => {
@@ -441,7 +442,7 @@ export function SettingsPage() {
       setMobilePush(originalNotification.mobilePush);
     } else if (section === "systemParameters" && originalSla) {
       setLoadingTime(originalSla.loadingTimeHours || 4);
-      setTransitTime(originalSla.transitTimeHours || 24);
+      setCustomsClearanceTime(originalSla.customsClearanceTimeHours || 24);
       setUnloadingTime(originalSla.unloadingTimeHours || 3);
     }
   };
@@ -509,14 +510,14 @@ export function SettingsPage() {
       } else if (section === "systemParameters") {
         const updateData = {
           loadingTimeHours: loadingTime,
-          transitTimeHours: transitTime,
+          customsClearanceTimeHours: customsClearanceTime,
           unloadingTimeHours: unloadingTime,
         };
         await updateSlaMutation.mutateAsync(updateData);
         // Update original values after successful save
         setOriginalSla({
           loadingTimeHours: loadingTime,
-          transitTimeHours: transitTime,
+          customsClearanceTimeHours: customsClearanceTime,
           unloadingTimeHours: unloadingTime,
         });
       }
@@ -613,8 +614,8 @@ export function SettingsPage() {
                   <SystemParametersSettings
                     loadingTime={loadingTime}
                     onLoadingTimeChange={setLoadingTime}
-                    transitTime={transitTime}
-                    onTransitTimeChange={setTransitTime}
+                    customsClearanceTime={customsClearanceTime}
+                    onCustomsClearanceTimeChange={setCustomsClearanceTime}
                     unloadingTime={unloadingTime}
                     onUnloadingTimeChange={setUnloadingTime}
                     changeCount={slaChangeCount}

@@ -22,6 +22,8 @@ import {cn} from "../../../../shared/utils/cn";
 import {getSegmentFileAttachments} from "../../../../services/file-attachment/file-attachment.service";
 import type {DocumentItem} from "./DocumentsSection";
 import {getFileSizesFromUrls} from "../utils/fileSize";
+import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
+import type {SEGMENT_STATUS as SEGMENT_STATUS_TYPE} from "../../../../services/shipment/shipment.api.service";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
   {id: "1", label: "GPS Lost", alertType: "alert"},
@@ -42,6 +44,7 @@ type SegmentInfoSummaryProps = {
   finishedAt?: string;
   etaToOrigin?: string | null;
   etaToDestination?: string | null;
+  eta?: string | null;
   lastGpsUpdate?: string | null;
   alertCount?: number;
   delaysInMinutes?: number;
@@ -55,6 +58,20 @@ type SegmentInfoSummaryProps = {
     thumbnailUrl?: string;
   }>;
   segmentId?: string;
+  status?: SEGMENT_STATUS_TYPE;
+  // Additional fields needed for status-based calculations
+  arrivedOriginAt?: string | null;
+  startLoadingAt?: string | null;
+  loadingCompletedAt?: string | null;
+  enterCustomsAt?: string | null;
+  customsClearedAt?: string | null;
+  arrivedDestinationAt?: string | null;
+  deliveredAt?: string | null;
+  estLoadingCompletionTime?: string | null;
+  estCustomsClearanceTime?: string | null;
+  initialEtaToOrigin?: string | null;
+  distanceToOrigin?: number | null;
+  durationOriginToDestination?: number | null;
 };
 
 /**
@@ -192,6 +209,431 @@ function formatFileType(fileType: string): string {
     .join(" ");
 }
 
+/**
+ * Calculate time difference in minutes between two timestamps
+ * Returns positive if target is in the future, negative if in the past
+ */
+function calculateTimeDifference(
+  targetTime: string | null | undefined,
+  referenceTime: string | null | undefined
+): number | null {
+  if (!targetTime || !referenceTime) return null;
+
+  try {
+    const target = new Date(targetTime);
+    const reference = new Date(referenceTime);
+    const diffMs = target.getTime() - reference.getTime();
+    return Math.floor(diffMs / 60000); // Convert to minutes
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Format time difference as "+Xh" or "-Xh" or "+Xm" or "-Xm"
+ */
+function formatTimeDifference(diffMinutes: number | null): string {
+  if (diffMinutes === null) return "";
+
+  const absMinutes = Math.abs(diffMinutes);
+  const sign = diffMinutes >= 0 ? "+" : "-";
+
+  if (absMinutes < 60) {
+    return `${sign}${absMinutes}m`;
+  } else {
+    const hours = Math.floor(absMinutes / 60);
+    return `${sign}${hours}h`;
+  }
+}
+
+/**
+ * Generate ETA message for ASSIGNED status
+ * Optimal movement time = Planned arrival time - GPS time to origin
+ */
+function generateAssignedMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {label: string; duration: string; difference?: string} | null {
+  const {estimatedStartTime, initialEtaToOrigin} = props;
+  // If we have ETA to origin, show it
+  if (initialEtaToOrigin) {
+    const difference = new Date(initialEtaToOrigin).getTime() - Date.now();
+
+    const optimalStartTime = new Date(
+      new Date(estimatedStartTime || new Date().toISOString()).getTime() -
+        difference
+    );
+
+    return {
+      label: t("segments.eta.optimalStartTime"),
+      duration: formatDateTime(optimalStartTime.toISOString()),
+      difference: formatTimeDifference(
+        calculateTimeDifference(
+          optimalStartTime.toISOString(),
+          new Date().toISOString()
+        )
+      ),
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Generate ETA message for TO_ORIGIN status
+ * ETA to origin with positive/negative difference
+ */
+function generateToOriginMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {label: string; duration: string; difference?: string} | null {
+  const {etaToOrigin, estimatedStartTime} = props;
+
+  if (!etaToOrigin) {
+    return null;
+  }
+
+  const duration = formatEtaDuration(etaToOrigin, t);
+  if (!duration) return null;
+
+  // Calculate difference from initial ETA
+  const diffFromInitial =
+    estimatedStartTime !== null && etaToOrigin !== undefined
+      ? calculateTimeDifference(estimatedStartTime, etaToOrigin)
+      : null;
+
+  const difference =
+    diffFromInitial !== null
+      ? formatTimeDifference(diffFromInitial)
+      : undefined;
+
+  return {
+    label: t("segments.eta.estimatedArrivalToOrigin"),
+    duration: formatDateTime(etaToOrigin),
+    difference,
+  };
+}
+
+/**
+ * Generate message for AT_ORIGIN, LOADING, IN_CUSTOMS statuses
+ * Optimal time to start moving to destination with time difference
+ */
+function generateAtOriginMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {label: string; duration: string; difference?: string} | null {
+  const {estimatedFinishTime, durationOriginToDestination} = props;
+
+  // If we have ETA to destination, show it
+  if (durationOriginToDestination) {
+    const totalEta = new Date(
+      new Date(estimatedFinishTime || new Date().toISOString()).getTime() -
+        durationOriginToDestination * 1000
+    );
+    const difference = calculateTimeDifference(
+      totalEta.toISOString(),
+      new Date().toISOString()
+    );
+
+    return {
+      label: t("segments.eta.optimalStartToDestination"),
+      duration: formatDateTime(totalEta.toISOString()),
+      difference: formatTimeDifference(difference),
+    };
+  }
+
+  // If we have estimated finish time but no GPS ETA, show planned time
+  if (estimatedFinishTime) {
+    const now = new Date();
+    const plannedFinish = new Date(estimatedFinishTime);
+    const diffMs = plannedFinish.getTime() - now.getTime();
+
+    // Show both positive (time remaining) and negative (time passed) values
+    const absDiffMs = Math.abs(diffMs);
+    const totalMinutes = Math.floor(absDiffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    const parts: string[] = [];
+    if (hours > 0) {
+      parts.push(
+        `${hours} ${
+          hours === 1 ? t("segments.eta.hour") : t("segments.eta.hours")
+        }`
+      );
+    }
+    if (minutes > 0) {
+      parts.push(
+        `${minutes} ${
+          minutes === 1 ? t("segments.eta.minute") : t("segments.eta.minutes")
+        }`
+      );
+    }
+
+    const duration = parts.join(" ") || "";
+    if (duration) {
+      // Add negative sign if time has passed
+      const displayDuration = diffMs < 0 ? `-${duration}` : duration;
+
+      // Calculate difference for display
+      const diffFromPlanned = calculateTimeDifference(
+        estimatedFinishTime,
+        new Date().toISOString()
+      );
+      const difference =
+        diffFromPlanned !== null
+          ? formatTimeDifference(diffFromPlanned)
+          : undefined;
+
+      return {
+        label: t("segments.eta.plannedArrivalToDestination"),
+        duration: displayDuration,
+        difference,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Generate ETA message for TO_DESTINATION status
+ * Planned arrival time with difference from GPS-based ETA
+ */
+function generateToDestinationMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {label: string; duration: string; difference?: string} | null {
+  const {estimatedFinishTime, etaToDestination} = props;
+
+  // If we have estimated finish time but no GPS ETA, show planned time
+  if (estimatedFinishTime) {
+    const now = new Date();
+    const plannedFinish = new Date(estimatedFinishTime);
+    const diffMs = plannedFinish.getTime() - now.getTime();
+
+    // Show both positive (time remaining) and negative (time passed) values
+    const absDiffMs = Math.abs(diffMs);
+    const totalMinutes = Math.floor(absDiffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    const parts: string[] = [];
+    if (hours > 0) {
+      parts.push(
+        `${hours} ${
+          hours === 1 ? t("segments.eta.hour") : t("segments.eta.hours")
+        }`
+      );
+    }
+    if (minutes > 0) {
+      parts.push(
+        `${minutes} ${
+          minutes === 1 ? t("segments.eta.minute") : t("segments.eta.minutes")
+        }`
+      );
+    }
+
+    const duration = parts.join(" ") || "";
+    if (duration) {
+      // Add negative sign if time has passed
+      const displayDuration = diffMs < 0 ? `-${duration}` : duration;
+
+      // Calculate difference for display
+      const diffFromPlanned = calculateTimeDifference(
+        estimatedFinishTime,
+        etaToDestination
+      );
+      const difference =
+        diffFromPlanned !== null
+          ? formatTimeDifference(diffFromPlanned)
+          : undefined;
+
+      return {
+        label: t("segments.eta.plannedArrivalToDestination"),
+        duration: displayDuration,
+        difference,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Generate ETA message for AT_DESTINATION status
+ * Planned arrival time with difference from GPS-based ETA
+ */
+function generateAtDestinationMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {label: string; duration: string; difference?: string} | null {
+  const {estimatedFinishTime, arrivedDestinationAt} = props;
+
+  // If we have estimated finish time but no GPS ETA, show planned time
+  if (estimatedFinishTime) {
+    const now = new Date();
+    const plannedFinish = new Date(estimatedFinishTime);
+    const diffMs = plannedFinish.getTime() - now.getTime();
+
+    // Show both positive (time remaining) and negative (time passed) values
+    const absDiffMs = Math.abs(diffMs);
+    const totalMinutes = Math.floor(absDiffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    const parts: string[] = [];
+    if (hours > 0) {
+      parts.push(
+        `${hours} ${
+          hours === 1 ? t("segments.eta.hour") : t("segments.eta.hours")
+        }`
+      );
+    }
+    if (minutes > 0) {
+      parts.push(
+        `${minutes} ${
+          minutes === 1 ? t("segments.eta.minute") : t("segments.eta.minutes")
+        }`
+      );
+    }
+
+    const duration = parts.join(" ") || "";
+    if (duration) {
+      // Add negative sign if time has passed
+      // const displayDuration = diffMs < 0 ? `-${duration}` : duration;
+
+      // Calculate difference for display
+      const diffFromPlanned = calculateTimeDifference(
+        estimatedFinishTime,
+        arrivedDestinationAt
+      );
+      const difference =
+        diffFromPlanned !== null
+          ? formatTimeDifference(diffFromPlanned)
+          : undefined;
+
+      return {
+        label: t("segments.eta.arrivedAtDestination"),
+        duration: formatDateTime(arrivedDestinationAt),
+        difference,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Generate completion message for DELIVERED status
+ * Summary of differences from predictions and plans
+ */
+function generateDeliveredMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {label: string; duration: string; details?: string} | null {
+  const {
+    estimatedStartTime,
+    startedAt,
+    estimatedFinishTime,
+    deliveredAt,
+    arrivedOriginAt,
+    etaToOrigin,
+  } = props;
+
+  if (!deliveredAt) {
+    return null;
+  }
+
+  // Calculate overall difference
+  const overallDiff = calculateTimeDifference(estimatedFinishTime, deliveredAt);
+  const overallDiffStr =
+    overallDiff !== null ? formatTimeDifference(overallDiff) : "";
+
+  // Build details about differences
+  const details: string[] = [];
+
+  if (startedAt && estimatedStartTime) {
+    const startDiff = calculateTimeDifference(estimatedStartTime, startedAt);
+    if (startDiff !== null) {
+      const diffStr = formatTimeDifference(startDiff);
+      details.push(
+        (t as (key: string, options?: Record<string, string>) => string)(
+          "segments.eta.delivered.startDifference",
+          {difference: diffStr}
+        )
+      );
+    }
+  }
+
+  if (arrivedOriginAt && etaToOrigin) {
+    const originDiff = calculateTimeDifference(etaToOrigin, arrivedOriginAt);
+    if (originDiff !== null) {
+      const diffStr = formatTimeDifference(originDiff);
+      details.push(
+        (t as (key: string, options?: Record<string, string>) => string)(
+          "segments.eta.delivered.originDifference",
+          {difference: diffStr}
+        )
+      );
+    }
+  }
+
+  if (overallDiffStr) {
+    details.push(
+      (t as (key: string, options?: Record<string, string>) => string)(
+        "segments.eta.delivered.overallDifference",
+        {difference: overallDiffStr}
+      )
+    );
+  }
+
+  return {
+    label: t("segments.eta.delivered.completed"),
+    duration: formatDateTime(deliveredAt),
+    details: details.length > 0 ? details.join(" • ") : undefined,
+  };
+}
+
+/**
+ * Generate dynamic ETA message based on segment status
+ */
+function generateStatusBasedMessage(
+  props: SegmentInfoSummaryProps,
+  t: (key: string, options?: Record<string, unknown>) => string
+): {
+  label: string;
+  duration: string;
+  difference?: string;
+  details?: string;
+} | null {
+  const {status} = props;
+
+  if (!status) {
+    // Fallback to old logic if no status provided
+    return null;
+  }
+
+  switch (status) {
+    case SEGMENT_STATUS.ASSIGNED:
+      return generateAssignedMessage(props, t);
+    case SEGMENT_STATUS.TO_ORIGIN:
+      return generateToOriginMessage(props, t);
+    case SEGMENT_STATUS.AT_ORIGIN:
+    case SEGMENT_STATUS.LOADING:
+    case SEGMENT_STATUS.IN_CUSTOMS:
+      return generateAtOriginMessage(props, t);
+    case SEGMENT_STATUS.TO_DESTINATION:
+      return generateToDestinationMessage(props, t);
+    case SEGMENT_STATUS.AT_DESTINATION:
+      return generateAtDestinationMessage(props, t);
+    case SEGMENT_STATUS.DELIVERED:
+      return generateDeliveredMessage(props, t);
+    default:
+      return null;
+  }
+}
+
 export default function SegmentInfoSummary({
   vehicleType,
   estimatedStartTime,
@@ -209,6 +651,19 @@ export default function SegmentInfoSummary({
   documents,
   segmentId,
   driverId,
+  status,
+  arrivedOriginAt,
+  startLoadingAt,
+  loadingCompletedAt,
+  enterCustomsAt,
+  customsClearedAt,
+  arrivedDestinationAt,
+  deliveredAt,
+  estLoadingCompletionTime,
+  estCustomsClearanceTime,
+  initialEtaToOrigin,
+  distanceToOrigin,
+  durationOriginToDestination,
 }: SegmentInfoSummaryProps) {
   const {t} = useTranslation();
   const [fetchedDocuments, setFetchedDocuments] = useState<DocumentItem[]>([]);
@@ -341,22 +796,54 @@ export default function SegmentInfoSummary({
   const etaOriginDuration = formatEtaDuration(etaToOrigin, t);
   const lastGpsUpdateFormatted = formatTimeAgo(lastGpsUpdate, t);
 
-  // Determine what to display for ETA
-  // Only show ETA if we have a valid non-empty duration
-  const etaDisplay =
-    etaToDestination && etaDestinationDuration
-      ? {
-          duration: etaDestinationDuration,
-          label: t("segments.eta.estimatedArrivalToDestination"),
-          type: "destination" as const,
-        }
-      : etaToOrigin && etaOriginDuration
-      ? {
-          duration: etaOriginDuration,
-          label: t("segments.eta.estimatedArrivalToOrigin"),
-          type: "origin" as const,
-        }
-      : null;
+  // Generate status-based message
+  const statusBasedMessage = generateStatusBasedMessage(
+    {
+      estimatedStartTime,
+      estimatedFinishTime,
+      startedAt,
+      etaToOrigin,
+      etaToDestination,
+      lastGpsUpdate,
+      status,
+      arrivedOriginAt,
+      startLoadingAt,
+      loadingCompletedAt,
+      enterCustomsAt,
+      customsClearedAt,
+      arrivedDestinationAt,
+      deliveredAt,
+      estLoadingCompletionTime,
+      estCustomsClearanceTime,
+      initialEtaToOrigin,
+      distanceToOrigin,
+      durationOriginToDestination,
+    },
+    t
+  );
+
+  // Fallback to old logic if status-based message is not available
+  const etaDisplay = statusBasedMessage
+    ? {
+        duration: statusBasedMessage.duration,
+        label: statusBasedMessage.label,
+        difference: statusBasedMessage.difference,
+        details: statusBasedMessage.details,
+        type: "statusBased" as const,
+      }
+    : etaToDestination && etaDestinationDuration
+    ? {
+        duration: etaDestinationDuration,
+        label: t("segments.eta.estimatedArrivalToDestination"),
+        type: "destination" as const,
+      }
+    : etaToOrigin && etaOriginDuration
+    ? {
+        duration: etaOriginDuration,
+        label: t("segments.eta.estimatedArrivalToOrigin"),
+        type: "origin" as const,
+      }
+    : null;
 
   return (
     <div dir="ltr" className="bg-white rounded-xl space-y-4 mt-4">
@@ -373,10 +860,24 @@ export default function SegmentInfoSummary({
                 <span className="text-slate-500 font-medium">
                   {etaDisplay.duration}
                 </span>
-                <span className="text-slate-500 text-xs font-light">
-                  {" "}
-                  {t("segments.eta.basedOnLatestGpsUpdate")}
-                </span>
+                {etaDisplay.difference && (
+                  <span
+                    className={`font-medium ml-1 ${
+                      etaDisplay.difference.startsWith("+")
+                        ? "text-green-600"
+                        : etaDisplay.difference.startsWith("-")
+                        ? "text-red-600"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    ({etaDisplay.difference})
+                  </span>
+                )}
+                {etaDisplay.type === "statusBased" && etaDisplay.details ? (
+                  <div className="text-slate-500 text-xs font-light mt-1">
+                    {etaDisplay.details}
+                  </div>
+                ) : null}
               </>
             ) : (
               <span className="text-slate-500 text-xs font-light">

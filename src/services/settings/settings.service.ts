@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { http } from "../../lib/http";
+import {z} from "zod";
+import {http} from "../../lib/http";
 
 // Type definitions matching server DTOs
 export type NotificationChannel = "system" | "email" | "sms" | "mobile_push";
@@ -38,14 +38,14 @@ export interface UpdateNotificationSettings {
 // SLA Settings
 export interface SlaSettings {
   loadingTimeHours?: number; // 1-720 hours
-  transitTimeHours?: number; // 1-720 hours
+  customsClearanceTimeHours?: number; // 1-720 hours
   unloadingTimeHours?: number; // 1-720 hours
   arrivalRadiusKm?: number; // 1-100 km
 }
 
 export interface UpdateSlaSettings {
   loadingTimeHours?: number;
-  transitTimeHours?: number;
+  customsClearanceTimeHours?: number;
   unloadingTimeHours?: number;
   arrivalRadiusKm?: number;
 }
@@ -68,7 +68,12 @@ export interface SettingsOptions {
 // Zod schemas for validation
 const distanceUnitSchema = z.enum(["km", "mile"]);
 const weightUnitSchema = z.enum(["kg", "lb"]);
-const notificationChannelSchema = z.enum(["system", "email", "sms", "mobile_push"]);
+const notificationChannelSchema = z.enum([
+  "system",
+  "email",
+  "sms",
+  "mobile_push",
+]);
 
 const generalSettingsSchema = z.object({
   companyName: z.string().optional(),
@@ -85,7 +90,7 @@ const notificationSettingsSchema = z.object({
 
 const slaSettingsSchema = z.object({
   loadingTimeHours: z.number().int().min(1).max(720).optional(),
-  transitTimeHours: z.number().int().min(1).max(720).optional(),
+  customsClearanceTimeHours: z.number().int().min(1).max(720).optional(),
   unloadingTimeHours: z.number().int().min(1).max(720).optional(),
   arrivalRadiusKm: z.number().int().min(1).max(100).optional(),
 });
@@ -129,7 +134,7 @@ export async function getSettingsByCategory(
 ): Promise<GeneralSettings | NotificationSettings | SlaSettings> {
   try {
     const response = await http.get(`/settings/${category}`);
-    
+
     switch (category) {
       case "general":
         return generalSettingsSchema.parse(response.data);
@@ -176,7 +181,7 @@ export async function updateSettingsByCategory(
     }
 
     const response = await http.put(`/settings/${category}`, validatedData);
-    
+
     switch (category) {
       case "general":
         return generalSettingsSchema.parse(response.data);
@@ -220,9 +225,13 @@ export async function getAvailableOptions(): Promise<SettingsOptions> {
 /**
  * Get single setting by key
  */
-export async function getSettingByKey(key: string): Promise<{ key: string; value: any }> {
+export async function getSettingByKey(
+  key: string
+): Promise<{key: string; value: any}> {
   try {
-    const response = await http.get<{ key: string; value: any }>(`/settings/key/${key}`);
+    const response = await http.get<{key: string; value: any}>(
+      `/settings/key/${key}`
+    );
     return response.data;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -235,13 +244,13 @@ export async function getSettingByKey(key: string): Promise<{ key: string; value
 /**
  * Upload logo file
  */
-export async function uploadLogo(file: File): Promise<{ url: string }> {
+export async function uploadLogo(file: File): Promise<{url: string}> {
   try {
     const formData = new FormData();
     formData.append("file", file);
-    
-    const response = await http.post<{ url: string }>("/settings/logo", formData);
-    
+
+    const response = await http.post<{url: string}>("/settings/logo", formData);
+
     return response.data;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -250,4 +259,3 @@ export async function uploadLogo(file: File): Promise<{ url: string }> {
     throw new Error("Failed to upload logo");
   }
 }
-

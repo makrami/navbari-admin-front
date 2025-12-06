@@ -106,4 +106,17 @@ export interface Segment {
   needToAction?: boolean;
   hasAlerts?: boolean;
   alertMessage?: string;
+
+  // Estimated values
+  distanceToOrigin: number | null;
+  initialEtaToOrigin: string | null;
+  initialDistanceToOrigin: number | null;
+  estLoadingCompletionTime: string | null;
+  loadingCompletedAt: string | null;
+
+  enterCustomsAt: string | null;
+  customsClearedAt: string | null;
+
+  estCustomsClearanceTime: string | null;
+  durationOriginToDestination: number | null;
 }

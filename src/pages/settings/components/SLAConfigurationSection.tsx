@@ -1,11 +1,11 @@
-import { useTranslation } from "react-i18next";
-import { NumericInputField } from "./NumericInputField";
+import {useTranslation} from "react-i18next";
+import {NumericInputField} from "./NumericInputField";
 
 type SLAConfigurationSectionProps = {
   loadingTime: number;
   onLoadingTimeChange: (value: number) => void;
-  transitTime: number;
-  onTransitTimeChange: (value: number) => void;
+  customsClearanceTime: number;
+  onCustomsClearanceTimeChange: (value: number) => void;
   unloadingTime: number;
   onUnloadingTimeChange: (value: number) => void;
 };
@@ -13,12 +13,12 @@ type SLAConfigurationSectionProps = {
 export function SLAConfigurationSection({
   loadingTime,
   onLoadingTimeChange,
-  transitTime,
-  onTransitTimeChange,
+  customsClearanceTime,
+  onCustomsClearanceTimeChange,
   unloadingTime,
   onUnloadingTimeChange,
 }: SLAConfigurationSectionProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   return (
     <div className="bg-slate-100 rounded-lg p-4 ">
@@ -41,10 +41,10 @@ export function SLAConfigurationSection({
         />
         <NumericInputField
           label={t(
-            "settings.sections.systemParameters.slaConfiguration.transitTime"
+            "settings.sections.systemParameters.slaConfiguration.customsClearanceTime"
           )}
-          value={transitTime}
-          onChange={onTransitTimeChange}
+          value={customsClearanceTime}
+          onChange={onCustomsClearanceTimeChange}
           unit="HOURS"
         />
         <NumericInputField

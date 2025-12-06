@@ -1,12 +1,12 @@
-import { SLAConfigurationSection } from "./SLAConfigurationSection";
+import {SLAConfigurationSection} from "./SLAConfigurationSection";
 
-import { SettingsFooter } from "./SettingsFooter";
+import {SettingsFooter} from "./SettingsFooter";
 
 type SystemParametersSettingsProps = {
   loadingTime: number;
   onLoadingTimeChange: (value: number) => void;
-  transitTime: number;
-  onTransitTimeChange: (value: number) => void;
+  customsClearanceTime: number;
+  onCustomsClearanceTimeChange: (value: number) => void;
   unloadingTime: number;
   onUnloadingTimeChange: (value: number) => void;
   changeCount: number;
@@ -18,8 +18,8 @@ type SystemParametersSettingsProps = {
 export function SystemParametersSettings({
   loadingTime,
   onLoadingTimeChange,
-  transitTime,
-  onTransitTimeChange,
+  customsClearanceTime,
+  onCustomsClearanceTimeChange,
   unloadingTime,
   onUnloadingTimeChange,
 
@@ -33,8 +33,8 @@ export function SystemParametersSettings({
       <SLAConfigurationSection
         loadingTime={loadingTime}
         onLoadingTimeChange={onLoadingTimeChange}
-        transitTime={transitTime}
-        onTransitTimeChange={onTransitTimeChange}
+        customsClearanceTime={customsClearanceTime}
+        onCustomsClearanceTimeChange={onCustomsClearanceTimeChange}
         unloadingTime={unloadingTime}
         onUnloadingTimeChange={onUnloadingTimeChange}
       />

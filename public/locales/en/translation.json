@@ -149,13 +149,62 @@
       "hours": "hours",
       "minutesAgo": "{{count}} Minutes ago",
       "hoursAgo": "{{count}} Hours ago",
-      "daysAgo": "{{count}} Days ago"
+      "daysAgo": "{{count}} Days ago",
+      "optimalStartTime": "Optimal start time in",
+      "optimalStartToDestination": "Optimal start to destination in",
+      "plannedArrivalToDestination": "Planned arrival in",
+      "arrivedAtDestination": "Arrived at destination",
+      "delivered": {
+        "completed": "Segment completed",
+        "startDifference": "Start: {{difference}}",
+        "originDifference": "Origin: {{difference}}",
+        "overallDifference": "Overall: {{difference}}"
+      }
     },
     "page": {
       "title": "Segments",
       "loading": "Loading segments...",
       "closeLabel": "Close",
       "empty": "No segments found"
+    },
+    "progressSteps": {
+      "labels": {
+        "start": "Start",
+        "toOrig": "To Origin",
+        "inOrig": "In Origin",
+        "loading": "Loading",
+        "inCustoms": "In Customs",
+        "toDest": "To Destination",
+        "atDest": "At Destination",
+        "delivered": "Delivered"
+      },
+      "leftLabels": {
+        "assigned": "Assigned",
+        "started": "Started",
+        "arrivedAt": "Arrived At",
+        "planned": "Planned"
+      },
+      "rightLabels": {
+        "startMovingAt": "Start Moving At",
+        "estArrival": "Est. Arrival",
+        "startLoadingAt": "Start Loading At",
+        "estComplete": "Est. Complete",
+        "estClear": "Est. Clear",
+        "arrivedAt": "Arrived At",
+        "deliveredAt": "Delivered At"
+      },
+      "rightLabelsCompleted": {
+        "startMovingAt": "Started Moving At",
+        "arrivedAt": "Arrived At",
+        "startLoadingAt": "Started Loading At",
+        "completedAt": "Completed At",
+        "clearedAt": "Cleared At",
+        "deliveredAt": "Delivered At"
+      },
+      "centerLabels": {
+        "distance": "Distance",
+        "duration": "Duration"
+      }
     }
   },
   "misc": {
@@ -590,7 +639,8 @@
           "description": "Define service-level agreements per shipment",
           "loadingTime": "Loading time",
           "transitTime": "Transit time",
-          "unloadingTime": "Unloading time"
+          "unloadingTime": "Unloading time",
+          "customsClearanceTime": "Customs clearance time"
         },
         "etaCalculationMethod": {
           "title": "ETA Calculation Method",

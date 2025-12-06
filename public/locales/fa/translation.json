@@ -149,13 +149,62 @@
       "hours": "ساعت",
       "minutesAgo": "{{count}} دقیقه پیش",
       "hoursAgo": "{{count}} ساعت پیش",
-      "daysAgo": "{{count}} روز پیش"
+      "daysAgo": "{{count}} روز پیش",
+      "optimalStartTime": "زمان بهینه حرکت در",
+      "optimalStartToDestination": "زمان بهینه حرکت به سمت مقصد در",
+      "plannedArrivalToDestination": "زمان برنامه‌ریزی شده برای رسیدن در",
+      "arrivedAtDestination": "زمان رسیدن به مقصد",
+      "delivered": {
+        "completed": "بخش تکمیل شد",
+        "startDifference": "شروع: {{difference}}",
+        "originDifference": "مبدأ: {{difference}}",
+        "overallDifference": "کلی: {{difference}}"
+      }
     },
     "page": {
       "title": "بخش‌ها",
       "loading": "در حال بارگذاری بخش‌ها...",
       "closeLabel": "بستن",
       "empty": "بخشی یافت نشد"
+    },
+    "progressSteps": {
+      "labels": {
+        "start": "شروع",
+        "toOrig": "به سمت مبدأ",
+        "inOrig": "در مبدأ",
+        "loading": "بارگیری",
+        "inCustoms": "در گمرک",
+        "toDest": "به سمت مقصد",
+        "atDest": "در مقصد",
+        "delivered": "تحویل شده"
+      },
+      "leftLabels": {
+        "assigned": "اختصاص داده شده",
+        "started": "شروع شده",
+        "arrivedAt": "رسیده در",
+        "planned": "برنامه‌ریزی شده"
+      },
+      "rightLabels": {
+        "startMovingAt": "شروع حرکت در",
+        "estArrival": "تخمینی رسیدن",
+        "startLoadingAt": "شروع بارگیری در",
+        "estComplete": "تخمینی تکمیل",
+        "estClear": "تخمینی ترخیص",
+        "arrivedAt": "رسیده در",
+        "deliveredAt": "تحویل شده در"
+      },
+      "rightLabelsCompleted": {
+        "startMovingAt": "شروع حرکت در",
+        "arrivedAt": "رسیده در",
+        "startLoadingAt": "شروع بارگیری در",
+        "completedAt": "تکمیل شده در",
+        "clearedAt": "ترخیص شده در",
+        "deliveredAt": "تحویل شده در"
+      },
+      "centerLabels": {
+        "distance": "فاصله",
+        "duration": "مدت زمان"
+      }
     }
   },
   "misc": {
@@ -590,7 +639,8 @@
           "description": "تعریف توافق‌نامه‌های سطح خدمات به ازای هر محموله",
           "loadingTime": "زمان بارگیری",
           "transitTime": "زمان حمل و نقل",
-          "unloadingTime": "زمان تخلیه"
+          "unloadingTime": "زمان تخلیه",
+          "customsClearanceTime": "زمان ترخیص گمرکی"
         },
         "etaCalculationMethod": {
           "title": "روش محاسبه ETA",

@@ -1,10 +1,10 @@
-import { cn } from "../../../../shared/utils/cn";
-import type { StepConfig } from "../config/progressSteps";
-import { AlertTriangleIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import {cn} from "../../../../shared/utils/cn";
+import type {StepConfig} from "../config/progressSteps";
+import {AlertTriangleIcon} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 type ProgressIconCardProps = {
-  Icon: React.ComponentType<{ className?: string }>;
+  Icon: React.ComponentType<{className?: string}>;
   isCompleted: boolean;
   isUpcoming: boolean;
   isActive?: boolean;
@@ -16,7 +16,7 @@ export function ProgressIconCard({
   Icon,
   isCompleted,
   isUpcoming,
-  isActive = false,
+  isActive,
   activeBgColor,
   activeIconColor,
 }: ProgressIconCardProps) {
@@ -46,6 +46,10 @@ type ProgressActiveCardProps = {
   estFinishAt?: string;
   distance?: string;
   alertMessage?: string;
+  isCompleted?: boolean;
+  isUpcoming?: boolean;
+  isActive?: boolean;
+  isDelivered?: boolean;
   onAlertClick?: () => void;
 };
 
@@ -56,11 +60,14 @@ export function ProgressActiveCard({
   estFinishAt,
   distance,
   alertMessage,
+  isCompleted,
+  isUpcoming,
+  isActive,
+  isDelivered,
   onAlertClick,
 }: ProgressActiveCardProps) {
   const Icon = step.icon;
-  const { t } = useTranslation();
-  const isDelivered = step.key === "delivered";
+  const {t} = useTranslation();
 
   const handleAlertClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -73,16 +80,18 @@ export function ProgressActiveCard({
     <div
       className={cn(
         "min-w-[300px] flex items-center justify-between rounded-lg px-2 h-12 relative",
-        step.bgColor,
-        isDelivered && "border-2 border-green-600"
+        isDelivered && isActive && "border-2 border-green-600",
+        isCompleted && "border-2 border-green-600",
+        isUpcoming && "border-2 border-slate-400",
+        isActive && !isDelivered && "border-2 border-yellow-600"
       )}
     >
       {/* Alert icon positioned at top-left, partially overlapping */}
       {showWarningIcon && (
-        <div className="absolute -top-2 -left-3 z-50">
+        <div className="absolute -top-2 -left-3 z-50 ">
           <div className="relative group">
             <div
-              className="bg-red-100 rounded-full p-1 border border-red-600 cursor-pointer hover:bg-red-200 transition-colors"
+              className="bg-red-100 rounded-full p-1 border  border-red-600 cursor-pointer hover:bg-red-200 transition-colors"
               onClick={handleAlertClick}
               title={
                 alertMessage
@@ -90,7 +99,7 @@ export function ProgressActiveCard({
                   : undefined
               }
             >
-              <AlertTriangleIcon className="size-3 text-red-600" />
+              <AlertTriangleIcon className="size-3 text-red-600 " />
             </div>
             {/* Tooltip - positioned to the right to avoid overflow clipping */}
             <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block z-50 whitespace-nowrap">
@@ -111,84 +120,97 @@ export function ProgressActiveCard({
         <span
           className={cn(
             "text-xs font-bold",
-            step.iconColor === "text-yellow-600" && "text-yellow-700/80",
-            step.iconColor === "text-orange-600" && "text-orange-700/80",
-            step.iconColor === "text-green-600" && "text-green-700/80"
+            isDelivered && isActive && "text-green-700/80",
+            isActive && !isDelivered && "text-yellow-700/80",
+            isUpcoming && "text-slate-700/80",
+            isCompleted && "text-green-700/80"
           )}
         >
-          Planned
+          {isCompleted ? step.leftLabelCompleted : step.leftLabel}
         </span>
         <span
           className={cn(
             "text-xs ",
-            step.iconColor === "text-yellow-600" && "text-yellow-700/80",
-            step.iconColor === "text-orange-600" && "text-orange-700/80",
-            step.iconColor === "text-green-600" && "text-green-700/80"
+            isDelivered && isActive && "text-green-700/80",
+
+            isActive && !isDelivered && "text-yellow-700/80",
+            isUpcoming && "text-slate-700/80",
+            isCompleted && "text-green-700/80"
           )}
         >
-          {plannedDate}
+          {plannedDate || "-"}
         </span>
       </div>
       <div className="flex flex-col justify-between h-full items-center py-1">
         <div className="flex items-center gap-0.5">
-          <Icon className={cn("size-3", step.iconColor)} />
+          <Icon
+            className={cn(
+              "size-3",
+              isDelivered && isActive && "text-green-700",
+              isActive && !isDelivered && "text-yellow-700",
+              isUpcoming && "text-slate-400",
+              isCompleted && "text-green-700"
+            )}
+          />
           <span
             className={cn(
               "text-sm font-semibold",
-              step.iconColor === "text-yellow-600" && "text-yellow-700",
-              step.iconColor === "text-orange-600" && "text-orange-700",
-              step.iconColor === "text-green-600" && "text-green-700"
+              isDelivered && isActive && "text-green-700",
+              isActive && !isDelivered && "text-yellow-700",
+              isUpcoming && "text-slate-700",
+              isCompleted && "text-green-700"
             )}
           >
             {step.label}
           </span>
         </div>
-        <span
-          className={cn(
-            "text-xs ",
-            step.iconColor === "text-yellow-600" && "text-yellow-700/80",
-            step.iconColor === "text-orange-600" && "text-orange-700/80",
-            step.iconColor === "text-green-600" && "text-green-700/80"
-          )}
-        >
-          {distance ? distance : "24 KM"}
-        </span>
+        {distance && (
+          <span
+            className={cn(
+              "text-xs ",
+              isDelivered && isActive && "text-green-700/80",
+              isActive && !isDelivered && "text-yellow-700/80",
+              isUpcoming && "text-slate-700/80",
+              isCompleted && "text-green-700/80"
+            )}
+          >
+            {distance}
+          </span>
+        )}
       </div>
       <div className="flex flex-col justify-between h-full items-end py-1">
         <span
           className={cn(
             "text-xs font-bold",
-            showWarningIcon && "text-red-600",
+            isDelivered && isActive && "text-green-700/80",
+
+            showWarningIcon && isActive && "text-red-600",
             !showWarningIcon &&
-              step.iconColor === "text-yellow-600" &&
+              isActive &&
+              !isDelivered &&
               "text-yellow-700/80",
-            !showWarningIcon &&
-              step.iconColor === "text-orange-600" &&
-              "text-orange-700/80",
-            !showWarningIcon &&
-              step.iconColor === "text-green-600" &&
-              "text-green-700/80"
+
+            isUpcoming && "text-slate-700/80",
+            isCompleted && "text-green-700/80"
           )}
         >
-          Est.
+          {isCompleted ? step.rightLabelCompleted : step.rightLabel}
         </span>
 
         <span
           className={cn(
             "text-xs ",
-            showWarningIcon && "text-red-600",
+            isDelivered && isActive && "text-green-700/80",
+            showWarningIcon && isActive && "text-red-600",
             !showWarningIcon &&
-              step.iconColor === "text-yellow-600" &&
+              isActive &&
+              !isDelivered &&
               "text-yellow-700/80",
-            !showWarningIcon &&
-              step.iconColor === "text-orange-600" &&
-              "text-orange-700/80",
-            !showWarningIcon &&
-              step.iconColor === "text-green-600" &&
-              "text-green-700/80"
+            isUpcoming && "text-slate-700/80",
+            isCompleted && "text-green-700/80"
           )}
         >
-          {estFinishAt}
+          {estFinishAt || "-"}
         </span>
       </div>
     </div>

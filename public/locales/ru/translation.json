@@ -149,13 +149,62 @@
       "hours": "часов",
       "minutesAgo": "{{count}} Минут назад",
       "hoursAgo": "{{count}} Часов назад",
-      "daysAgo": "{{count}} Дней назад"
+      "daysAgo": "{{count}} Дней назад",
+      "optimalStartTime": "Оптимальное время начала в",
+      "optimalStartToDestination": "Оптимальное время начала к месту назначения в",
+      "plannedArrivalToDestination": "Запланированное время прибытия в",
+      "arrivedAtDestination": "Время прибытия в пункт назначения",
+      "delivered": {
+        "completed": "Сегмент завершен",
+        "startDifference": "Старт: {{difference}}",
+        "originDifference": "Отправление: {{difference}}",
+        "overallDifference": "Общее: {{difference}}"
+      }
     },
     "page": {
       "title": "Сегменты",
       "loading": "Загрузка сегментов...",
       "closeLabel": "Закрыть",
       "empty": "Сегменты не найдены"
+    },
+    "progressSteps": {
+      "labels": {
+        "start": "Старт",
+        "toOrig": "К пункту отправления",
+        "inOrig": "В пункте отправления",
+        "loading": "Загрузка",
+        "inCustoms": "На таможне",
+        "toDest": "К пункту назначения",
+        "atDest": "В пункте назначения",
+        "delivered": "Доставлено"
+      },
+      "leftLabels": {
+        "assigned": "Назначено",
+        "started": "Начато",
+        "arrivedAt": "Прибыло в",
+        "planned": "Запланировано"
+      },
+      "rightLabels": {
+        "startMovingAt": "Начать движение в",
+        "estArrival": "Приб. прибытие",
+        "startLoadingAt": "Начать загрузку в",
+        "estComplete": "Приб. завершение",
+        "estClear": "Приб. очистка",
+        "arrivedAt": "Прибыло в",
+        "deliveredAt": "Доставлено в"
+      },
+      "rightLabelsCompleted": {
+        "startMovingAt": "Начало движения в",
+        "arrivedAt": "Прибыло в",
+        "startLoadingAt": "Начало загрузки в",
+        "completedAt": "Завершено в",
+        "clearedAt": "Очищено в",
+        "deliveredAt": "Доставлено в"
+      },
+      "centerLabels": {
+        "distance": "Расстояние",
+        "duration": "Продолжительность"
+      }
     }
   },
   "sidebar": {
@@ -489,6 +538,31 @@
         "email": "Электронная почта",
         "sms": "SMS",
         "mobilePush": "Мобильный пуш"
+      },
+      "systemParameters": {
+        "title": "Системные параметры",
+        "description": "Точная настройка операционной логики",
+        "slaConfiguration": {
+          "title": "Конфигурация SLA",
+          "description": "Определение соглашений об уровне обслуживания для каждой отправки",
+          "loadingTime": "Время загрузки",
+          "transitTime": "Время транзита",
+          "unloadingTime": "Время разгрузки",
+          "customsClearanceTime": "Время таможенной очистки"
+        },
+        "etaCalculationMethod": {
+          "title": "Метод расчета ETA",
+          "description": "Выберите способ определения расчетного времени прибытия",
+          "realtimeGps": "На основе GPS в реальном времени",
+          "historicalData": "На основе исторических данных"
+        },
+        "gpsTracking": {
+          "title": "GPS и отслеживание",
+          "description": "Настройка отслеживания данных о местоположении и триггеров оповещений",
+          "gpsAlertDistance": "Расстояние оповещения GPS",
+          "pingInterval": "Интервал пинга",
+          "maxConcurrentShipments": "Макс. одновременных отправок на местную компанию"
+        }
       },
       "rolesPermissions": {
         "title": "Роли и разрешения",

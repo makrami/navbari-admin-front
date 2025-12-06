@@ -149,13 +149,62 @@
       "hours": "ساعات",
       "minutesAgo": "منذ {{count}} دقيقة",
       "hoursAgo": "منذ {{count}} ساعة",
-      "daysAgo": "منذ {{count}} يوم"
+      "daysAgo": "منذ {{count}} يوم",
+      "optimalStartTime": "الوقت الأمثل للبدء في",
+      "optimalStartToDestination": "الوقت الأمثل للبدء إلى الوجهة في",
+      "plannedArrivalToDestination": "الوقت المخطط للوصول في",
+      "arrivedAtDestination": "زمان الوصول إلى الوجهة",
+      "delivered": {
+        "completed": "اكتمل القسم",
+        "startDifference": "البدء: {{difference}}",
+        "originDifference": "المنشأ: {{difference}}",
+        "overallDifference": "الإجمالي: {{difference}}"
+      }
     },
     "page": {
       "title": "الأقسام",
       "loading": "جاري تحميل الأقسام...",
       "closeLabel": "إغلاق",
       "empty": "لم يتم العثور على أقسام"
+    },
+    "progressSteps": {
+      "labels": {
+        "start": "البداية",
+        "toOrig": "إلى المنشأ",
+        "inOrig": "في المنشأ",
+        "loading": "التحميل",
+        "inCustoms": "في الجمارك",
+        "toDest": "إلى الوجهة",
+        "atDest": "في الوجهة",
+        "delivered": "تم التسليم"
+      },
+      "leftLabels": {
+        "assigned": "مخصصة",
+        "started": "بدأت",
+        "arrivedAt": "وصلت في",
+        "planned": "مخططة"
+      },
+      "rightLabels": {
+        "startMovingAt": "بدء الحركة في",
+        "estArrival": "الوصول المقدر",
+        "startLoadingAt": "بدء التحميل في",
+        "estComplete": "الإكمال المقدر",
+        "estClear": "التخليص المقدر",
+        "arrivedAt": "وصلت في",
+        "deliveredAt": "تم التسليم في"
+      },
+      "rightLabelsCompleted": {
+        "startMovingAt": "بدأت الحركة في",
+        "arrivedAt": "وصلت في",
+        "startLoadingAt": "بدأ التحميل في",
+        "completedAt": "اكتملت في",
+        "clearedAt": "تم التخليص في",
+        "deliveredAt": "تم التسليم في"
+      },
+      "centerLabels": {
+        "distance": "المسافة",
+        "duration": "المدة"
+      }
     }
   },
   "sidebar": {
@@ -273,7 +322,7 @@
       }
     },
     "segments": {
-        "title": "الأقسام",
+      "title": "الأقسام",
       "addSegment": "إضافة قسم",
       "allActivities": "جميع الأنشطة",
       "progress": {
@@ -489,6 +538,31 @@
         "email": "البريد الإلكتروني",
         "sms": "رسالة نصية",
         "mobilePush": "إشعار الجوال"
+      },
+      "systemParameters": {
+        "title": "معاملات النظام",
+        "description": "ضبط منطق التشغيل بدقة",
+        "slaConfiguration": {
+          "title": "تكوين SLA",
+          "description": "تعريف اتفاقيات مستوى الخدمة لكل شحنة",
+          "loadingTime": "وقت التحميل",
+          "transitTime": "وقت العبور",
+          "unloadingTime": "وقت التفريغ",
+          "customsClearanceTime": "وقت التخليص الجمركي"
+        },
+        "etaCalculationMethod": {
+          "title": "طريقة حساب ETA",
+          "description": "اختر كيفية تحديد الوقت المتوقع للوصول",
+          "realtimeGps": "بناءً على GPS في الوقت الفعلي",
+          "historicalData": "بناءً على البيانات التاريخية"
+        },
+        "gpsTracking": {
+          "title": "GPS والتتبع",
+          "description": "تكوين كيفية تتبع بيانات الموقع ومتى يتم تشغيل التنبيهات",
+          "gpsAlertDistance": "مسافة تنبيه GPS",
+          "pingInterval": "فترة الإرسال",
+          "maxConcurrentShipments": "الحد الأقصى للشحنات المتزامنة لكل شركة محلية"
+        }
       },
       "rolesPermissions": {
         "title": "الأدوار والصلاحيات",
