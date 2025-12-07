@@ -85,7 +85,7 @@ export function useShipmentSegments(shipmentId: string | null) {
     refetchOnMount: true,
     refetchOnReconnect: true,
     staleTime: 0, // Always stale, triggers fetch every time
-    gcTime: 60_000, // 60 seconds
+    refetchInterval: 10000, // 10 seconds
   });
 
   // Maintain backward compatibility with existing code

@@ -14,14 +14,15 @@ import {
   sendChatAlert,
   sendChatMessage,
 } from "./chat.service";
-import { appendMessageToCache, updateConversationCache } from "./socket";
+import {appendMessageToCache, updateConversationCache} from "./socket";
 import type {
+  ConversationReadDto,
   MessageReadDto,
   SendChatAlertInput,
   SendChatMessageInput,
   UnreadCountResponse,
 } from "./chat.types";
-import { CHAT_MESSAGE_TYPE } from "./chat.types";
+import {CHAT_MESSAGE_TYPE} from "./chat.types";
 
 export const CHAT_MESSAGES_PAGE_SIZE = 30;
 
@@ -61,7 +62,7 @@ export function useConversationMessages(conversationId?: string) {
     queryKey: conversationId
       ? chatKeys.messages(conversationId)
       : ["chat", "messages", "noop"],
-    queryFn: ({ pageParam }) =>
+    queryFn: ({pageParam}) =>
       conversationId
         ? getConversationMessages(conversationId, {
             take: CHAT_MESSAGES_PAGE_SIZE,
@@ -95,7 +96,7 @@ export function useSendChatMessage() {
 
       if (!conversationId) {
         console.warn("⚠️ No conversationId found, skipping optimistic update");
-        return { tempId: null, conversationId: null };
+        return {tempId: null, conversationId: null};
       }
 
       const tempMessage: TemporaryMessage = {
@@ -125,14 +126,16 @@ export function useSendChatMessage() {
       });
       addTemporaryMessageToCache(queryClient, tempMessage);
 
-      return { tempId, conversationId };
+      return {tempId, conversationId};
     },
     onSuccess: (message, _variables, context) => {
       if (!context?.tempId || !context?.conversationId) {
         // Fallback: add message normally if no temp message was created
         appendMessageToCache(queryClient, message);
         updateConversationCache(queryClient, message);
-        invalidateChatQueries(queryClient, message.conversationId);
+        // Only invalidate conversations and unread count, not messages (already in cache)
+        queryClient.invalidateQueries({queryKey: chatKeys.conversations()});
+        queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
         return;
       }
 
@@ -145,8 +148,10 @@ export function useSendChatMessage() {
       );
       updateConversationCache(queryClient, message);
 
-      // Invalidate queries to ensure consistency
-      invalidateChatQueries(queryClient, message.conversationId);
+      // Only invalidate conversations and unread count, not messages (already updated in cache)
+      // The socket will also receive the message and update cache, but duplicate check prevents issues
+      queryClient.invalidateQueries({queryKey: chatKeys.conversations()});
+      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
       if (message.conversationId) {
         queryClient.invalidateQueries({
           queryKey: chatKeys.conversation(message.conversationId),
@@ -181,7 +186,7 @@ export function useSendChatAlert() {
 
       if (!conversationId) {
         console.warn("⚠️ No conversationId found, skipping optimistic update");
-        return { tempId: null, conversationId: null };
+        return {tempId: null, conversationId: null};
       }
 
       const tempMessage: TemporaryMessage = {
@@ -212,14 +217,16 @@ export function useSendChatAlert() {
       });
       addTemporaryMessageToCache(queryClient, tempMessage);
 
-      return { tempId, conversationId };
+      return {tempId, conversationId};
     },
     onSuccess: (message, _variables, context) => {
       if (!context?.tempId || !context?.conversationId) {
         // Fallback: add message normally if no temp message was created
         appendMessageToCache(queryClient, message);
         updateConversationCache(queryClient, message);
-        invalidateChatQueries(queryClient, message.conversationId);
+        // Only invalidate conversations and unread count, not messages (already in cache)
+        queryClient.invalidateQueries({queryKey: chatKeys.conversations()});
+        queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
         return;
       }
 
@@ -232,8 +239,10 @@ export function useSendChatAlert() {
       );
       updateConversationCache(queryClient, message);
 
-      // Invalidate queries to ensure consistency
-      invalidateChatQueries(queryClient, message.conversationId);
+      // Only invalidate conversations and unread count, not messages (already updated in cache)
+      // The socket will also receive the message and update cache, but duplicate check prevents issues
+      queryClient.invalidateQueries({queryKey: chatKeys.conversations()});
+      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
     },
     onError: (_error, _variables, context) => {
       if (!context?.tempId || !context?.conversationId) return;
@@ -272,8 +281,14 @@ function invalidateChatQueries(
   queryClient: ReturnType<typeof useQueryClient>,
   conversationId: string
 ) {
-  queryClient.invalidateQueries({ queryKey: chatKeys.conversations() });
-  queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount() });
+  // Update conversation cache directly instead of invalidating all conversations
+  // This prevents refetching all conversation lists
+  updateConversationReadStatus(queryClient, conversationId);
+
+  // Invalidate unread count (global) - needs refetch
+  queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
+
+  // Invalidate specific conversation and messages queries
   if (conversationId) {
     queryClient.invalidateQueries({
       queryKey: chatKeys.messages(conversationId),
@@ -284,6 +299,63 @@ function invalidateChatQueries(
   }
 }
 
+/**
+ * Updates the conversation cache to mark a conversation as read
+ * This updates all conversation list queries (including those with recipientType)
+ * without causing refetches - similar to updateConversationCache but for read status
+ */
+export function updateConversationReadStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  conversationId: string
+) {
+  const baseKey = chatKeys.conversations();
+
+  const updateConversation = (
+    oldConversations: ConversationReadDto[] | undefined
+  ): ConversationReadDto[] | undefined => {
+    if (!oldConversations) {
+      return oldConversations;
+    }
+
+    const foundConversation = oldConversations.find(
+      (conv) => conv.id === conversationId
+    );
+
+    if (!foundConversation) {
+      // Conversation not in this list, no update needed
+      return oldConversations;
+    }
+
+    // Update the conversation to mark as read (set unread counts to 0)
+    return oldConversations.map((conversation) => {
+      if (conversation.id !== conversationId) {
+        return conversation;
+      }
+
+      return {
+        ...conversation,
+        unreadMessageCount: 0,
+        unreadAlertCount: 0,
+      };
+    });
+  };
+
+  // Update all conversation queries that match the base key
+  // This matches: ["chat", "conversations"] and ["chat", "conversations", "driver"], etc.
+  queryClient.setQueriesData<ConversationReadDto[]>(
+    {
+      predicate: (query) => {
+        const queryKey = query.queryKey;
+        return (
+          queryKey.length >= baseKey.length &&
+          baseKey.every((key, index) => queryKey[index] === key)
+        );
+      },
+    },
+    updateConversation
+  );
+}
+
 // Helper function to get conversation ID from input
 async function getConversationIdFromInput(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -291,7 +363,7 @@ async function getConversationIdFromInput(
 ): Promise<string | null> {
   // Try to find conversation from cache
   const conversations = queryClient.getQueryData<
-    Array<{ id: string; driverId?: string | null; companyId?: string | null }>
+    Array<{id: string; driverId?: string | null; companyId?: string | null}>
   >(chatKeys.conversations());
 
   if (conversations) {

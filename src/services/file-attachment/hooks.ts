@@ -22,6 +22,11 @@ export function useSegmentFileAttachments(segmentId: string | null) {
     queryKey: fileAttachmentKeys.segment(segmentId!),
     queryFn: () => getSegmentFileAttachments(segmentId!),
     enabled: !!segmentId,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Always stale, triggers fetch every time
+    refetchInterval: 10000, // 10 seconds
   });
 }
 

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {useEffect, useState} from "react";
+import {useQueryClient} from "@tanstack/react-query";
 import FinancialSection from "./FinancialSection";
 import DocumentsSection from "./DocumentsSection";
 import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
@@ -20,7 +21,10 @@ import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
 import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
 import {cn} from "../../../../shared/utils/cn";
-import {getSegmentFileAttachments} from "../../../../services/file-attachment/file-attachment.service";
+import {
+  useSegmentFileAttachments,
+  fileAttachmentKeys,
+} from "../../../../services/file-attachment/hooks";
 import type {DocumentItem} from "./DocumentsSection";
 import {getFileSizesFromUrls} from "../utils/fileSize";
 import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
@@ -634,7 +638,8 @@ export default function SegmentInfoSummary({
   estimatedStartTime,
   startedAt,
   localCompany,
-  driverName,
+  companyId,
+
   estimatedFinishTime,
   finishedAt,
   etaToOrigin,
@@ -663,6 +668,7 @@ export default function SegmentInfoSummary({
 }: SegmentInfoSummaryProps) {
   const {t} = useTranslation();
   const isRTL = useRTL();
+  const queryClient = useQueryClient();
   const [fetchedDocuments, setFetchedDocuments] = useState<DocumentItem[]>([]);
   const [documentsWithSizes, setDocumentsWithSizes] = useState<DocumentItem[]>(
     []
@@ -670,6 +676,9 @@ export default function SegmentInfoSummary({
   const [chatInitialTab, setChatInitialTab] = useState<
     "all" | "chats" | "alerts"
   >("all");
+
+  // Use the hook to fetch file attachments
+  const {data: fileAttachments} = useSegmentFileAttachments(segmentId || null);
 
   // Create actionable alerts with translations
   const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
@@ -739,39 +748,35 @@ export default function SegmentInfoSummary({
     };
   }, [documents, segmentId]);
 
-  // Fetch documents when segmentId is provided
+  // Transform file attachments to DocumentItem format and fetch file sizes
   useEffect(() => {
-    if (!segmentId) {
+    if (!fileAttachments || !segmentId) {
       setFetchedDocuments([]);
       return;
     }
 
     let isMounted = true;
 
-    getSegmentFileAttachments(segmentId)
-      .then(async (fileAttachments) => {
-        if (!isMounted) return;
+    // Transform API response to DocumentItem format
+    const transformedDocuments: DocumentItem[] = fileAttachments.map(
+      (attachment) => ({
+        id: attachment.id,
+        name: formatFileType(attachment.fileType),
+        sizeLabel: "0 KB", // Will be updated after fetching file sizes
+        status: attachment.approvalStatus,
+        author: undefined, // API doesn't provide author name directly
+        thumbnailUrl: undefined, // API doesn't provide thumbnail
+        filePath: attachment.filePath,
+        rejectionComment: attachment.rejectionComment ?? undefined,
+      })
+    );
 
-        // Transform API response to DocumentItem format
-        const transformedDocuments: DocumentItem[] = fileAttachments.map(
-          (attachment) => ({
-            id: attachment.id,
-            name: formatFileType(attachment.fileType),
-            sizeLabel: "0 KB", // Will be updated after fetching file sizes
-            status: attachment.approvalStatus,
-            author: undefined, // API doesn't provide author name directly
-            thumbnailUrl: undefined, // API doesn't provide thumbnail
-            filePath: attachment.filePath,
-            rejectionComment: attachment.rejectionComment ?? undefined,
-          })
-        );
+    setFetchedDocuments(transformedDocuments);
 
-        setFetchedDocuments(transformedDocuments);
-
-        // Fetch file sizes in parallel
-        const filePaths = fileAttachments.map((a) => a.filePath);
-        const fileSizes = await getFileSizesFromUrls(filePaths);
-
+    // Fetch file sizes in parallel
+    const filePaths = fileAttachments.map((a) => a.filePath);
+    getFileSizesFromUrls(filePaths)
+      .then((fileSizes) => {
         if (!isMounted) return;
 
         // Update documents with file sizes
@@ -784,20 +789,20 @@ export default function SegmentInfoSummary({
       })
       .catch((error) => {
         if (!isMounted) return;
-        console.error("Failed to fetch segment documents:", error);
-        setFetchedDocuments([]);
+        console.error("Failed to fetch file sizes:", error);
+        setFetchedDocuments(transformedDocuments);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [segmentId]);
+  }, [fileAttachments, segmentId]);
 
   // Use the reusable chat hook for company chat
   const chatHook = useChatWithRecipient({
-    recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
-    driverId: driverId || undefined,
-    recipientName: driverName || t("segments.summary.driver"),
+    recipientType: CHAT_RECIPIENT_TYPE.COMPANY,
+    companyId: companyId || undefined,
+    recipientName: localCompany || t("segments.summary.company"),
   });
 
   // Format ETA duration
@@ -963,15 +968,15 @@ export default function SegmentInfoSummary({
           {/* Alerts Indicator */}
           <button
             onClick={() => {
-              if (driverId) {
+              if (companyId) {
                 setChatInitialTab("alerts");
                 chatHook.setIsChatOpen(true);
               }
             }}
-            disabled={!driverId}
+            disabled={!companyId}
             className={cn(
               "flex flex-col items-center gap-1 transition-opacity",
-              driverId
+              companyId
                 ? "cursor-pointer hover:opacity-80"
                 : "cursor-not-allowed opacity-50"
             )}
@@ -1108,15 +1113,28 @@ export default function SegmentInfoSummary({
             </div>
             {/* Chat Button */}
             <button
-              onClick={() => driverId && chatHook.setIsChatOpen(true)}
-              disabled={!driverId}
+              onClick={() => companyId && chatHook.setIsChatOpen(true)}
+              disabled={!companyId}
               className={cn(
-                "size-8 rounded-lg bg-[#1B54FE]/10 flex items-center justify-center flex-shrink-0 hover:bg-blue-300 transition-colors",
-                !driverId && "opacity-50 cursor-not-allowed"
+                "size-8 rounded-lg bg-[#1B54FE]/10 flex items-center justify-center flex-shrink-0 hover:bg-blue-300 transition-colors relative",
+                !companyId && "opacity-50 cursor-not-allowed"
               )}
               aria-label={t("segments.summary.chatWithCompany")}
             >
               <MessagesSquareIcon className="size-4 text-[#1B54FE]" />
+              {(() => {
+                const unreadCount =
+                  (chatHook.conversation?.unreadMessageCount ?? 0) +
+                  (chatHook.conversation?.unreadAlertCount ?? 0);
+                if (unreadCount > 0) {
+                  return (
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-semibold rounded-full border-2 border-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
             </button>
           </div>
         </div>
@@ -1127,49 +1145,17 @@ export default function SegmentInfoSummary({
         documents={segmentId ? fetchedDocuments : documentsWithSizes}
         segmentId={segmentId}
         onDocumentsUpdate={async () => {
-          // Refetch documents after update
+          // Refetch documents after update using queryClient
           if (segmentId) {
-            try {
-              const fileAttachments = await getSegmentFileAttachments(
-                segmentId
-              );
-              const transformedDocuments: DocumentItem[] = fileAttachments.map(
-                (attachment) => ({
-                  id: attachment.id,
-                  name: formatFileType(attachment.fileType),
-                  sizeLabel: "0 KB",
-                  status: attachment.approvalStatus,
-                  author: undefined,
-                  thumbnailUrl: undefined,
-                  filePath: attachment.filePath,
-                  rejectionComment: attachment.rejectionComment ?? undefined,
-                })
-              );
-
-              setFetchedDocuments(transformedDocuments);
-
-              // Fetch file sizes in parallel
-              const filePaths = fileAttachments.map((a) => a.filePath);
-              const fileSizes = await getFileSizesFromUrls(filePaths);
-
-              // Update documents with file sizes
-              const updatedDocuments = transformedDocuments.map(
-                (doc, index) => ({
-                  ...doc,
-                  sizeLabel: fileSizes[index] || "0 KB",
-                })
-              );
-
-              setFetchedDocuments(updatedDocuments);
-            } catch (error) {
-              console.error("Failed to refetch documents:", error);
-            }
+            await queryClient.refetchQueries({
+              queryKey: fileAttachmentKeys.segment(segmentId),
+            });
           }
         }}
       />
 
       {/* Chat Overlay */}
-      {driverId && (
+      {companyId && (
         <ChatOverlay
           isOpen={chatHook.isChatOpen}
           onClose={() => {

@@ -4,7 +4,7 @@ import {useQueryClient, type InfiniteData} from "@tanstack/react-query";
 
 import type {ConversationReadDto, MessageReadDto} from "./chat.types";
 import {CHAT_MESSAGE_TYPE} from "./chat.types";
-import {chatKeys} from "./hooks";
+import {chatKeys, updateConversationReadStatus} from "./hooks";
 import {ENV} from "../../lib/env";
 
 export function useChatSocket(
@@ -14,6 +14,12 @@ export function useChatSocket(
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
   const isConnectedRef = useRef(false);
+  const onTypingChangeRef = useRef(onTypingChange);
+
+  // Keep the callback ref updated
+  useEffect(() => {
+    onTypingChangeRef.current = onTypingChange;
+  }, [onTypingChange]);
 
   useEffect(() => {
     const url = resolveChatSocketUrl();
@@ -112,7 +118,7 @@ export function useChatSocket(
 
       // Stop typing indicator when new message arrives (only for active conversation)
       if (message.conversationId === activeConversationId) {
-        onTypingChange?.(false);
+        onTypingChangeRef.current?.(false);
       }
     };
 
@@ -120,22 +126,28 @@ export function useChatSocket(
       updateCaches(queryClient, payload.conversationId);
     };
 
+    const handleConversationRead = (payload: {conversationId: string}) => {
+      // Update cache directly instead of invalidating all conversations
+      updateConversationReadStatus(queryClient, payload.conversationId);
+      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
+    };
+
     const handleTypingStart = (payload: {conversationId: string}) => {
       if (payload.conversationId === activeConversationId) {
-        onTypingChange?.(true);
+        onTypingChangeRef.current?.(true);
       }
     };
 
     const handleTypingStop = (payload: {conversationId: string}) => {
       if (payload.conversationId === activeConversationId) {
-        onTypingChange?.(false);
+        onTypingChangeRef.current?.(false);
       }
     };
 
     socket.on("message:new", handleMessageEvent);
     socket.on("alert:new", handleMessageEvent);
     socket.on("conversation:updated", handleConversationUpdated);
-    socket.on("conversation:read", handleConversationUpdated);
+    socket.on("conversation:read", handleConversationRead);
     socket.on("typing:start", handleTypingStart);
     socket.on("typing:stop", handleTypingStop);
 
@@ -148,14 +160,14 @@ export function useChatSocket(
       socket.off("message:new", handleMessageEvent);
       socket.off("alert:new", handleMessageEvent);
       socket.off("conversation:updated", handleConversationUpdated);
-      socket.off("conversation:read", handleConversationUpdated);
+      socket.off("conversation:read", handleConversationRead);
       socket.off("typing:start", handleTypingStart);
       socket.off("typing:stop", handleTypingStop);
       socket.disconnect();
       socketRef.current = null;
       isConnectedRef.current = false;
     };
-  }, [queryClient, activeConversationId, onTypingChange]);
+  }, [queryClient, activeConversationId]);
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -277,16 +289,16 @@ export function appendMessageToCache(
     (oldData: InfiniteData<MessageReadDto[]> | undefined) => {
       // Check if message already exists (by ID) - check this first
       if (oldData) {
-        // const exists = oldData.pages.some((page) =>
-        //   page.some((item) => item.id === message.id)
-        // );
-        // if (exists) {
-        //   console.log(
-        //     "⚠️ Message already exists in cache, skipping:",
-        //     message.id
-        //   );
-        //   return oldData;
-        // }
+        const exists = oldData.pages.some((page) =>
+          page.some((item) => item.id === message.id)
+        );
+        if (exists) {
+          console.log(
+            "⚠️ Message already exists in cache, skipping:",
+            message.id
+          );
+          return oldData;
+        }
 
         // Check if there's a temporary message with matching content that should be replaced
         // This handles the case where socket receives the message we just sent

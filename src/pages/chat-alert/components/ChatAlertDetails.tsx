@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import {useEffect, useMemo, useState, useRef} from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/en";
 import "dayjs/locale/fa";
 import "dayjs/locale/ar";
 import "dayjs/locale/ru";
 import "dayjs/locale/zh";
-import { useTranslation } from "react-i18next";
-import type { ChatAlert } from "../data";
-import { ChatSection } from "./ChatSection";
-import { ShipmentHeader } from "./ShipmentHeader";
+import {useTranslation} from "react-i18next";
+import type {ChatAlert} from "../data";
+import {ChatSection} from "./ChatSection";
+import {ShipmentHeader} from "./ShipmentHeader";
 import {
   useConversationMessages,
   useMarkConversationRead,
   useSendChatAlert,
   useSendChatMessage,
 } from "../../../services/chat/hooks";
-import { useChatSocket } from "../../../services/chat/socket";
+import {useChatSocket} from "../../../services/chat/socket";
 import {
   CHAT_ALERT_TYPE,
   CHAT_MESSAGE_TYPE,
@@ -24,12 +24,12 @@ import {
   type ConversationReadDto,
   type MessageReadDto,
 } from "../../../services/chat/chat.types";
-import type { ActionableAlertChip, AlertType, Message } from "../types/chat";
-import { ENV } from "../../../lib/env";
-import { useDriverDetails } from "../../../services/driver/hooks";
-import { useCompanyDetails } from "../../../services/company/hooks";
-import { DriverDetails } from "../../Drivers/components/DriverDetails";
-import { CompanyDetails } from "../../LocalCompanies/components/CompanyDetails";
+import type {ActionableAlertChip, AlertType, Message} from "../types/chat";
+import {ENV} from "../../../lib/env";
+import {useDriverDetails} from "../../../services/driver/hooks";
+import {useCompanyDetails} from "../../../services/company/hooks";
+import {DriverDetails} from "../../Drivers/components/DriverDetails";
+import {CompanyDetails} from "../../LocalCompanies/components/CompanyDetails";
 
 type ChatAlertDetailsProps = {
   chatAlert: ChatAlert;
@@ -40,10 +40,10 @@ type ChatAlertDetailsProps = {
 };
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
+  {id: "1", label: "GPS Lost", alertType: "alert"},
+  {id: "2", label: "Delay Expected", alertType: "warning"},
+  {id: "3", label: "Route Cleared", alertType: "success"},
+  {id: "4", label: "Documentation Pending", alertType: "info"},
 ];
 
 const LOCALE_MAP: Record<string, string> = {
@@ -60,7 +60,7 @@ export function ChatAlertDetails({
   currentUserId,
   onClose,
 }: ChatAlertDetailsProps) {
-  const { i18n } = useTranslation();
+  const {i18n} = useTranslation();
   const [isTyping, setIsTyping] = useState(false);
 
   // Set dayjs locale based on current i18n language
@@ -77,6 +77,11 @@ export function ChatAlertDetails({
   const sendMessageMutation = useSendChatMessage();
   const sendAlertMutation = useSendChatAlert();
   const markConversationRead = useMarkConversationRead();
+  const lastMarkedReadRef = useRef<{
+    conversationId: string;
+    unreadAlertCount: number;
+    unreadMessageCount: number;
+  } | null>(null);
 
   // Fetch driver or company data based on recipient type
   const selectedDriver = useDriverDetails(conversation.driverId ?? null);
@@ -96,12 +101,35 @@ export function ChatAlertDetails({
   }, [isTyping]);
 
   useEffect(() => {
-    if (
-      (conversation.unreadAlertCount > 0 ||
-        conversation.unreadMessageCount > 0) &&
-      !markConversationRead.isPending
-    ) {
-      markConversationRead.mutate(conversation.id);
+    if (markConversationRead.isPending) {
+      return;
+    }
+
+    const hasUnreadMessages =
+      conversation.unreadAlertCount > 0 || conversation.unreadMessageCount > 0;
+
+    // Check if we've already marked this conversation as read with these exact counts
+    const alreadyMarked =
+      lastMarkedReadRef.current?.conversationId === conversation.id &&
+      lastMarkedReadRef.current?.unreadAlertCount ===
+        conversation.unreadAlertCount &&
+      lastMarkedReadRef.current?.unreadMessageCount ===
+        conversation.unreadMessageCount;
+
+    if (hasUnreadMessages && !alreadyMarked) {
+      markConversationRead.mutate(conversation.id, {
+        onSuccess: () => {
+          // Update ref to track that we've marked this conversation as read
+          lastMarkedReadRef.current = {
+            conversationId: conversation.id,
+            unreadAlertCount: conversation.unreadAlertCount,
+            unreadMessageCount: conversation.unreadMessageCount,
+          };
+        },
+      });
+    } else if (!hasUnreadMessages) {
+      // Reset ref when there are no unread messages
+      lastMarkedReadRef.current = null;
     }
   }, [
     conversation.id,
@@ -130,7 +158,7 @@ export function ChatAlertDetails({
       messageIds: mapped.map((m) => m.id).slice(-5), // Last 5 message IDs
       messagesWithStatus: mapped
         .filter((m) => m.status)
-        .map((m) => ({ id: m.id, status: m.status })),
+        .map((m) => ({id: m.id, status: m.status})),
     });
 
     return mapped;
@@ -240,7 +268,7 @@ function mapMessageDtoToUi(
       fileUrl,
       fileName: message.fileName || undefined,
       status: (
-        message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
+        message as MessageReadDto & {_status?: "sending" | "failed" | "sent"}
       )._status, // Get status from temporary message
     };
   }
@@ -257,7 +285,7 @@ function mapMessageDtoToUi(
     fileName: message.fileName || undefined,
     fileMimeType: message.fileMimeType || undefined,
     status: (
-      message as MessageReadDto & { _status?: "sending" | "failed" | "sent" }
+      message as MessageReadDto & {_status?: "sending" | "failed" | "sent"}
     )._status, // Get status from temporary message
   };
 }

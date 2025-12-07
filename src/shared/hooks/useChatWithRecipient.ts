@@ -1,4 +1,4 @@
-import {useState, useMemo, useEffect} from "react";
+import {useState, useMemo, useEffect, useRef} from "react";
 import dayjs from "dayjs";
 import {
   useChatConversations,
@@ -85,6 +85,11 @@ export function useChatWithRecipient({
   const sendMessageMutation = useSendChatMessage();
   const sendAlertMutation = useSendChatAlert();
   const markConversationRead = useMarkConversationRead();
+  const lastMarkedReadRef = useRef<{
+    conversationId: string;
+    unreadAlertCount: number;
+    unreadMessageCount: number;
+  } | null>(null);
 
   // Use socket for real-time updates
   useChatSocket(conversation?.id, setIsTyping);
@@ -100,16 +105,43 @@ export function useChatWithRecipient({
 
   // Mark conversation as read when opened
   useEffect(() => {
-    if (
-      isChatOpen &&
-      conversation &&
-      (conversation.unreadAlertCount > 0 ||
-        conversation.unreadMessageCount > 0) &&
-      !markConversationRead.isPending
-    ) {
-      markConversationRead.mutate(conversation.id);
+    if (!isChatOpen || !conversation || markConversationRead.isPending) {
+      return;
     }
-  }, [isChatOpen, conversation, markConversationRead]);
+
+    const hasUnreadMessages =
+      conversation.unreadAlertCount > 0 || conversation.unreadMessageCount > 0;
+
+    // Check if we've already marked this conversation as read with these exact counts
+    const alreadyMarked =
+      lastMarkedReadRef.current?.conversationId === conversation.id &&
+      lastMarkedReadRef.current?.unreadAlertCount ===
+        conversation.unreadAlertCount &&
+      lastMarkedReadRef.current?.unreadMessageCount ===
+        conversation.unreadMessageCount;
+
+    if (hasUnreadMessages && !alreadyMarked) {
+      markConversationRead.mutate(conversation.id, {
+        onSuccess: () => {
+          // Update ref to track that we've marked this conversation as read
+          lastMarkedReadRef.current = {
+            conversationId: conversation.id,
+            unreadAlertCount: conversation.unreadAlertCount,
+            unreadMessageCount: conversation.unreadMessageCount,
+          };
+        },
+      });
+    } else if (!hasUnreadMessages) {
+      // Reset ref when there are no unread messages
+      lastMarkedReadRef.current = null;
+    }
+  }, [
+    isChatOpen,
+    conversation?.id,
+    conversation?.unreadAlertCount,
+    conversation?.unreadMessageCount,
+    markConversationRead,
+  ]);
 
   // Map messages to UI format
   const messages = useMemo<Message[]>(() => {

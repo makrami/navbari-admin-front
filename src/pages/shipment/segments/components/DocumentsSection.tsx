@@ -2,9 +2,9 @@ import {Paperclip, FileText as FileTextIcon, X as XIcon} from "lucide-react";
 import {useState, useRef} from "react";
 import DocumentCard from "./DocumentCard";
 import {
-  uploadFileAttachment,
-  updateFileAttachmentStatus,
-} from "../../../../services/file-attachment/file-attachment.service";
+  useUploadFileAttachment,
+  useUpdateFileAttachmentStatus,
+} from "../../../../services/file-attachment/hooks";
 import {ENV} from "../../../../lib/env";
 
 export type DocumentItem = {
@@ -35,11 +35,13 @@ export function DocumentsSection({
   const [selectedDocumentId, setSelectedDocumentId] = useState<
     string | number | null
   >(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<DocumentItem | null>(
     null
   );
+
+  // Use mutation hooks
+  const uploadMutation = useUploadFileAttachment();
+  const updateStatusMutation = useUpdateFileAttachmentStatus();
 
   // Use provided documents only
   const displayDocuments = documents;
@@ -63,9 +65,8 @@ export function DocumentsSection({
     const file = event.target.files?.[0];
     if (!file || !segmentId) return;
 
-    setIsUploading(true);
     try {
-      await uploadFileAttachment(segmentId, file);
+      await uploadMutation.mutateAsync({segmentId, file});
       onDocumentsUpdate?.();
       // Reset file input
       if (fileInputRef.current) {
@@ -74,23 +75,21 @@ export function DocumentsSection({
     } catch (error) {
       console.error("Failed to upload document:", error);
       alert("Failed to upload document. Please try again.");
-    } finally {
-      setIsUploading(false);
     }
   };
 
   const handleApprove = async (docId: string | number) => {
     if (!segmentId) return;
 
-    setIsUpdating(true);
     try {
-      await updateFileAttachmentStatus(docId.toString(), "approved");
+      await updateStatusMutation.mutateAsync({
+        id: docId.toString(),
+        approvalStatus: "approved",
+      });
       onDocumentsUpdate?.();
     } catch (error) {
       console.error("Failed to approve document:", error);
       alert("Failed to approve document. Please try again.");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -103,13 +102,12 @@ export function DocumentsSection({
   const confirmReject = async () => {
     if (!selectedDocumentId || !rejectionComment.trim() || !segmentId) return;
 
-    setIsUpdating(true);
     try {
-      await updateFileAttachmentStatus(
-        selectedDocumentId.toString(),
-        "rejected",
-        rejectionComment.trim()
-      );
+      await updateStatusMutation.mutateAsync({
+        id: selectedDocumentId.toString(),
+        approvalStatus: "rejected",
+        rejectionComment: rejectionComment.trim(),
+      });
       setShowRejectDialog(false);
       setRejectionComment("");
       setSelectedDocumentId(null);
@@ -117,8 +115,6 @@ export function DocumentsSection({
     } catch (error) {
       console.error("Failed to reject document:", error);
       alert("Failed to reject document. Please try again.");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -160,12 +156,12 @@ export function DocumentsSection({
                 type="button"
                 aria-label="Upload document"
                 onClick={handleUploadClick}
-                disabled={isUploading}
+                disabled={uploadMutation.isPending}
                 className="flex flex-col w-18 items-center justify-center rounded-xl border border-dashed border-slate-300 px-3 py-6 hover:bg-slate-50 transition-colors bg-white shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Paperclip className="size-5 text-slate-400" />
                 <span className="mt-2 font-medium text-xs text-slate-400">
-                  {isUploading ? "Uploading..." : "Upload"}
+                  {uploadMutation.isPending ? "Uploading..." : "Upload"}
                 </span>
               </button>
             </>
@@ -186,7 +182,7 @@ export function DocumentsSection({
               onReasons={() => handleReasons(doc)}
               onPreview={() => handlePreview(doc)}
               onView={() => handleView(doc)}
-              disabled={isUpdating}
+              disabled={updateStatusMutation.isPending}
             />
           ))}
         </div>
@@ -221,10 +217,12 @@ export function DocumentsSection({
               <button
                 type="button"
                 onClick={confirmReject}
-                disabled={!rejectionComment.trim() || isUpdating}
+                disabled={
+                  !rejectionComment.trim() || updateStatusMutation.isPending
+                }
                 className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUpdating ? "Rejecting..." : "Reject"}
+                {updateStatusMutation.isPending ? "Rejecting..." : "Reject"}
               </button>
             </div>
           </div>
