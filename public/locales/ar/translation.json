@@ -161,6 +161,33 @@
         "overallDifference": "الإجمالي: {{difference}}"
       }
     },
+    "summary": {
+      "plannedStart": "البدء المخطط",
+      "startedAt": "بدأ في",
+      "estFinish": "الانتهاء المقدر",
+      "finishedAt": "انتهى في",
+      "driverVehicle": "مركبة السائق",
+      "localCompany": "الشركة المحلية",
+      "notPlanned": "غير مخطط",
+      "notStarted": "لم يبدأ",
+      "notFinished": "لم ينته",
+      "notAssigned": "غير مخصص",
+      "nA": "غير متاح",
+      "company": "الشركة",
+      "driver": "السائق",
+      "gps": "GPS",
+      "on": "تشغيل",
+      "off": "إيقاف",
+      "delay": "تأخير",
+      "alerts": "التنبيهات",
+      "pending": "قيد الانتظار",
+      "openChatWithAlerts": "فتح الدردشة مع التنبيهات",
+      "chatWithCompany": "الدردشة مع الشركة",
+      "gpsLost": "فقدان GPS",
+      "delayExpected": "تأخير متوقع",
+      "routeCleared": "تم مسح المسار",
+      "documentationPending": "الوثائق قيد الانتظار"
+    },
     "page": {
       "title": "الأقسام",
       "loading": "جاري تحميل الأقسام...",
@@ -289,7 +316,8 @@
       "justNow": "الآن",
       "minutesAgo": "منذ {{count}} دقيقة",
       "hoursAgo": "منذ {{count}} ساعة",
-      "daysAgo": "منذ {{count}} يوم"
+      "daysAgo": "منذ {{count}} يوم",
+      "allActivities": "جميع الأنشطة"
     },
     "addModal": {
       "title": "إضافة شحنة جديدة",

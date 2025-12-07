@@ -15,6 +15,7 @@ import {useEffect, useState} from "react";
 import FinancialSection from "./FinancialSection";
 import DocumentsSection from "./DocumentsSection";
 import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
+import {useRTL} from "../../../../shared/hooks/useRTL";
 import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
 import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
@@ -25,14 +26,8 @@ import {getFileSizesFromUrls} from "../utils/fileSize";
 import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
 import type {SEGMENT_STATUS as SEGMENT_STATUS_TYPE} from "../../../../services/shipment/shipment.api.service";
 
-const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
-];
-
 type SegmentInfoSummaryProps = {
+  baseFee?: number;
   vehicleType?: string;
   estimatedStartTime?: string;
   estimatedFinishTime?: string;
@@ -651,6 +646,7 @@ export default function SegmentInfoSummary({
   documents,
   segmentId,
   driverId,
+  baseFee,
   status,
   arrivedOriginAt,
   startLoadingAt,
@@ -666,6 +662,7 @@ export default function SegmentInfoSummary({
   durationOriginToDestination,
 }: SegmentInfoSummaryProps) {
   const {t} = useTranslation();
+  const isRTL = useRTL();
   const [fetchedDocuments, setFetchedDocuments] = useState<DocumentItem[]>([]);
   const [documentsWithSizes, setDocumentsWithSizes] = useState<DocumentItem[]>(
     []
@@ -673,6 +670,18 @@ export default function SegmentInfoSummary({
   const [chatInitialTab, setChatInitialTab] = useState<
     "all" | "chats" | "alerts"
   >("all");
+
+  // Create actionable alerts with translations
+  const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
+    {id: "1", label: t("segments.summary.gpsLost"), alertType: "alert"},
+    {id: "2", label: t("segments.summary.delayExpected"), alertType: "warning"},
+    {id: "3", label: t("segments.summary.routeCleared"), alertType: "success"},
+    {
+      id: "4",
+      label: t("segments.summary.documentationPending"),
+      alertType: "info",
+    },
+  ];
 
   // Fetch file sizes for documents passed as props
   useEffect(() => {
@@ -788,7 +797,7 @@ export default function SegmentInfoSummary({
   const chatHook = useChatWithRecipient({
     recipientType: CHAT_RECIPIENT_TYPE.DRIVER,
     driverId: driverId || undefined,
-    recipientName: driverName || "Driver",
+    recipientName: driverName || t("segments.summary.driver"),
   });
 
   // Format ETA duration
@@ -848,7 +857,10 @@ export default function SegmentInfoSummary({
   return (
     <div dir="ltr" className="bg-white rounded-xl space-y-4 mt-4">
       {/* Estimated Arrival Card */}
-      <div className="bg-slate-50 rounded-xl p-4 flex items-center justify-between gap-2">
+      <div
+        dir={isRTL ? "rtl" : "ltr"}
+        className="bg-slate-50 rounded-xl p-4 flex items-center justify-between gap-2"
+      >
         {/* Left Section - Text Information */}
         <div className="flex flex-col  gap-2">
           <div className="text-sm">
@@ -862,7 +874,7 @@ export default function SegmentInfoSummary({
                 </span>
                 {etaDisplay.difference && (
                   <span
-                    className={`font-medium ml-1 ${
+                    className={`font-medium ${isRTL ? "mr-1" : "ml-1"} ${
                       etaDisplay.difference.startsWith("+")
                         ? "text-green-600"
                         : etaDisplay.difference.startsWith("-")
@@ -896,7 +908,11 @@ export default function SegmentInfoSummary({
         </div>
 
         {/* Right Section - Status Indicators */}
-        <div className="flex items-end gap-8 flex-shrink-0 ml-auto">
+        <div
+          className={`flex items-end gap-8 flex-shrink-0 ${
+            isRTL ? "mr-auto" : "ml-auto"
+          }`}
+        >
           {/* GPS Indicator */}
           <div className="flex flex-col items-center gap-1">
             <div
@@ -919,9 +935,11 @@ export default function SegmentInfoSummary({
                   isGpsOn(lastGpsUpdate) ? "text-green-600" : "text-slate-400"
                 }`}
               >
-                GPS{" "}
+                {t("segments.summary.gps")}{" "}
                 <span className="!font-bold text-xs ">
-                  {isGpsOn(lastGpsUpdate) ? "On" : "Off"}
+                  {isGpsOn(lastGpsUpdate)
+                    ? t("segments.summary.on")
+                    : t("segments.summary.off")}
                 </span>
               </span>
             </div>
@@ -935,7 +953,9 @@ export default function SegmentInfoSummary({
               </div>
               <span className="text-xs flex items-center gap-1 font-bold text-slate-900">
                 {formatDelay(delaysInMinutes)}
-                <div className="text-xs !font-normal ">Delay</div>
+                <div className="text-xs !font-normal ">
+                  {t("segments.summary.delay")}
+                </div>
               </span>
             </div>
           </div>
@@ -955,14 +975,16 @@ export default function SegmentInfoSummary({
                 ? "cursor-pointer hover:opacity-80"
                 : "cursor-not-allowed opacity-50"
             )}
-            aria-label="Open chat with alerts"
+            aria-label={t("segments.summary.openChatWithAlerts")}
           >
             <div className="size-12 rounded-full bg-red-50 flex items-center justify-center">
               <TriangleAlert className="size-5 text-red-600" />
             </div>
             <span className="text-xs">
               <span className="font-bold text-red-600">{alertCount ?? 0}</span>{" "}
-              <span className="font-normal text-red-600 text-xs">Alerts</span>
+              <span className="font-normal text-red-600 text-xs">
+                {t("segments.summary.alerts")}
+              </span>
             </span>
           </button>
 
@@ -976,7 +998,7 @@ export default function SegmentInfoSummary({
                 {pendingDocuments ?? 0}
               </span>{" "}
               <span className="font-normal text-xs text-yellow-600">
-                Pending
+                {t("segments.summary.pending")}
               </span>
             </span>
           </div>
@@ -984,7 +1006,7 @@ export default function SegmentInfoSummary({
       </div>
       <div className="h-px bg-slate-100 mb-4" />
 
-      <section className="grid grid-cols-3 gap-2">
+      <section dir={isRTL ? "rtl" : "ltr"} className="grid grid-cols-3 gap-2">
         {/* Card 1: Start Times */}
         <div className="bg-white rounded-xl p-3  flex flex-col justify-between border border-slate-100">
           {/* Planned Start */}
@@ -992,13 +1014,13 @@ export default function SegmentInfoSummary({
             <div className="flex items-center gap-2">
               <TimerIcon className="size-4 text-slate-300" />
               <span className="text-xs font-medium text-slate-400 uppercase">
-                PLANNED START
+                {t("segments.summary.plannedStart")}
               </span>
             </div>
             <div className="text-xs font-bold text-[#1B54FE] ">
               {estimatedStartTime
                 ? formatDateTime(estimatedStartTime)
-                : "Not Planned"}
+                : t("segments.summary.notPlanned")}
             </div>
           </div>
 
@@ -1007,11 +1029,13 @@ export default function SegmentInfoSummary({
             <div className="flex items-center gap-2">
               <TimerIcon className="size-4 text-slate-300" />
               <span className="text-xs font-medium text-slate-400 uppercase">
-                STARTED AT
+                {t("segments.summary.startedAt")}
               </span>
             </div>
             <div className="text-xs font-bold text-green-600 ">
-              {startedAt ? formatDateTime(startedAt) : "Not started"}
+              {startedAt
+                ? formatDateTime(startedAt)
+                : t("segments.summary.notStarted")}
             </div>
           </div>
         </div>
@@ -1023,13 +1047,13 @@ export default function SegmentInfoSummary({
             <div className="flex items-center gap-2">
               <TimerOffIcon className="size-4 text-slate-300" />
               <span className="text-xs font-medium text-slate-400 uppercase">
-                EST. FINISH
+                {t("segments.summary.estFinish")}
               </span>
             </div>
             <div className="text-xs font-bold text-[#1B54FE] ">
               {estimatedFinishTime
                 ? formatDateTime(estimatedFinishTime)
-                : "Not Planned"}
+                : t("segments.summary.notPlanned")}
             </div>
           </div>
 
@@ -1038,11 +1062,13 @@ export default function SegmentInfoSummary({
             <div className="flex items-center gap-2">
               <TimerOffIcon className="size-4 text-slate-300" />
               <span className="text-xs font-medium text-slate-400 uppercase">
-                FINISHED AT
+                {t("segments.summary.finishedAt")}
               </span>
             </div>
             <div className="text-xs font-bold text-red-600 ">
-              {finishedAt ? formatDateTime(finishedAt) : "Not finished"}
+              {finishedAt
+                ? formatDateTime(finishedAt)
+                : t("segments.summary.notFinished")}
             </div>
           </div>
         </div>
@@ -1054,10 +1080,12 @@ export default function SegmentInfoSummary({
             <div className="flex items-center gap-2">
               <TruckIcon className="size-4 text-slate-300" />
               <span className="text-xs font-medium text-slate-400 uppercase">
-                DRIVER VEHICLE
+                {t("segments.summary.driverVehicle")}
               </span>
             </div>
-            <div className="text-xs text-slate-900">{vehicleType ?? "N/A"}</div>
+            <div className="text-xs text-slate-900">
+              {vehicleType ?? t("segments.summary.nA")}
+            </div>
           </div>
 
           {/* Local Company */}
@@ -1066,12 +1094,12 @@ export default function SegmentInfoSummary({
               <div className="flex items-center gap-2">
                 <BoxesIcon className="size-4 text-slate-300" />
                 <span className="text-xs font-medium text-slate-400 uppercase">
-                  LOCAL COMPANY
+                  {t("segments.summary.localCompany")}
                 </span>
               </div>
               <div className="flex items-center gap-1 ">
                 <span className="text-xs text-slate-900">
-                  {localCompany ?? "Not assigned"}
+                  {localCompany ?? t("segments.summary.notAssigned")}
                 </span>
                 <div className=" size-4 bg-[#1B54FE] rounded-full flex items-center justify-center">
                   <PlaneIcon className="size-3 text-white" />
@@ -1086,14 +1114,14 @@ export default function SegmentInfoSummary({
                 "size-8 rounded-lg bg-[#1B54FE]/10 flex items-center justify-center flex-shrink-0 hover:bg-blue-300 transition-colors",
                 !driverId && "opacity-50 cursor-not-allowed"
               )}
-              aria-label="Chat with company"
+              aria-label={t("segments.summary.chatWithCompany")}
             >
               <MessagesSquareIcon className="size-4 text-[#1B54FE]" />
             </button>
           </div>
         </div>
       </section>
-      <FinancialSection />
+      <FinancialSection baseFee={parseFloat(baseFee?.toString() || "0")} />
       <div className="h-px bg-slate-100" />
       <DocumentsSection
         documents={segmentId ? fetchedDocuments : documentsWithSizes}
@@ -1148,7 +1176,7 @@ export default function SegmentInfoSummary({
             chatHook.setIsChatOpen(false);
             setChatInitialTab("all"); // Reset to "all" when closing
           }}
-          recipientName={localCompany || "Company"}
+          recipientName={localCompany || t("segments.summary.company")}
           chatHook={chatHook}
           actionableAlerts={ACTIONABLE_ALERTS}
           initialTab={chatInitialTab}

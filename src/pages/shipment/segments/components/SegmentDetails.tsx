@@ -717,7 +717,10 @@ export function SegmentDetails({
                 estimatedFinishTime={data.estimatedFinishTime || undefined}
                 etaToOrigin={data.etaToOrigin}
                 etaToDestination={data.etaToDestination}
+                finishedAt={data.deliveredAt || undefined}
+                startedAt={data.startedAt || undefined}
                 eta={data.eta}
+                baseFee={data.baseFee ? parseFloat(data.baseFee) : undefined}
                 vehicleType={data.vehicleType || undefined}
                 lastGpsUpdate={data.lastGpsUpdate || undefined}
                 alertCount={data.alertCount}

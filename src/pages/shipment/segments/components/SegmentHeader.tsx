@@ -7,21 +7,21 @@ import {
   MessagesSquare,
   MapPin,
 } from "lucide-react";
-import { cn } from "../../../../shared/utils/cn";
-import { formatDistance } from "../../../../shared/utils/segmentHelpers";
-import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
-import { getFileUrl } from "../../../LocalCompanies/utils";
-import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
-import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
-import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
-import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
-import { useTranslation } from "react-i18next";
+import {cn} from "../../../../shared/utils/cn";
+import {formatDistance} from "../../../../shared/utils/segmentHelpers";
+import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
+import {getFileUrl} from "../../../LocalCompanies/utils";
+import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
+import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
+import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
+import {useTranslation} from "react-i18next";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
+  {id: "1", label: "GPS Lost", alertType: "alert"},
+  {id: "2", label: "Delay Expected", alertType: "warning"},
+  {id: "3", label: "Route Cleared", alertType: "success"},
+  {id: "4", label: "Documentation Pending", alertType: "info"},
 ];
 
 type SegmentHeaderProps = {
@@ -70,7 +70,7 @@ export default function SegmentHeader({
   onCargoClick,
   isAssigned = false,
 }: SegmentHeaderProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   // Only show driver info when backend has approved/assigned the driver
   const distance = formatDistance(distanceKm);
 
@@ -95,6 +95,11 @@ export default function SegmentHeader({
     driverId: driverId || undefined,
     recipientName: driverName || t("segments.cardHeader.driver"),
   });
+
+  // Check if there are unread messages
+  const hasUnreadMessages =
+    (chatHook.conversation?.unreadMessageCount ?? 0) > 0 ||
+    (chatHook.conversation?.unreadAlertCount ?? 0) > 0;
 
   return (
     <div
@@ -201,44 +206,47 @@ export default function SegmentHeader({
         segmentStatus !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
         segmentStatus !== SEGMENT_STATUS.CANCELLED &&
         driverName ? (
-          segmentStatus === SEGMENT_STATUS.ASSIGNED ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (driverId) {
-                    chatHook.setIsChatOpen(true);
-                  }
-                }}
-                disabled={!driverId}
-                className={cn(
-                  "bg-[#1B54FE]/10 rounded-md p-1.5 hover:bg-[#1B54FE]/20 transition-colors",
-                  !driverId && "opacity-50 cursor-not-allowed"
-                )}
-                aria-label={t("segments.cardHeader.chatWithDriver")}
-              >
-                <MessagesSquare className="size-3.5 text-[#1B54FE]" />
-              </button>
-              <div
-                className={cn(
-                  "rounded-md p-1.5",
-                  lastGpsUpdate && isGpsOn(lastGpsUpdate)
-                    ? "bg-green-600/10"
-                    : "bg-slate-400/10"
-                )}
-              >
-                <MapPin
-                  className={cn(
-                    "size-3.5",
-                    lastGpsUpdate && isGpsOn(lastGpsUpdate)
-                      ? "text-green-600"
-                      : "text-slate-400"
-                  )}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (driverId) {
+                  chatHook.setIsChatOpen(true);
+                }
+              }}
+              className={cn(
+                "relative bg-[#1B54FE]/10 rounded-md p-1.5 hover:bg-[#1B54FE]/20 transition-colors",
+                !driverId && "opacity-50 cursor-not-allowed"
+              )}
+              aria-label={t("segments.cardHeader.chatWithDriver")}
+            >
+              <MessagesSquare className="size-3.5 text-[#1B54FE]" />
+              {hasUnreadMessages && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 size-2 bg-red-500 rounded-full border-2 border-white"
+                  aria-label="New messages"
                 />
-              </div>
+              )}
+            </button>
+            <div
+              className={cn(
+                "rounded-md p-1.5",
+                lastGpsUpdate && isGpsOn(lastGpsUpdate)
+                  ? "bg-green-600/10"
+                  : "bg-slate-400/10"
+              )}
+            >
+              <MapPin
+                className={cn(
+                  "size-3.5",
+                  lastGpsUpdate && isGpsOn(lastGpsUpdate)
+                    ? "text-green-600"
+                    : "text-slate-400"
+                )}
+              />
             </div>
-          ) : null
+          </div>
         ) : null}
         <MoreVertical className="size-5 text-slate-400" />
       </div>

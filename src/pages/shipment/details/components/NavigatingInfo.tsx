@@ -30,6 +30,7 @@ import {useTranslation} from "react-i18next";
 
 type NavigatingInfoProps = PropsWithChildren<{
   segments: Segment[];
+  driverId: string;
   className?: string;
   title: string;
   shipmentId: string;
@@ -61,6 +62,7 @@ const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
 
 export function NavigatingInfo({
   segments,
+  driverId,
   className,
   title,
   shipmentId,
@@ -78,13 +80,6 @@ export function NavigatingInfo({
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
-
-  // Find first segment with driverId
-  const segmentWithDriver = useMemo(() => {
-    return segments.find((segment) => segment.driverId);
-  }, [segments]);
-
-  const driverId = segmentWithDriver?.driverId || null;
 
   // Use the reusable chat hook
   const chatHook = useChatWithRecipient({

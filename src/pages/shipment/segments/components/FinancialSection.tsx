@@ -1,17 +1,15 @@
-import { useMemo, useState } from "react";
-import { Plus, MoreVertical, CoinsIcon } from "lucide-react";
+import {useMemo, useState} from "react";
+import {Plus, MoreVertical, CoinsIcon} from "lucide-react";
 
-export function FinancialSection() {
+export function FinancialSection({baseFee}: {baseFee: number}) {
   const [additionalCosts, setAdditionalCosts] = useState<
-    Array<{ id: number; label: string; amount: number }>
-  >([{ id: 1, label: "2 nights stay", amount: 15.8 }]);
+    Array<{id: number; label: string; amount: number}>
+  >([]);
 
   const [currentInput, setCurrentInput] = useState<{
     label: string;
     amount: number;
-  }>({ label: "", amount: 0 });
-
-  const baseFee = 34.5;
+  }>({label: "", amount: 0});
 
   const total = useMemo(() => {
     const additionalTotal = additionalCosts.reduce(
@@ -32,7 +30,7 @@ export function FinancialSection() {
           amount: currentInput.amount,
         },
       ]);
-      setCurrentInput({ label: "", amount: 0 });
+      setCurrentInput({label: "", amount: 0});
     }
   };
 
@@ -40,7 +38,7 @@ export function FinancialSection() {
     field: "label" | "amount",
     value: string | number
   ) => {
-    setCurrentInput((prev) => ({ ...prev, [field]: value }));
+    setCurrentInput((prev) => ({...prev, [field]: value}));
   };
 
   const handleRemoveCost = (id: number) => {
@@ -59,7 +57,9 @@ export function FinancialSection() {
             {/* Base Fee */}
             <div className="flex items-center gap-1 bg-white rounded-lg px-2 py-2 flex-shrink-0">
               <span className="text-xs text-slate-900">Base Fee:</span>
-              <span className="text-xs font-bold text-slate-900">$34.5</span>
+              <span className="text-xs font-bold text-slate-900">
+                ${baseFee.toFixed(2)}
+              </span>
             </div>
 
             {/* Additional Costs */}

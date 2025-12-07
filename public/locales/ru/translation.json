@@ -161,6 +161,33 @@
         "overallDifference": "Общее: {{difference}}"
       }
     },
+    "summary": {
+      "plannedStart": "ПЛАНИРУЕМЫЙ СТАРТ",
+      "startedAt": "НАЧАЛОСЬ В",
+      "estFinish": "ПРИБЛ. ЗАВЕРШЕНИЕ",
+      "finishedAt": "ЗАВЕРШЕНО В",
+      "driverVehicle": "ТРАНСПОРТ ВОДИТЕЛЯ",
+      "localCompany": "МЕСТНАЯ КОМПАНИЯ",
+      "notPlanned": "Не запланировано",
+      "notStarted": "Не начато",
+      "notFinished": "Не завершено",
+      "notAssigned": "Не назначено",
+      "nA": "Н/Д",
+      "company": "Компания",
+      "driver": "Водитель",
+      "gps": "GPS",
+      "on": "Вкл",
+      "off": "Выкл",
+      "delay": "Задержка",
+      "alerts": "Оповещения",
+      "pending": "В ожидании",
+      "openChatWithAlerts": "Открыть чат с оповещениями",
+      "chatWithCompany": "Чат с компанией",
+      "gpsLost": "GPS потерян",
+      "delayExpected": "Ожидается задержка",
+      "routeCleared": "Маршрут очищен",
+      "documentationPending": "Документация в ожидании"
+    },
     "page": {
       "title": "Сегменты",
       "loading": "Загрузка сегментов...",
@@ -289,7 +316,8 @@
       "justNow": "Только что",
       "minutesAgo": "{{count}} мин назад",
       "hoursAgo": "{{count}} ч назад",
-      "daysAgo": "{{count}} дн назад"
+      "daysAgo": "{{count}} дн назад",
+      "allActivities": "Все активности"
     },
     "addModal": {
       "title": "Добавить новое отправление",

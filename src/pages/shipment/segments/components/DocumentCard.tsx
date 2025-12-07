@@ -58,12 +58,41 @@ export function DocumentCard({
   const statusConfig = statusStyles[status];
   const IconComp = statusConfig.Icon;
 
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Don't trigger preview if clicking on action buttons
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.tagName === "BUTTON" ||
+      status !== "pending"
+    ) {
+      return;
+    }
+    onPreview?.();
+  };
+
+  const showTooltip = status === "pending" && onPreview;
+
   return (
     <div
-      className={`flex flex-col w-52 border justify-between border-slate-200 rounded-xl p-3 shrink-0 ${
-        className ?? ""
-      }`}
+      className={`relative group flex flex-col w-52 border justify-between border-slate-200 rounded-xl p-3 shrink-0 ${
+        showTooltip
+          ? "cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          : ""
+      } ${className ?? ""}`}
+      onClick={handleCardClick}
     >
+      {/* Tooltip */}
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
+          <div className="bg-slate-900 text-white text-xs rounded-md px-3 py-1.5 shadow-lg whitespace-nowrap">
+            Click to preview
+            {/* Arrow pointing down */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-slate-900" />
+          </div>
+        </div>
+      )}
+
       {/* Top section: Status icon, file info, and uploader */}
       <div className="flex items-start justify-between gap-2">
         {/* Left side: Status icon with file info */}
@@ -94,7 +123,10 @@ export function DocumentCard({
 
       {/* Action buttons at bottom */}
       {status === "pending" && (
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
             onClick={onApprove}

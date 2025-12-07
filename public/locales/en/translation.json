@@ -161,6 +161,33 @@
         "overallDifference": "Overall: {{difference}}"
       }
     },
+    "summary": {
+      "plannedStart": "PLANNED START",
+      "startedAt": "STARTED AT",
+      "estFinish": "EST. FINISH",
+      "finishedAt": "FINISHED AT",
+      "driverVehicle": "DRIVER VEHICLE",
+      "localCompany": "LOCAL COMPANY",
+      "notPlanned": "Not Planned",
+      "notStarted": "Not started",
+      "notFinished": "Not finished",
+      "notAssigned": "Not assigned",
+      "nA": "N/A",
+      "company": "Company",
+      "driver": "Driver",
+      "gps": "GPS",
+      "on": "On",
+      "off": "Off",
+      "delay": "Delay",
+      "alerts": "Alerts",
+      "pending": "Pending",
+      "openChatWithAlerts": "Open chat with alerts",
+      "chatWithCompany": "Chat with company",
+      "gpsLost": "GPS Lost",
+      "delayExpected": "Delay Expected",
+      "routeCleared": "Route Cleared",
+      "documentationPending": "Documentation Pending"
+    },
     "page": {
       "title": "Segments",
       "loading": "Loading segments...",
@@ -527,7 +554,8 @@
       "justNow": "Just now",
       "minutesAgo": "{{count}}m ago",
       "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "daysAgo": "{{count}}d ago",
+      "allActivities": "All Activities"
     },
     "addModal": {
       "title": "Add New Shipment",

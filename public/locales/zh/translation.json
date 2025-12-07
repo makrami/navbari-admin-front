@@ -161,6 +161,33 @@
         "overallDifference": "总计：{{difference}}"
       }
     },
+    "summary": {
+      "plannedStart": "计划开始",
+      "startedAt": "开始时间",
+      "estFinish": "预计完成",
+      "finishedAt": "完成时间",
+      "driverVehicle": "司机车辆",
+      "localCompany": "本地公司",
+      "notPlanned": "未计划",
+      "notStarted": "未开始",
+      "notFinished": "未完成",
+      "notAssigned": "未分配",
+      "nA": "不适用",
+      "company": "公司",
+      "driver": "司机",
+      "gps": "GPS",
+      "on": "开启",
+      "off": "关闭",
+      "delay": "延迟",
+      "alerts": "警报",
+      "pending": "待处理",
+      "openChatWithAlerts": "打开警报聊天",
+      "chatWithCompany": "与公司聊天",
+      "gpsLost": "GPS丢失",
+      "delayExpected": "预期延迟",
+      "routeCleared": "路线已清除",
+      "documentationPending": "文档待处理"
+    },
     "page": {
       "title": "路段",
       "loading": "加载路段中...",
@@ -289,7 +316,8 @@
       "justNow": "刚刚",
       "minutesAgo": "{{count}} 分钟前",
       "hoursAgo": "{{count}} 小时前",
-      "daysAgo": "{{count}} 天前"
+      "daysAgo": "{{count}} 天前",
+      "allActivities": "所有活动"
     },
     "addModal": {
       "title": "添加新货运",

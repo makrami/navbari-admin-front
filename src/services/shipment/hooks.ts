@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
   listShipments,
   getShipment,
@@ -81,6 +81,11 @@ export function useShipmentSegments(shipmentId: string | null) {
     queryKey: shipmentKeys.segments(shipmentId!),
     queryFn: () => getShipmentSegments(shipmentId!),
     enabled: !!shipmentId,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Always stale, triggers fetch every time
+    gcTime: 60_000, // 60 seconds
   });
 
   // Maintain backward compatibility with existing code
@@ -111,7 +116,7 @@ export function useCreateShipment() {
     mutationFn: (data: CreateShipmentDto) => createShipment(data),
     onSuccess: () => {
       // Invalidate and refetch shipments list
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
     },
   });
 }
@@ -123,12 +128,12 @@ export function useUpdateShipment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateShipmentDto }) =>
+    mutationFn: ({id, data}: {id: string; data: UpdateShipmentDto}) =>
       updateShipment(id, data),
     onSuccess: (data) => {
       // Invalidate and refetch shipment queries
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.detail(data.id) });
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.detail(data.id)});
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
     },
   });
 }
@@ -143,7 +148,7 @@ export function useDeleteShipment() {
     mutationFn: (id: string) => deleteShipment(id),
     onSuccess: () => {
       // Invalidate and refetch shipments list
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
     },
   });
 }
@@ -164,7 +169,7 @@ export function useCreateSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.detail(data.shipmentId),
       });
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
     },
   });
 }
@@ -176,7 +181,7 @@ export function useUpdateSegment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateSegmentDto }) =>
+    mutationFn: ({id, data}: {id: string; data: UpdateSegmentDto}) =>
       updateSegment(id, data),
     onSuccess: (data) => {
       // Invalidate shipment and segments queries
@@ -186,7 +191,7 @@ export function useUpdateSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.detail(data.shipmentId),
       });
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
     },
   });
 }
@@ -198,7 +203,7 @@ export function useAnnounceSegment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, companyIds }: { id: string; companyIds: string[] }) =>
+    mutationFn: ({id, companyIds}: {id: string; companyIds: string[]}) =>
       announceSegment(id, companyIds),
     onSuccess: (data) => {
       // Invalidate shipment and segments queries
@@ -208,7 +213,7 @@ export function useAnnounceSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.detail(data.shipmentId),
       });
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
       // Invalidate announcements query for this segment
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.segmentAnnouncements(data.id),
@@ -235,7 +240,7 @@ export function useAssignSegment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: AssignSegmentDto }) =>
+    mutationFn: ({id, data}: {id: string; data: AssignSegmentDto}) =>
       assignSegment(id, data),
     onSuccess: (data) => {
       // Invalidate shipment and segments queries
@@ -245,7 +250,7 @@ export function useAssignSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.detail(data.shipmentId),
       });
-      queryClient.invalidateQueries({ queryKey: shipmentKeys.lists() });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
       // Invalidate announcements query for this segment
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.segmentAnnouncements(data.id),

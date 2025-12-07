@@ -161,6 +161,33 @@
         "overallDifference": "کلی: {{difference}}"
       }
     },
+    "summary": {
+      "plannedStart": "شروع برنامه‌ریزی شده",
+      "startedAt": "شروع شده در",
+      "estFinish": "پایان تخمینی",
+      "finishedAt": "پایان یافته در",
+      "driverVehicle": "وسیله نقلیه راننده",
+      "localCompany": "شرکت محلی",
+      "notPlanned": "برنامه‌ریزی نشده",
+      "notStarted": "شروع نشده",
+      "notFinished": "پایان نیافته",
+      "notAssigned": "اختصاص داده نشده",
+      "nA": "نامشخص",
+      "company": "شرکت",
+      "driver": "راننده",
+      "gps": "GPS",
+      "on": "روشن",
+      "off": "خاموش",
+      "delay": "تأخیر",
+      "alerts": "هشدارها",
+      "pending": "در انتظار",
+      "openChatWithAlerts": "باز کردن چت با هشدارها",
+      "chatWithCompany": "چت با شرکت",
+      "gpsLost": "GPS از دست رفته",
+      "delayExpected": "تأخیر پیش‌بینی شده",
+      "routeCleared": "مسیر پاک شد",
+      "documentationPending": "مستندات در انتظار"
+    },
     "page": {
       "title": "بخش‌ها",
       "loading": "در حال بارگذاری بخش‌ها...",
@@ -527,7 +554,8 @@
       "justNow": "همین الان",
       "minutesAgo": "{{count}} دقیقه پیش",
       "hoursAgo": "{{count}} ساعت پیش",
-      "daysAgo": "{{count}} روز پیش"
+      "daysAgo": "{{count}} روز پیش",
+      "allActivities": "همه فعالیت‌ها"
     },
     "addModal": {
       "title": "افزودن محموله جدید",
