@@ -1,12 +1,12 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import { cn } from "../../../shared/utils/cn";
-import type { Shipment as DomainShipment } from "../../../shared/types/shipment";
-import type { Segment } from "../../../shared/types/segmentData";
-import { SegmentCardHeader } from "./SegmentCardHeader";
-import { SegmentInfoBanner } from "./SegmentInfoBanner";
-import { SegmentInfoGrid } from "./SegmentInfoGrid";
-import { FinancialSection } from "../../shipment/segments/components/FinancialSection";
-import { DocumentsSection } from "../../shipment/segments/components/DocumentsSection";
+import {useLayoutEffect, useRef, useState} from "react";
+import {cn} from "../../../shared/utils/cn";
+import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
+import {SegmentCardHeader} from "./SegmentCardHeader";
+import {SegmentInfoBanner} from "./SegmentInfoBanner";
+import {SegmentInfoGrid} from "./SegmentInfoGrid";
+import {FinancialSection} from "../../shipment/segments/components/FinancialSection";
+import {DocumentsSection} from "../../shipment/segments/components/DocumentsSection";
 
 type SegmentCardProps = {
   segment: Segment;
@@ -73,7 +73,7 @@ export function SegmentCard({
         className={cn(
           "overflow-hidden transition-[height] duration-300 ease-in-out"
         )}
-        style={{ height: isExpanded ? measuredHeight : 0 }}
+        style={{height: isExpanded ? measuredHeight : 0}}
         aria-hidden={!isExpanded && measuredHeight === 0}
       >
         <div
@@ -89,7 +89,9 @@ export function SegmentCard({
         >
           <SegmentInfoBanner segment={segment} shipment={shipment} />
           <SegmentInfoGrid segment={segment} />
-          <FinancialSection />
+          <FinancialSection
+            baseFee={segment.baseFee ? parseFloat(segment.baseFee) : 0}
+          />
           <DocumentsSection />
         </div>
       </div>

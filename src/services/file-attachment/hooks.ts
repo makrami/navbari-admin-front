@@ -3,7 +3,6 @@ import {
   getSegmentFileAttachments,
   uploadFileAttachment,
   updateFileAttachmentStatus,
-  type FileAttachmentReadDto,
 } from "./file-attachment.service";
 import {shipmentKeys} from "../shipment/hooks";
 

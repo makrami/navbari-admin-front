@@ -277,16 +277,16 @@ export function appendMessageToCache(
     (oldData: InfiniteData<MessageReadDto[]> | undefined) => {
       // Check if message already exists (by ID) - check this first
       if (oldData) {
-        const exists = oldData.pages.some((page) =>
-          page.some((item) => item.id === message.id)
-        );
-        if (exists) {
-          console.log(
-            "⚠️ Message already exists in cache, skipping:",
-            message.id
-          );
-          return oldData;
-        }
+        // const exists = oldData.pages.some((page) =>
+        //   page.some((item) => item.id === message.id)
+        // );
+        // if (exists) {
+        //   console.log(
+        //     "⚠️ Message already exists in cache, skipping:",
+        //     message.id
+        //   );
+        //   return oldData;
+        // }
 
         // Check if there's a temporary message with matching content that should be replaced
         // This handles the case where socket receives the message we just sent
@@ -397,43 +397,155 @@ export function updateConversationCache(
   message: MessageReadDto,
   activeConversationId?: string
 ) {
-  queryClient.setQueryData(
-    chatKeys.conversations(),
-    (oldConversations: ConversationReadDto[] | undefined) => {
-      if (!oldConversations) return oldConversations;
-      return oldConversations.map((conversation) => {
-        if (conversation.id !== message.conversationId) {
-          return conversation;
-        }
+  // Update all conversation queries (including those with recipientType)
+  // useChatConversations(recipientType) uses key: ["chat", "conversations", recipientType]
+  // We need to update all queries that start with ["chat", "conversations"]
+  const baseKey = chatKeys.conversations();
+  console.log("🔄 Updating conversation cache for message:", {
+    messageId: message.id,
+    conversationId: message.conversationId,
+    messageType: message.messageType,
+    activeConversationId,
+    baseKey,
+  });
 
-        // If this is the active conversation, don't increment unread counts
-        // (messages are already being viewed)
-        const isActiveConversation = conversation.id === activeConversationId;
-
-        // Determine if we should increment unread counts
-        // Only increment if it's not the active conversation
-        const shouldIncrementUnread = !isActiveConversation;
-
-        // Update unread counts based on message type
-        const updatedConversation = {
-          ...conversation,
-          lastMessageId: message.id,
-          lastMessageAt: message.createdAt,
-          lastMessageContent: message.content || null,
-        };
-
-        if (shouldIncrementUnread) {
-          if (message.messageType === CHAT_MESSAGE_TYPE.ALERT) {
-            updatedConversation.unreadAlertCount =
-              (conversation.unreadAlertCount || 0) + 1;
-          } else {
-            updatedConversation.unreadMessageCount =
-              (conversation.unreadMessageCount || 0) + 1;
-          }
-        }
-
-        return updatedConversation;
-      });
+  // Helper function to update conversation data
+  const updateConversation = (
+    oldConversations: ConversationReadDto[] | undefined
+  ): ConversationReadDto[] | undefined => {
+    if (!oldConversations) {
+      console.log("⚠️ No conversations in cache to update");
+      return oldConversations;
     }
+
+    console.log("📋 Found conversations in cache:", oldConversations.length);
+    const foundConversation = oldConversations.find(
+      (conv) => conv.id === message.conversationId
+    );
+
+    if (!foundConversation) {
+      console.log(
+        "⚠️ Conversation not found in cache:",
+        message.conversationId,
+        "Available IDs:",
+        oldConversations.map((c) => c.id)
+      );
+      return oldConversations;
+    }
+
+    console.log("✅ Found conversation to update:", {
+      conversationId: foundConversation.id,
+      currentUnreadMessages: foundConversation.unreadMessageCount,
+      currentUnreadAlerts: foundConversation.unreadAlertCount,
+      isActive: foundConversation.id === activeConversationId,
+      lastMessageId: foundConversation.lastMessageId,
+      incomingMessageId: message.id,
+    });
+
+    // Create a new array to ensure React Query detects the change
+    const updatedConversations = oldConversations.map((conversation) => {
+      if (conversation.id !== message.conversationId) {
+        return conversation;
+      }
+
+      // Check if this message was already processed
+      // This prevents duplicate increments when multiple hook instances process the same message
+      const isAlreadyProcessed = conversation.lastMessageId === message.id;
+
+      if (isAlreadyProcessed) {
+        console.log(
+          "⚠️ Message already processed, skipping unread count increment:",
+          {
+            messageId: message.id,
+            lastMessageId: conversation.lastMessageId,
+          }
+        );
+        // Return conversation as-is since it's already been updated
+        return conversation;
+      }
+
+      // // If this is the active conversation, don't increment unread counts
+      // // (messages are already being viewed)
+      // const isActiveConversation = conversation.id === activeConversationId;
+
+      // // Determine if we should increment unread counts
+      // // Only increment if it's not the active conversation
+      // const shouldIncrementUnread = !isActiveConversation;
+
+      // Update unread counts based on message type
+      const updatedConversation: ConversationReadDto = {
+        ...conversation,
+        lastMessageId: message.id,
+        lastMessageAt: message.createdAt,
+        lastMessageContent: message.content || null,
+      };
+
+      if (message.messageType === CHAT_MESSAGE_TYPE.ALERT) {
+        updatedConversation.unreadAlertCount =
+          (conversation.unreadAlertCount || 0) + 1;
+        console.log("📈 Incremented unreadAlertCount:", {
+          from: conversation.unreadAlertCount || 0,
+          to: updatedConversation.unreadAlertCount,
+        });
+      } else {
+        updatedConversation.unreadMessageCount =
+          (conversation.unreadMessageCount || 0) + 1;
+        console.log("📈 Incremented unreadMessageCount:", {
+          from: conversation.unreadMessageCount || 0,
+          to: updatedConversation.unreadMessageCount,
+        });
+      }
+
+      return updatedConversation;
+    });
+
+    return updatedConversations;
+  };
+
+  // Get all matching queries first to debug
+  const allQueries = queryClient.getQueryCache().getAll();
+  const matchingQueries = allQueries.filter((query) => {
+    const queryKey = query.queryKey;
+    const matches =
+      queryKey.length >= baseKey.length &&
+      baseKey.every((key, index) => queryKey[index] === key);
+    return matches;
+  });
+
+  console.log("🔍 Query matching results:", {
+    totalQueries: allQueries.length,
+    matchingQueries: matchingQueries.length,
+    matchingKeys: matchingQueries.map((q) => q.queryKey),
+  });
+
+  // Update all queries that match the base conversations key
+  // This will match: ["chat", "conversations"] and ["chat", "conversations", "driver"], etc.
+  const updatedQueries = queryClient.setQueriesData<ConversationReadDto[]>(
+    {
+      predicate: (query) => {
+        const queryKey = query.queryKey;
+        // Check if query key starts with baseKey
+        const matches =
+          queryKey.length >= baseKey.length &&
+          baseKey.every((key, index) => queryKey[index] === key);
+        if (matches) {
+          console.log("✅ Matching query found:", queryKey);
+        }
+        return matches;
+      },
+    },
+    updateConversation
   );
+
+  const updatedCount = updatedQueries.length;
+  console.log("📊 Updated queries count:", updatedCount);
+
+  // If no queries were updated (conversation not in cache), invalidate to force refetch
+  if (updatedCount === 0) {
+    console.log("🔄 No queries updated, invalidating to force refetch");
+    queryClient.invalidateQueries({
+      queryKey: baseKey,
+      exact: false,
+    });
+  }
 }

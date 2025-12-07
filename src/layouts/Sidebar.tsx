@@ -1,6 +1,6 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useRTL } from "../shared/hooks/useRTL";
+import {NavLink, useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
+import {useRTL} from "../shared/hooks/useRTL";
 
 // Figma-exported assets (from the currently selected node)
 import imgLogo from "../assets/images/truck.svg";
@@ -16,21 +16,24 @@ import {
   LogOutIcon,
   UserIcon,
 } from "lucide-react";
-import { ActiveIndicator } from "../shared/components";
-import { logout } from "../services/auth.service";
-import { LanguageSelector } from "../components/Ui/LanguageSelector";
-import { useCurrentUser } from "../services/user/hooks";
-import { getFileUrl } from "../pages/Drivers/utils";
+import {ActiveIndicator} from "../shared/components";
+import {logout} from "../services/auth.service";
+import {LanguageSelector} from "../components/Ui/LanguageSelector";
+import {useCurrentUser} from "../services/user/hooks";
+import {getFileUrl} from "../pages/Drivers/utils";
+import {useUnreadChatCount} from "../services/chat/hooks";
 
 export function Sidebar() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const isRTL = useRTL();
   const {
     data: user,
     isLoading: isLoadingUser,
     error: userError,
   } = useCurrentUser();
+  const {data: unreadCountData} = useUnreadChatCount();
+  const unreadCount = unreadCountData?.count ?? 0;
 
   // Debug: Log user data to console
   if (user) {
@@ -80,13 +83,13 @@ export function Sidebar() {
           {/* Overview */}
           <NavLink
             to="/dashboard"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
+            {({isActive}) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <LayoutGridIcon
@@ -108,13 +111,13 @@ export function Sidebar() {
           {/* Active indicator + Truck */}
           <NavLink
             to="/shipments"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
+            {({isActive}) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <TruckIcon
@@ -136,13 +139,13 @@ export function Sidebar() {
           {/* Gear */}
           <NavLink
             to="/local-companies"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
+            {({isActive}) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <BoxesIcon
@@ -164,13 +167,13 @@ export function Sidebar() {
           {/* Drivers */}
           <NavLink
             to="/drivers"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
+            {({isActive}) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <UsersIcon
@@ -192,13 +195,13 @@ export function Sidebar() {
           {/* Dollar */}
           <NavLink
             to="/finance"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
+            {({isActive}) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <DollarSignIcon
@@ -220,20 +223,27 @@ export function Sidebar() {
           {/* Chat & Alert */}
           <NavLink
             to="/chat-alert"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
-              <div className="flex items-center gap-2">
+            {({isActive}) => (
+              <div className="flex items-center gap-2 relative">
                 <ActiveIndicator isActive={isActive} />
-                <MessageSquareDot
-                  className={`size-5 ${
-                    isActive ? "text-[#1B54FE]" : "text-slate-400"
-                  }`}
-                />
+                <div className="relative">
+                  <MessageSquareDot
+                    className={`size-5 ${
+                      isActive ? "text-[#1B54FE]" : "text-slate-400"
+                    }`}
+                  />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span
                   className={`text-xs font-medium uppercase tracking-wide ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
@@ -248,13 +258,13 @@ export function Sidebar() {
           {/* Settings */}
           <NavLink
             to="/settings"
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({ isActive }) => (
+            {({isActive}) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <SettingsIcon

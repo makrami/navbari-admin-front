@@ -230,6 +230,11 @@ export function useSegmentAnnouncements(segmentId: string | null) {
     queryKey: shipmentKeys.segmentAnnouncements(segmentId!),
     queryFn: () => getSegmentAnnouncements(segmentId!),
     enabled: !!segmentId,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Always stale, triggers fetch every time
+    gcTime: 60_000, // 60 seconds
   });
 }
 

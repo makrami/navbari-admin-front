@@ -320,11 +320,24 @@ export function NavigatingInfo({
                   disabled={!driverId}
                   aria-label={t("shipment.navigatingInfo.openChat")}
                   className={cn(
-                    "bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform",
+                    "bg-blue-100 text-blue-600 rounded-[8px] p-2 hover:scale-105 transition-transform relative",
                     !driverId && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <MessagesSquareIcon className="size-4" />
+                  {(() => {
+                    const unreadCount =
+                      (chatHook.conversation?.unreadMessageCount ?? 0) +
+                      (chatHook.conversation?.unreadAlertCount ?? 0);
+                    if (unreadCount > 0) {
+                      return (
+                        <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-semibold rounded-full border-2 border-white">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
                 </button>
               </div>
             </div>

@@ -725,7 +725,7 @@ export function SegmentDetails({
                 lastGpsUpdate={data.lastGpsUpdate || undefined}
                 alertCount={data.alertCount}
                 delaysInMinutes={data.delaysInMinutes}
-                pendingDocuments={0}
+                pendingDocuments={data.pendingDocuments || 0}
                 documents={data.documents?.map((doc) => ({
                   ...doc,
                   sizeLabel: doc.sizeLabel || "0 KB",
