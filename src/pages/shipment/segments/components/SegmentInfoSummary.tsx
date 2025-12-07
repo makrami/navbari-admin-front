@@ -650,7 +650,7 @@ export default function SegmentInfoSummary({
   pendingDocuments = 0,
   documents,
   segmentId,
-  driverId,
+
   baseFee,
   status,
   arrivedOriginAt,

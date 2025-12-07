@@ -145,21 +145,11 @@ export function useSegmentsData(
   }, [allSegments, filter, searchQuery]);
 
   const needActionCount = useMemo(() => {
-    return allSegments.filter(
-      (seg) =>
-        !seg.isCompleted &&
-        (seg.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ||
-          seg.status === SEGMENT_STATUS.ASSIGNED)
-    ).length;
+    return allSegments.filter((seg) => seg.needToAction).length;
   }, [allSegments]);
 
   const alertCount = useMemo(() => {
-    return allSegments.filter(
-      (seg) =>
-        !seg.isCompleted &&
-        (seg.status === SEGMENT_STATUS.CANCELLED ||
-          seg.status === SEGMENT_STATUS.AT_ORIGIN)
-    ).length;
+    return allSegments.filter((seg) => seg.hasAlerts).length;
   }, [allSegments]);
 
   return {
