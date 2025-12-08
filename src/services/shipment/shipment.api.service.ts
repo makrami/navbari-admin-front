@@ -1,7 +1,7 @@
-import { http } from "../../lib/http";
-import type { Shipment } from "../../shared/types/shipment";
-import type { Segment } from "../../shared/types/segmentData";
-import { SegmentStatus } from "../../shared/types/segmentData";
+import {http} from "../../lib/http";
+import type {Shipment} from "../../shared/types/shipment";
+import type {Segment} from "../../shared/types/segmentData";
+import {SegmentStatus} from "../../shared/types/segmentData";
 
 // Enums matching API
 export const SHIPMENT_STATUS = {
@@ -434,7 +434,7 @@ export async function updateSegment(
 ): Promise<Segment> {
   try {
     // Normalize datetime strings to ISO 8601 format (ensure seconds are included)
-    const normalizedData = { ...data };
+    const normalizedData = {...data};
 
     // Helper function to normalize datetime string to ISO 8601 format
     // Backend @IsDateString() requires strict ISO 8601 format (e.g., 2024-01-01T12:00:00.000Z)
@@ -640,5 +640,34 @@ export async function createSegment(data: CreateSegmentDto): Promise<Segment> {
       throw error;
     }
     throw new Error("Failed to create segment");
+  }
+}
+
+/**
+ * Delete a segment
+ */
+export async function deleteSegment(id: string): Promise<void> {
+  try {
+    await http.delete(`/segments/${id}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to delete segment");
+  }
+}
+
+/**
+ * Cancel a segment
+ */
+export async function cancelSegment(id: string): Promise<Segment> {
+  try {
+    const response = await http.post<Segment>(`/segments/${id}/cancel`);
+    return mapSegmentDtoToSegmentData(response.data);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to cancel segment");
   }
 }

@@ -120,7 +120,17 @@
       "segment": "路段",
       "cargoDeclaration": "货物申报",
       "chatWithDriver": "与司机聊天",
-      "driver": "司机"
+      "driver": "司机",
+      "delete": "删除",
+      "cancel": "取消",
+      "deleteSegment": "删除路段",
+      "deleteSegmentConfirm": "您确定要删除此路段吗？此操作无法撤销。",
+      "deleting": "删除中...",
+      "confirmDelete": "确认删除",
+      "cancelSegment": "取消路段",
+      "cancelSegmentConfirm": "您确定要取消此路段吗？此操作无法撤销。",
+      "cancelling": "取消中...",
+      "confirmCancel": "确认取消"
     },
     "infoBanner": {
       "from": "从",

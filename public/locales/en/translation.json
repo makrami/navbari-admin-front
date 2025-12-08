@@ -120,7 +120,17 @@
       "segment": "SEGMENT",
       "cargoDeclaration": "Cargo Declaration",
       "chatWithDriver": "Chat with driver",
-      "driver": "Driver"
+      "driver": "Driver",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleteSegment": "Delete Segment",
+      "deleteSegmentConfirm": "Are you sure you want to delete this segment? This action cannot be undone.",
+      "deleting": "Deleting...",
+      "confirmDelete": "Confirm Delete",
+      "cancelSegment": "Cancel Segment",
+      "cancelSegmentConfirm": "Are you sure you want to cancel this segment? This action cannot be undone.",
+      "cancelling": "Cancelling...",
+      "confirmCancel": "Confirm Cancel"
     },
     "infoBanner": {
       "from": "From",

@@ -120,7 +120,17 @@
       "segment": "بخش",
       "cargoDeclaration": "اعلام بار",
       "chatWithDriver": "چت با راننده",
-      "driver": "راننده"
+      "driver": "راننده",
+      "delete": "حذف",
+      "cancel": "لغو",
+      "deleteSegment": "حذف بخش",
+      "deleteSegmentConfirm": "آیا مطمئن هستید که می‌خواهید این بخش را حذف کنید؟ این عمل قابل بازگشت نیست.",
+      "deleting": "در حال حذف...",
+      "confirmDelete": "تأیید حذف",
+      "cancelSegment": "لغو بخش",
+      "cancelSegmentConfirm": "آیا مطمئن هستید که می‌خواهید این بخش را لغو کنید؟ این عمل قابل بازگشت نیست.",
+      "cancelling": "در حال لغو...",
+      "confirmCancel": "تأیید لغو"
     },
     "infoBanner": {
       "from": "از",

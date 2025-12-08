@@ -120,7 +120,17 @@
       "segment": "СЕГМЕНТ",
       "cargoDeclaration": "Декларация груза",
       "chatWithDriver": "Чат с водителем",
-      "driver": "Водитель"
+      "driver": "Водитель",
+      "delete": "Удалить",
+      "cancel": "Отменить",
+      "deleteSegment": "Удалить сегмент",
+      "deleteSegmentConfirm": "Вы уверены, что хотите удалить этот сегмент? Это действие нельзя отменить.",
+      "deleting": "Удаление...",
+      "confirmDelete": "Подтвердить удаление",
+      "cancelSegment": "Отменить сегмент",
+      "cancelSegmentConfirm": "Вы уверены, что хотите отменить этот сегмент? Это действие нельзя отменить.",
+      "cancelling": "Отмена...",
+      "confirmCancel": "Подтвердить отмену"
     },
     "infoBanner": {
       "from": "От",

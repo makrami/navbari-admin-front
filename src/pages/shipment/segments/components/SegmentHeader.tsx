@@ -6,6 +6,9 @@ import {
   MapPinned,
   MessagesSquare,
   MapPin,
+  Trash2,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import {cn} from "../../../../shared/utils/cn";
 import {formatDistance} from "../../../../shared/utils/segmentHelpers";
@@ -16,6 +19,11 @@ import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
 import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
 import {useTranslation} from "react-i18next";
+import {useState, useRef, useEffect} from "react";
+import {
+  useDeleteSegment,
+  useCancelSegment,
+} from "../../../../services/shipment/hooks";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
   {id: "1", label: "GPS Lost", alertType: "alert"},
@@ -42,6 +50,7 @@ type SegmentHeaderProps = {
   lastGpsUpdate?: string | null;
   editable: boolean;
   segmentId: string;
+  shipmentId: string;
   onToggle: () => void;
   showCargoButton: boolean;
   onCargoClick: (e: React.MouseEvent) => void;
@@ -65,14 +74,75 @@ export default function SegmentHeader({
   lastGpsUpdate,
   editable,
   segmentId,
+  shipmentId,
   onToggle,
   showCargoButton,
   onCargoClick,
   isAssigned = false,
 }: SegmentHeaderProps) {
   const {t} = useTranslation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const deleteSegmentMutation = useDeleteSegment();
+  const cancelSegmentMutation = useCancelSegment();
+
   // Only show driver info when backend has approved/assigned the driver
   const distance = formatDistance(distanceKm);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // Determine which actions to show
+  const showDelete = segmentStatus === SEGMENT_STATUS.PENDING_ASSIGNMENT;
+  const showCancel =
+    segmentStatus &&
+    segmentStatus !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+    segmentStatus !== SEGMENT_STATUS.DELIVERED &&
+    segmentStatus !== SEGMENT_STATUS.CANCELLED;
+
+  const handleDelete = async () => {
+    try {
+      await deleteSegmentMutation.mutateAsync({
+        id: segmentId,
+        shipmentId,
+      });
+      setShowDeleteModal(false);
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error("Failed to delete segment:", error);
+      // Error is handled by the mutation, but we can show a toast here if needed
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      await cancelSegmentMutation.mutateAsync({
+        id: segmentId,
+        shipmentId,
+      });
+      setShowCancelModal(false);
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error("Failed to cancel segment:", error);
+      // Error is handled by the mutation, but we can show a toast here if needed
+    }
+  };
 
   function isGpsOn(lastGpsUpdate: string | null | undefined): boolean {
     if (!lastGpsUpdate) return false;
@@ -248,8 +318,146 @@ export default function SegmentHeader({
             </div>
           </div>
         ) : null}
-        <MoreVertical className="size-5 text-slate-400" />
+        <div className="relative" ref={menuRef}>
+          {segmentStatus === SEGMENT_STATUS.CANCELLED ? (
+            <span className="px-3 py-1 text-sm font-semibold text-red-600">
+              {t("shipment.status.cancelled")}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+              aria-label="More options"
+            >
+              <MoreVertical className="size-5 text-slate-400" />
+            </button>
+          )}
+          {isMenuOpen && (showDelete || showCancel) && (
+            <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 min-w-[160px]">
+              {showDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    setShowDeleteModal(true);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 first:rounded-t-lg"
+                >
+                  <Trash2 className="size-4" />
+                  {t("segments.cardHeader.delete") || "Delete"}
+                </button>
+              )}
+              {showCancel && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    setShowCancelModal(true);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 last:rounded-b-lg"
+                >
+                  <X className="size-4" />
+                  {t("segments.cardHeader.cancel") || "Cancel"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="size-6 text-red-600" />
+              <h3 className="text-lg font-semibold">
+                {t("segments.cardHeader.deleteSegment") || "Delete Segment"}
+              </h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              {t("segments.cardHeader.deleteSegmentConfirm") ||
+                "Are you sure you want to delete this segment? This action cannot be undone."}
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={
+                  deleteSegmentMutation.isPending ||
+                  cancelSegmentMutation.isPending
+                }
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {t("segments.cardHeader.cancel") || "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={
+                  deleteSegmentMutation.isPending ||
+                  cancelSegmentMutation.isPending
+                }
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteSegmentMutation.isPending
+                  ? t("segments.cardHeader.deleting") || "Deleting..."
+                  : t("segments.cardHeader.confirmDelete") || "Confirm Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="size-6 text-orange-600" />
+              <h3 className="text-lg font-semibold">
+                {t("segments.cardHeader.cancelSegment") || "Cancel Segment"}
+              </h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              {t("segments.cardHeader.cancelSegmentConfirm") ||
+                "Are you sure you want to cancel this segment? This action cannot be undone."}
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(false)}
+                disabled={
+                  deleteSegmentMutation.isPending ||
+                  cancelSegmentMutation.isPending
+                }
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {t("segments.cardHeader.cancel") || "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={
+                  deleteSegmentMutation.isPending ||
+                  cancelSegmentMutation.isPending
+                }
+                className="flex-1 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+              >
+                {cancelSegmentMutation.isPending
+                  ? t("segments.cardHeader.cancelling") || "Cancelling..."
+                  : t("segments.cardHeader.confirmCancel") || "Confirm Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Chat Overlay */}
       {driverId && (

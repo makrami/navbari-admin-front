@@ -308,6 +308,7 @@ export function SegmentDetails({
         driverName={data.driverName ?? undefined}
         editable={editable}
         segmentId={data.id}
+        shipmentId={data.shipmentId}
         onToggle={handleToggle}
         showCargoButton={
           !!data.originCountry &&
@@ -322,19 +323,21 @@ export function SegmentDetails({
         isAssigned={isAssigned}
       />
 
-      {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT && !open && (
-        <div className="px-3 pb-3">
-          <SegmentProgress
-            current={data.status as SEGMENT_STATUS}
-            dateTime={
-              (data.estimatedStartTime ?? undefined) as string | undefined
-            }
-            showWarningIcon={data.hasDisruption ?? false}
-            segment={data}
-            onAlertClick={handleAlertClick}
-          />
-        </div>
-      )}
+      {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+        data.status !== SEGMENT_STATUS.CANCELLED &&
+        !open && (
+          <div className="px-3 pb-3">
+            <SegmentProgress
+              current={data.status as SEGMENT_STATUS}
+              dateTime={
+                (data.estimatedStartTime ?? undefined) as string | undefined
+              }
+              showWarningIcon={data.hasDisruption ?? false}
+              segment={data}
+              onAlertClick={handleAlertClick}
+            />
+          </div>
+        )}
 
       {/* Expandable content container */}
       <div
@@ -367,7 +370,9 @@ export function SegmentDetails({
             )}
 
             {/* Segment progress appears here when segment is expanded */}
-            {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT && !locked ? (
+            {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+            data.status !== SEGMENT_STATUS.CANCELLED &&
+            !locked ? (
               <SegmentProgress
                 current={data.status as SEGMENT_STATUS}
                 showWarningIcon={data.hasDisruption ?? false}

@@ -13,6 +13,8 @@ import {
   getSegmentAnnouncements,
   assignSegment,
   getSegmentRoute,
+  deleteSegment,
+  cancelSegment,
   type ShipmentFilters,
   type CreateShipmentDto,
   type UpdateShipmentDto,
@@ -272,5 +274,53 @@ export function useSegmentRoute(segmentId: string | null) {
     queryKey: shipmentKeys.segmentRoute(segmentId!),
     queryFn: () => getSegmentRoute(segmentId!),
     enabled: !!segmentId,
+  });
+}
+
+/**
+ * Mutation hook for deleting segment
+ */
+export function useDeleteSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({id, shipmentId}: {id: string; shipmentId: string}) => {
+      void shipmentId; // Used in onSuccess callback
+      return deleteSegment(id);
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate shipment and segments queries
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segments(variables.shipmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.detail(variables.shipmentId),
+      });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+    },
+  });
+}
+
+/**
+ * Mutation hook for canceling segment
+ */
+export function useCancelSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({id, shipmentId}: {id: string; shipmentId: string}) => {
+      void shipmentId; // Not needed here, but kept for API consistency
+      return cancelSegment(id);
+    },
+    onSuccess: (data) => {
+      // Invalidate shipment and segments queries
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.segments(data.shipmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shipmentKeys.detail(data.shipmentId),
+      });
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+    },
   });
 }

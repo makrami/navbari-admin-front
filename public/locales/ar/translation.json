@@ -120,7 +120,17 @@
       "segment": "القسم",
       "cargoDeclaration": "إعلان البضائع",
       "chatWithDriver": "الدردشة مع السائق",
-      "driver": "السائق"
+      "driver": "السائق",
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "deleteSegment": "حذف القسم",
+      "deleteSegmentConfirm": "هل أنت متأكد أنك تريد حذف هذا القسم؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleting": "جاري الحذف...",
+      "confirmDelete": "تأكيد الحذف",
+      "cancelSegment": "إلغاء القسم",
+      "cancelSegmentConfirm": "هل أنت متأكد أنك تريد إلغاء هذا القسم؟ لا يمكن التراجع عن هذا الإجراء.",
+      "cancelling": "جاري الإلغاء...",
+      "confirmCancel": "تأكيد الإلغاء"
     },
     "infoBanner": {
       "from": "من",
