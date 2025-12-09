@@ -24,7 +24,10 @@ import {
   useUpdateSegment,
   useSegmentAnnouncements,
 } from "../../../../services/shipment/hooks";
-import type {CompanyReadDto} from "../../../../services/company/company.service";
+import {
+  COMPANY_STATUS,
+  type CompanyReadDto,
+} from "../../../../services/company/company.service";
 import {
   computeSegmentPlace,
   computeSegmentNextPlace,
@@ -189,7 +192,9 @@ export function SegmentDetails({
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
-    return companies.map(transformCompanyToCargoCompany);
+    return companies
+      .filter((company) => company.status === COMPANY_STATUS.APPROVED)
+      .map(transformCompanyToCargoCompany);
   }, [companies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
