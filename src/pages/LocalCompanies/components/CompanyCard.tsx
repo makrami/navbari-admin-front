@@ -18,7 +18,8 @@ import {
 } from "../../../services/company/hooks";
 import {useState} from "react";
 import {useTranslation} from "react-i18next";
-import {apiStatusToUiStatus} from "../types";
+import {apiStatusToUiStatus, STATUS_TO_COLOR} from "../types";
+import {COMPANY_STATUS} from "../../../services/company/company.service";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -86,15 +87,19 @@ export function CompanyCard({
     }
   };
   const {t} = useTranslation();
+  const uiStatus = apiStatusToUiStatus(company.status);
+  const statusColors = STATUS_TO_COLOR[uiStatus];
   return (
     <div
       dir="ltr"
       className={cn(
         "relative overflow-hidden p-2 rounded-2xl transition-shadow",
         selected ? "bg-[#1b54fe] text-white shadow" : "bg-white",
+        onView && "cursor-pointer hover:shadow-md",
         className
       )}
       aria-pressed={selected}
+      onClick={() => onView?.(company.id)}
     >
       {/* <div className={cn("h-1.5 rounded-full", `${colors.bar}`)} /> */}
 
@@ -125,14 +130,10 @@ export function CompanyCard({
               "px-2 py-0.5 rounded-full text-[10px]",
               selected
                 ? "bg-white/15 text-white"
-                : "bg-slate-100 text-slate-600"
+                : statusColors.pill + " " + statusColors.pillText
             )}
           >
-            {t(
-              `localCompanies.page.status.${apiStatusToUiStatus(
-                company.status
-              )}`
-            )}
+            {t(`localCompanies.page.status.${uiStatus}`)}
           </span>
         </div>
 
@@ -224,7 +225,7 @@ export function CompanyCard({
         </div>
 
         {/* Actions */}
-        {company.status === "pending" ? (
+        {company.status === COMPANY_STATUS.PENDING ? (
           <div className="mt-5 grid grid-cols-3 gap-2">
             <Button
               variant="ghost"
@@ -234,7 +235,10 @@ export function CompanyCard({
                   ? "bg-green-500/15 text-green-300 hover:bg-white/20"
                   : "bg-green-600/20 hover:!bg-green-600/30 text-green-600"
               )}
-              onClick={handleApprove}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApprove();
+              }}
             >
               {t("localCompanies.page.card.approve")}
               <CheckIcon className="size-3 " />
@@ -247,7 +251,10 @@ export function CompanyCard({
                   ? "bg-red-500/15 text-red-300 hover:bg-white/20"
                   : "bg-red-600/20 hover:!bg-red-600/30 text-red-600"
               )}
-              onClick={handleReject}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReject();
+              }}
             >
               {t("localCompanies.page.card.reject")}
               <XIcon className="size-3" />
@@ -260,7 +267,10 @@ export function CompanyCard({
                   ? "bg-white/15 text-white hover:bg-white/20"
                   : "bg-slate-100 hover:bg-slate-200"
               )}
-              onClick={() => onView?.(company.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView?.(company.id);
+              }}
             >
               {t("localCompanies.page.card.view")}
               <EyeIcon className="h-4 w-4" />
@@ -276,7 +286,10 @@ export function CompanyCard({
                   ? "bg-white/15 text-white hover:bg-white/20"
                   : "bg-slate-100 hover:bg-slate-200"
               )}
-              onClick={() => onView?.(company.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView?.(company.id);
+              }}
             >
               {t("localCompanies.page.card.viewDetails")}
               <EyeIcon className="h-4 w-4" />
@@ -285,8 +298,18 @@ export function CompanyCard({
         )}
         {/* Reject Dialog */}
         {showRejectDialog && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowRejectDialog(false);
+              setRejectionReason("");
+            }}
+          >
+            <div
+              className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center gap-3 mb-4">
                 <AlertTriangleIcon className="size-6 text-red-600" />
                 <h3 className="text-lg font-semibold">Reject Company</h3>
@@ -297,14 +320,19 @@ export function CompanyCard({
               </p>
               <textarea
                 value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setRejectionReason(e.target.value);
+                }}
+                onClick={(e) => e.stopPropagation()}
                 placeholder="Enter rejection reason (required)..."
                 className="w-full min-h-24 text-black rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
               />
               <div className="flex gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowRejectDialog(false);
                     setRejectionReason("");
                   }}
@@ -314,7 +342,10 @@ export function CompanyCard({
                 </button>
                 <button
                   type="button"
-                  onClick={confirmReject}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    confirmReject();
+                  }}
                   disabled={!rejectionReason.trim() || rejectMutation.isPending}
                   className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
                 >

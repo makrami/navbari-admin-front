@@ -1,8 +1,8 @@
-import { RefreshCcw } from "lucide-react";
-import type { SegmentAnnouncementReadDto } from "../../../../services/shipment/shipment.api.service";
-import { getFileUrl } from "../../../LocalCompanies/utils";
-import { useAssignSegment } from "../../../../services/shipment/hooks";
-import { useState } from "react";
+import {RefreshCcw} from "lucide-react";
+import type {SegmentAnnouncementReadDto} from "../../../../services/shipment/shipment.api.service";
+import {getFileUrl} from "../../../LocalCompanies/utils";
+import {useAssignSegment} from "../../../../services/shipment/hooks";
+import {useState} from "react";
 
 type CargoAssignmentsListProps = {
   announcements: SegmentAnnouncementReadDto[];
@@ -86,10 +86,12 @@ export default function CargoAssignmentsList({
             </div>
 
             {/* Middle-right: distance */}
-            <div className="shrink-0">
-              <span className="text-xs font-bold text-slate-900">246 KM</span>
-              <span className="text-xs text-slate-500 ml-1">to Origin</span>
-            </div>
+            {announcement.status !== "pending" && (
+              <div className="shrink-0">
+                <span className="text-xs font-bold text-slate-900">246 KM</span>
+                <span className="text-xs text-slate-500 ml-1">to Origin</span>
+              </div>
+            )}
 
             {/* Right: status */}
             {announcement.status === "pending" ? (
