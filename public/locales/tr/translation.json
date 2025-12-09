@@ -1,0 +1,779 @@
+{
+  "common": {
+    "welcome": "Hoş Geldiniz",
+    "loading": "Yükleniyor...",
+    "language": "Dil",
+    "error": {
+      "unknown": "Bilinmeyen bir hata oluştu"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Hoş Geldiniz",
+      "subtitle": "Lütfen giriş yapmak için kimlik bilgilerinizi girin.",
+      "usernameLabel": "Kullanıcı Adı",
+      "usernamePlaceholder": "jane.doe",
+      "emailPlaceholder": "E-posta veya Telefon",
+      "passwordLabel": "Şifre",
+      "passwordPlaceholder": "Şifre",
+      "submit": {
+        "label": "Giriş Yap",
+        "loading": "Giriş yapılıyor..."
+      },
+      "rememberMe": "Beni hatırla",
+      "showPassword": "Şifreyi göster",
+      "hidePassword": "Şifreyi gizle",
+      "noAccount": "Hesabınız yok mu?",
+      "signUpLink": "Kayıt ol",
+      "errors": {
+        "invalidCredentials": "Yanlış kimlik bilgileri!",
+        "networkError": "Ağ hatası. Lütfen tekrar deneyin.",
+        "required": "Lütfen tüm alanları doldurun",
+        "loginFailed": "Giriş başarısız. Lütfen tekrar deneyin."
+      }
+    },
+    "signUp": {
+      "title": "Hesap oluştur",
+      "subtitle": "Başlamak için kayıt olun (demo modu).",
+      "usernameLabel": "Kullanıcı Adı",
+      "usernamePlaceholder": "jane.doe",
+      "passwordLabel": "Şifre",
+      "passwordPlaceholder": "••••••••",
+      "confirmLabel": "Şifreyi onayla",
+      "confirmPlaceholder": "••••••••",
+      "submit": {
+        "label": "Hesap oluştur",
+        "loading": "Hesap oluşturuluyor..."
+      },
+      "haveAccount": "Zaten hesabınız var mı?",
+      "loginLink": "Giriş yap",
+      "errors": {
+        "mismatch": "Şifreler eşleşmiyor"
+      }
+    }
+  },
+  "dashboard": {
+    "header": {
+      "title": "Kontrol Paneli"
+    },
+    "kpiCards": {
+      "totalShipments": {
+        "title": "Toplam Sevkiyat",
+        "metaTop": "76 aktif, 538 teslim edildi",
+        "metaBottom": "614 toplam"
+      },
+      "totalAlerts": {
+        "title": "Toplam Uyarı",
+        "metaTop": "76 yeni uyarı",
+        "metaBottom": "614 toplam"
+      },
+      "segmentsAwaitingDriver": {
+        "title": "Sürücü Bekleyen Segmentler",
+        "metaTop": "6 yakında varacak, 9 atanmamış",
+        "metaBottom": "6 ülke etkilendi",
+        "modal": {
+          "showAll": "Tümünü Göster"
+        }
+      },
+      "newAwaitingRegistrations": {
+        "title": "Yeni Bekleyen Kayıtlar",
+        "metaTop": "6 yeni sürücü, 9 yeni şirket",
+        "metaBottom": "son istek: 2 saat önce",
+        "modal": {
+          "showAll": "Tümünü Göster"
+        }
+      },
+      "unreadMessages": {
+        "title": "Okunmamış Mesajlar",
+        "metaTop": "6 okunmamış, 9 yanıt bekliyor",
+        "metaBottom": "son mesaj: 25 dk önce",
+        "modal": {
+          "showAll": "Tümünü Göster",
+          "messageSnippet": "m'yi açmaya çalışıyorum..."
+        }
+      }
+    },
+    "filters": {
+      "allFilters": "Tüm Filtreler",
+      "status": {
+        "pending": "Beklemede",
+        "normal": "Normal",
+        "alert": "Uyarı"
+      }
+    },
+    "guide": {
+      "title": "Kılavuz",
+      "shipments": "Sevkiyatlar",
+      "driver": "Sürücü",
+      "pending": "Beklemede",
+      "alert": "Uyarı"
+    },
+    "search": {
+      "placeholder": "Sevkiyat, Sürücüler... ile ara"
+    }
+  },
+  "segments": {
+    "cardHeader": {
+      "destinationFallback": "(VARŞIŞ NOKTASI)",
+      "notAssigned": "ATANMAMIŞ",
+      "current": "GÜNCEL",
+      "segment": "SEGMENT",
+      "cargoDeclaration": "Kargo Beyanı",
+      "chatWithDriver": "Sürücü ile sohbet",
+      "driver": "Sürücü",
+      "delete": "Sil",
+      "cancel": "İptal",
+      "deleteSegment": "Segmenti Sil",
+      "deleteSegmentConfirm": "Bu segmenti silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      "deleting": "Siliniyor...",
+      "confirmDelete": "Silme İşlemini Onayla",
+      "cancelSegment": "Segmenti İptal Et",
+      "cancelSegmentConfirm": "Bu segmenti iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      "cancelling": "İptal ediliyor...",
+      "confirmCancel": "İptal İşlemini Onayla"
+    },
+    "infoBanner": {
+      "from": "Nereden",
+      "to": "Nereye",
+      "notSet": "Ayarlanmamış"
+    },
+    "infoGrid": {
+      "startLabel": "BAŞLANGIÇ",
+      "finishLabel": "TAH. BİTİŞ",
+      "vehicleLabel": "SÜRÜCÜ ARAÇ",
+      "localCompanyLabel": "YEREL ŞİRKET",
+      "notSet": "Ayarlanmamış",
+      "notAssigned": "Atanmamış"
+    },
+    "eta": {
+      "estimatedArrivalToDestination": "Tahmini varış",
+      "estimatedArrivalToOrigin": "Tahmini varış",
+      "basedOnLatestGpsUpdate": "(son GPS güncellemesine göre)",
+      "driverNotStartedToOrigin": "Sürücü başlangıç noktasına sürmeye başlamadı",
+      "lastGpsUpdate": "Son GPS güncellemesi:",
+      "noGpsUpdateAvailable": "GPS güncellemesi mevcut değil",
+      "justNow": "Az önce",
+      "minute": "dakika",
+      "minutes": "dakika",
+      "hour": "saat",
+      "hours": "saat",
+      "minutesAgo": "{{count}} Dakika önce",
+      "hoursAgo": "{{count}} Saat önce",
+      "daysAgo": "{{count}} Gün önce",
+      "optimalStartTime": "Optimal başlangıç zamanı",
+      "optimalStartToDestination": "Varış noktasına optimal başlangıç",
+      "plannedArrivalToDestination": "Planlanan varış",
+      "arrivedAtDestination": "Varış noktasına ulaşıldı",
+      "delivered": {
+        "completed": "Segment tamamlandı",
+        "startDifference": "Başlangıç: {{difference}}",
+        "originDifference": "Başlangıç Noktası: {{difference}}",
+        "overallDifference": "Genel: {{difference}}"
+      }
+    },
+    "summary": {
+      "plannedStart": "PLANLANAN BAŞLANGIÇ",
+      "startedAt": "BAŞLANGIÇ ZAMANI",
+      "estFinish": "TAH. BİTİŞ",
+      "finishedAt": "BİTİŞ ZAMANI",
+      "driverVehicle": "SÜRÜCÜ ARAÇ",
+      "localCompany": "YEREL ŞİRKET",
+      "notPlanned": "Planlanmamış",
+      "notStarted": "Başlatılmamış",
+      "notFinished": "Bitirilmemiş",
+      "notAssigned": "Atanmamış",
+      "nA": "Mevcut Değil",
+      "company": "Şirket",
+      "driver": "Sürücü",
+      "gps": "GPS",
+      "on": "Açık",
+      "off": "Kapalı",
+      "delay": "Gecikme",
+      "alerts": "Uyarılar",
+      "pending": "Beklemede",
+      "openChatWithAlerts": "Uyarılarla sohbeti aç",
+      "chatWithCompany": "Şirket ile sohbet",
+      "gpsLost": "GPS Sinyali Kayboldu",
+      "delayExpected": "Gecikme Bekleniyor",
+      "routeCleared": "Rota Temizlendi",
+      "documentationPending": "Belgeler Beklemede"
+    },
+    "page": {
+      "title": "Segmentler",
+      "loading": "Segmentler yükleniyor...",
+      "closeLabel": "Kapat",
+      "empty": "Segment bulunamadı"
+    },
+    "progressSteps": {
+      "labels": {
+        "start": "Başlangıç",
+        "toOrig": "Başlangıç Noktasına",
+        "inOrig": "Başlangıç Noktasında",
+        "loading": "Yükleniyor",
+        "inCustoms": "Gümrükte",
+        "toDest": "Varış Noktasına",
+        "atDest": "Varış Noktasında",
+        "delivered": "Teslim Edildi"
+      },
+      "leftLabels": {
+        "assigned": "Atandı",
+        "started": "Başlatıldı",
+        "arrivedAt": "Varış",
+        "planned": "Planlandı"
+      },
+      "rightLabels": {
+        "startMovingAt": "Hareket Başlangıcı",
+        "estArrival": "Tah. Varış",
+        "startLoadingAt": "Yükleme Başlangıcı",
+        "estComplete": "Tah. Tamamlanma",
+        "estClear": "Tah. Temizleme",
+        "arrivedAt": "Varış",
+        "deliveredAt": "Teslim Zamanı"
+      },
+      "rightLabelsCompleted": {
+        "startMovingAt": "Hareket Başladı",
+        "arrivedAt": "Varış",
+        "startLoadingAt": "Yükleme Başladı",
+        "completedAt": "Tamamlandı",
+        "clearedAt": "Temizlendi",
+        "deliveredAt": "Teslim Edildi"
+      },
+      "centerLabels": {
+        "distance": "Mesafe",
+        "duration": "Süre"
+      }
+    }
+  },
+  "misc": {
+    "notFound": {
+      "title": "Bulunamadı",
+      "description": "Aradığınız sayfa mevcut değil.",
+      "link": "Ana sayfaya git"
+    }
+  },
+  "overview": {
+    "header": {
+      "title": "Genel Bakış",
+      "subtitle": "Temel metriklerin hızlı özeti."
+    }
+  },
+  "mapDemo": {
+    "title": "Kargo Haritası Demo",
+    "segmentLabel": "{{vehicleId}} / {{driverId}}",
+    "selectedSegment": "Seçilen segment #{{index}}"
+  },
+  "drivers": {
+    "page": {
+      "title": "Sürücüler",
+      "stats": {
+        "shipments": "sevkiyat",
+        "vehicles": "araç"
+      },
+      "closeDetails": "Detay panelini kapat",
+      "actions": {
+        "activate": "Etkinleştir",
+        "deactivate": "Devre dışı bırak"
+      },
+      "status": {
+        "all": "Tümü",
+        "pending": "Beklemede",
+        "approved": "Onaylandı",
+        "rejected": "Reddedildi",
+        "inactive": "Pasif"
+      },
+      "scroll": {
+        "left": "Sola kaydır",
+        "right": "Sağa kaydır"
+      }
+    },
+    "details": {
+      "unknownDriver": "Bilinmeyen Sürücü",
+      "nA": "Mevcut Değil",
+      "avatar": "Avatar",
+      "openChat": "Sohbeti aç",
+      "companyLogo": "Şirket Logosu",
+      "register": "Kayıt",
+      "shipments": "Sevkiyatlar",
+      "vehicle": "ARAÇ",
+      "plateNumber": "PLAKA NUMARASI",
+      "capacity": "KAPASİTE",
+      "tons": "Ton",
+      "alerts": {
+        "gpsLost": "GPS Sinyali Kayboldu",
+        "delayExpected": "Gecikme Bekleniyor",
+        "routeCleared": "Rota Temizlendi",
+        "documentationPending": "Belgeler Beklemede"
+      }
+    }
+  },
+  "localCompanies": {
+    "page": {
+      "title": "Yerel Şirketler",
+      "stats": {
+        "drivers": "sürücü",
+        "active": "aktif"
+      },
+      "closeDetails": "Detay panelini kapat",
+      "actions": {
+        "activate": "Etkinleştir",
+        "deactivate": "Devre dışı bırak"
+      },
+      "errors": {
+        "loadFailed": "Şirketler yüklenemedi"
+      },
+      "empty": "Şirket bulunamadı",
+      "status": {
+        "all": "Tümü",
+        "pending": "Beklemede",
+        "active": "Aktif",
+        "rejected": "Reddedildi",
+        "inactive": "Pasif"
+      },
+      "scroll": {
+        "left": "Sola kaydır",
+        "right": "Sağa kaydır"
+      },
+      "card": {
+        "drivers": "sürücü",
+        "types": "tip",
+        "approve": "Onayla",
+        "reject": "Reddet",
+        "view": "Görüntüle",
+        "viewDetails": "Detayları Görüntüle"
+      },
+      "details": {
+        "openChat": "Sohbeti aç",
+        "register": "Kayıt",
+        "drivers": "Sürücüler",
+        "segments": "Segmentler",
+        "phone": "Telefon",
+        "email": "E-posta",
+        "add": "Ekle",
+        "edit": "Düzenle"
+      },
+      "documents": {
+        "title": "Belgeler",
+        "upload": "Yükle",
+        "loading": "Belgeler yükleniyor...",
+        "empty": "Belge bulunamadı",
+        "open": "Aç",
+        "rejectionReason": "Red nedeni",
+        "approve": "Onayla",
+        "reject": "Reddet",
+        "preview": "Önizleme",
+        "rejectDocument": "Belgeyi Reddet",
+        "rejectReasonPrompt": "Lütfen red nedeni belirtin:",
+        "rejectReasonPlaceholder": "Red nedeni girin...",
+        "cancel": "İptal",
+        "rejecting": "Reddediliyor...",
+        "closePreview": "Önizlemeyi kapat",
+        "previewNotAvailable": "Bu dosya türü için önizleme mevcut değil",
+        "openFile": "Dosyayı Aç",
+        "fileNotAvailable": "Dosya mevcut değil",
+        "openInNewTab": "Yeni Sekmede Aç",
+        "close": "Kapat",
+        "types": {
+          "license": "Lisans",
+          "insurance": "Sigorta",
+          "manager_id": "Yönetici Kimliği",
+          "primary_contact_id": "Birincil İletişim Kimliği",
+          "other": "Diğer Belge"
+        }
+      },
+      "internalNotes": {
+        "title": "İç Notlar",
+        "placeholder": "Şirket hakkında iç not ekle...",
+        "saving": "Kaydediliyor...",
+        "saveNote": "Notu kaydet",
+        "saveFailed": "Not kaydedilemedi",
+        "saveSuccess": "Not başarıyla kaydedildi"
+      },
+      "activities": {
+        "title": "Son Aktiviteler",
+        "loading": "Segmentler yükleniyor...",
+        "empty": "Bu şirket için segment bulunamadı.",
+        "fetchFailed": "Segmentler alınamadı",
+        "from": "Nereden",
+        "until": "Ne zamana kadar",
+        "headers": {
+          "id": "ID",
+          "route": "Rota",
+          "date": "Tarih",
+          "status": "Durum"
+        },
+        "status": {
+          "pendingAssignment": "Atama Bekliyor",
+          "assigned": "Atandı",
+          "toOrigin": "Başlangıç Noktasına",
+          "atOrigin": "Başlangıç Noktasında",
+          "loading": "Yükleniyor",
+          "inCustoms": "Gümrükte",
+          "toDestination": "Varış Noktasına",
+          "atDestination": "Varış Noktasında",
+          "delivered": "Teslim Edildi",
+          "cancelled": "İptal Edildi",
+          "unknown": "Bilinmeyen"
+        }
+      }
+    }
+  },
+  "finance": {
+    "page": {
+      "title": "Finans",
+      "addPayment": "Ödeme Ekle"
+    }
+  },
+  "chatAlert": {
+    "page": {
+      "title": "Sohbetler ve Uyarılar"
+    },
+    "search": {
+      "placeholder": "Sohbet ve uyarıları ara..."
+    },
+    "filters": {
+      "all": "Tümü",
+      "drivers": "Sürücüler",
+      "localCompanies": "Yerel Şirk."
+    },
+    "selectChat": "Bir sohbet seçin",
+    "empty": {
+      "all": "Henüz sohbet yok",
+      "drivers": "Henüz sürücülerle sohbet yok",
+      "companies": "Henüz şirketlerle sohbet yok"
+    },
+    "details": {
+      "title": "Detaylar",
+      "close": "Detay panelini kapat"
+    },
+    "shipmentHeader": {
+      "chat": "Sohbet",
+      "notifications": "Bildirimler",
+      "close": "Kapat"
+    },
+    "chatSection": {
+      "filters": {
+        "all": "Tümü",
+        "chats": "Sohbetler",
+        "alerts": "Uyarılar"
+      },
+      "loading": "Yükleniyor...",
+      "loadOlderMessages": "Eski mesajları yükle"
+    },
+    "messageInput": {
+      "placeholder": "Mesaj yazın...",
+      "attachFile": "Dosya ekle",
+      "sendMessage": "Mesaj gönder",
+      "removeAttachment": "Eki kaldır"
+    },
+    "dateGroup": {
+      "today": "Bugün",
+      "yesterday": "Dün"
+    }
+  },
+  "vehicles": {
+    "header": {
+      "title": "Araçlar",
+      "subtitle": "Teslimatlarınızı ve araçlarınızı yönetin."
+    }
+  },
+  "layout": {
+    "app": {
+      "openMenu": "Menüyü aç",
+      "menuLabel": "Menü"
+    }
+  },
+  "sidebar": {
+    "brandAlt": "Marka",
+    "profileAlt": "Profil",
+    "profileName": "Xin Zhao",
+    "notifications": "Bildirimler",
+    "logout": "Çıkış Yap",
+    "links": {
+      "dashboard": "Kontrol Paneli",
+      "shipment": "Sevkiyat",
+      "localCompanies": "Yerel Şirketler",
+      "drivers": "Sürücüler",
+      "finance": "Finans",
+      "chatAlert": "Sohbet ve Uyarı",
+      "settings": "Ayarlar"
+    },
+    "mobile": {
+      "navLabel": "Navigasyon menüsü",
+      "brand": "Navbari",
+      "closeMenu": "Menüyü kapat"
+    }
+  },
+  "shipment": {
+    "page": {
+      "title": "Sevkiyat",
+      "selectShipment": "Detayları görmek için bir sevkiyat seçin",
+      "loading": "Sevkiyatlar yükleniyor..."
+    },
+    "navigatingInfo": {
+      "chat": "Sohbet",
+      "notifications": "Bildirimler",
+      "filter": "Filtre",
+      "close": "Kapat",
+      "unknown": "Bilinmeyen",
+      "openChat": "Sohbeti aç",
+      "vehicle": "Araç",
+      "localCompany": "Yerel Şirket",
+      "nA": "Mevcut Değil",
+      "weight": "Ağırlık",
+      "destination": "Varış Noktası",
+      "tons": "Ton",
+      "driverChangedFrom": "Sürücü değişti",
+      "to": "ile",
+      "turnedGpsOn": "GPS'lerini açtı.",
+      "turnedGpsOff": "GPS'lerini kapattı.",
+      "uploaded": "Yüklendi",
+      "driver": "Sürücü"
+    },
+    "listPanel": {
+      "title": "Sevkiyat"
+    },
+    "search": {
+      "placeholder": "Ara...",
+      "filters": "Filtreler"
+    },
+    "actions": {
+      "addShipment": "Sevkiyat Ekle",
+      "segments": "Segmentler"
+    },
+    "status": {
+      "all": "Tümü",
+      "pending": "Beklemede",
+      "inTransit": "Yolda",
+      "delivered": "Teslim Edildi",
+      "cancelled": "İptal Edildi",
+      "pendingAssignment": "Atama Bekliyor"
+    },
+    "shipmentItem": {
+      "notAssigned": "Atanmamış"
+    },
+    "activity": {
+      "inTransit": "Yolda",
+      "atOrigin": "Başlangıç Noktasında",
+      "atDestination": "Varış Noktasında",
+      "loading": "Yükleniyor",
+      "inCustoms": "Gümrükte",
+      "delivered": "Teslim Edildi",
+      "assigned": "Atandı",
+      "active": "Aktif",
+      "pending": "Beklemede",
+      "justNow": "Az önce",
+      "minutesAgo": "{{count}} dk önce",
+      "hoursAgo": "{{count}} saat önce",
+      "daysAgo": "{{count}} gün önce",
+      "allActivities": "Tüm Aktiviteler"
+    },
+    "addModal": {
+      "title": "Yeni Sevkiyat Ekle",
+      "close": "Kapat",
+      "name": "Ad",
+      "namePlaceholder": "Sevkiyat Adı...",
+      "from": "Nereden",
+      "to": "Nereye",
+      "searchCities": "Şehir ara...",
+      "cargoCategory": "Kargo Kategorisi",
+      "searchCategories": "Kategori ara...",
+      "cargoWeight": "Kargo Ağırlığı",
+      "weightUnit": "KG",
+      "segmentCount": "Segment Sayısı",
+      "segmentCountPlaceholder": "0",
+      "cancel": "İptal",
+      "create": "Oluştur",
+      "loadingCities": "Şehirler yükleniyor...",
+      "noCitiesFound": "Şehir bulunamadı",
+      "noCategoriesFound": "Kategori bulunamadı",
+      "categories": {
+        "electronics": "Elektronik",
+        "textiles": "Tekstil",
+        "food": "Gıda",
+        "medical": "Tıbbi",
+        "machinery": "Makine",
+        "chemicals": "Kimyasal",
+        "automotive": "Otomotiv",
+        "furniture": "Mobilya"
+      }
+    },
+    "segments": {
+      "title": "Segmentler",
+      "addSegment": "Segment Ekle",
+      "allActivities": "Tüm Aktiviteler",
+      "progress": {
+        "alert": {
+          "delayedStartDrivingTime": "Sürücü henüz sürmeye başlamadı - kalkış gecikti",
+          "delayedArriveOriginTime": "Sürücü alım noktasına varışta gecikti",
+          "delayedStartToDestination": "Sürücü varış noktasına sürmeye başlamada gecikti",
+          "delayedArriveFinalDestinationTime": "Sürücü son varış noktasına varışta gecikti",
+          "delayedArriveDestinationTime": "Sürücü varış noktasına varışta gecikti",
+          "lostGpsSignal": "GPS sinyali kayboldu - son güncelleme beklenenden fazla",
+          "delayedLoadingTime": "Yükleme planlanandan daha uzun sürüyor"
+        }
+      }
+    },
+    "scroll": {
+      "left": "Sola kaydır",
+      "right": "Sağa kaydır"
+    }
+  },
+  "settings": {
+    "page": {
+      "title": "Ayarlar"
+    },
+    "sections": {
+      "general": {
+        "title": "Genel Ayarlar",
+        "description": "Temel şirket ve uygulama ayarlarını yapılandırın.",
+        "companyName": "Şirket Adı",
+        "companyNamePlaceholder": "Şirket Adı...",
+        "companyLogo": "Şirket Logosu",
+        "uploadText": "Yüklemek için tıklayın veya sürükleyip bırakın",
+        "uploadHint": "PNG veya JPG (Maks. 2MB)",
+        "uploadButton": "Yükle",
+        "timeZone": "Saat Dilimi",
+        "mapStyle": "Harita Stili",
+        "measurementUnits": "Ölçü Birimleri",
+        "distanceUnit": "Kilometre (KM)",
+        "weightUnit": "Kilogram (KG)",
+        "changesCount": "{{count}} değişiklik var",
+        "revert": "Geri Al",
+        "saveChanges": "Değişiklikleri Kaydet",
+        "saving": "Kaydediliyor..."
+      },
+      "notifications": {
+        "title": "Bildirim ve Uyarılar",
+        "description": "Otomatik uyarıları ve kullanıcı bildirim tercihlerini yönetin.",
+        "driverGpsAlert": "Sürücü GPS Uyarısı sonrası:",
+        "delayAlert": "Gecikme Uyarısı sonrası:",
+        "minutes": "DAKİKA",
+        "hours": "SAAT",
+        "deliveryMethods": "Teslimat Yöntemleri",
+        "deliveryMethodsDescription": "Etkinleştirilen uyarıları nasıl almak istediğinizi seçin",
+        "inApp": "Uygulama İçi Bildirim",
+        "email": "E-posta",
+        "sms": "SMS",
+        "mobilePush": "Mobil Bildirim"
+      },
+      "localization": {
+        "title": "Yerelleştirme",
+        "description": "Platform için dil, para birimi ve bölgesel formatlamayı ayarlayın.",
+        "language": "Dil",
+        "baseCurrency": "Temel Para Birimi",
+        "perCountryCurrencyOverride": {
+          "title": "Ülkeye Göre Para Birimi Geçersiz Kılma",
+          "description": "Farklı varış ülkeleri için özel para birimleri ayarlayın",
+          "addOverride": "Geçersiz Kılma Ekle"
+        },
+        "dateFormat": "Tarih Formatı",
+        "timeFormat": "Saat Formatı",
+        "numericSeparator": "Sayısal Ayırıcı",
+        "decimalSeparator": "Ondalık Ayırıcı"
+      },
+      "systemParameters": {
+        "title": "Sistem Parametreleri",
+        "description": "Operasyonel mantığı ince ayarlayın",
+        "slaConfiguration": {
+          "title": "SLA Yapılandırması",
+          "description": "Sevkiyat başına hizmet seviyesi anlaşmalarını tanımlayın",
+          "loadingTime": "Yükleme süresi",
+          "transitTime": "Transit süresi",
+          "unloadingTime": "Boşaltma süresi",
+          "customsClearanceTime": "Gümrük temizleme süresi"
+        },
+        "etaCalculationMethod": {
+          "title": "ETA Hesaplama Yöntemi",
+          "description": "Tahmini varış süresinin nasıl tanımlanacağını seçin",
+          "realtimeGps": "Gerçek zamanlı GPS'e göre",
+          "historicalData": "Geçmiş verilere göre"
+        },
+        "gpsTracking": {
+          "title": "GPS ve Takip",
+          "description": "Konum verilerinin nasıl takip edildiğini ve uyarıların ne zaman tetiklendiğini yapılandırın",
+          "gpsAlertDistance": "GPS Uyarı Mesafesi",
+          "pingInterval": "Ping Aralığı",
+          "maxConcurrentShipments": "Yerel Şirket Başına Maks. Eşzamanlı Sevkiyat"
+        }
+      },
+      "rolesPermissions": {
+        "title": "Roller ve İzinler",
+        "description": "Platform genelinde kullanıcı erişimini ve izinlerini yönetin.",
+        "addNewRole": "Yeni Rol Ekle",
+        "search": "Rolleri ara...",
+        "user": "Kullanıcı",
+        "selectRole": "Detayları görmek için bir rol seçin",
+        "roleDetails": "Rol Detayları",
+        "roleName": "Rol Adı",
+        "roleDescription": "Açıklama",
+        "status": "Durum",
+        "dataVisibilityScope": "Veri Görünürlük Kapsamı",
+        "geographicalAccess": "Coğrafi Erişim",
+        "permissions": "İzinler",
+        "modules": "Modüller",
+        "view": "Görüntüle",
+        "createEdit": "Oluştur/Düzenle",
+        "delete": "Sil",
+        "approve": "Onayla",
+        "users": "Kullanıcılar",
+        "addUser": "Kullanıcı Ekle",
+        "nameEmail": "Ad ve E-posta",
+        "actions": "İşlemler",
+        "cancel": "İptal",
+        "confirmDelete": "Silme İşlemini Onayla",
+        "deleteUser": "Kullanıcıyı Sil",
+        "deleteUserConfirm": "\"{{name}}\" kullanıcısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+        "deleting": "Siliniyor...",
+        "failedToLoadRoles": "Roller yüklenemedi",
+        "editUserIn": "\"{{roleName}}\" içinde Kullanıcıyı Düzenle",
+        "addNewUserTo": "\"{{roleName}}\" içine Yeni Kullanıcı Ekle",
+        "name": "Ad",
+        "namePlaceholder": "Ad...",
+        "email": "E-posta",
+        "emailPlaceholder": "E-posta...",
+        "password": "Şifre",
+        "passwordPlaceholder": "Şifre...",
+        "passwordLeaveEmpty": "mevcut şifreyi korumak için boş bırakın",
+        "passwordRequired": "Şifre gereklidir",
+        "passwordMinLength": "Şifre en az 8 karakter uzunluğunda olmalıdır",
+        "passwordLowercase": "Şifre en az bir küçük harf içermelidir",
+        "passwordUppercase": "Şifre en az bir büyük harf içermelidir",
+        "passwordNumber": "Şifre en az bir rakam içermelidir",
+        "passwordSpecialChar": "Şifre en az bir özel karakter içermelidir (@$!%*?&)",
+        "passwordRequirements": "İçermelidir: küçük harf, büyük harf, rakam ve özel karakter (@$!%*?&)",
+        "save": "Kaydet",
+        "add": "Ekle",
+        "saving": "Kaydediliyor...",
+        "statusActive": "Aktif",
+        "statusSuspended": "Askıya Alındı"
+      }
+    }
+  },
+  "entityCard": {
+    "vehicle": "Araç",
+    "plateNumber": "Plaka Numarası",
+    "lostShipment": "Kayıp Sevkiyat",
+    "nA": "Mevcut Değil",
+    "avatar": "Avatar",
+    "companyLogo": "Şirket logosu",
+    "status": {
+      "pending": "Beklemede",
+      "active": "Aktif",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi",
+      "inactive": "Pasif"
+    },
+    "vehicleType": {
+      "tented": "Tenteli",
+      "refrigerated": "Soğutmalı",
+      "flatbed": "Düz Yataklı",
+      "double_wall": "Çift Duvarlı"
+    },
+    "actions": {
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "view": "Görüntüle",
+      "viewDetails": "Detayları Görüntüle"
+    }
+  }
+}

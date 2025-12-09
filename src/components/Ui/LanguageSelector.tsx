@@ -1,21 +1,22 @@
-import { useState, useRef, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useProfileStore } from "../../store/profileStore";
+import {useState, useRef, useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {useProfileStore} from "../../store/profileStore";
 import i18n from "../../lib/i18n";
 import ReactCountryFlag from "react-country-flag";
-import { ChevronDown } from "lucide-react";
+import {ChevronDown} from "lucide-react";
 
 const languages = [
-  { code: "en", name: "English", countryCode: "US" },
-  { code: "fa", name: "فارسی", countryCode: "IR" },
-  { code: "ar", name: "العربية", countryCode: "SA" },
-  { code: "zh", name: "中文", countryCode: "CN" },
-  { code: "ru", name: "Русский", countryCode: "RU" },
+  {code: "en", name: "English", countryCode: "US"},
+  {code: "fa", name: "فارسی", countryCode: "IR"},
+  {code: "ar", name: "العربية", countryCode: "SA"},
+  {code: "zh", name: "中文", countryCode: "CN"},
+  {code: "ru", name: "Русский", countryCode: "RU"},
+  {code: "tr", name: "Türkçe", countryCode: "TR"},
 ];
 
 export const LanguageSelector = () => {
-  const { i18n: i18nInstance } = useTranslation();
-  const { language, setLanguage } = useProfileStore();
+  const {i18n: i18nInstance} = useTranslation();
+  const {language, setLanguage} = useProfileStore();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
