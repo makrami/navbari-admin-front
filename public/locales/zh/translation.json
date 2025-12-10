@@ -3,6 +3,7 @@
     "welcome": "欢迎",
     "loading": "加载中...",
     "language": "语言",
+    "cancel": "取消",
     "error": {
       "unknown": "发生未知错误"
     }
@@ -402,6 +403,20 @@
       "scroll": {
         "left": "向左滚动",
         "right": "向右滚动"
+      },
+      "documents": {
+        "selectDocumentType": "选择文件类型",
+        "types": {
+          "license": "许可证",
+          "vehicle_reg": "车辆登记",
+          "insurance": "保险",
+          "photo": "照片",
+          "national_or_passport_id": "身份证或护照",
+          "vehicle_id_card": "车辆身份证",
+          "driver_license": "驾驶证",
+          "vehicle_trailer_photo": "车辆拖车照片",
+          "other": "其他文件"
+        }
       }
     },
     "details": {

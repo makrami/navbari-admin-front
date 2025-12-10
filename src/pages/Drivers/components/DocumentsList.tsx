@@ -1,5 +1,5 @@
 import type {HTMLAttributes} from "react";
-import {useRef, useState} from "react";
+import {useState, useRef} from "react";
 import {cn} from "../../../shared/utils/cn";
 import {
   FileText as FileTextIcon,
@@ -20,17 +20,25 @@ import {
   DRIVER_DOCUMENT_TYPE,
   DRIVER_DOCUMENT_STATUS,
 } from "../../../services/driver/document.service";
-import type {DriverDocumentReadDto} from "../../../services/driver/document.service";
+import type {
+  DriverDocumentReadDto,
+  DRIVER_DOCUMENT_TYPE as DriverDocumentType,
+} from "../../../services/driver/document.service";
 import {getFileUrl} from "../utils";
+import {UploadDocumentModal} from "./UploadDocumentModal";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
 const documentTypeLabels: Record<string, string> = {
-  license: "License",
-  vehicle_reg: "Vehicle Registration",
-  insurance: "Insurance",
-  photo: "Photo",
-  other: "Other Document",
+  [DRIVER_DOCUMENT_TYPE.LICENSE]: "License",
+  [DRIVER_DOCUMENT_TYPE.VEHICLE_REG]: "Vehicle Registration",
+  [DRIVER_DOCUMENT_TYPE.INSURANCE]: "Insurance",
+  [DRIVER_DOCUMENT_TYPE.PHOTO]: "Photo",
+  [DRIVER_DOCUMENT_TYPE.NATIONAL_OR_PASSPORT_ID]: "National ID or Passport",
+  [DRIVER_DOCUMENT_TYPE.VEHICLE_ID_CARD]: "Vehicle ID Card",
+  [DRIVER_DOCUMENT_TYPE.DRIVER_LICENSE]: "Driver License",
+  [DRIVER_DOCUMENT_TYPE.VEHICLE_TRAILER_PHOTO]: "Vehicle Trailer Photo",
+  [DRIVER_DOCUMENT_TYPE.OTHER]: "Other Document",
 };
 
 type DocumentCardProps = HTMLAttributes<HTMLDivElement> & {
@@ -215,9 +223,10 @@ export default function DocumentsList({
   );
   const [previewDocument, setPreviewDocument] =
     useState<DriverDocumentReadDto | null>(null);
-
-  // New: Ref for hidden file input
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedDocumentType, setSelectedDocumentType] =
+    useState<DriverDocumentType | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleApprove = async (id: string) => {
     try {
@@ -247,22 +256,31 @@ export default function DocumentsList({
     }
   };
 
-  const handleFileUpload = async (
+  const handleSelectDocumentType = (documentType: DriverDocumentType) => {
+    setSelectedDocumentType(documentType);
+    // Trigger file input after a short delay to ensure modal is closed
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 100);
+  };
+
+  const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file || !driverId) return;
-
-    const documentType = DRIVER_DOCUMENT_TYPE.OTHER;
+    if (!file || !driverId || !selectedDocumentType) return;
 
     try {
       await uploadMutation.mutateAsync({
         driverId,
-        documentType,
+        documentType: selectedDocumentType,
         file,
       });
-      // Optionally clear the value so you can upload the same file again if desired
-      if (event.target) event.target.value = "";
+      // Reset state
+      setSelectedDocumentType(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (error) {
       console.error("Failed to upload document:", error);
     }
@@ -282,11 +300,11 @@ export default function DocumentsList({
             type="file"
             style={{display: "none"}}
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            onChange={handleFileUpload}
+            onChange={handleFileSelect}
           />
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setShowUploadModal(true)}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
           >
             <UploadIcon className="size-4" />
@@ -458,6 +476,13 @@ export default function DocumentsList({
           </div>
         </div>
       )}
+
+      {/* Upload Document Modal */}
+      <UploadDocumentModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onSelectDocumentType={handleSelectDocumentType}
+      />
     </section>
   );
 }

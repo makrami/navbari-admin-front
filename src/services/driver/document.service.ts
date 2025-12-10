@@ -7,6 +7,10 @@ export const DRIVER_DOCUMENT_TYPE = {
   VEHICLE_REG: "vehicle_reg",
   INSURANCE: "insurance",
   PHOTO: "photo",
+  NATIONAL_OR_PASSPORT_ID: "national_or_passport_id",
+  VEHICLE_ID_CARD: "vehicle_id_card",
+  DRIVER_LICENSE: "driver_license",
+  VEHICLE_TRAILER_PHOTO: "vehicle_trailer_photo",
   OTHER: "other",
 } as const;
 

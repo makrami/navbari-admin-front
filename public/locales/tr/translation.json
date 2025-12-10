@@ -3,6 +3,7 @@
     "welcome": "Hoş Geldiniz",
     "loading": "Yükleniyor...",
     "language": "Dil",
+    "cancel": "İptal",
     "error": {
       "unknown": "Bilinmeyen bir hata oluştu"
     }
@@ -284,6 +285,20 @@
       "scroll": {
         "left": "Sola kaydır",
         "right": "Sağa kaydır"
+      },
+      "documents": {
+        "selectDocumentType": "Belge Türü Seçin",
+        "types": {
+          "license": "Lisans",
+          "vehicle_reg": "Araç Tescil",
+          "insurance": "Sigorta",
+          "photo": "Fotoğraf",
+          "national_or_passport_id": "Kimlik veya Pasaport",
+          "vehicle_id_card": "Araç Kimlik Kartı",
+          "driver_license": "Sürücü Ehliyeti",
+          "vehicle_trailer_photo": "Araç Römork Fotoğrafı",
+          "other": "Diğer Belge"
+        }
       }
     },
     "details": {

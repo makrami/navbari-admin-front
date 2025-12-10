@@ -3,6 +3,7 @@
     "welcome": "خوش آمدید",
     "loading": "در حال بارگذاری...",
     "language": "زبان",
+    "cancel": "لغو",
     "error": {
       "unknown": "خطای ناشناخته رخ داد"
     }
@@ -284,6 +285,20 @@
       "scroll": {
         "left": "اسکرول به چپ",
         "right": "اسکرول به راست"
+      },
+      "documents": {
+        "selectDocumentType": "نوع سند را انتخاب کنید",
+        "types": {
+          "license": "مجوز",
+          "vehicle_reg": "ثبت نام وسیله نقلیه",
+          "insurance": "بیمه",
+          "photo": "عکس",
+          "national_or_passport_id": "کارت ملی یا پاسپورت",
+          "vehicle_id_card": "کارت شناسایی وسیله نقلیه",
+          "driver_license": "گواهینامه راننده",
+          "vehicle_trailer_photo": "عکس تریلر وسیله نقلیه",
+          "other": "سند دیگر"
+        }
       }
     },
     "details": {

@@ -3,6 +3,7 @@
     "welcome": "مرحباً",
     "loading": "جارٍ التحميل...",
     "language": "اللغة",
+    "cancel": "إلغاء",
     "error": {
       "unknown": "حدث خطأ غير معروف"
     }
@@ -402,6 +403,20 @@
       "scroll": {
         "left": "التمرير لليسار",
         "right": "التمرير لليمين"
+      },
+      "documents": {
+        "selectDocumentType": "اختر نوع الوثيقة",
+        "types": {
+          "license": "الترخيص",
+          "vehicle_reg": "تسجيل المركبة",
+          "insurance": "التأمين",
+          "photo": "صورة",
+          "national_or_passport_id": "الهوية الوطنية أو جواز السفر",
+          "vehicle_id_card": "بطاقة هوية المركبة",
+          "driver_license": "رخصة القيادة",
+          "vehicle_trailer_photo": "صورة مقطورة المركبة",
+          "other": "وثيقة أخرى"
+        }
       }
     },
     "details": {

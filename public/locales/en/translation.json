@@ -3,6 +3,7 @@
     "welcome": "Welcome",
     "loading": "Loading...",
     "language": "Language",
+    "cancel": "Cancel",
     "error": {
       "unknown": "An unknown error occurred"
     }
@@ -284,6 +285,20 @@
       "scroll": {
         "left": "Scroll left",
         "right": "Scroll right"
+      },
+      "documents": {
+        "selectDocumentType": "Select Document Type",
+        "types": {
+          "license": "License",
+          "vehicle_reg": "Vehicle Registration",
+          "insurance": "Insurance",
+          "photo": "Photo",
+          "national_or_passport_id": "National ID or Passport",
+          "vehicle_id_card": "Vehicle ID Card",
+          "driver_license": "Driver License",
+          "vehicle_trailer_photo": "Vehicle Trailer Photo",
+          "other": "Other Document"
+        }
       }
     },
     "details": {
