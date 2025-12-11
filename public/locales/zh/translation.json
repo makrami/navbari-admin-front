@@ -415,6 +415,7 @@
           "vehicle_id_card": "车辆身份证",
           "driver_license": "驾驶证",
           "vehicle_trailer_photo": "车辆拖车照片",
+          "vehicle_photo": "车辆照片",
           "other": "其他文件"
         }
       }
@@ -431,6 +432,7 @@
       "plateNumber": "车牌号",
       "capacity": "容量",
       "tons": "吨",
+      "netVolume": "净体积",
       "alerts": {
         "gpsLost": "GPS丢失",
         "delayExpected": "预计延迟",
@@ -737,7 +739,8 @@
       "tented": "篷车",
       "refrigerated": "冷藏车",
       "flatbed": "平板车",
-      "double_wall": "双层壁车"
+      "double_wall": "双层壁车",
+      "other": "其他"
     },
     "actions": {
       "approve": "批准",

@@ -1,4 +1,4 @@
-import type { Driver } from "../types";
+import type {Driver} from "../types";
 import {
   Phone as PhoneIcon,
   Users as UsersIcon,
@@ -7,14 +7,16 @@ import {
   ScanBarcode,
   Weight,
   MessagesSquareIcon,
+  Mail as MailIcon,
+  Ruler as RulerIcon,
 } from "lucide-react";
-import { STATUS_TO_COLOR } from "../types";
-import { ENV } from "../../../lib/env";
-import { useChatWithRecipient } from "../../../shared/hooks/useChatWithRecipient";
-import { ChatOverlay } from "../../../shared/components/ChatOverlay";
-import { CHAT_RECIPIENT_TYPE } from "../../../services/chat/chat.types";
-import type { ActionableAlertChip } from "../../chat-alert/types/chat";
-import { useTranslation } from "react-i18next";
+import {STATUS_TO_COLOR} from "../types";
+import {ENV} from "../../../lib/env";
+import {useChatWithRecipient} from "../../../shared/hooks/useChatWithRecipient";
+import {ChatOverlay} from "../../../shared/components/ChatOverlay";
+import {CHAT_RECIPIENT_TYPE} from "../../../services/chat/chat.types";
+import type {ActionableAlertChip} from "../../chat-alert/types/chat";
+import {useTranslation} from "react-i18next";
 
 type Props = {
   driver: Driver;
@@ -23,7 +25,7 @@ type Props = {
 const getActionableAlerts = (
   t: (key: string) => string
 ): ActionableAlertChip[] => [
-  { id: "1", label: t("drivers.details.alerts.gpsLost"), alertType: "alert" },
+  {id: "1", label: t("drivers.details.alerts.gpsLost"), alertType: "alert"},
   {
     id: "2",
     label: t("drivers.details.alerts.delayExpected"),
@@ -50,8 +52,8 @@ function getFileUrl(filePath: string | null | undefined): string | undefined {
   return `${ENV.FILE_BASE_URL}/${cleanPath}`;
 }
 
-export function DriverDetails({ driver }: Props) {
-  const { t } = useTranslation();
+export function DriverDetails({driver}: Props) {
+  const {t} = useTranslation();
   const colors = STATUS_TO_COLOR[driver.status];
   const driverName =
     driver.user?.fullName || t("drivers.details.unknownDriver");
@@ -128,6 +130,12 @@ export function DriverDetails({ driver }: Props) {
                 <PhoneIcon className="size-3.5 text-slate-400" />
                 <span> {phone}</span>
               </div>
+              {driver.user?.email && (
+                <div className="flex items-center gap-2">
+                  <MailIcon className="size-3.5 text-slate-400" />
+                  <span>{driver.user.email}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <CalendarIcon className="size-3.5 text-slate-400" />
                 <span>
@@ -173,7 +181,10 @@ export function DriverDetails({ driver }: Props) {
 
             <p>
               {driver.vehicleType
-                ? t(`entityCard.vehicleType.${driver.vehicleType}`)
+                ? String(driver.vehicleType) === "other" &&
+                  (driver as any).vehicleCustomType
+                  ? (driver as any).vehicleCustomType
+                  : t(`entityCard.vehicleType.${driver.vehicleType}`)
                 : ""}
             </p>
           </div>
@@ -202,6 +213,24 @@ export function DriverDetails({ driver }: Props) {
               {t("drivers.details.tons")}
             </p>
           </div>
+
+          {(driver as any).vehicleNetVolume != null &&
+            !isNaN((driver as any).vehicleNetVolume) && (
+              <>
+                <div className="h-10 border-l border-slate-200" />
+
+                <div className="flex flex-col gap-1 min-w-[7.5rem]">
+                  <p className="text-slate-400 flex items-center gap-2 font-semibold">
+                    <RulerIcon className="size-4  text-slate-400" />
+                    {t("drivers.details.netVolume")}
+                  </p>
+
+                  <p>
+                    {Number((driver as any).vehicleNetVolume).toFixed(2)} m³
+                  </p>
+                </div>
+              </>
+            )}
         </div>
       </div>
 

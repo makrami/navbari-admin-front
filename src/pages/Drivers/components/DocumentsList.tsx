@@ -38,6 +38,7 @@ const documentTypeLabels: Record<string, string> = {
   [DRIVER_DOCUMENT_TYPE.VEHICLE_ID_CARD]: "Vehicle ID Card",
   [DRIVER_DOCUMENT_TYPE.DRIVER_LICENSE]: "Driver License",
   [DRIVER_DOCUMENT_TYPE.VEHICLE_TRAILER_PHOTO]: "Vehicle Trailer Photo",
+  [DRIVER_DOCUMENT_TYPE.VEHICLE_PHOTO]: "Vehicle Photo",
   [DRIVER_DOCUMENT_TYPE.OTHER]: "Other Document",
 };
 

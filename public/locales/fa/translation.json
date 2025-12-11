@@ -297,6 +297,7 @@
           "vehicle_id_card": "کارت شناسایی وسیله نقلیه",
           "driver_license": "گواهینامه راننده",
           "vehicle_trailer_photo": "عکس تریلر وسیله نقلیه",
+          "vehicle_photo": "عکس وسیله نقلیه",
           "other": "سند دیگر"
         }
       }
@@ -313,6 +314,7 @@
       "plateNumber": "شماره پلاک",
       "capacity": "ظرفیت",
       "tons": "تن",
+      "netVolume": "حجم خالص",
       "alerts": {
         "gpsLost": "GPS از دست رفته",
         "delayExpected": "تأخیر پیش‌بینی شده",
@@ -782,7 +784,8 @@
       "tented": "چادری",
       "refrigerated": "یخچالی",
       "flatbed": "کفی",
-      "double_wall": "دو دیواره"
+      "double_wall": "دو دیواره",
+      "other": "سایر"
     },
     "actions": {
       "approve": "تأیید",

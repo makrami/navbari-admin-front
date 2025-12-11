@@ -415,6 +415,7 @@
           "vehicle_id_card": "بطاقة هوية المركبة",
           "driver_license": "رخصة القيادة",
           "vehicle_trailer_photo": "صورة مقطورة المركبة",
+          "vehicle_photo": "صورة المركبة",
           "other": "وثيقة أخرى"
         }
       }
@@ -431,6 +432,7 @@
       "plateNumber": "رقم اللوحة",
       "capacity": "السعة",
       "tons": "أطنان",
+      "netVolume": "الحجم الصافي",
       "alerts": {
         "gpsLost": "فقدان GPS",
         "delayExpected": "تأخير متوقع",
@@ -737,7 +739,8 @@
       "tented": "مغطاة",
       "refrigerated": "مبردة",
       "flatbed": "منصة مسطحة",
-      "double_wall": "جدار مزدوج"
+      "double_wall": "جدار مزدوج",
+      "other": "أخرى"
     },
     "actions": {
       "approve": "الموافقة",

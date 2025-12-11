@@ -297,6 +297,7 @@
           "vehicle_id_card": "Araç Kimlik Kartı",
           "driver_license": "Sürücü Ehliyeti",
           "vehicle_trailer_photo": "Araç Römork Fotoğrafı",
+          "vehicle_photo": "Araç Fotoğrafı",
           "other": "Diğer Belge"
         }
       }
@@ -313,6 +314,7 @@
       "plateNumber": "PLAKA NUMARASI",
       "capacity": "KAPASİTE",
       "tons": "Ton",
+      "netVolume": "NET HACİM",
       "alerts": {
         "gpsLost": "GPS Sinyali Kayboldu",
         "delayExpected": "Gecikme Bekleniyor",
@@ -782,7 +784,8 @@
       "tented": "Tenteli",
       "refrigerated": "Soğutmalı",
       "flatbed": "Düz Yataklı",
-      "double_wall": "Çift Duvarlı"
+      "double_wall": "Çift Duvarlı",
+      "other": "Diğer"
     },
     "actions": {
       "approve": "Onayla",
