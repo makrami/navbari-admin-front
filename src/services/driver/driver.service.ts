@@ -13,7 +13,7 @@ export async function listDrivers(): Promise<Driver[]> {
  * Update driver status (approve or reject)
  */
 export type UpdateDriverStatusRequest = {
-  status: "approved" | "rejected";
+  status: "approved" | "rejected" | "inactive";
   rejectionReason?: string;
 };
 
@@ -51,4 +51,11 @@ export async function rejectDriver(
     status: "rejected",
     rejectionReason,
   });
+}
+
+/**
+ * Delete a driver
+ */
+export async function deleteDriver(id: string): Promise<void> {
+  await http.delete(`/drivers/${id}`);
 }

@@ -273,14 +273,20 @@
       "closeDetails": "Close details panel",
       "actions": {
         "activate": "Activate",
-        "deactivate": "Deactivate"
+        "deactivate": "Deactivate",
+        "delete": "Delete",
+        "deleteDriver": "Delete Driver",
+        "deleteDriverConfirm": "Are you sure you want to delete \"{{name}}\"?",
+        "deleting": "Deleting...",
+        "confirmDelete": "Confirm Delete"
       },
       "status": {
         "all": "All",
         "pending": "Pending",
         "approved": "Approved",
         "rejected": "Rejected",
-        "inactive": "Inactive"
+        "inactive": "Inactive",
+        "active": "Active"
       },
       "scroll": {
         "left": "Scroll left",

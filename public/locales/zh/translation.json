@@ -391,14 +391,20 @@
       "closeDetails": "关闭详细信息面板",
       "actions": {
         "activate": "激活",
-        "deactivate": "停用"
+        "deactivate": "停用",
+        "delete": "删除",
+        "deleteDriver": "删除司机",
+        "deleteDriverConfirm": "您确定要删除 \"{{name}}\" 吗？",
+        "deleting": "删除中...",
+        "confirmDelete": "确认删除"
       },
       "status": {
         "all": "全部",
         "pending": "等待中",
         "approved": "已批准",
         "rejected": "已拒绝",
-        "inactive": "非活跃"
+        "inactive": "非活跃",
+        "active": "活跃"
       },
       "scroll": {
         "left": "向左滚动",

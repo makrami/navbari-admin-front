@@ -391,14 +391,20 @@
       "closeDetails": "Закрыть панель деталей",
       "actions": {
         "activate": "Активировать",
-        "deactivate": "Деактивировать"
+        "deactivate": "Деактивировать",
+        "delete": "Удалить",
+        "deleteDriver": "Удалить водителя",
+        "deleteDriverConfirm": "Вы уверены, что хотите удалить \"{{name}}\"?",
+        "deleting": "Удаление...",
+        "confirmDelete": "Подтвердить удаление"
       },
       "status": {
         "all": "Все",
         "pending": "Ожидание",
         "approved": "Утверждено",
         "rejected": "Отклонено",
-        "inactive": "Неактивный"
+        "inactive": "Неактивный",
+        "active": "Активный"
       },
       "scroll": {
         "left": "Прокрутить влево",

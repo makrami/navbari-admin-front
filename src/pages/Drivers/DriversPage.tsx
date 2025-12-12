@@ -1,39 +1,45 @@
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { EntityCard } from "../../shared/components/ui/EntityCard";
-import { StatusFilterChips } from "./components/StatusFilterChips";
-import type { FilterKey } from "./components/StatusFilterChips";
-import { ListPanel } from "../../shared/components/ui/ListPanel";
-import { DetailsPanel } from "../shipment/details/DetailsPanel";
-import { DriverDetails } from "./components/DriverDetails";
-import { PanelRightClose } from "lucide-react";
+import {useMemo, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {EntityCard} from "../../shared/components/ui/EntityCard";
+import {StatusFilterChips} from "./components/StatusFilterChips";
+import type {FilterKey} from "./components/StatusFilterChips";
+import {ListPanel} from "../../shared/components/ui/ListPanel";
+import {DetailsPanel} from "../shipment/details/DetailsPanel";
+import {DriverDetails} from "./components/DriverDetails";
+import {PanelRightClose, AlertTriangle, Trash2} from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
-import { DriversPageSkeleton } from "./components/DriversSkeleton";
-import { useDrivers, driverKeys } from "../../services/driver/hooks";
-import { formatDriverForEntityCard } from "./utils";
+import {DriversPageSkeleton} from "./components/DriversSkeleton";
+import {useDrivers, driverKeys} from "../../services/driver/hooks";
+import {formatDriverForEntityCard} from "./utils";
 import {
   approveDriver,
   rejectDriver,
+  deleteDriver,
+  updateDriverStatus,
 } from "../../services/driver/driver.service";
-import { RejectionReasonModal } from "./components/RejectionReasonModal";
+import {RejectionReasonModal} from "./components/RejectionReasonModal";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
 export function DriversPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isActive, setIsActive] = useState<boolean>(true);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [driverToReject, setDriverToReject] = useState<{
     id: string;
     name: string;
   } | null>(null);
-  const { t } = useTranslation();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [driverToDelete, setDriverToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const {t} = useTranslation();
   const queryClient = useQueryClient();
-  const { data: drivers = [], isLoading, isError, error } = useDrivers();
+  const {data: drivers = [], isLoading, isError, error} = useDrivers();
 
   const formattedDrivers = useMemo(() => {
     return drivers.map(formatDriverForEntityCard);
@@ -67,28 +73,44 @@ export function DriversPage() {
     ? drivers.find((d) => d.id === selectedId)
     : null;
 
-  useEffect(() => {
-    if (selectedDriver) {
-      setIsActive(selectedDriver.status !== "inactive");
-    }
-  }, [selectedDriver]);
-
   // Approve mutation
   const approveMutation = useMutation({
     mutationFn: approveDriver,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: driverKeys.list() });
+      queryClient.invalidateQueries({queryKey: driverKeys.list()});
     },
   });
 
   // Reject mutation
   const rejectMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+    mutationFn: ({id, reason}: {id: string; reason: string}) =>
       rejectDriver(id, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: driverKeys.list() });
+      queryClient.invalidateQueries({queryKey: driverKeys.list()});
       setRejectionModalOpen(false);
       setDriverToReject(null);
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: deleteDriver,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: driverKeys.list()});
+      setDeleteModalOpen(false);
+      setDriverToDelete(null);
+      if (selectedId === driverToDelete?.id) {
+        setSelectedId(null);
+      }
+    },
+  });
+
+  // Update driver status mutation (for activate/deactivate)
+  const updateStatusMutation = useMutation({
+    mutationFn: ({id, status}: {id: string; status: "approved" | "inactive"}) =>
+      updateDriverStatus(id, {status}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: driverKeys.list()});
     },
   });
 
@@ -109,8 +131,36 @@ export function DriversPage() {
 
   const handleRejectionSubmit = (reason: string) => {
     if (driverToReject) {
-      rejectMutation.mutate({ id: driverToReject.id, reason });
+      rejectMutation.mutate({id: driverToReject.id, reason});
     }
+  };
+
+  const handleDeleteClick = () => {
+    if (selectedDriver) {
+      setDriverToDelete({
+        id: selectedDriver.id,
+        name: selectedDriver.user.fullName || selectedDriver.user.email,
+      });
+      setDeleteModalOpen(true);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (driverToDelete) {
+      deleteMutation.mutate(driverToDelete.id);
+    }
+  };
+
+  const handleToggleStatus = () => {
+    if (!selectedDriver) return;
+
+    const newStatus: "approved" | "inactive" =
+      selectedDriver.status === "approved" ? "inactive" : "approved";
+
+    updateStatusMutation.mutate({
+      id: selectedDriver.id,
+      status: newStatus,
+    });
   };
 
   if (isLoading) {
@@ -235,35 +285,53 @@ export function DriversPage() {
                     >
                       <PanelRightClose className="size-5" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsActive((v) => !v)}
-                      role="switch"
-                      aria-checked={isActive}
-                      className={
-                        (isActive
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600") +
-                        " inline-flex items-center gap-2 rounded-full justify-between min-w-33 px-2 py-1.5 text-sm font-medium transition-colors duration-200"
-                      }
-                    >
-                      <span
-                        className={
-                          (isActive ? "bg-red-600" : "bg-green-600") +
-                          " relative inline-block h-4 w-7 rounded-full transition-colors duration-200"
-                        }
-                      >
-                        <span
+                    <div className="flex items-center gap-2">
+                      {selectedDriver.status === "approved" ||
+                      selectedDriver.status === "inactive" ? (
+                        <button
+                          type="button"
+                          onClick={handleToggleStatus}
+                          disabled={updateStatusMutation.isPending}
+                          role="switch"
+                          aria-checked={selectedDriver.status === "approved"}
                           className={
-                            (isActive ? "translate-x-3" : "translate-x-0") +
-                            " absolute left-0.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white transition-transform duration-200"
+                            (selectedDriver.status === "inactive"
+                              ? "bg-red-100 text-red-600"
+                              : "bg-green-100 text-green-600") +
+                            " inline-flex items-center gap-2 rounded-full justify-between min-w-33 px-2 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           }
-                        ></span>
-                      </span>
-                      {isActive
-                        ? t("drivers.page.actions.deactivate")
-                        : t("drivers.page.actions.activate")}
-                    </button>
+                        >
+                          <span
+                            className={
+                              (selectedDriver.status === "inactive"
+                                ? "bg-red-600"
+                                : "bg-green-600") +
+                              " relative inline-block h-4 w-7 rounded-full transition-colors duration-200"
+                            }
+                          >
+                            <span
+                              className={
+                                (selectedDriver.status === "inactive"
+                                  ? "translate-x-3"
+                                  : "translate-x-0") +
+                                " absolute left-0.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white transition-transform duration-200"
+                              }
+                            ></span>
+                          </span>
+                          {selectedDriver.status === "inactive"
+                            ? t("drivers.page.status.inactive", "Inactive")
+                            : t("drivers.page.status.active", "Active")}
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={handleDeleteClick}
+                        className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors duration-200"
+                      >
+                        <Trash2 className="size-4" />
+                        {t("drivers.page.actions.delete", "Delete")}
+                      </button>
+                    </div>
                   </div>
                   <DriverDetails driver={selectedDriver} />
                   <RecentActivities driver={selectedDriver} />
@@ -284,6 +352,50 @@ export function DriversPage() {
         onSubmit={handleRejectionSubmit}
         driverName={driverToReject?.name}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="size-6 text-red-600" />
+              <h3 className="text-lg font-semibold">
+                {t("drivers.page.actions.deleteDriver", "Delete Driver")}
+              </h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              {t(
+                "drivers.page.actions.deleteDriverConfirm",
+                `Are you sure you want to delete "${driverToDelete?.name}"? This action cannot be undone.`,
+                {name: driverToDelete?.name}
+              )}
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setDriverToDelete(null);
+                }}
+                disabled={deleteMutation.isPending}
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {t("common.cancel", "Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={deleteMutation.isPending}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteMutation.isPending
+                  ? t("drivers.page.actions.deleting", "Deleting...")
+                  : t("drivers.page.actions.confirmDelete", "Confirm Delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

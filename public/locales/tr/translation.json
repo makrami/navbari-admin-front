@@ -273,14 +273,20 @@
       "closeDetails": "Detay panelini kapat",
       "actions": {
         "activate": "Etkinleştir",
-        "deactivate": "Devre dışı bırak"
+        "deactivate": "Devre dışı bırak",
+        "delete": "Sil",
+        "deleteDriver": "Sürücüyü Sil",
+        "deleteDriverConfirm": "\"{{name}}\" sürücüsünü silmek istediğinizden emin misiniz?",
+        "deleting": "Siliniyor...",
+        "confirmDelete": "Silme İşlemini Onayla"
       },
       "status": {
         "all": "Tümü",
         "pending": "Beklemede",
         "approved": "Onaylandı",
         "rejected": "Reddedildi",
-        "inactive": "Pasif"
+        "inactive": "Pasif",
+        "active": "Aktif"
       },
       "scroll": {
         "left": "Sola kaydır",

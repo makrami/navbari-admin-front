@@ -391,14 +391,20 @@
       "closeDetails": "إغلاق لوحة التفاصيل",
       "actions": {
         "activate": "تفعيل",
-        "deactivate": "إلغاء التفعيل"
+        "deactivate": "إلغاء التفعيل",
+        "delete": "حذف",
+        "deleteDriver": "حذف السائق",
+        "deleteDriverConfirm": "هل أنت متأكد من حذف \"{{name}}\"؟",
+        "deleting": "جاري الحذف...",
+        "confirmDelete": "تأكيد الحذف"
       },
       "status": {
         "all": "الكل",
         "pending": "في الانتظار",
         "approved": "موافق عليه",
         "rejected": "مرفوض",
-        "inactive": "غير نشط"
+        "inactive": "غير نشط",
+        "active": "نشط"
       },
       "scroll": {
         "left": "التمرير لليسار",

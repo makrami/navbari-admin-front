@@ -273,14 +273,20 @@
       "closeDetails": "بستن پنل جزئیات",
       "actions": {
         "activate": "فعال‌سازی",
-        "deactivate": "غیرفعال‌سازی"
+        "deactivate": "غیرفعال‌سازی",
+        "delete": "حذف",
+        "deleteDriver": "حذف راننده",
+        "deleteDriverConfirm": "آیا از حذف \"{{name}}\" مطمئن هستید؟",
+        "deleting": "در حال حذف...",
+        "confirmDelete": "تأیید حذف"
       },
       "status": {
         "all": "همه",
         "pending": "در انتظار",
         "approved": "تأیید شده",
         "rejected": "رد شده",
-        "inactive": "غیرفعال"
+        "inactive": "غیرفعال",
+        "active": "فعال"
       },
       "scroll": {
         "left": "اسکرول به چپ",
