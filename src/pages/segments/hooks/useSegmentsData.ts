@@ -53,27 +53,14 @@ export function useSegmentsData(
   const baseSegments = fromService;
 
   const allSegments: Segment[] = useMemo(() => {
-    let segments: Segment[];
-
-    if (!extraSegments?.length) {
-      segments = baseSegments;
-    } else {
-      const byKey = new Map<string, Segment>();
-      const keyOf = (segment: Segment) =>
-        `${segment.shipmentId}::${segment.step ?? 0}`;
-
-      baseSegments.forEach((segment) => {
-        byKey.set(keyOf(segment), segment);
-      });
-
-      extraSegments.forEach((segment) => {
-        byKey.set(keyOf(segment), segment);
-      });
-
-      segments = Array.from(byKey.values());
+    // When extraSegments (activeSegments) is provided, use ALL segments from it directly
+    // This ensures all segments from activeSegments are shown without deduplication
+    if (extraSegments?.length) {
+      return extraSegments;
     }
 
-    return segments;
+    // Otherwise, use segments from service shipments
+    return baseSegments;
   }, [baseSegments, extraSegments]);
 
   // Filter segments using SEGMENT_STATUS directly

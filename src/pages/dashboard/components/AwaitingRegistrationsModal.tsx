@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { Building2, UserIcon, Globe } from "lucide-react";
-import { cn } from "../../../shared/utils/cn";
+import {useEffect, useMemo, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
+import {Building2, UserIcon, Globe} from "lucide-react";
+import {cn} from "../../../shared/utils/cn";
 import ReactCountryFlag from "react-country-flag";
-import { useRegistrationSummaries } from "../../../services/dashboard/hooks";
-import { getCountryCode } from "../../../shared/utils/countryCode";
-import { ENV } from "../../../lib/env";
+import {useRegistrationSummaries} from "../../../services/dashboard/hooks";
+import {getCountryCode} from "../../../shared/utils/countryCode";
+import {ENV} from "../../../lib/env";
 
 /**
  * Construct full URL for file (avatar, logo, etc.)
@@ -27,7 +27,7 @@ function getFileUrl(filePath: string | null | undefined): string | undefined {
 type AwaitingRegistrationsModalProps = {
   open: boolean;
   onClose: () => void;
-  cardPosition: { top: number; left: number; width: number } | null;
+  cardPosition: {top: number; left: number; width: number} | null;
 };
 
 type Registration = {
@@ -46,6 +46,7 @@ type Registration = {
     city: string;
     countryCode: string;
   };
+  driverName?: string; // For driver registrations, store driver name
 };
 
 export function AwaitingRegistrationsModal({
@@ -53,9 +54,9 @@ export function AwaitingRegistrationsModal({
   onClose,
   cardPosition,
 }: AwaitingRegistrationsModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const navigate = useNavigate();
-  const { data: registrationSummaries = [], isLoading } =
+  const {data: registrationSummaries = [], isLoading} =
     useRegistrationSummaries();
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
@@ -73,6 +74,7 @@ export function AwaitingRegistrationsModal({
             name: summary.companyName,
             logo: getFileUrl(summary.companyLogo),
           },
+          driverName: summary.driverName, // Store driver name for finding the driver
         };
       } else {
         return {
@@ -94,6 +96,22 @@ export function AwaitingRegistrationsModal({
   const handleShowAll = () => {
     onClose();
     navigate("/local-companies");
+  };
+
+  const handleRegistrationClick = (registration: Registration) => {
+    onClose();
+    if (registration.type === "company") {
+      // Navigate to local companies page with company ID
+      navigate(`/local-companies?selectedId=${registration.id}`);
+    } else {
+      // Navigate to drivers page with company ID and driver name
+      // We'll find the driver by company ID and name on the drivers page
+      navigate(
+        `/drivers?companyId=${registration.id}&driverName=${encodeURIComponent(
+          registration.driverName || ""
+        )}`
+      );
+    }
   };
 
   useEffect(() => {
@@ -158,8 +176,9 @@ export function AwaitingRegistrationsModal({
               registrations.map((registration, index) => (
                 <div
                   key={registration.id}
+                  onClick={() => handleRegistrationClick(registration)}
                   className={cn(
-                    "flex items-start gap-3 p-3 transition-colors cursor-pointer",
+                    "flex items-start gap-3 p-3 transition-colors cursor-pointer hover:bg-slate-800/50",
                     index !== registrations.length - 1 &&
                       "border-b-1 border-slate-600"
                   )}

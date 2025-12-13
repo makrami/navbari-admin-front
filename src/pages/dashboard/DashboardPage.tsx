@@ -183,6 +183,8 @@ export function DashboardPage() {
             setCardPosition(null);
           }}
           cardPosition={cardPosition}
+          onSegmentClick={handleSegmentClick}
+          activeSegments={activeSegments}
         />
       </div>
     </div>

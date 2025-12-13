@@ -1,5 +1,6 @@
-import {useMemo, useState} from "react";
+import {useMemo, useState, useEffect} from "react";
 import {useTranslation} from "react-i18next";
+import {useSearchParams} from "react-router-dom";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {EntityCard} from "../../shared/components/ui/EntityCard";
 import {StatusFilterChips} from "./components/StatusFilterChips";
@@ -25,6 +26,7 @@ import {RejectionReasonModal} from "./components/RejectionReasonModal";
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
 export function DriversPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
@@ -66,6 +68,39 @@ export function DriversPage() {
     }
     return counts;
   }, [formattedDrivers]);
+
+  // Sync selectedId with URL params
+  useEffect(() => {
+    const urlSelectedId = searchParams.get("selectedId");
+    const urlCompanyId = searchParams.get("companyId");
+    const urlDriverName = searchParams.get("driverName");
+
+    if (urlSelectedId) {
+      // Direct driver ID selection
+      const driverExists = drivers.some((d) => d.id === urlSelectedId);
+      if (driverExists && selectedId !== urlSelectedId) {
+        setSelectedId(urlSelectedId);
+      }
+    } else if (urlCompanyId && urlDriverName) {
+      // Find driver by company ID and driver name
+      const decodedDriverName = decodeURIComponent(urlDriverName);
+      const foundDriver = drivers.find(
+        (d) =>
+          d.companyId === urlCompanyId &&
+          (d.user.fullName === decodedDriverName ||
+            d.user.email === decodedDriverName)
+      );
+      if (foundDriver && selectedId !== foundDriver.id) {
+        setSelectedId(foundDriver.id);
+        // Update URL to use driver ID instead of company ID + name
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete("companyId");
+        newSearchParams.delete("driverName");
+        newSearchParams.set("selectedId", foundDriver.id);
+        setSearchParams(newSearchParams, {replace: true});
+      }
+    }
+  }, [searchParams, drivers, selectedId, setSearchParams]);
 
   // Determine selected driver for split view; keep hooks before any early returns
   // Find the original driver object for DriverDetails component
@@ -279,7 +314,17 @@ export function DriversPage() {
                   <div className="flex w-full items-center justify-between rounded-xl ">
                     <button
                       type="button"
-                      onClick={() => setSelectedId(null)}
+                      onClick={() => {
+                        setSelectedId(null);
+                        // Remove selectedId from URL params
+                        const newSearchParams = new URLSearchParams(
+                          searchParams
+                        );
+                        newSearchParams.delete("selectedId");
+                        newSearchParams.delete("companyId");
+                        newSearchParams.delete("driverName");
+                        setSearchParams(newSearchParams);
+                      }}
                       className="grid h-9 w-9 place-items-center rounded-lg border border-slate-300 bg-white text-slate-400 hover:bg-slate-50 transition-colors"
                       aria-label={t("drivers.page.closeDetails")}
                     >

@@ -1,23 +1,27 @@
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { Truck, ArrowRight } from "lucide-react";
-import { cn } from "../../../shared/utils/cn";
+import {useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
+import {Truck, ArrowRight} from "lucide-react";
+import {cn} from "../../../shared/utils/cn";
 import ReactCountryFlag from "react-country-flag";
-import { useSegmentSummaries } from "../../../services/dashboard/hooks";
-import { getCountryCode } from "../../../shared/utils/countryCode";
-import type { SegmentSummaryType } from "../../../services/dashboard/dashboard.service";
+import {useSegmentSummaries} from "../../../services/dashboard/hooks";
+import {getCountryCode} from "../../../shared/utils/countryCode";
+import type {SegmentSummaryType} from "../../../services/dashboard/dashboard.service";
+import type {Segment} from "../../../shared/types/segmentData";
 
 type SegmentsAwaitingDriverModalProps = {
   open: boolean;
   onClose: () => void;
-  cardPosition: { top: number; left: number; width: number } | null;
+  cardPosition: {top: number; left: number; width: number} | null;
+  onSegmentClick?: (segmentId: string) => void;
+  activeSegments?: Segment[];
 };
 
 type SegmentDisplay = {
   id: string;
   title: string;
   shipmentId: string;
+  segmentOrder: number;
   status: string;
   textColor: string;
   statusColor: string;
@@ -63,10 +67,12 @@ export function SegmentsAwaitingDriverModal({
   open,
   onClose,
   cardPosition,
+  onSegmentClick,
+  activeSegments = [],
 }: SegmentsAwaitingDriverModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const navigate = useNavigate();
-  const { data: segmentSummaries = [], isLoading } = useSegmentSummaries();
+  const {data: segmentSummaries = [], isLoading} = useSegmentSummaries();
 
   const segments: SegmentDisplay[] = segmentSummaries.map((summary) => {
     const statusInfo = mapTypeToStatus(summary.type);
@@ -74,6 +80,7 @@ export function SegmentsAwaitingDriverModal({
       id: `${summary.shipmentId}-${summary.segmentOrder}`,
       title: summary.shipmentTitle,
       shipmentId: summary.shipmentId,
+      segmentOrder: summary.segmentOrder,
       status: statusInfo.status,
       textColor: statusInfo.textColor,
       statusColor: statusInfo.statusColor,
@@ -88,6 +95,22 @@ export function SegmentsAwaitingDriverModal({
       },
     };
   });
+
+  const handleSegmentClick = (segment: SegmentDisplay) => {
+    // Find the matching segment from activeSegments
+    // segmentOrder is 0-indexed, so we need to match with order (0-indexed) or step (1-indexed)
+    const matchingSegment = activeSegments.find(
+      (seg) =>
+        seg.shipmentId === segment.shipmentId &&
+        (seg.order === segment.segmentOrder ||
+          (seg.step !== undefined && seg.step === segment.segmentOrder + 1))
+    );
+
+    if (matchingSegment && onSegmentClick) {
+      onSegmentClick(matchingSegment.id);
+      onClose();
+    }
+  };
 
   const handleShowAll = () => {
     onClose();
@@ -156,8 +179,9 @@ export function SegmentsAwaitingDriverModal({
               segments.map((segment: SegmentDisplay, index: number) => (
                 <div
                   key={segment.id}
+                  onClick={() => handleSegmentClick(segment)}
                   className={cn(
-                    "flex items-start gap-3 p-3 transition-colors cursor-pointer",
+                    "flex items-start gap-3 p-3 transition-colors cursor-pointer hover:bg-white/10",
                     index !== segments.length - 1 &&
                       "border-b-1 border-slate-600"
                   )}

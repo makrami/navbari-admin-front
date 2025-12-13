@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { StatusFilterChips } from "./components/StatusFilterChips";
 import type { FilterKey } from "./components/StatusFilterChips";
 import { ListPanel } from "../../shared/components/ui/ListPanel";
@@ -20,6 +21,7 @@ import { apiStatusToUiStatus } from "./types";
 import { CompanyCard } from "./components/CompanyCard";
 
 export function LocalCompaniesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { t } = useTranslation();
@@ -61,12 +63,24 @@ export function LocalCompaniesPage() {
     return companies.find((c) => c.id === selectedId) || null;
   }, [companies, selectedId]);
 
+  // Sync selectedId with URL params
+  useEffect(() => {
+    const urlSelectedId = searchParams.get("selectedId");
+    if (urlSelectedId) {
+      // Check if the company exists in the list
+      const companyExists = companies.some((c) => c.id === urlSelectedId);
+      if (companyExists && selectedId !== urlSelectedId) {
+        setSelectedId(urlSelectedId);
+      }
+    }
+  }, [searchParams, companies, selectedId]);
+
   // Auto-select first company if none selected
   useEffect(() => {
-    if (!selectedId && filteredCompanies.length > 0) {
+    if (!selectedId && filteredCompanies.length > 0 && !searchParams.get("selectedId")) {
       setSelectedId(filteredCompanies[0].id);
     }
-  }, [selectedId, filteredCompanies]);
+  }, [selectedId, filteredCompanies, searchParams]);
 
   // Handle activate/deactivate toggle
   const handleToggleActive = async () => {
@@ -179,7 +193,13 @@ export function LocalCompaniesPage() {
                   <div className="flex w-full items-center justify-between rounded-xl ">
                     <button
                       type="button"
-                      onClick={() => setSelectedId(null)}
+                      onClick={() => {
+                        setSelectedId(null);
+                        // Remove selectedId from URL params
+                        const newSearchParams = new URLSearchParams(searchParams);
+                        newSearchParams.delete("selectedId");
+                        setSearchParams(newSearchParams);
+                      }}
                       className="grid h-9 w-9 place-items-center rounded-lg border border-slate-300 bg-white text-slate-400 hover:bg-slate-50 transition-colors"
                       aria-label={t("localCompanies.page.closeDetails")}
                     >

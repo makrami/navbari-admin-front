@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { useShipments } from "../../services/shipment/hooks";
-import { useActiveSegments } from "../../services/dashboard/hooks";
-import type { FilterType } from "./components/SegmentsFilters";
-import { SegmentsFilters } from "./components/SegmentsFilters";
-import type { Segment } from "../../shared/types/segmentData";
-import { useSegmentsData } from "./hooks/useSegmentsData";
-import { cn } from "../../shared/utils/cn";
-import { getSegmentListId } from "./utils/getSegmentListId";
+import {useEffect, useRef, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
+import {X} from "lucide-react";
+import {useShipments} from "../../services/shipment/hooks";
+import {useActiveSegments} from "../../services/dashboard/hooks";
+import type {FilterType} from "./components/SegmentsFilters";
+import {SegmentsFilters} from "./components/SegmentsFilters";
+import type {Segment} from "../../shared/types/segmentData";
+import {useSegmentsData} from "./hooks/useSegmentsData";
+import {cn} from "../../shared/utils/cn";
+import {getSegmentListId} from "./utils/getSegmentListId";
 import SegmentDetails from "../shipment/segments/components/SegmentDetails";
-import type { Shipment } from "../../shared/types/shipment";
-import { SEGMENT_STATUS } from "../../services/shipment/shipment.api.service";
+import type {Shipment} from "../../shared/types/shipment";
+import {SEGMENT_STATUS} from "../../services/shipment/shipment.api.service";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
@@ -28,20 +28,20 @@ export function SegmentsPage({
   extraSegments,
 }: SegmentsPageProps = {}) {
   const navigate = useNavigate();
-  const { data: serviceShipments, loading } = useShipments();
-  const { data: activeSegments } = useActiveSegments();
+  const {data: serviceShipments, loading} = useShipments();
+  const {data: activeSegments} = useActiveSegments();
   const [filter, setFilter] = useState<FilterType>("need-action");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSegments, setExpandedSegments] = useState<Set<string>>(
     () => new Set()
   );
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Use activeSegments if extraSegments is not provided (when navigating directly to /segments)
   const segmentsToUse = extraSegments ?? activeSegments ?? [];
 
-  const { needActionCount, alertCount, allSegments, filteredSegments } =
+  const {needActionCount, alertCount, allSegments, filteredSegments} =
     useSegmentsData(
       serviceShipments ?? null,
       filter,
@@ -140,7 +140,7 @@ export function SegmentsPage({
     const timeoutId = setTimeout(() => {
       const node = itemRefs.current.get(segmentListId);
       if (node) {
-        node.scrollIntoView({ behavior: "smooth", block: "center" });
+        node.scrollIntoView({behavior: "smooth", block: "center"});
       }
     }, 100);
 
@@ -206,7 +206,7 @@ export function SegmentsPage({
       {/* Segments List */}
       <div
         className="flex-1 overflow-y-auto no-scrollbar"
-        style={{ scrollbarGutter: "stable" }}
+        style={{scrollbarGutter: "stable"}}
       >
         <div className="max-w-6xl mx-auto pb-6">
           {filteredSegments.length === 0 ? (

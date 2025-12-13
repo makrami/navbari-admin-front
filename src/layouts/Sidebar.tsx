@@ -22,6 +22,7 @@ import {LanguageSelector} from "../components/Ui/LanguageSelector";
 import {useCurrentUser} from "../services/user/hooks";
 import {getFileUrl} from "../pages/Drivers/utils";
 import {useUnreadChatCount} from "../services/chat/hooks";
+import {useDashboardSummary} from "../services/dashboard/hooks";
 
 export function Sidebar() {
   const navigate = useNavigate();
@@ -34,6 +35,13 @@ export function Sidebar() {
   } = useCurrentUser();
   const {data: unreadCountData} = useUnreadChatCount();
   const unreadCount = unreadCountData?.count ?? 0;
+  const {data: dashboardSummary} = useDashboardSummary();
+
+  // Get counts for awaiting registrations
+  const awaitingCompaniesCount =
+    dashboardSummary?.companiesWaitingForApprovalCount ?? 0;
+  const awaitingDriversCount =
+    dashboardSummary?.driversWaitingForApprovalCount ?? 0;
 
   // Debug: Log user data to console
   if (user) {
@@ -146,13 +154,22 @@ export function Sidebar() {
             }
           >
             {({isActive}) => (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 relative">
                 <ActiveIndicator isActive={isActive} />
-                <BoxesIcon
-                  className={`size-5 ${
-                    isActive ? "text-[#1B54FE]" : "text-slate-400"
-                  }`}
-                />
+                <div className="relative">
+                  <BoxesIcon
+                    className={`size-5 ${
+                      isActive ? "text-[#1B54FE]" : "text-slate-400"
+                    }`}
+                  />
+                  {awaitingCompaniesCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                      {awaitingCompaniesCount > 99
+                        ? "99+"
+                        : awaitingCompaniesCount}
+                    </span>
+                  )}
+                </div>
                 <span
                   className={`text-xs font-medium uppercase tracking-wide ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"
@@ -174,13 +191,20 @@ export function Sidebar() {
             }
           >
             {({isActive}) => (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 relative">
                 <ActiveIndicator isActive={isActive} />
-                <UsersIcon
-                  className={`size-5 ${
-                    isActive ? "text-[#1B54FE]" : "text-slate-400"
-                  }`}
-                />
+                <div className="relative">
+                  <UsersIcon
+                    className={`size-5 ${
+                      isActive ? "text-[#1B54FE]" : "text-slate-400"
+                    }`}
+                  />
+                  {awaitingDriversCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                      {awaitingDriversCount > 99 ? "99+" : awaitingDriversCount}
+                    </span>
+                  )}
+                </div>
                 <span
                   className={`text-xs font-medium uppercase tracking-wide ${
                     isActive ? "text-[#1B54FE]" : "text-slate-400"

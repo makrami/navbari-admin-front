@@ -1,16 +1,18 @@
-import { useEffect, useState, useRef, useLayoutEffect, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { AlertTriangle, MessageSquareText } from "lucide-react";
-import { cn } from "../../../shared/utils/cn";
-import { useConversationsSummaries } from "../../../services/dashboard/hooks";
-import type { ConversationSummary } from "../../../services/dashboard/dashboard.service";
+import {useEffect, useState, useRef, useLayoutEffect, useMemo} from "react";
+import {useTranslation} from "react-i18next";
+import {AlertTriangle, MessageSquareText} from "lucide-react";
+import {cn} from "../../../shared/utils/cn";
+import {useConversationsSummaries} from "../../../services/dashboard/hooks";
+import type {ConversationSummary} from "../../../services/dashboard/dashboard.service";
 import dayjs from "dayjs";
-import { ENV } from "../../../lib/env";
+import {ENV} from "../../../lib/env";
+import {useChatWithConversation} from "../../../shared/hooks/useChatWithConversation";
+import {ChatOverlay} from "../../../shared/components/ChatOverlay";
 
 type UnreadMessagesModalProps = {
   open: boolean;
   onClose: () => void;
-  cardPosition: { top: number; left: number; width: number } | null;
+  cardPosition: {top: number; left: number; width: number} | null;
   type: "messages" | "alerts";
 };
 
@@ -62,14 +64,36 @@ export function UnreadMessagesModal({
   cardPosition,
   type,
 }: UnreadMessagesModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
   const [calculatedPosition, setCalculatedPosition] = useState<{
     top: number;
     left: number;
   } | null>(null);
-  const { data: conversationsData, isLoading } = useConversationsSummaries();
+  const {data: conversationsData, isLoading} = useConversationsSummaries();
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [selectedConversationName, setSelectedConversationName] = useState<
+    string | null
+  >(null);
+  const openChatRef = useRef<string | null>(null);
+
+  // Chat hook for selected conversation
+  const chatHook = useChatWithConversation({
+    conversationId: selectedConversationId || "",
+    recipientName: selectedConversationName || "",
+  });
+
+  // Open chat when conversation ID is set and we have a pending open request
+  useEffect(() => {
+    if (openChatRef.current && selectedConversationId === openChatRef.current) {
+      // Open chat - ChatOverlay will handle loading state
+      chatHook.setIsChatOpen(true);
+      openChatRef.current = null;
+    }
+  }, [selectedConversationId, chatHook.setIsChatOpen]);
 
   // Get the appropriate summaries based on type
   const summaries: ConversationSummary[] = useMemo(() => {
@@ -80,7 +104,10 @@ export function UnreadMessagesModal({
   }, [conversationsData, type]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      // Don't reset selected conversation here - let chat overlay handle its own close
+      return;
+    }
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -143,7 +170,7 @@ export function UnreadMessagesModal({
       top = containerRect.top + 20; // 20px padding from edge
     }
 
-    setCalculatedPosition({ top, left });
+    setCalculatedPosition({top, left});
   }, [open, cardPosition]);
 
   // Fine-tune position after modal is rendered with actual dimensions
@@ -184,7 +211,7 @@ export function UnreadMessagesModal({
     }
 
     if (needsUpdate) {
-      setCalculatedPosition({ top, left });
+      setCalculatedPosition({top, left});
     }
   }, [open, cardPosition, calculatedPosition]);
 
@@ -256,10 +283,21 @@ export function UnreadMessagesModal({
                   <div
                     key={summary.conversationId}
                     className={cn(
-                      "flex items-start gap-3 p-3 transition-colors cursor-pointer",
+                      "flex items-start gap-3 p-3 transition-colors cursor-pointer hover:bg-slate-800/50",
                       index !== summaries.length - 1 &&
                         "border-b-2 border-slate-600"
                     )}
+                    onClick={() => {
+                      const conversationId = summary.conversationId;
+                      const conversationName = summary.conversationTitle;
+
+                      // Set the conversation ID and mark that we want to open chat
+                      setSelectedConversationId(conversationId);
+                      setSelectedConversationName(conversationName);
+                      openChatRef.current = conversationId;
+
+                      onClose(); // Close the modal when opening chat
+                    }}
                   >
                     {/* Avatar */}
                     {avatarUrl && !hasImageError ? (
@@ -329,6 +367,22 @@ export function UnreadMessagesModal({
           {t("dashboard.kpiCards.unreadMessages.modal.showAll")}
         </button>
       </div>
+
+      {/* Chat Overlay */}
+      {selectedConversationId && (
+        <ChatOverlay
+          isOpen={chatHook.isChatOpen}
+          onClose={() => {
+            chatHook.setIsChatOpen(false);
+            setSelectedConversationId(null);
+            setSelectedConversationName(null);
+            openChatRef.current = null;
+          }}
+          recipientName={selectedConversationName || ""}
+          chatHook={chatHook}
+          actionableAlerts={[]}
+        />
+      )}
     </>
   );
 }
