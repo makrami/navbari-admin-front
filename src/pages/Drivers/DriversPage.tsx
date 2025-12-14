@@ -22,6 +22,7 @@ import {
   updateDriverStatus,
 } from "../../services/driver/driver.service";
 import {RejectionReasonModal} from "./components/RejectionReasonModal";
+import {useCurrentUser} from "../../services/user/hooks";
 
 // Using FilterKey type from StatusFilterChips to avoid keeping a runtime-only array
 
@@ -42,6 +43,13 @@ export function DriversPage() {
   const {t} = useTranslation();
   const queryClient = useQueryClient();
   const {data: drivers = [], isLoading, isError, error} = useDrivers();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasDriversDelete = permissions.includes("drivers:delete");
+  const hasDriversManage = permissions.includes("drivers:manage");
 
   const formattedDrivers = useMemo(() => {
     return drivers.map(formatDriverForEntityCard);
@@ -252,8 +260,8 @@ export function DriversPage() {
                 entity={d}
                 className="w-full h-full"
                 onView={(id) => setSelectedId(id)}
-                onApprove={handleApprove}
-                onReject={handleReject}
+                onApprove={hasDriversManage ? handleApprove : undefined}
+                onReject={hasDriversManage ? handleReject : undefined}
                 statsLabels={{
                   driversLabel: t("drivers.page.stats.shipments"),
                   activeLabel: t("drivers.page.stats.vehicles"),
@@ -293,8 +301,8 @@ export function DriversPage() {
                 className="w-full h-full"
                 selected={selectedId === d.id}
                 onView={(id) => setSelectedId(id)}
-                onApprove={handleApprove}
-                onReject={handleReject}
+                onApprove={hasDriversManage ? handleApprove : undefined}
+                onReject={hasDriversManage ? handleReject : undefined}
                 statsLabels={{
                   driversLabel: t("drivers.page.stats.shipments"),
                   activeLabel: t("drivers.page.stats.vehicles"),
@@ -368,14 +376,16 @@ export function DriversPage() {
                             : t("drivers.page.status.active", "Active")}
                         </button>
                       ) : null}
-                      <button
-                        type="button"
-                        onClick={handleDeleteClick}
-                        className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors duration-200"
-                      >
-                        <Trash2 className="size-4" />
-                        {t("drivers.page.actions.delete", "Delete")}
-                      </button>
+                      {hasDriversDelete && (
+                        <button
+                          type="button"
+                          onClick={handleDeleteClick}
+                          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors duration-200"
+                        >
+                          <Trash2 className="size-4" />
+                          {t("drivers.page.actions.delete", "Delete")}
+                        </button>
+                      )}
                     </div>
                   </div>
                   <DriverDetails driver={selectedDriver} />

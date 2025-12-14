@@ -20,6 +20,7 @@ import {useState} from "react";
 import {useTranslation} from "react-i18next";
 import {apiStatusToUiStatus, STATUS_TO_COLOR} from "../types";
 import {COMPANY_STATUS} from "../../../services/company/company.service";
+import {useCurrentUser} from "../../../services/user/hooks";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -52,6 +53,12 @@ export function CompanyCard({
   const rejectMutation = useRejectCompany();
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasCompaniesManage = permissions.includes("companies:manage");
 
   const handleApprove = async () => {
     if (window.confirm(`Are you sure you want to approve "${company.name}"?`)) {
@@ -226,39 +233,48 @@ export function CompanyCard({
 
         {/* Actions */}
         {company.status === COMPANY_STATUS.PENDING ? (
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            <Button
-              variant="ghost"
-              className={cn(
-                "!p-0 h-7 inline-flex items-center gap-1.5",
-                selected
-                  ? "bg-green-500/15 text-green-300 hover:bg-white/20"
-                  : "bg-green-600/20 hover:!bg-green-600/30 text-green-600"
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleApprove();
-              }}
-            >
-              {t("localCompanies.page.card.approve")}
-              <CheckIcon className="size-3 " />
-            </Button>
-            <Button
-              variant="ghost"
-              className={cn(
-                "h-7 !p-0 inline-flex items-center gap-1.5",
-                selected
-                  ? "bg-red-500/15 text-red-300 hover:bg-white/20"
-                  : "bg-red-600/20 hover:!bg-red-600/30 text-red-600"
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleReject();
-              }}
-            >
-              {t("localCompanies.page.card.reject")}
-              <XIcon className="size-3" />
-            </Button>
+          <div
+            className={cn(
+              "mt-5 grid gap-2",
+              hasCompaniesManage ? "grid-cols-3" : "grid-cols-1"
+            )}
+          >
+            {hasCompaniesManage && (
+              <>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "!p-0 h-7 inline-flex items-center gap-1.5",
+                    selected
+                      ? "bg-green-500/15 text-green-300 hover:bg-white/20"
+                      : "bg-green-600/20 hover:!bg-green-600/30 text-green-600"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleApprove();
+                  }}
+                >
+                  {t("localCompanies.page.card.approve")}
+                  <CheckIcon className="size-3 " />
+                </Button>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "h-7 !p-0 inline-flex items-center gap-1.5",
+                    selected
+                      ? "bg-red-500/15 text-red-300 hover:bg-white/20"
+                      : "bg-red-600/20 hover:!bg-red-600/30 text-red-600"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReject();
+                  }}
+                >
+                  {t("localCompanies.page.card.reject")}
+                  <XIcon className="size-3" />
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               className={cn(

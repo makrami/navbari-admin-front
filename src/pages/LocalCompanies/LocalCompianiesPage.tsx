@@ -1,36 +1,43 @@
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
-import { StatusFilterChips } from "./components/StatusFilterChips";
-import type { FilterKey } from "./components/StatusFilterChips";
-import { ListPanel } from "../../shared/components/ui/ListPanel";
-import { DetailsPanel } from "../shipment/details/DetailsPanel";
-import { CompanyDetails } from "./components/CompanyDetails";
-import { PanelRightClose } from "lucide-react";
+import {useEffect, useMemo, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {useSearchParams} from "react-router-dom";
+import {StatusFilterChips} from "./components/StatusFilterChips";
+import type {FilterKey} from "./components/StatusFilterChips";
+import {ListPanel} from "../../shared/components/ui/ListPanel";
+import {DetailsPanel} from "../shipment/details/DetailsPanel";
+import {CompanyDetails} from "./components/CompanyDetails";
+import {PanelRightClose} from "lucide-react";
 import DocumentsList from "./components/DocumentsList";
 import InternalNotes from "./components/InternalNotes";
 import RecentActivities from "./components/RecentActivities";
-import { LocalCompaniesPageSkeleton } from "./components/LocalCompaniesSkeleton";
+import {LocalCompaniesPageSkeleton} from "./components/LocalCompaniesSkeleton";
 import {
   useCompanies,
   useCompanyDetails,
   useSuspendCompany,
   useUnsuspendCompany,
 } from "../../services/company/hooks";
-import { apiStatusToUiStatus } from "./types";
-import { CompanyCard } from "./components/CompanyCard";
+import {apiStatusToUiStatus} from "./types";
+import {CompanyCard} from "./components/CompanyCard";
+import {useCurrentUser} from "../../services/user/hooks";
 
 export function LocalCompaniesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   // Fetch all companies with no filters
-  const { data: companies = [], isLoading, error } = useCompanies({});
-  const { data: companyDetails } = useCompanyDetails(selectedId);
+  const {data: companies = [], isLoading, error} = useCompanies({});
+  const {data: companyDetails} = useCompanyDetails(selectedId);
   const suspendMutation = useSuspendCompany();
   const unsuspendMutation = useUnsuspendCompany();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasCompaniesManage = permissions.includes("companies:manage");
 
   // Filter companies based on UI filter only (all companies are fetched)
   const filteredCompanies = useMemo(() => {
@@ -77,7 +84,11 @@ export function LocalCompaniesPage() {
 
   // Auto-select first company if none selected
   useEffect(() => {
-    if (!selectedId && filteredCompanies.length > 0 && !searchParams.get("selectedId")) {
+    if (
+      !selectedId &&
+      filteredCompanies.length > 0 &&
+      !searchParams.get("selectedId")
+    ) {
       setSelectedId(filteredCompanies[0].id);
     }
   }, [selectedId, filteredCompanies, searchParams]);
@@ -196,7 +207,9 @@ export function LocalCompaniesPage() {
                       onClick={() => {
                         setSelectedId(null);
                         // Remove selectedId from URL params
-                        const newSearchParams = new URLSearchParams(searchParams);
+                        const newSearchParams = new URLSearchParams(
+                          searchParams
+                        );
                         newSearchParams.delete("selectedId");
                         setSearchParams(newSearchParams);
                       }}
@@ -205,40 +218,44 @@ export function LocalCompaniesPage() {
                     >
                       <PanelRightClose className="size-5" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleToggleActive}
-                      disabled={
-                        suspendMutation.isPending || unsuspendMutation.isPending
-                      }
-                      role="switch"
-                      aria-checked={isActive}
-                      className={
-                        (isActive
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600") +
-                        " inline-flex items-center gap-2 rounded-full justify-between min-w-33 px-2 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
-                      }
-                    >
-                      <span
+                    {hasCompaniesManage && (
+                      <button
+                        type="button"
+                        onClick={handleToggleActive}
+                        disabled={
+                          suspendMutation.isPending ||
+                          unsuspendMutation.isPending
+                        }
+                        role="switch"
+                        aria-checked={isActive}
                         className={
-                          (isActive ? "bg-red-600" : "bg-green-600") +
-                          " relative inline-block h-4 w-7 rounded-full transition-colors duration-200"
+                          (isActive
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600") +
+                          " inline-flex items-center gap-2 rounded-full justify-between min-w-33 px-2 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
                         }
                       >
                         <span
                           className={
-                            (isActive ? "translate-x-3" : "translate-x-0") +
-                            " absolute left-0.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white transition-transform duration-200"
+                            (isActive ? "bg-green-600" : "bg-red-600") +
+                            " relative inline-block h-4 w-7 rounded-full transition-colors duration-200"
                           }
-                        ></span>
-                      </span>
-                      {suspendMutation.isPending || unsuspendMutation.isPending
-                        ? t("common.loading")
-                        : isActive
-                        ? t("localCompanies.page.actions.deactivate")
-                        : t("localCompanies.page.actions.activate")}
-                    </button>
+                        >
+                          <span
+                            className={
+                              (isActive ? "translate-x-3" : "translate-x-0") +
+                              " absolute left-0.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white transition-transform duration-200"
+                            }
+                          ></span>
+                        </span>
+                        {suspendMutation.isPending ||
+                        unsuspendMutation.isPending
+                          ? t("common.loading")
+                          : isActive
+                          ? t("localCompanies.page.status.active")
+                          : t("localCompanies.page.status.inactive")}
+                      </button>
+                    )}
                   </div>
                   <CompanyDetails company={companyDetails || selectedCompany} />
                   <DocumentsList companyId={selectedId} />

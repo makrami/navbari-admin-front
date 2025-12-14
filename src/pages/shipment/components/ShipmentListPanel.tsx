@@ -4,12 +4,13 @@ import {
   SegmentButton,
   ShipmentItem,
 } from "../../../components";
-import { ListPanel } from "../../../shared/components/ui/ListPanel";
-import type { Shipment } from "../../../shared/types/shipment";
-import type { Segment } from "../../../shared/types/segmentData";
-import { useMemo, useState } from "react";
-import { StatusFilterChips, type FilterKey } from "./StatusFilterChips";
-import { useTranslation } from "react-i18next";
+import {ListPanel} from "../../../shared/components/ui/ListPanel";
+import type {Shipment} from "../../../shared/types/shipment";
+import type {Segment} from "../../../shared/types/segmentData";
+import {useMemo, useState} from "react";
+import {StatusFilterChips, type FilterKey} from "./StatusFilterChips";
+import {useTranslation} from "react-i18next";
+import {useCurrentUser} from "../../../services/user/hooks";
 
 // Helper function to format Segment for ShipmentItem
 function formatSegmentsForShipmentItem(segments: Segment[]): Array<{
@@ -61,8 +62,14 @@ export function ShipmentListPanel({
   editedSegmentsByShipmentId = {},
   segmentsLoading = false,
 }: ShipmentListPanelProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasShipmentsCreate = permissions.includes("shipments:create");
 
   // Calculate counts for each filter based on backend shipment status enum
   const filterCounts = useMemo(() => {
@@ -112,7 +119,7 @@ export function ShipmentListPanel({
     >
       <SearchShipment />
       <div className="flex items-center gap-2">
-        <AddShipment onClick={onAddShipment} />
+        {hasShipmentsCreate && <AddShipment onClick={onAddShipment} />}
         <SegmentButton />
       </div>
       <StatusFilterChips

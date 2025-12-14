@@ -399,7 +399,7 @@ export function SettingsPage() {
 
       // Only include country if provided
       if (user.country !== undefined) {
-        updateData.country = user.country || null;
+        updateData.country = user.country || undefined;
       }
 
       await updateUserMutation.mutateAsync({

@@ -1,7 +1,8 @@
-import type { PropsWithChildren, ReactNode } from "react";
-import { cn } from "../../../shared/utils/cn";
-import { PlusIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import type {PropsWithChildren, ReactNode} from "react";
+import {cn} from "../../../shared/utils/cn";
+import {PlusIcon} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {useCurrentUser} from "../../../services/user/hooks";
 
 type SegmentsProps = PropsWithChildren<{
   className?: string;
@@ -17,14 +18,22 @@ export function Segments({
   onAddSegment,
   readOnly = false,
 }: SegmentsProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasSegmentsCreate = permissions.includes("segments:create");
+
   return (
     <section className={cn(className)} data-name="Segments Section" dir="ltr">
       <header className="flex items-center justify-between">
         <h2 className="font-bold text-slate-900">{title}</h2>
         {readOnly
           ? null
-          : onAddSegment && (
+          : onAddSegment &&
+            hasSegmentsCreate && (
               <button
                 type="button"
                 onClick={onAddSegment}

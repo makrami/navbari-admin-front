@@ -149,7 +149,7 @@ export function RolesPermissionsSettings({
                 id: editUser.id,
                 name: editUser.name,
                 email: editUser.email,
-                country: editUser.country,
+                country: editUser.country || undefined,
               }
             : null
         }

@@ -1,6 +1,6 @@
-import type { HTMLAttributes } from "react";
-import { useRef, useState } from "react";
-import { cn } from "../../../shared/utils/cn";
+import type {HTMLAttributes} from "react";
+import {useRef, useState} from "react";
+import {cn} from "../../../shared/utils/cn";
 import {
   FileText as FileTextIcon,
   Check as CheckIcon,
@@ -20,9 +20,10 @@ import {
   COMPANY_DOCUMENT_TYPE,
   COMPANY_DOCUMENT_STATUS,
 } from "../../../services/company/document.service";
-import type { CompanyDocumentReadDto } from "../../../services/company/document.service";
-import { getFileUrl } from "../utils";
-import { useTranslation } from "react-i18next";
+import type {CompanyDocumentReadDto} from "../../../services/company/document.service";
+import {getFileUrl} from "../utils";
+import {useTranslation} from "react-i18next";
+import {useCurrentUser} from "../../../services/user/hooks";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
@@ -32,6 +33,7 @@ type DocumentCardProps = HTMLAttributes<HTMLDivElement> & {
   onReject?: () => void;
   onView?: () => void;
   onPreview?: () => void;
+  canManage?: boolean;
 };
 
 function DocumentCard({
@@ -40,14 +42,15 @@ function DocumentCard({
   onReject,
   onView,
   onPreview,
+  canManage = false,
   className,
   ...rest
-}: DocumentCardProps & { onPreview?: () => void }) {
-  const { t } = useTranslation();
+}: DocumentCardProps & {onPreview?: () => void}) {
+  const {t} = useTranslation();
   const statusBadge = {
-    approved: { icon: CheckIcon, wrap: "bg-green-100 text-green-600" },
-    rejected: { icon: XIcon, wrap: "bg-red-100 text-red-600" },
-    pending: { icon: FileClock, wrap: "bg-amber-100 text-amber-600" },
+    approved: {icon: CheckIcon, wrap: "bg-green-100 text-green-600"},
+    rejected: {icon: XIcon, wrap: "bg-red-100 text-red-600"},
+    pending: {icon: FileClock, wrap: "bg-amber-100 text-amber-600"},
   }[doc.status];
 
   const documentTitle =
@@ -127,24 +130,47 @@ function DocumentCard({
         </div>
       )}
       {doc.status === COMPANY_DOCUMENT_STATUS.PENDING && (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onApprove}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
-          >
-            {t("localCompanies.page.documents.approve")}
-            <CheckIcon className="size-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onReject}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
-          >
-            {t("localCompanies.page.documents.reject")}
-            <XIcon className="size-4" />
-          </button>
-        </div>
+        <>
+          {canManage ? (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={onApprove}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
+              >
+                {t("localCompanies.page.documents.approve")}
+                <CheckIcon className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onReject}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
+              >
+                {t("localCompanies.page.documents.reject")}
+                <XIcon className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={onPreview}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-100 py-2 text-xs font-medium text-blue-700 hover:bg-blue-200"
+              >
+                {t("localCompanies.page.documents.preview")}
+                <EyeIcon className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleView}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-slate-100 py-2 text-xs font-medium text-slate-900 hover:bg-slate-200"
+              >
+                {t("localCompanies.page.documents.open")}
+                <FileTextIcon className="size-4" />
+              </button>
+            </div>
+          )}
+        </>
       )}
       {doc.status === COMPANY_DOCUMENT_STATUS.APPROVED && (
         <div className="grid grid-cols-2 gap-3">
@@ -167,14 +193,21 @@ function DocumentCard({
         </div>
       )}
       {doc.status === COMPANY_DOCUMENT_STATUS.REJECTED && (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onApprove}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-green-100 py-2 text-xs font-medium text-green-700 hover:bg-green-200"
-          >
-            {t("localCompanies.page.documents.approve")}
-          </button>
+        <div
+          className={cn(
+            "grid gap-3",
+            canManage ? "grid-cols-2" : "grid-cols-1"
+          )}
+        >
+          {canManage && (
+            <button
+              type="button"
+              onClick={onApprove}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-green-100 py-2 text-xs font-medium text-green-700 hover:bg-green-200"
+            >
+              {t("localCompanies.page.documents.approve")}
+            </button>
+          )}
           <button
             type="button"
             onClick={onPreview}
@@ -200,11 +233,18 @@ export default function DocumentsList({
   companyId,
   className,
 }: DocumentsListProps) {
-  const { t } = useTranslation();
-  const { data: documents = [], isLoading } = useCompanyDocuments(companyId);
+  const {t} = useTranslation();
+  const {data: documents = [], isLoading} = useCompanyDocuments(companyId);
   const approveMutation = useApproveDocument();
   const rejectMutation = useRejectDocument();
   const uploadMutation = useUploadDocument();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasCompaniesUpdate = permissions.includes("companies:update");
+  const hasCompaniesManage = permissions.includes("companies:manage");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
@@ -277,24 +317,26 @@ export default function DocumentsList({
         <h2 className="text-base font-semibold text-slate-900">
           {title || t("localCompanies.page.documents.title")}
         </h2>
-        <div>
-          {/* Hidden file input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            style={{ display: "none" }}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-          >
-            <UploadIcon className="size-4" />
-            {t("localCompanies.page.documents.upload")}
-          </button>
-        </div>
+        {hasCompaniesUpdate && (
+          <div>
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              style={{display: "none"}}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+            >
+              <UploadIcon className="size-4" />
+              {t("localCompanies.page.documents.upload")}
+            </button>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -314,6 +356,7 @@ export default function DocumentsList({
               onApprove={() => handleApprove(doc.id)}
               onReject={() => handleReject(doc.id)}
               onPreview={() => setPreviewDocument(doc)}
+              canManage={hasCompaniesManage}
             />
           ))}
         </div>

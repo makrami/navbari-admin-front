@@ -1,5 +1,5 @@
-import { Button } from "./Button";
-import { cn } from "../../utils/cn";
+import {Button} from "./Button";
+import {cn} from "../../utils/cn";
 import {
   Truck as TruckIcon,
   X as XIcon,
@@ -7,9 +7,9 @@ import {
   ScanLine as ScanLineIcon,
   Calendar as CalendarIcon,
 } from "lucide-react";
-import { STATUS_TO_COLOR } from "./entity-card-constants";
-import type { EntityStatus } from "./entity-card-constants";
-import { useTranslation } from "react-i18next";
+import {STATUS_TO_COLOR} from "./entity-card-constants";
+import type {EntityStatus} from "./entity-card-constants";
+import {useTranslation} from "react-i18next";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -78,7 +78,7 @@ export function EntityCard({
   onView,
   actionLabels,
 }: Props) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const colors = STATUS_TO_COLOR[entity.status];
 
   const defaultActionLabels = {
@@ -88,7 +88,7 @@ export function EntityCard({
     viewDetailsLabel: t("entityCard.actions.viewDetails"),
   };
 
-  const finalActionLabels = { ...defaultActionLabels, ...actionLabels };
+  const finalActionLabels = {...defaultActionLabels, ...actionLabels};
 
   return (
     <div
@@ -267,7 +267,7 @@ export function EntityCard({
         </div>
 
         {/* Actions */}
-        {entity.status === "pending" ? (
+        {entity.status === "pending" && onApprove && onReject ? (
           <div className="mt-auto pt-5 grid grid-cols-2 gap-2">
             <Button
               variant="ghost"

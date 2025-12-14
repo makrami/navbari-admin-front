@@ -26,6 +26,7 @@ import type {
 } from "../../../services/driver/document.service";
 import {getFileUrl} from "../utils";
 import {UploadDocumentModal} from "./UploadDocumentModal";
+import {useCurrentUser} from "../../../services/user/hooks";
 
 export type DocumentStatus = "pending" | "approved" | "rejected";
 
@@ -48,6 +49,7 @@ type DocumentCardProps = HTMLAttributes<HTMLDivElement> & {
   onReject?: () => void;
   onView?: () => void;
   onPreview?: () => void;
+  canManage?: boolean;
 };
 
 function DocumentCard({
@@ -56,6 +58,7 @@ function DocumentCard({
   onReject,
   onView,
   onPreview,
+  canManage = false,
   className,
   ...rest
 }: DocumentCardProps & {onPreview?: () => void}) {
@@ -140,24 +143,47 @@ function DocumentCard({
         </div>
       )}
       {doc.status === DRIVER_DOCUMENT_STATUS.PENDING && (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onApprove}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
-          >
-            Approve
-            <CheckIcon className="size-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onReject}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
-          >
-            Reject
-            <XIcon className="size-4" />
-          </button>
-        </div>
+        <>
+          {canManage ? (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={onApprove}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
+              >
+                Approve
+                <CheckIcon className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onReject}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
+              >
+                Reject
+                <XIcon className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={onPreview}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-100 py-2 text-xs font-medium text-blue-700 hover:bg-blue-200"
+              >
+                Preview
+                <EyeIcon className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleView}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-slate-100 py-2 text-xs font-medium text-slate-900 hover:bg-slate-200"
+              >
+                Open
+                <FileTextIcon className="size-4" />
+              </button>
+            </div>
+          )}
+        </>
       )}
       {doc.status === DRIVER_DOCUMENT_STATUS.APPROVED && (
         <div className="grid grid-cols-2 gap-3">
@@ -180,14 +206,21 @@ function DocumentCard({
         </div>
       )}
       {doc.status === DRIVER_DOCUMENT_STATUS.REJECTED && (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onApprove}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-green-100 py-2 text-xs font-medium text-green-700 hover:bg-green-200"
-          >
-            Approve
-          </button>
+        <div
+          className={cn(
+            "grid gap-3",
+            canManage ? "grid-cols-2" : "grid-cols-1"
+          )}
+        >
+          {canManage && (
+            <button
+              type="button"
+              onClick={onApprove}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-green-100 py-2 text-xs font-medium text-green-700 hover:bg-green-200"
+            >
+              Approve
+            </button>
+          )}
           <button
             type="button"
             onClick={onPreview}
@@ -217,6 +250,13 @@ export default function DocumentsList({
   const approveMutation = useApproveDocument();
   const rejectMutation = useRejectDocument();
   const uploadMutation = useUploadDocument();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasDriversUpdate = permissions.includes("drivers:update");
+  const hasDriversManage = permissions.includes("drivers:manage");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
@@ -295,23 +335,25 @@ export default function DocumentsList({
     <section className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        <>
-          <input
-            ref={fileInputRef}
-            type="file"
-            style={{display: "none"}}
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            onChange={handleFileSelect}
-          />
-          <button
-            type="button"
-            onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-          >
-            <UploadIcon className="size-4" />
-            Upload
-          </button>
-        </>
+        {hasDriversUpdate && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              style={{display: "none"}}
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={handleFileSelect}
+            />
+            <button
+              type="button"
+              onClick={() => setShowUploadModal(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+            >
+              <UploadIcon className="size-4" />
+              Upload
+            </button>
+          </>
+        )}
       </div>
 
       {isLoading ? (
@@ -331,6 +373,7 @@ export default function DocumentsList({
               onApprove={() => handleApprove(doc.id)}
               onReject={() => handleReject(doc.id)}
               onPreview={() => setPreviewDocument(doc)}
+              canManage={hasDriversManage}
             />
           ))}
         </div>
