@@ -13,6 +13,7 @@ import {getSegmentListId} from "./utils/getSegmentListId";
 import SegmentDetails from "../shipment/segments/components/SegmentDetails";
 import type {Shipment} from "../../shared/types/shipment";
 import {SEGMENT_STATUS} from "../../services/shipment/shipment.api.service";
+import {useCurrentUser} from "../../services/user/hooks";
 
 type SegmentsPageProps = {
   selectedSegmentId?: string | null;
@@ -28,7 +29,18 @@ export function SegmentsPage({
   extraSegments,
 }: SegmentsPageProps = {}) {
   const navigate = useNavigate();
-  const {data: serviceShipments, loading} = useShipments();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasShipmentsRead = permissions.includes("shipments:read");
+
+  // Conditionally fetch shipments only if user has shipments:read permission
+  const {data: serviceShipments, loading} = useShipments(
+    {},
+    {enabled: hasShipmentsRead}
+  );
   const {data: activeSegments} = useActiveSegments();
   const [filter, setFilter] = useState<FilterType>("need-action");
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,14 +190,16 @@ export function SegmentsPage({
       <div className="py-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label={t("segments.page.closeLabel")}
-            >
-              <X className="h-5 w-5 text-slate-600" />
-            </button>
+            {hasShipmentsRead && (
+              <button
+                type="button"
+                onClick={handleClose}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                aria-label={t("segments.page.closeLabel")}
+              >
+                <X className="h-5 w-5 text-slate-600" />
+              </button>
+            )}
             <h1 className="text-2xl font-bold text-slate-900">
               {t("segments.page.title")}
             </h1>
@@ -278,7 +292,7 @@ export function SegmentsPage({
                         locked={false}
                         shipment={shipment as Shipment}
                         segmentId={segment.id}
-                        linkShipment={true}
+                        linkShipment={hasShipmentsRead}
                       />
                     </div>
                   );

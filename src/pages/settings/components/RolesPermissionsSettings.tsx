@@ -14,12 +14,18 @@ type RolesPermissionsSettingsProps = {
   users: User[];
   onRoleUpdate: (role: Partial<Role>) => void;
   onPermissionsChange: (permissions: Permission[]) => void;
-  onUserAdd: (user: {name: string; email: string; password: string}) => void;
+  onUserAdd: (user: {
+    name: string;
+    email: string;
+    password: string;
+    country?: string;
+  }) => void;
   onUserUpdate: (user: {
     id: string;
     name: string;
     email: string;
     password?: string;
+    country?: string;
   }) => void;
   onUserRemove: (userId: string) => void;
   onUserStatusChange: (userId: string, isActive: boolean) => void;
@@ -78,6 +84,7 @@ export function RolesPermissionsSettings({
     name: string;
     email: string;
     password?: string;
+    country?: string;
   }) => {
     if (data.id) {
       onUserUpdate({
@@ -85,12 +92,14 @@ export function RolesPermissionsSettings({
         name: data.name,
         email: data.email,
         password: data.password,
+        country: data.country,
       });
     } else {
       onUserAdd({
         name: data.name,
         email: data.email,
         password: data.password || "",
+        country: data.country,
       });
     }
     setIsUserModalOpen(false);
@@ -136,7 +145,12 @@ export function RolesPermissionsSettings({
         roleId={selectedRoleId}
         initialUser={
           editUser
-            ? {id: editUser.id, name: editUser.name, email: editUser.email}
+            ? {
+                id: editUser.id,
+                name: editUser.name,
+                email: editUser.email,
+                country: editUser.country,
+              }
             : null
         }
         onClose={() => setIsUserModalOpen(false)}

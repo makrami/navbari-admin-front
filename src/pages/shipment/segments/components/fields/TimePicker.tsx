@@ -1,12 +1,13 @@
-import { useRef } from "react";
-import { Clock, ChevronDown } from "lucide-react";
-import { cn } from "../../../../../shared/utils/cn";
+import {useRef} from "react";
+import {Clock, ChevronDown} from "lucide-react";
+import {cn} from "../../../../../shared/utils/cn";
 
 type TimePickerProps = {
   label: string;
   value: string;
   onChange: (v: string) => void;
   error?: boolean;
+  disabled?: boolean;
 };
 
 export default function TimePicker({
@@ -14,10 +15,12 @@ export default function TimePicker({
   value,
   onChange,
   error = false,
+  disabled = false,
 }: TimePickerProps) {
   const timeInputRef = useRef<HTMLInputElement>(null);
 
   const handleFieldClick = () => {
+    if (disabled) return;
     if (timeInputRef.current) {
       if (typeof timeInputRef.current.showPicker === "function") {
         timeInputRef.current.showPicker();
@@ -50,12 +53,15 @@ export default function TimePicker({
           onChange={(e) => onChange(e.target.value)}
           className="sr-only"
           aria-label={label}
+          disabled={disabled}
         />
         <button
           type="button"
+          disabled={disabled}
           className={cn(
             "relative text-left w-full rounded-lg bg-[#1B54FE]/10 pl-9 pr-9 py-2 text-sm outline-none cursor-pointer",
-            error && "ring-1 ring-red-400"
+            error && "ring-1 ring-red-400",
+            disabled && "opacity-50 cursor-not-allowed bg-slate-50"
           )}
           onClick={handleFieldClick}
         >

@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { http } from "../../lib/http";
+import {z} from "zod";
+import {http} from "../../lib/http";
 
 // Create User DTO
 const createUserDtoSchema = z.object({
@@ -10,6 +10,7 @@ const createUserDtoSchema = z.object({
   fullName: z.string().optional().nullable(),
   roleId: z.string().uuid(),
   isActive: z.boolean().default(true),
+  country: z.string().optional().nullable(),
 });
 
 export type CreateUserDto = z.infer<typeof createUserDtoSchema>;
@@ -19,6 +20,7 @@ const updateUserDtoSchema = z.object({
   fullName: z.string().optional().nullable(),
   password: z.string().optional(),
   isActive: z.boolean().optional(),
+  country: z.string().optional().nullable(),
 });
 
 export type UpdateUserDto = z.infer<typeof updateUserDtoSchema>;
@@ -43,7 +45,10 @@ export type UserResponse = z.infer<typeof userResponseSchema>;
 export async function createUser(data: CreateUserDto): Promise<UserResponse> {
   try {
     const validatedData = createUserDtoSchema.parse(data);
-    const response = await http.post<UserResponse>("/admin/users", validatedData);
+    const response = await http.post<UserResponse>(
+      "/admin/users",
+      validatedData
+    );
     return userResponseSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -66,7 +71,10 @@ export async function updateUser(
 ): Promise<UserResponse> {
   try {
     const validatedData = updateUserDtoSchema.parse(data);
-    const response = await http.put<UserResponse>(`/admin/users/${id}`, validatedData);
+    const response = await http.put<UserResponse>(
+      `/admin/users/${id}`,
+      validatedData
+    );
     return userResponseSchema.parse(response.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -93,4 +101,3 @@ export async function deleteUser(id: string): Promise<void> {
     throw new Error("Failed to delete user");
   }
 }
-

@@ -1,6 +1,6 @@
-import { useRef, useState, useEffect } from "react";
-import { Search, ChevronUp } from "lucide-react";
-import { cn } from "../../../../../shared/utils/cn";
+import {useRef, useState, useEffect} from "react";
+import {Search, ChevronUp} from "lucide-react";
+import {cn} from "../../../../../shared/utils/cn";
 
 type FieldBoxSelectProps = {
   label: string;
@@ -8,6 +8,7 @@ type FieldBoxSelectProps = {
   onChange?: (v: string) => void;
   options?: string[];
   placeholder?: string;
+  disabled?: boolean;
 };
 
 export default function FieldBoxSelect({
@@ -16,8 +17,9 @@ export default function FieldBoxSelect({
   onChange,
   options,
   placeholder = "Search cities...",
+  disabled = false,
 }: FieldBoxSelectProps) {
-  const isEditable = Boolean(options && onChange);
+  const isEditable = Boolean(options && onChange && !disabled);
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,17 +96,19 @@ export default function FieldBoxSelect({
               value={displayValue}
               onChange={handleInputChange}
               onFocus={() => {
-                if (!isOpen) {
+                if (!isOpen && !disabled) {
                   setSearchQuery("");
                   setIsOpen(true);
                 }
               }}
               placeholder={placeholder}
+              disabled={disabled}
               className={cn(
                 "w-full rounded-lg pl-9 pr-9 py-2.5 text-sm outline-none transition-all duration-200",
                 "border border-slate-200 bg-white text-slate-900",
                 "hover:border-[#1B54FE]/40 focus:border-[#1B54FE] focus:ring-2 focus:ring-[#1B54FE]/10",
-                "placeholder:text-slate-400"
+                "placeholder:text-slate-400",
+                disabled && "opacity-50 cursor-not-allowed bg-slate-50"
               )}
             />
             <ChevronUp

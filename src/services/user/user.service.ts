@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { http } from "../../lib/http";
+import {z} from "zod";
+import {http} from "../../lib/http";
 
 // User response schema according to API documentation
 const userResponseSchema = z
@@ -10,8 +10,8 @@ const userResponseSchema = z
     emailVerified: z.boolean(),
     phoneNumberVerified: z.boolean(),
     fullName: z.string().nullable(),
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
+    firstName: z.string().optional().nullable(),
+    lastName: z.string().optional().nullable(),
     referralCode: z.string().nullable(),
     appScope: z.string(),
     roleId: z.string().uuid(),
@@ -64,7 +64,7 @@ export async function getCurrentUser(): Promise<UserResponse> {
   } catch (error: unknown) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
-      const firstError = error.issues[0] as { message: string } | undefined;
+      const firstError = error.issues[0] as {message: string} | undefined;
       throw new Error(firstError?.message || "Invalid user data");
     }
 
@@ -90,7 +90,7 @@ export async function resetPassword(data: ResetPasswordRequest): Promise<void> {
   } catch (error: unknown) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
-      const firstError = error.issues[0] as { message: string } | undefined;
+      const firstError = error.issues[0] as {message: string} | undefined;
       throw new Error(firstError?.message || "Invalid password data");
     }
 

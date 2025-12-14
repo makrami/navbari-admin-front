@@ -40,6 +40,7 @@ import {
   CHAT_ALERT_TYPE,
 } from "../../../../services/chat/chat.types";
 import {useTranslation} from "react-i18next";
+import {useCurrentUser} from "../../../../services/user/hooks";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -142,6 +143,12 @@ export function SegmentDetails({
   const [baseFee, setBaseFee] = useState<string>(String(data.baseFee));
 
   const updateSegmentMutation = useUpdateSegment();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasSegmentsManage = permissions.includes("segments:manage");
 
   // Sync form fields when data changes externally (e.g., after save)
   useEffect(() => {
@@ -316,14 +323,17 @@ export function SegmentDetails({
         shipmentId={data.shipmentId}
         onToggle={handleToggle}
         showCargoButton={
+          hasSegmentsManage &&
           !!data.originCountry &&
           !!data.destinationCountry &&
           data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT
         }
         onCargoClick={(e) => {
           e.stopPropagation();
-          setPendingUpdate({});
-          setShowCargoModal(true);
+          if (hasSegmentsManage) {
+            setPendingUpdate({});
+            setShowCargoModal(true);
+          }
         }}
         isAssigned={isAssigned}
       />
@@ -394,30 +404,35 @@ export function SegmentDetails({
                   value={fromValue}
                   onChange={setFromValue}
                   options={CITY_OPTIONS}
+                  disabled={!hasSegmentsManage}
                 />
                 <FieldBoxSelect
                   label="TO"
                   value={toValue}
                   onChange={setToValue}
                   options={CITY_OPTIONS}
+                  disabled={!hasSegmentsManage}
                 />
                 <DatePicker
                   label="START DATE"
                   value={startDateValue}
                   onChange={setStartDateValue}
                   error={showErrors && !startDateValue.trim()}
+                  disabled={!hasSegmentsManage}
                 />
                 <DatePicker
                   label="EST. FINISH DATE"
                   value={estFinishDateValue}
                   onChange={setEstFinishDateValue}
                   error={showErrors && !estFinishDateValue.trim()}
+                  disabled={!hasSegmentsManage}
                 />
                 <TimePicker
                   label="START TIME"
                   value={startTimeValue}
                   onChange={setStartTimeValue}
                   error={showErrors && !startTimeValue.trim()}
+                  disabled={!hasSegmentsManage}
                 />
 
                 <TimePicker
@@ -425,14 +440,16 @@ export function SegmentDetails({
                   value={estFinishTimeValue}
                   onChange={setEstFinishTimeValue}
                   error={showErrors && !estFinishTimeValue.trim()}
+                  disabled={!hasSegmentsManage}
                 />
                 <BaseFeeField
                   value={baseFee}
                   onChange={setBaseFee}
                   error={showErrors && !baseFee.trim()}
+                  disabled={!hasSegmentsManage}
                 />
                 <SegmentActions
-                  readOnly={locked || !editable}
+                  readOnly={locked || !editable || !hasSegmentsManage}
                   onReset={() => {
                     setToValue("");
                     setStartDateValue("");

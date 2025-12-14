@@ -5,12 +5,14 @@ type BaseFeeFieldProps = {
   value: string;
   onChange: (v: string) => void;
   error?: boolean;
+  disabled?: boolean;
 };
 
 export default function BaseFeeField({
   value,
   onChange,
   error = false,
+  disabled = false,
 }: BaseFeeFieldProps) {
   return (
     <div className="grid gap-1 md:col-span-1 border-1 border-slate-200 rounded-xl py-5 px-2">
@@ -20,9 +22,11 @@ export default function BaseFeeField({
           type="number"
           min="0"
           step="0.1"
+          disabled={disabled}
           className={cn(
             "w-full rounded-lg  bg-[#1B54FE]/10 pr-8 px-3 py-2 text-sm outline-none placeholder:text-[#1B54FE]",
-            error && "ring-1 ring-red-400"
+            error && "ring-1 ring-red-400",
+            disabled && "opacity-50 cursor-not-allowed bg-slate-50"
           )}
           placeholder="0.0"
           value={value}

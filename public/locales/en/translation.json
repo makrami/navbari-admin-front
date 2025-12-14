@@ -764,6 +764,8 @@
         "passwordNumber": "Password must contain at least one number",
         "passwordSpecialChar": "Password must contain at least one special character (@$!%*?&)",
         "passwordRequirements": "Must contain: lowercase, uppercase, number, and special character (@$!%*?&)",
+        "country": "Country",
+        "countryPlaceholder": "Search countries...",
         "save": "Save",
         "add": "Add",
         "saving": "Saving...",

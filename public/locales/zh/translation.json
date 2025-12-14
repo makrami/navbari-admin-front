@@ -672,6 +672,8 @@
         "passwordNumber": "密码必须包含至少一个数字",
         "passwordSpecialChar": "密码必须包含至少一个特殊字符 (@$!%*?&)",
         "passwordRequirements": "必须包含: 小写字母、大写字母、数字和特殊字符 (@$!%*?&)",
+        "country": "国家",
+        "countryPlaceholder": "搜索国家...",
         "save": "保存",
         "add": "添加",
         "saving": "保存中...",

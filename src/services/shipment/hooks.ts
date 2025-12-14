@@ -44,10 +44,14 @@ export const shipmentKeys = {
 /**
  * Query hook for listing shipments
  */
-export function useShipments(filters: ShipmentFilters = {}) {
+export function useShipments(
+  filters: ShipmentFilters = {},
+  options?: {enabled?: boolean}
+) {
   const query = useQuery({
     queryKey: shipmentKeys.list(filters),
     queryFn: () => listShipments(filters),
+    enabled: options?.enabled !== false, // Default to true if not specified
   });
 
   // Maintain backward compatibility with existing code

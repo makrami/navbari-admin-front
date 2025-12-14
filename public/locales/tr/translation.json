@@ -764,6 +764,8 @@
         "passwordNumber": "Şifre en az bir rakam içermelidir",
         "passwordSpecialChar": "Şifre en az bir özel karakter içermelidir (@$!%*?&)",
         "passwordRequirements": "İçermelidir: küçük harf, büyük harf, rakam ve özel karakter (@$!%*?&)",
+        "country": "Ülke",
+        "countryPlaceholder": "Ülkeleri ara...",
         "save": "Kaydet",
         "add": "Ekle",
         "saving": "Kaydediliyor...",

@@ -352,6 +352,7 @@ export function SettingsPage() {
     name: string;
     email: string;
     password: string;
+    country?: string;
   }) => {
     if (!selectedRoleId) return;
 
@@ -363,6 +364,7 @@ export function SettingsPage() {
         roleId: selectedRoleId,
         appScope: "head_office",
         isActive: true,
+        country: user.country,
       });
       // Roles will be refetched automatically due to query invalidation
     } catch (error) {
@@ -376,6 +378,7 @@ export function SettingsPage() {
     name: string;
     email: string;
     password?: string;
+    country?: string;
   }) => {
     if (!selectedRoleId) return;
 
@@ -384,6 +387,7 @@ export function SettingsPage() {
         fullName?: string;
         password?: string;
         isActive?: boolean;
+        country?: string;
       } = {
         fullName: user.name,
       };
@@ -391,6 +395,11 @@ export function SettingsPage() {
       // Only include password if provided
       if (user.password) {
         updateData.password = user.password;
+      }
+
+      // Only include country if provided
+      if (user.country !== undefined) {
+        updateData.country = user.country || null;
       }
 
       await updateUserMutation.mutateAsync({

@@ -24,6 +24,7 @@ import {
   useDeleteSegment,
   useCancelSegment,
 } from "../../../../services/shipment/hooks";
+import {useCurrentUser} from "../../../../services/user/hooks";
 
 const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
   {id: "1", label: "GPS Lost", alertType: "alert"},
@@ -87,6 +88,12 @@ export default function SegmentHeader({
   const menuRef = useRef<HTMLDivElement>(null);
   const deleteSegmentMutation = useDeleteSegment();
   const cancelSegmentMutation = useCancelSegment();
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasSegmentsManage = permissions.includes("segments:manage");
 
   // Only show driver info when backend has approved/assigned the driver
   const distance = formatDistance(distanceKm);
@@ -323,7 +330,8 @@ export default function SegmentHeader({
             <span className="px-3 py-1 text-sm font-semibold text-red-600">
               {t("shipment.status.cancelled")}
             </span>
-          ) : (
+          ) : hasSegmentsManage &&
+            segmentStatus !== SEGMENT_STATUS.DELIVERED ? (
             <button
               type="button"
               onClick={(e) => {
@@ -335,7 +343,7 @@ export default function SegmentHeader({
             >
               <MoreVertical className="size-5 text-slate-400" />
             </button>
-          )}
+          ) : null}
           {isMenuOpen && (showDelete || showCancel) && (
             <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 min-w-[160px]">
               {showDelete && (

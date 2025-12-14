@@ -1,6 +1,7 @@
-import { X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import {X} from "lucide-react";
+import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {CountrySelect} from "./CountrySelect";
 
 /**
  * Validate password according to requirements:
@@ -12,7 +13,7 @@ import { useTranslation } from "react-i18next";
 function validatePassword(
   password: string,
   t: (key: string) => string
-): { valid: boolean; error?: string } {
+): {valid: boolean; error?: string} {
   if (!password) {
     return {
       valid: false,
@@ -55,7 +56,7 @@ function validatePassword(
     };
   }
 
-  return { valid: true };
+  return {valid: true};
 }
 
 export type AddEditUserModalProps = {
@@ -63,13 +64,19 @@ export type AddEditUserModalProps = {
   mode: "add" | "edit";
   roleName: string;
   roleId: string | null;
-  initialUser?: { id?: string; name: string; email: string } | null;
+  initialUser?: {
+    id?: string;
+    name: string;
+    email: string;
+    country?: string;
+  } | null;
   onClose: () => void;
   onSubmit: (data: {
     id?: string;
     name: string;
     email: string;
     password?: string;
+    country?: string;
   }) => void;
   isLoading?: boolean;
 };
@@ -83,10 +90,11 @@ export function AddEditUserModal({
   onSubmit,
   isLoading = false,
 }: AddEditUserModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [country, setCountry] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [touched, setTouched] = useState({
     name: false,
@@ -99,9 +107,10 @@ export function AddEditUserModal({
     if (open) {
       setName(initialUser?.name ?? "");
       setEmail(initialUser?.email ?? "");
+      setCountry(initialUser?.country ?? "");
       setPassword(""); // Reset password on open
       setPasswordError(null);
-      setTouched({ name: false, email: false, password: false });
+      setTouched({name: false, email: false, password: false});
     }
   }, [open, initialUser]);
 
@@ -122,7 +131,7 @@ export function AddEditUserModal({
   };
 
   const handlePasswordBlur = () => {
-    setTouched((prev) => ({ ...prev, password: true }));
+    setTouched((prev) => ({...prev, password: true}));
     if (!isEdit || password.trim()) {
       // For edit mode, only validate if password is provided
       const validation = validatePassword(password, t);
@@ -134,7 +143,7 @@ export function AddEditUserModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ name: true, email: true, password: true });
+    setTouched({name: true, email: true, password: true});
 
     // Validate name and email
     if (!name.trim() || !email.trim()) {
@@ -174,6 +183,7 @@ export function AddEditUserModal({
       name: name.trim(),
       email: email.trim(),
       password: password.trim() || undefined, // Only include if provided
+      country: country.trim() || undefined, // Only include if provided
     });
   };
 
@@ -200,7 +210,11 @@ export function AddEditUserModal({
               <X className="size-4 text-slate-400" />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="px-5 py-4">
+          <form
+            onSubmit={handleSubmit}
+            className="px-5 py-4"
+            autoComplete="off"
+          >
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -215,6 +229,7 @@ export function AddEditUserModal({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    autoComplete="off"
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B54FE] focus:border-transparent bg-white text-slate-900 text-sm"
                   />
                 </div>
@@ -231,6 +246,7 @@ export function AddEditUserModal({
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={isEdit}
+                    autoComplete="off"
                     className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B54FE] focus:border-transparent text-slate-900 text-sm ${
                       isEdit ? "bg-slate-100 cursor-not-allowed" : "bg-white"
                     }`}
@@ -254,6 +270,7 @@ export function AddEditUserModal({
                   onChange={(e) => handlePasswordChange(e.target.value)}
                   onBlur={handlePasswordBlur}
                   required={!isEdit}
+                  autoComplete="new-password"
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B54FE] focus:border-transparent bg-white text-slate-900 text-sm ${
                     passwordError && touched.password
                       ? "border-red-300 focus:ring-red-500"
@@ -270,6 +287,20 @@ export function AddEditUserModal({
                     )}
                   </p>
                 )}
+              </div>
+              <div>
+                <CountrySelect
+                  label={
+                    t("settings.sections.rolesPermissions.country") || "Country"
+                  }
+                  value={country}
+                  onChange={setCountry}
+                  placeholder={
+                    t(
+                      "settings.sections.rolesPermissions.countryPlaceholder"
+                    ) || "Search countries..."
+                  }
+                />
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 mt-6">

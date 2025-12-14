@@ -3,6 +3,7 @@ import type {SegmentAnnouncementReadDto} from "../../../../services/shipment/shi
 import {getFileUrl} from "../../../LocalCompanies/utils";
 import {useAssignSegment} from "../../../../services/shipment/hooks";
 import {useState} from "react";
+import {useCurrentUser} from "../../../../services/user/hooks";
 
 type CargoAssignmentsListProps = {
   announcements: SegmentAnnouncementReadDto[];
@@ -13,6 +14,12 @@ export default function CargoAssignmentsList({
 }: CargoAssignmentsListProps) {
   const assignSegmentMutation = useAssignSegment();
   const [assigningId, setAssigningId] = useState<string | null>(null);
+  const {data: user} = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasSegmentsManage = permissions.includes("segments:manage");
 
   const handleAssign = async (announcement: SegmentAnnouncementReadDto) => {
     if (!announcement.driverId) {
@@ -104,7 +111,9 @@ export default function CargoAssignmentsList({
                   className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded hover:bg-green-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleAssign(announcement)}
                   disabled={
-                    assigningId === announcement.id || !announcement.driverId
+                    !hasSegmentsManage ||
+                    assigningId === announcement.id ||
+                    !announcement.driverId
                   }
                   type="button"
                 >
