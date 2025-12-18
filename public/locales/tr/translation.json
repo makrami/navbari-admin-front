@@ -609,6 +609,7 @@
       "weightUnit": "KG",
       "segmentCount": "Segment Sayısı",
       "segmentCountPlaceholder": "0",
+      "segmentCountMaxError": "Maksimum Başlangıç Segment Sayısı 20'dir",
       "cancel": "İptal",
       "create": "Oluştur",
       "loadingCities": "Şehirler yükleniyor...",

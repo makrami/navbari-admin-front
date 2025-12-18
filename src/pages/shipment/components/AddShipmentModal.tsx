@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { XIcon, Search, ChevronDown, Check } from "lucide-react";
-import { useCities } from "../../../services/geography/hooks";
-import type { City } from "../../../services/geography/geography.service";
-import type { CreateShipmentDto } from "../../../services/shipment/shipment.api.service";
-import { useTranslation } from "react-i18next";
+import {useState, useEffect, useRef, useMemo} from "react";
+import {XIcon, Search, ChevronDown, Check} from "lucide-react";
+import {useCities} from "../../../services/geography/hooks";
+import type {City} from "../../../services/geography/geography.service";
+import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
+import {useTranslation} from "react-i18next";
 
 type CityDropdownProps = {
   value: string;
@@ -22,7 +22,7 @@ function CityDropdown({
   cities,
   isLoading = false,
 }: CityDropdownProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -185,7 +185,7 @@ function CargoCategoryDropdown({
   placeholder,
   label,
 }: CargoCategoryDropdownProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -198,9 +198,9 @@ function CargoCategoryDropdown({
         value: "electronics",
         label: t("shipment.addModal.categories.electronics"),
       },
-      { value: "textiles", label: t("shipment.addModal.categories.textiles") },
-      { value: "food", label: t("shipment.addModal.categories.food") },
-      { value: "medical", label: t("shipment.addModal.categories.medical") },
+      {value: "textiles", label: t("shipment.addModal.categories.textiles")},
+      {value: "food", label: t("shipment.addModal.categories.food")},
+      {value: "medical", label: t("shipment.addModal.categories.medical")},
       {
         value: "machinery",
         label: t("shipment.addModal.categories.machinery"),
@@ -354,7 +354,7 @@ export default function AddShipmentModal({
   onClose,
   onCreate,
 }: AddShipmentModalProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   // Fields per reference design
   const [name, setName] = useState("");
   const [from, setFrom] = useState("");
@@ -362,15 +362,27 @@ export default function AddShipmentModal({
   const [cargoCategory, setCargoCategory] = useState("");
   const [cargoWeight, setCargoWeight] = useState<string>("");
   const [segmentsAmount, setSegmentsAmount] = useState<string>("");
+  const [segmentCountError, setSegmentCountError] = useState<string>("");
 
   // Fetch cities from API
-  const { data: cities = [], isLoading: isLoadingCities } = useCities();
+  const {data: cities = [], isLoading: isLoadingCities} = useCities();
 
   if (!open) return null;
 
+  const handleSegmentCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSegmentsAmount(value);
+
+    if (value && parseInt(value, 10) > 20) {
+      setSegmentCountError(t("shipment.addModal.segmentCountMaxError"));
+    } else {
+      setSegmentCountError("");
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    if (!name || segmentCountError) return;
     onCreate({
       title: name,
       originCountry: from.split(",")[1].trim(),
@@ -388,6 +400,7 @@ export default function AddShipmentModal({
     setCargoCategory("");
     setCargoWeight("");
     setSegmentsAmount("");
+    setSegmentCountError("");
     onClose();
   };
 
@@ -476,11 +489,19 @@ export default function AddShipmentModal({
             <input
               type="number"
               min="0"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+              max="20"
+              className={`w-full rounded-xl border px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 ${
+                segmentCountError
+                  ? "border-red-300 focus:ring-red-200"
+                  : "border-slate-200 focus:ring-blue-200"
+              }`}
               placeholder={t("shipment.addModal.segmentCountPlaceholder")}
               value={segmentsAmount}
-              onChange={(e) => setSegmentsAmount(e.target.value)}
+              onChange={handleSegmentCountChange}
             />
+            {segmentCountError && (
+              <p className="text-xs text-red-600">{segmentCountError}</p>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2">

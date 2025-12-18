@@ -349,6 +349,7 @@
       "weightUnit": "كجم",
       "segmentCount": "عدد الأقسام",
       "segmentCountPlaceholder": "0",
+      "segmentCountMaxError": "الحد الأقصى لعدد الأقسام الأولية هو 20",
       "cancel": "إلغاء",
       "create": "إنشاء",
       "loadingCities": "جارٍ تحميل المدن...",

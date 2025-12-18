@@ -349,6 +349,7 @@
       "weightUnit": "公斤",
       "segmentCount": "路段数量",
       "segmentCountPlaceholder": "0",
+      "segmentCountMaxError": "最大初始段数为 20",
       "cancel": "取消",
       "create": "创建",
       "loadingCities": "加载城市中...",

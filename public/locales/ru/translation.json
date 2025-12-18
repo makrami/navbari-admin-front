@@ -349,6 +349,7 @@
       "weightUnit": "КГ",
       "segmentCount": "Количество сегментов",
       "segmentCountPlaceholder": "0",
+      "segmentCountMaxError": "Максимальное начальное количество сегментов - 20",
       "cancel": "Отмена",
       "create": "Создать",
       "loadingCities": "Загрузка городов...",

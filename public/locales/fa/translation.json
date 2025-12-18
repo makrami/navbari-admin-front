@@ -609,6 +609,7 @@
       "weightUnit": "کیلوگرم",
       "segmentCount": "تعداد بخش",
       "segmentCountPlaceholder": "0",
+      "segmentCountMaxError": "حداکثر تعداد بخش اولیه 20 است",
       "cancel": "لغو",
       "create": "ایجاد",
       "loadingCities": "در حال بارگذاری شهرها...",

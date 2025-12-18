@@ -609,6 +609,7 @@
       "weightUnit": "KG",
       "segmentCount": "Segment Count",
       "segmentCountPlaceholder": "0",
+      "segmentCountMaxError": "Max Initial Segment Count is 20",
       "cancel": "Cancel",
       "create": "Create",
       "loadingCities": "Loading cities...",
