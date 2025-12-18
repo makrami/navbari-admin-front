@@ -49,7 +49,6 @@ type NavigatingInfoProps = PropsWithChildren<{
 // Figma snapshot image URLs (used as static assets to match design)
 
 import avatarImg from "../../../../assets/images/avatar.png";
-import {getFileUrl} from "../../../LocalCompanies/utils";
 import CargoMap from "../../../../components/CargoMap";
 import {getCountryCode} from "../../../../shared/utils/countryCode";
 import ReactCountryFlag from "react-country-flag";

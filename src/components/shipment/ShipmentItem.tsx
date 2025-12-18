@@ -4,7 +4,6 @@ import {cn} from "../../shared/utils/cn";
 import type {Shipment} from "../../shared/types/shipment";
 import type {Segment} from "../../shared/types/segmentData";
 import {SegmentStatus} from "../../shared/types/segmentData";
-import {getFileUrl} from "../../pages/LocalCompanies/utils";
 import {getCountryCode} from "../../shared/utils/countryCode";
 import {useTranslation} from "react-i18next";
 import {DriverInfo} from "../../shared/components/DriverInfo";

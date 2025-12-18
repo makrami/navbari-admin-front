@@ -14,7 +14,6 @@ type StarRatingProps = {
 };
 
 export function StarRating({
-  segmentId,
   currentRating,
   onSubmit,
   driverAvatarUrl,
