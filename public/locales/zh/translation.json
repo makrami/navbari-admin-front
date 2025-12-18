@@ -133,6 +133,11 @@
       "cancelling": "取消中...",
       "confirmCancel": "确认取消"
     },
+    "rating": {
+      "yourRate": "您的评分",
+      "submit": "提交",
+      "submitted": "已提交"
+    },
     "infoBanner": {
       "from": "从",
       "to": "到",
@@ -277,7 +282,7 @@
       "notifications": "通知",
       "filter": "过滤器",
       "close": "关闭",
-      "unknown": "未知",
+      "notAssigned": "未分配",
       "openChat": "打开聊天",
       "vehicle": "车辆",
       "localCompany": "本地公司",

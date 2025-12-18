@@ -133,6 +133,11 @@
       "cancelling": "در حال لغو...",
       "confirmCancel": "تأیید لغو"
     },
+    "rating": {
+      "yourRate": "امتیاز شما",
+      "submit": "ارسال",
+      "submitted": "ارسال شد"
+    },
     "infoBanner": {
       "from": "از",
       "to": "به",
@@ -537,7 +542,7 @@
       "notifications": "اعلان‌ها",
       "filter": "فیلتر",
       "close": "بستن",
-      "unknown": "نامشخص",
+      "notAssigned": "تعیین نشده",
       "openChat": "باز کردن چت",
       "vehicle": "وسیله نقلیه",
       "localCompany": "شرکت محلی",

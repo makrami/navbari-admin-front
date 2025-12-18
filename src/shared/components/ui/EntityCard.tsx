@@ -10,6 +10,7 @@ import {
 import {STATUS_TO_COLOR} from "./entity-card-constants";
 import type {EntityStatus} from "./entity-card-constants";
 import {useTranslation} from "react-i18next";
+import {DriverInfo} from "../DriverInfo";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -46,6 +47,7 @@ export type EntityCardData = {
   numShipments?: number;
   numActiveVehicles: number;
   lastActivity: string;
+  rating?: number;
 };
 
 type Props = {
@@ -118,23 +120,26 @@ export function EntityCard({
               <img
                 src={entity.avatarUrl}
                 alt={t("entityCard.avatar")}
-                className={cn(
-                  "size-14",
-                  entity.avatarUrl ? "rounded-full object-cover" : "rounded"
-                )}
+                className={cn("size-8 rounded-full object-cover flex-shrink-0")}
               />
             ) : (
-              <div className="h-8 w-8 rounded bg-slate-200 grid place-items-center text-xs font-semibold"></div>
+              <div className="h-8 w-8 rounded-full bg-slate-200 grid place-items-center text-xs font-semibold flex-shrink-0"></div>
             )}
-            <div className="flex flex-col gap-1">
-              <p
-                className={cn(
+            <div className="flex flex-col gap-1 min-w-0">
+              <DriverInfo
+                driverName={entity.name}
+                driverAvatarUrl={null}
+                driverRating={entity.rating}
+                showRating={true}
+                avatarSize="sm"
+                nameClassName={cn(
                   "font-semibold truncate",
                   selected ? "text-white" : "text-slate-900"
                 )}
-              >
-                {entity.name}
-              </p>
+                showRatingBeforeName={false}
+                selected={selected}
+                className="gap-1.5"
+              />
               <div
                 className={cn(
                   "flex items-center justify-between text-sm",

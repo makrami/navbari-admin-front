@@ -72,6 +72,7 @@ export interface Segment {
 
   // UI display fields (from separate lookups)
   driverRating?: number;
+  rating?: number | null;
 
   localCompany?: string;
 

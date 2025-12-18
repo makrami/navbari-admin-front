@@ -1,6 +1,6 @@
-import type { Driver } from "./types";
-import type { EntityCardData } from "../../shared/components/ui/EntityCard";
-import { ENV } from "../../lib/env";
+import type {Driver} from "./types";
+import type {EntityCardData} from "../../shared/components/ui/EntityCard";
+import {ENV} from "../../lib/env";
 
 /**
  * Get country code from country name
@@ -40,7 +40,9 @@ function getCountryCode(countryName: string): string {
 /**
  * Construct full URL for file (avatar, document, etc.)
  */
-export function getFileUrl(filePath: string | null | undefined): string | undefined {
+export function getFileUrl(
+  filePath: string | null | undefined
+): string | undefined {
   if (!filePath) return undefined;
 
   // If already a full URL, return as is
@@ -125,5 +127,6 @@ export function formatDriverForEntityCard(driver: Driver): EntityCardData {
     numShipments: numShipments,
     numActiveVehicles: numActiveVehicles,
     lastActivity: lastActivity,
+    rating: driver.rating,
   };
 }

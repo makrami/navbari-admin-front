@@ -14,6 +14,7 @@ import {STATUS_TO_COLOR} from "../types";
 import {ENV} from "../../../lib/env";
 import {useChatWithRecipient} from "../../../shared/hooks/useChatWithRecipient";
 import {ChatOverlay} from "../../../shared/components/ChatOverlay";
+import {DriverInfo} from "../../../shared/components/DriverInfo";
 import {CHAT_RECIPIENT_TYPE} from "../../../services/chat/chat.types";
 import type {ActionableAlertChip} from "../../chat-alert/types/chat";
 import {useTranslation} from "react-i18next";
@@ -99,9 +100,16 @@ export function DriverDetails({driver}: Props) {
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-slate-900 font-bold text-xl leading-none truncate">
-                {driverName}
-              </p>
+              <DriverInfo
+                driverName={driverName}
+                driverAvatarUrl={null}
+                driverRating={driver.rating}
+                showRating={true}
+                avatarSize="lg"
+                nameClassName="text-slate-900 font-bold text-xl leading-none"
+                showRatingBeforeName={false}
+                className="gap-1.5"
+              />
               <button
                 type="button"
                 onClick={() => chatHook.setIsChatOpen(true)}

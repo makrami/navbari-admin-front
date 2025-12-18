@@ -1,7 +1,7 @@
-import { http } from "../../lib/http";
-import type { Shipment } from "../../shared/types/shipment";
-import type { Segment } from "../../shared/types/segmentData";
-import { SegmentStatus } from "../../shared/types/segmentData";
+import {http} from "../../lib/http";
+import type {Shipment} from "../../shared/types/shipment";
+import type {Segment} from "../../shared/types/segmentData";
+import {SegmentStatus} from "../../shared/types/segmentData";
 
 // Enums matching API
 export const SHIPMENT_STATUS = {
@@ -423,6 +423,7 @@ export interface UpdateSegmentDto {
   estimatedStartTime?: string;
   estimatedFinishTime?: string;
   baseFee?: number;
+  rating?: number;
 }
 
 /**
@@ -434,7 +435,7 @@ export async function updateSegment(
 ): Promise<Segment> {
   try {
     // Normalize datetime strings to ISO 8601 format (ensure seconds are included)
-    const normalizedData = { ...data };
+    const normalizedData = {...data};
 
     // Helper function to normalize datetime string to ISO 8601 format
     // Backend @IsDateString() requires strict ISO 8601 format (e.g., 2024-01-01T12:00:00.000Z)
@@ -527,6 +528,26 @@ export async function announceSegment(
       throw error;
     }
     throw new Error("Failed to announce segment");
+  }
+}
+
+/**
+ * Rate a segment
+ */
+export async function rateSegment(
+  id: string,
+  rating: number
+): Promise<Segment> {
+  try {
+    const response = await http.post<Segment>(`/segments/${id}/rate`, {
+      rating,
+    });
+    return mapSegmentDtoToSegmentData(response.data);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to rate segment");
   }
 }
 

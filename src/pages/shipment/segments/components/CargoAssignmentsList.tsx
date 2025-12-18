@@ -6,11 +6,12 @@ import {
   Loader2,
   UserRound,
 } from "lucide-react";
-import type { SegmentAnnouncementReadDto } from "../../../../services/shipment/shipment.api.service";
-import { getFileUrl } from "../../../LocalCompanies/utils";
-import { useAssignSegment } from "../../../../services/shipment/hooks";
-import { useState, useEffect } from "react";
-import { useCurrentUser } from "../../../../services/user/hooks";
+import type {SegmentAnnouncementReadDto} from "../../../../services/shipment/shipment.api.service";
+import {getFileUrl} from "../../../LocalCompanies/utils";
+import {DriverInfo} from "../../../../shared/components/DriverInfo";
+import {useAssignSegment} from "../../../../services/shipment/hooks";
+import {useState, useEffect} from "react";
+import {useCurrentUser} from "../../../../services/user/hooks";
 import LocationDetailsCard from "./LocationDetailsCard";
 
 type CargoAssignmentsListProps = {
@@ -51,7 +52,7 @@ function formatWeight(weight: string | null | undefined): string {
   // Format with thousand separators
   const num = parseFloat(numericValue);
   if (isNaN(num)) return weight;
-  return `${num.toLocaleString("en-US", { maximumFractionDigits: 0 })} KG`;
+  return `${num.toLocaleString("en-US", {maximumFractionDigits: 0})} KG`;
 }
 
 export default function CargoAssignmentsList({
@@ -69,7 +70,7 @@ export default function CargoAssignmentsList({
   const [localOriginDetails, setLocalOriginDetails] = useState(originDetails);
   const [localDestinationDetails, setLocalDestinationDetails] =
     useState(destinationDetails);
-  const { data: user } = useCurrentUser();
+  const {data: user} = useCurrentUser();
 
   // Get permissions array from user data
   const userRecord = user as Record<string, unknown> | undefined;
@@ -209,24 +210,15 @@ export default function CargoAssignmentsList({
             {/* Middle-left: driver/admin or pending */}
             <div className="w-1/4">
               {announcement.driverId ? (
-                <div className="flex items-center gap-2 text-xs text-slate-700">
-                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-slate-200 text-[10px] text-slate-600">
-                    {announcement.driverAvatarUrl ? (
-                      <img
-                        src={getFileUrl(announcement.driverAvatarUrl ?? "")}
-                        alt={announcement.driverName ?? ""}
-                        className="h-5 w-5 rounded-full bg-slate-200 object-cover"
-                      />
-                    ) : (
-                      <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-slate-200 text-[10px] text-slate-600">
-                        {announcement.driverName?.split(" ")[0][0]}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-xs font-medium text-slate-900 truncate">
-                    {announcement.driverName}
-                  </span>
-                </div>
+                <DriverInfo
+                  driverAvatarUrl={announcement.driverAvatarUrl ?? null}
+                  driverName={announcement.driverName ?? null}
+                  driverRating={null}
+                  avatarSize="sm"
+                  nameClassName="text-xs font-medium"
+                  showRating={false}
+                  className="gap-2"
+                />
               ) : (
                 <div className="text-xs font-semibold text-slate-500 inline-flex items-center gap-1">
                   <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-slate-100">

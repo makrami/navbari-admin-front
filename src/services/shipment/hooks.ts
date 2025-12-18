@@ -9,6 +9,7 @@ import {
   updateSegment,
   createSegment,
   announceSegment,
+  rateSegment,
   getShipmentActivityLog,
   getSegmentAnnouncements,
   assignSegment,
@@ -227,6 +228,31 @@ export function useAnnounceSegment() {
       queryClient.invalidateQueries({
         queryKey: shipmentKeys.segmentAnnouncements(data.id),
       });
+    },
+  });
+}
+
+/**
+ * Mutation hook for rating a segment
+ */
+export function useRateSegment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({id, rating}: {id: string; rating: number}) =>
+      rateSegment(id, rating),
+    onSuccess: (data) => {
+      // Invalidate shipment and segments queries to refetch updated data
+      if (data.shipmentId) {
+        queryClient.invalidateQueries({
+          queryKey: shipmentKeys.segments(data.shipmentId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: shipmentKeys.detail(data.shipmentId),
+        });
+      }
+      queryClient.invalidateQueries({queryKey: shipmentKeys.lists()});
+      queryClient.invalidateQueries({queryKey: shipmentKeys.all});
     },
   });
 }

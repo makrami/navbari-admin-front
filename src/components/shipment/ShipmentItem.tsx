@@ -1,12 +1,13 @@
 import ReactCountryFlag from "react-country-flag";
-import { ArrowRight, UsersIcon } from "lucide-react";
-import { cn } from "../../shared/utils/cn";
-import type { Shipment } from "../../shared/types/shipment";
-import type { Segment } from "../../shared/types/segmentData";
-import { SegmentStatus } from "../../shared/types/segmentData";
-import { getFileUrl } from "../../pages/LocalCompanies/utils";
-import { getCountryCode } from "../../shared/utils/countryCode";
-import { useTranslation } from "react-i18next";
+import {ArrowRight, UsersIcon} from "lucide-react";
+import {cn} from "../../shared/utils/cn";
+import type {Shipment} from "../../shared/types/shipment";
+import type {Segment} from "../../shared/types/segmentData";
+import {SegmentStatus} from "../../shared/types/segmentData";
+import {getFileUrl} from "../../pages/LocalCompanies/utils";
+import {getCountryCode} from "../../shared/utils/countryCode";
+import {useTranslation} from "react-i18next";
+import {DriverInfo} from "../../shared/components/DriverInfo";
 
 type FormattedSegment = {
   step: number;
@@ -44,7 +45,7 @@ export function ShipmentItem({
   fullSegments = [],
   segmentsLoading = false,
 }: ShipmentItemProps) {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const clampedProgress = Math.max(0, Math.min(100, progressPercent));
   const isDelivered = status === "Delivered";
 
@@ -110,6 +111,7 @@ export function ShipmentItem({
   // Extract driver info from first in-progress segment
   const driverName = inProgressSegment?.driverName || userName || null;
   const driverAvatarUrl = inProgressSegment?.driverAvatarUrl || undefined;
+  const driverRating = inProgressSegment?.driverRating ?? null;
 
   return (
     <button
@@ -152,7 +154,7 @@ export function ShipmentItem({
           <ReactCountryFlag
             svg
             countryCode={fromCode}
-            style={{ width: 22, height: 16, borderRadius: 2 }}
+            style={{width: 22, height: 16, borderRadius: 2}}
           />
           <div
             className={cn(
@@ -169,7 +171,7 @@ export function ShipmentItem({
                   ? "bg-white"
                   : "bg-[#1b54fe]"
               )}
-              style={{ width: `${clampedProgress}%` }}
+              style={{width: `${clampedProgress}%`}}
             />
           </div>
           <ArrowRight
@@ -181,7 +183,7 @@ export function ShipmentItem({
           <ReactCountryFlag
             svg
             countryCode={toCode}
-            style={{ width: 22, height: 16, borderRadius: 2 }}
+            style={{width: 22, height: 16, borderRadius: 2}}
           />
         </div>
       ) : (
@@ -207,16 +209,16 @@ export function ShipmentItem({
             <div className="flex items-center gap-2 text-white/80">
               <UsersIcon className="h-3.5 w-3.5 text-white/70" />
               {driverName ? (
-                <>
-                  <img
-                    src={getFileUrl(driverAvatarUrl)}
-                    alt={driverName}
-                    className="size-4 rounded-full"
-                  />
-                  <span className="text-xs font-medium text-white">
-                    {driverName}
-                  </span>
-                </>
+                <DriverInfo
+                  driverAvatarUrl={driverAvatarUrl ?? null}
+                  driverName={driverName}
+                  driverRating={driverRating}
+                  avatarSize="sm"
+                  nameClassName="text-xs font-medium text-white"
+                  showRating={true}
+                  selected={selected}
+                  className="gap-2"
+                />
               ) : null}
             </div>
           </div>
@@ -228,7 +230,7 @@ export function ShipmentItem({
           {segmentsLoading ? (
             // Loading placeholder for segments
             <div className="mt-4 grid gap-3">
-              {Array.from({ length: 3 }).map((_, idx) => (
+              {Array.from({length: 3}).map((_, idx) => (
                 <div
                   key={`loading-${idx}`}
                   className="grid grid-cols-[14px_1fr_auto] items-start gap-2 animate-pulse"

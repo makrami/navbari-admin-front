@@ -133,6 +133,11 @@
       "cancelling": "جاري الإلغاء...",
       "confirmCancel": "تأكيد الإلغاء"
     },
+    "rating": {
+      "yourRate": "تقييمك",
+      "submit": "إرسال",
+      "submitted": "تم الإرسال"
+    },
     "infoBanner": {
       "from": "من",
       "to": "إلى",
@@ -277,7 +282,7 @@
       "notifications": "الإشعارات",
       "filter": "المرشح",
       "close": "إغلاق",
-      "unknown": "غير معروف",
+      "notAssigned": "غير معين",
       "openChat": "فتح الدردشة",
       "vehicle": "المركبة",
       "localCompany": "الشركة المحلية",

@@ -13,7 +13,7 @@ import {
 import {cn} from "../../../../shared/utils/cn";
 import {formatDistance} from "../../../../shared/utils/segmentHelpers";
 import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import {getFileUrl} from "../../../LocalCompanies/utils";
+import {DriverInfo} from "../../../../shared/components/DriverInfo";
 import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
 import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
@@ -48,6 +48,7 @@ type SegmentHeaderProps = {
   driverAvatarUrl?: string;
   driverId?: string;
   driverName?: string;
+  driverRating?: number | null;
   lastGpsUpdate?: string | null;
   editable: boolean;
   segmentId: string;
@@ -72,6 +73,7 @@ export default function SegmentHeader({
   driverAvatarUrl,
   driverId,
   driverName,
+  driverRating,
   lastGpsUpdate,
   editable,
   segmentId,
@@ -266,18 +268,14 @@ export default function SegmentHeader({
         segmentStatus !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
         segmentStatus !== SEGMENT_STATUS.CANCELLED &&
         driverName ? (
-          <div className="flex items-center gap-2">
-            {driverAvatarUrl ? (
-              <img
-                src={getFileUrl(driverAvatarUrl)}
-                alt="avatar"
-                className="size-5 rounded-full"
-              />
-            ) : null}
-            <span className="text-xs font-medium text-slate-900 ">
-              {driverName}
-            </span>
-          </div>
+          <DriverInfo
+            driverAvatarUrl={driverAvatarUrl}
+            driverName={driverName}
+            driverRating={driverRating}
+            avatarSize="sm"
+            nameClassName="text-xs font-medium"
+            showRatingBeforeName={false}
+          />
         ) : null}
         {segmentStatus &&
         segmentStatus !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&

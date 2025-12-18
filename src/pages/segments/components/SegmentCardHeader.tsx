@@ -1,17 +1,11 @@
-import {
-  ChevronDown,
-  ArrowRight,
-  MoreVertical,
-  Check,
-  UserRound,
-} from "lucide-react";
+import {ChevronDown, ArrowRight, MoreVertical, Check} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {cn} from "../../../shared/utils/cn";
 import type {Shipment as DomainShipment} from "../../../shared/types/shipment";
 import type {Segment} from "../../../shared/types/segmentData";
 import SegmentProgress from "../../shipment/segments/components/SegmentProgress";
 import {SEGMENT_STATUS} from "../../../services/shipment/shipment.api.service";
-import {getFileUrl} from "../../LocalCompanies/utils";
+import {DriverInfo} from "../../../shared/components/DriverInfo";
 
 type SegmentCardHeaderProps = {
   segment: Segment;
@@ -80,22 +74,16 @@ export function SegmentCardHeader({
         </div>
         <div className="flex items-center gap-2">
           {segment.driverName && (
-            <>
-              {segment.driverAvatarUrl ? (
-                <img
-                  src={getFileUrl(segment.driverAvatarUrl)}
-                  alt={segment.driverName}
-                  className="size-5 rounded-full"
-                />
-              ) : (
-                <div className="size-5 rounded-full bg-slate-300 flex items-center justify-center">
-                  <UserRound className="size-3 text-white fill-white" />
-                </div>
-              )}
-              <span className="text-sm text-slate-900">
-                {segment.driverName}
-              </span>
-            </>
+            <DriverInfo
+              driverAvatarUrl={segment.driverAvatarUrl ?? null}
+              driverName={segment.driverName}
+              driverRating={segment.driverRating}
+              showRating={true}
+              avatarSize="sm"
+              nameClassName="text-sm"
+              showRatingBeforeName={true}
+              className="gap-1.5"
+            />
           )}
           <div className="size-3 rounded-full bg-green-500 border-2 border-white" />
           <button

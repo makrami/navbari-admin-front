@@ -24,6 +24,7 @@ import {MAPBOX_TOKEN} from "../../../dashboard/constants";
 import type {Segment} from "../../../../shared/types/segmentData";
 import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
 import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import {DriverInfo} from "../../../../shared/components/DriverInfo";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
 import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
 import {useTranslation} from "react-i18next";
@@ -297,20 +298,29 @@ export function NavigatingInfo({
             {/* Header: Driver name, rating, quick chat */}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-4 min-w-0">
-                {driverPhoto ? (
-                  <img
-                    src={driverPhoto ? getFileUrl(driverPhoto) : undefined}
-                    alt="Driver avatar"
-                    className="size-7 rounded-full object-cover"
+                {driverName ? (
+                  <DriverInfo
+                    driverName={driverName}
+                    driverAvatarUrl={driverPhoto}
+                    driverRating={
+                      segments.find((s) => s.driverName === driverName)
+                        ?.driverRating ?? null
+                    }
+                    avatarSize="lg"
+                    nameClassName="text-slate-900 font-medium"
+                    showRating={true}
+                    className="gap-4"
                   />
                 ) : (
-                  <div className="size-7 rounded-full bg-slate-200 flex items-center justify-center">
-                    <UserRoundIcon className="size-4 text-slate-500" />
+                  <div className="flex items-center gap-4">
+                    <div className="size-7 rounded-full bg-slate-200 flex items-center justify-center">
+                      <UserRoundIcon className="size-4 text-slate-500" />
+                    </div>
+                    <p className="text-slate-900 font-medium">
+                      {t("shipment.navigatingInfo.notAssigned")}
+                    </p>
                   </div>
                 )}
-                <p className="text-slate-900 font-medium">
-                  {driverName || t("shipment.navigatingInfo.unknown")}
-                </p>
               </div>
 
               <div className="flex items-center gap-3">
@@ -367,7 +377,7 @@ export function NavigatingInfo({
                     </span>
                   </div>
                   <p className="text-xs text-slate-900">
-                    {vehicle || t("shipment.navigatingInfo.unknown")}
+                    {vehicle || t("shipment.navigatingInfo.notAssigned")}
                   </p>
                 </div>
 

@@ -133,6 +133,11 @@
       "cancelling": "İptal ediliyor...",
       "confirmCancel": "İptal İşlemini Onayla"
     },
+    "rating": {
+      "yourRate": "Değerlendirmeniz",
+      "submit": "Gönder",
+      "submitted": "Gönderildi"
+    },
     "infoBanner": {
       "from": "Nereden",
       "to": "Nereye",
@@ -537,7 +542,7 @@
       "notifications": "Bildirimler",
       "filter": "Filtre",
       "close": "Kapat",
-      "unknown": "Bilinmeyen",
+      "notAssigned": "Atanmamış",
       "openChat": "Sohbeti aç",
       "vehicle": "Araç",
       "localCompany": "Yerel Şirket",

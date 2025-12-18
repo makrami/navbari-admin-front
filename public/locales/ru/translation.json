@@ -133,6 +133,11 @@
       "cancelling": "Отмена...",
       "confirmCancel": "Подтвердить отмену"
     },
+    "rating": {
+      "yourRate": "Ваша оценка",
+      "submit": "Отправить",
+      "submitted": "Отправлено"
+    },
     "infoBanner": {
       "from": "От",
       "to": "До",
@@ -277,7 +282,7 @@
       "notifications": "Уведомления",
       "filter": "Фильтр",
       "close": "Закрыть",
-      "unknown": "Неизвестно",
+      "notAssigned": "Не назначено",
       "openChat": "Открыть чат",
       "vehicle": "Транспорт",
       "localCompany": "Местная компания",

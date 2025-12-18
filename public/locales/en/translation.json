@@ -133,6 +133,11 @@
       "cancelling": "Cancelling...",
       "confirmCancel": "Confirm Cancel"
     },
+    "rating": {
+      "yourRate": "Your Rate",
+      "submit": "Submit",
+      "submitted": "Submitted"
+    },
     "infoBanner": {
       "from": "From",
       "to": "To",
@@ -537,7 +542,7 @@
       "notifications": "Notifications",
       "filter": "Filter",
       "close": "Close",
-      "unknown": "Unknown",
+      "notAssigned": "Not Assigned",
       "openChat": "Open chat",
       "vehicle": "Vehicle",
       "localCompany": "Local Company",

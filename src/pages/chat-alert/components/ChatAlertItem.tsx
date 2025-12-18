@@ -1,9 +1,9 @@
-import { cn } from "../../../shared/utils/cn";
-import type { ChatAlert } from "../data";
-import { ChatAlertAvatar } from "./ChatAlertAvatar";
-import { ChatAlertHeader } from "./ChatAlertHeader";
-import { ChatAlertFooter } from "./ChatAlertFooter";
-import { handleChatAlertKeyDown, handleMenuClick } from "./utils";
+import {cn} from "../../../shared/utils/cn";
+import type {ChatAlert} from "../data";
+import {ChatAlertAvatar} from "./ChatAlertAvatar";
+import {ChatAlertHeader} from "./ChatAlertHeader";
+import {ChatAlertFooter} from "./ChatAlertFooter";
+import {handleChatAlertKeyDown, handleMenuClick} from "./utils";
 
 type ChatAlertItemProps = {
   chatAlert: ChatAlert;
@@ -46,6 +46,8 @@ export function ChatAlertItem({
           alerts={chatAlert.alerts}
           messages={chatAlert.messages}
           selected={selected}
+          rating={chatAlert.rating}
+          avatarUrl={chatAlert.avatarUrl}
           onMenuClick={handleMenuButtonClick}
         />
 

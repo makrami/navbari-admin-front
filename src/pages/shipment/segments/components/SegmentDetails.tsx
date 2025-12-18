@@ -13,6 +13,7 @@ import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
+import {StarRating} from "./StarRating";
 import type {Segment} from "../../../../shared/types/segmentData";
 import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
 import type {Shipment} from "../../../../shared/types/shipment";
@@ -23,6 +24,7 @@ import {useCompanies} from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
+  useRateSegment,
 } from "../../../../services/shipment/hooks";
 import {
   COMPANY_STATUS,
@@ -152,6 +154,7 @@ export function SegmentDetails({
   );
 
   const updateSegmentMutation = useUpdateSegment();
+  const rateSegmentMutation = useRateSegment();
   const {data: user} = useCurrentUser();
 
   // Get permissions array from user data
@@ -270,6 +273,22 @@ export function SegmentDetails({
     chatHook.setIsChatOpen(true);
   };
 
+  // Handle rating submission
+  const handleRatingSubmit = async (rating: number) => {
+    if (!segmentId) return;
+
+    try {
+      await rateSegmentMutation.mutateAsync({
+        id: segmentId,
+        rating,
+      });
+      // The mutation will automatically invalidate and refetch segments
+    } catch (error) {
+      console.error("Failed to submit rating:", error);
+      throw error; // Re-throw so StarRating can handle it
+    }
+  };
+
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
 
   // helper state derived inline by Field components when needed
@@ -350,6 +369,7 @@ export function SegmentDetails({
         driverAvatarUrl={data.driverAvatarUrl ?? undefined}
         driverId={data.driverId ?? undefined}
         driverName={data.driverName ?? undefined}
+        driverRating={data.driverRating ?? null}
         editable={editable}
         segmentId={data.id}
         shipmentId={data.shipmentId}
@@ -373,7 +393,7 @@ export function SegmentDetails({
       {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
         data.status !== SEGMENT_STATUS.CANCELLED &&
         !open && (
-          <div className="px-3 pb-3">
+          <div className="px-3 pb-3 space-y-3">
             <SegmentProgress
               current={data.status as SEGMENT_STATUS}
               dateTime={
@@ -383,6 +403,15 @@ export function SegmentDetails({
               segment={data}
               onAlertClick={handleAlertClick}
             />
+            {data.status === SEGMENT_STATUS.DELIVERED && segmentId && (
+              <StarRating
+                segmentId={segmentId}
+                currentRating={data.rating ?? null}
+                onSubmit={handleRatingSubmit}
+                driverAvatarUrl={data.driverAvatarUrl ?? undefined}
+                driverName={data.driverName ?? undefined}
+              />
+            )}
           </div>
         )}
 
@@ -423,12 +452,23 @@ export function SegmentDetails({
             {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
             data.status !== SEGMENT_STATUS.CANCELLED &&
             !locked ? (
-              <SegmentProgress
-                current={data.status as SEGMENT_STATUS}
-                showWarningIcon={data.hasDisruption ?? false}
-                segment={data}
-                onAlertClick={handleAlertClick}
-              />
+              <div className="space-y-3">
+                <SegmentProgress
+                  current={data.status as SEGMENT_STATUS}
+                  showWarningIcon={data.hasDisruption ?? false}
+                  segment={data}
+                  onAlertClick={handleAlertClick}
+                />
+                {data.status === SEGMENT_STATUS.DELIVERED && segmentId && (
+                  <StarRating
+                    segmentId={segmentId}
+                    currentRating={data.rating ?? null}
+                    onSubmit={handleRatingSubmit}
+                    driverAvatarUrl={data.driverAvatarUrl ?? undefined}
+                    driverName={data.driverName ?? undefined}
+                  />
+                )}
+              </div>
             ) : null}
 
             {/* Show form only when editable AND segment is pending assignment */}
