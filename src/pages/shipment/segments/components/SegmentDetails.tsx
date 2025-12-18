@@ -230,7 +230,7 @@ export function SegmentDetails({
   };
 
   // Fetch companies from API
-  const {data: companies = []} = useCompanies();
+  const {data: companies = [], refetch: refetchCompanies} = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -238,6 +238,13 @@ export function SegmentDetails({
       .filter((company) => company.status === COMPANY_STATUS.APPROVED)
       .map(transformCompanyToCargoCompany);
   }, [companies]);
+
+  // Refetch companies when cargo modal opens
+  useEffect(() => {
+    if (showCargoModal) {
+      refetchCompanies();
+    }
+  }, [showCargoModal, refetchCompanies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
   const {data: announcements = []} = useSegmentAnnouncements(
