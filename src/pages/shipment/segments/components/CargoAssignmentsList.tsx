@@ -8,10 +8,7 @@ import {
 } from "lucide-react";
 import type { SegmentAnnouncementReadDto } from "../../../../services/shipment/shipment.api.service";
 import { getFileUrl } from "../../../LocalCompanies/utils";
-import {
-  useAssignSegment,
-  useUpdateSegment,
-} from "../../../../services/shipment/hooks";
+import { useAssignSegment } from "../../../../services/shipment/hooks";
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../../../../services/user/hooks";
 import LocationDetailsCard from "./LocationDetailsCard";
@@ -68,7 +65,6 @@ export default function CargoAssignmentsList({
   cargoWeight,
 }: CargoAssignmentsListProps) {
   const assignSegmentMutation = useAssignSegment();
-  const updateSegmentMutation = useUpdateSegment();
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [localOriginDetails, setLocalOriginDetails] = useState(originDetails);
   const [localDestinationDetails, setLocalDestinationDetails] =
@@ -115,43 +111,21 @@ export default function CargoAssignmentsList({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <LocationDetailsCard
           title="ORIGIN DETAILS"
-          content={localOriginDetails}
+          content={localOriginDetails || ""}
           onSave={async (newContent) => {
             setLocalOriginDetails(newContent);
-            if (segmentId) {
-              try {
-                await updateSegmentMutation.mutateAsync({
-                  id: segmentId,
-                  data: {
-                    originDetails: newContent,
-                  } as Record<string, unknown>,
-                });
-              } catch (error) {
-                console.error("Failed to update origin details:", error);
-              }
-            }
           }}
           disabled={!hasSegmentsManage}
+          segmentId={segmentId}
         />
         <LocationDetailsCard
           title="DESTINATION DETAILS"
-          content={localDestinationDetails}
+          content={localDestinationDetails || ""}
           onSave={async (newContent) => {
             setLocalDestinationDetails(newContent);
-            if (segmentId) {
-              try {
-                await updateSegmentMutation.mutateAsync({
-                  id: segmentId,
-                  data: {
-                    destinationDetails: newContent,
-                  } as Record<string, unknown>,
-                });
-              } catch (error) {
-                console.error("Failed to update destination details:", error);
-              }
-            }
           }}
           disabled={!hasSegmentsManage}
+          segmentId={segmentId}
         />
       </div>
 

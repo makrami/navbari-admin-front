@@ -30,8 +30,6 @@ import type { DocumentItem } from "./DocumentsSection";
 import { getFileSizesFromUrls } from "../utils/fileSize";
 import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
 import type { SEGMENT_STATUS as SEGMENT_STATUS_TYPE } from "../../../../services/shipment/shipment.api.service";
-import { useUpdateSegment } from "../../../../services/shipment/hooks";
-import type { UpdateSegmentDto } from "../../../../services/shipment/shipment.api.service";
 import { useCurrentUser } from "../../../../services/user/hooks";
 
 type SegmentInfoSummaryProps = {
@@ -677,7 +675,6 @@ export default function SegmentInfoSummary({
   const { t } = useTranslation();
   const isRTL = useRTL();
   const queryClient = useQueryClient();
-  const updateSegmentMutation = useUpdateSegment();
   const { data: user } = useCurrentUser();
 
   // Get permissions array from user data
@@ -1179,43 +1176,21 @@ export default function SegmentInfoSummary({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <LocationDetailsCard
           title="ORIGIN DETAILS"
-          content={localOriginDetails}
+          content={localOriginDetails || ""}
           onSave={async (newContent) => {
             setLocalOriginDetails(newContent);
-            if (segmentId) {
-              try {
-                await updateSegmentMutation.mutateAsync({
-                  id: segmentId,
-                  data: {
-                    originDetails: newContent,
-                  } as UpdateSegmentDto & Record<string, unknown>,
-                });
-              } catch (error) {
-                console.error("Failed to update origin details:", error);
-              }
-            }
           }}
           disabled={!hasSegmentsManage}
+          segmentId={segmentId}
         />
         <LocationDetailsCard
           title="DESTINATION DETAILS"
-          content={localDestinationDetails}
+          content={localDestinationDetails || ""}
           onSave={async (newContent) => {
             setLocalDestinationDetails(newContent);
-            if (segmentId) {
-              try {
-                await updateSegmentMutation.mutateAsync({
-                  id: segmentId,
-                  data: {
-                    destinationDetails: newContent,
-                  } as UpdateSegmentDto & Record<string, unknown>,
-                });
-              } catch (error) {
-                console.error("Failed to update destination details:", error);
-              }
-            }
           }}
           disabled={!hasSegmentsManage}
+          segmentId={segmentId}
         />
       </div>
       <FinancialSection baseFee={parseFloat(baseFee?.toString() || "0")} />

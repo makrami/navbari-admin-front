@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { PenLine, Check, X } from "lucide-react";
+import { useUpdateSegmentDetails } from "../../../../services/shipment/hooks";
 
 type LocationDetailsCardProps = {
   title: "ORIGIN DETAILS" | "DESTINATION DETAILS";
   content: string;
   onSave?: (newContent: string) => void | Promise<void>;
   disabled?: boolean;
+  segmentId?: string;
 };
 
 export default function LocationDetailsCard({
@@ -13,9 +15,11 @@ export default function LocationDetailsCard({
   content,
   onSave,
   disabled = false,
+  segmentId,
 }: LocationDetailsCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
+  const updateSegmentDetailsMutation = useUpdateSegmentDetails();
 
   // Sync editedContent when content prop changes (but not when editing)
   useEffect(() => {
@@ -35,10 +39,41 @@ export default function LocationDetailsCard({
   };
 
   const handleConfirm = async () => {
-    if (onSave) {
-      await onSave(editedContent);
+    if (segmentId) {
+      try {
+        // Determine which field is being edited
+        const isOrigin = title === "ORIGIN DETAILS";
+
+        // Prepare the request body
+        // Only send the field being edited, send undefined for the other one
+        const requestBody = {
+          originDetails: isOrigin ? editedContent : undefined,
+          destinationDetails: isOrigin ? undefined : editedContent,
+        };
+
+        // Call the API
+        await updateSegmentDetailsMutation.mutateAsync({
+          id: segmentId,
+          data: requestBody,
+        });
+
+        // Call onSave callback if provided (for local state updates)
+        if (onSave) {
+          await onSave(editedContent);
+        }
+
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Failed to update location details:", error);
+        // Don't close editing mode on error
+      }
+    } else {
+      // Fallback to onSave if segmentId is not provided
+      if (onSave) {
+        await onSave(editedContent);
+      }
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
   return (
