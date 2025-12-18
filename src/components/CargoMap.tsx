@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, {
   Layer,
   NavigationControl,
@@ -8,15 +8,19 @@ import Map, {
   type MapRef,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type {FeatureCollection, LineString, Position} from "geojson";
-import {TruckIcon} from "lucide-react";
-import type {Map as MapboxMap, MapboxEvent} from "mapbox-gl";
-import {useQueries} from "@tanstack/react-query";
-import {shipmentKeys} from "../services/shipment/hooks";
-import {getSegmentRoute} from "../services/shipment/shipment.api.service";
+import type { FeatureCollection, LineString, Position } from "geojson";
+import { TruckIcon } from "lucide-react";
+import type { Map as MapboxMap, MapboxEvent } from "mapbox-gl";
+import { useQueries } from "@tanstack/react-query";
+import { shipmentKeys } from "../services/shipment/hooks";
+import { getSegmentRoute } from "../services/shipment/shipment.api.service";
 
 type Props = {
-  segmentIds: {id: string; currentLatitude: number; currentLongitude: number}[];
+  segmentIds: {
+    id: string;
+    currentLatitude: number;
+    currentLongitude: number;
+  }[];
   initialView?: {
     longitude: number;
     latitude: number;
@@ -164,6 +168,13 @@ export function CargoMap({
     })),
   });
 
+  // Create a stable string key based on query data states to track changes
+  const queryDataKey = useMemo(() => {
+    return routeQueries
+      .map((q, idx) => `${idx}:${q.dataUpdatedAt}:${q.status}`)
+      .join("|");
+  }, [routeQueries]);
+
   // Process route queries into route sources
   const routeSources = useMemo(() => {
     const sources: {
@@ -172,6 +183,12 @@ export function CargoMap({
       color: string;
       segmentId: string;
       segmentIdx: number;
+      routeData?: {
+        originLongitude: number;
+        originLatitude: number;
+        destinationLongitude: number;
+        destinationLatitude: number;
+      };
     }[] = [];
 
     routeQueries.forEach((query, idx) => {
@@ -207,6 +224,12 @@ export function CargoMap({
               color,
               segmentId: segmentId.id,
               segmentIdx: idx,
+              routeData: {
+                originLongitude: query.data.originLongitude,
+                originLatitude: query.data.originLatitude,
+                destinationLongitude: query.data.destinationLongitude,
+                destinationLatitude: query.data.destinationLatitude,
+              },
             });
           }
         }
@@ -214,32 +237,40 @@ export function CargoMap({
     });
 
     return sources;
-  }, [routeQueries, segmentIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryDataKey, segmentIds]);
 
   // Calculate center from route data
   const center = useMemo(() => {
     if (initialView) {
-      return {...initialView, pitch: 0, bearing: 0};
+      return { ...initialView, pitch: 0, bearing: 0 };
     }
 
     const allCoords: Position[] = [];
-    routeQueries.forEach((query) => {
-      if (query.data?.geometry) {
-        const coords = query.data.geometry as unknown as Position[];
-        allCoords.push(...(coords as Position[]));
+    routeSources.forEach((src) => {
+      const geom = src.data.features[0]?.geometry;
+      if (geom && (geom as LineString).coordinates) {
+        const coords = (geom as LineString).coordinates as Position[];
+        allCoords.push(...coords);
       }
     });
 
     if (allCoords.length === 0) {
-      return {longitude: 105.0, latitude: 35.0, zoom: 4, pitch: 0, bearing: 0};
+      return {
+        longitude: 105.0,
+        latitude: 35.0,
+        zoom: 4,
+        pitch: 0,
+        bearing: 0,
+      };
     }
 
     const lons = allCoords.map((c) => c[0]);
     const lats = allCoords.map((c) => c[1]);
     const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
     const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
-    return {longitude, latitude, zoom: 4, pitch: 0, bearing: 0};
-  }, [routeQueries, initialView]);
+    return { longitude, latitude, zoom: 4, pitch: 0, bearing: 0 };
+  }, [routeSources, initialView]);
 
   // Set map error if any query failed
   useEffect(() => {
@@ -253,9 +284,10 @@ export function CargoMap({
     } else {
       setMapError(null);
     }
-  }, [routeQueries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryDataKey]);
 
-  // Create endpoint markers from route data
+  // Create endpoint markers from route sources (now contains all needed data)
   const endpointMarkers = useMemo(() => {
     const markers: Array<{
       id: string;
@@ -264,31 +296,28 @@ export function CargoMap({
       color: string;
     }> = [];
 
-    routeQueries.forEach((query, idx) => {
-      if (query.data) {
-        const route = query.data;
-        const color = COLORS[idx % COLORS.length] || DEFAULT_COLOR;
-
+    routeSources.forEach((src) => {
+      if (src.routeData) {
         // Origin marker
         markers.push({
-          id: `start-${idx}`,
-          lng: route.originLongitude,
-          lat: route.originLatitude,
-          color,
+          id: `start-${src.segmentIdx}`,
+          lng: src.routeData.originLongitude,
+          lat: src.routeData.originLatitude,
+          color: src.color,
         });
 
         // Destination marker
         markers.push({
-          id: `end-${idx}`,
-          lng: route.destinationLongitude,
-          lat: route.destinationLatitude,
-          color,
+          id: `end-${src.segmentIdx}`,
+          lng: src.routeData.destinationLongitude,
+          lat: src.routeData.destinationLatitude,
+          color: src.color,
         });
       }
     });
 
     return markers;
-  }, [routeQueries]);
+  }, [routeSources]);
 
   // Create label points (midpoint of route)
   const labelPoints = useMemo(() => {
@@ -310,7 +339,7 @@ export function CargoMap({
         color: src.color,
       };
     });
-  }, [routeSources]);
+  }, [routeSources, segmentIds]);
 
   // Fit map bounds to show all routes after they're loaded
   useEffect(() => {
@@ -324,14 +353,6 @@ export function CargoMap({
       return;
     }
 
-    // Check if all routes are loaded
-    const allLoaded = routeQueries.every(
-      (query) => query.isSuccess || query.isError
-    );
-    if (!allLoaded) {
-      return;
-    }
-
     // Collect all coordinates from routes
     const allCoords: Position[] = [];
     routeSources.forEach((src) => {
@@ -340,11 +361,18 @@ export function CargoMap({
         const coords = (geom as LineString).coordinates as Position[];
         allCoords.push(...coords);
       }
-    });
 
-    // Also include endpoint markers
-    endpointMarkers.forEach((marker) => {
-      allCoords.push([marker.lng, marker.lat] as Position);
+      // Also include endpoint markers from routeData
+      if (src.routeData) {
+        allCoords.push([
+          src.routeData.originLongitude,
+          src.routeData.originLatitude,
+        ] as Position);
+        allCoords.push([
+          src.routeData.destinationLongitude,
+          src.routeData.destinationLatitude,
+        ] as Position);
+      }
     });
 
     if (allCoords.length === 0) {
@@ -394,7 +422,7 @@ export function CargoMap({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [routeSources, routeQueries, endpointMarkers, segmentIds]);
+  }, [routeSources]);
 
   const interactiveIds = useMemo(
     () => routeSources.map((s) => `${s.id}-line`),
@@ -477,7 +505,7 @@ export function CargoMap({
           onLoad={handleMapLoad}
           onError={(e) => {
             const msg =
-              (e as unknown as {error?: Error}).error?.message ??
+              (e as unknown as { error?: Error }).error?.message ??
               "Map failed to load";
             setMapError(msg);
           }}
@@ -485,7 +513,7 @@ export function CargoMap({
           bearing={0}
           dragRotate={false}
           touchPitch={false}
-          touchZoomRotate={{around: "center"}}
+          touchZoomRotate={{ around: "center" }}
         >
           <NavigationControl position="top-right" showCompass={false} />
 
@@ -499,7 +527,7 @@ export function CargoMap({
                 <Layer
                   id={`${src.id}-line`}
                   type="line"
-                  layout={{"line-cap": "round", "line-join": "round"}}
+                  layout={{ "line-cap": "round", "line-join": "round" }}
                   paint={{
                     "line-color": hoverColor,
                     "line-width": lineWidth,
