@@ -169,11 +169,26 @@ export function CargoMap({
   });
 
   // Create a stable string key based on query data states to track changes
+  // This only changes when actual data changes, not on every render
   const queryDataKey = useMemo(() => {
-    return routeQueries
-      .map((q, idx) => `${idx}:${q.dataUpdatedAt}:${q.status}`)
+    const key = routeQueries
+      .map((q, idx) => {
+        const segId = segmentIds[idx]?.id || idx;
+        // Include data hash to detect changes
+        const dataHash = q.data
+          ? JSON.stringify([
+              q.data.originLongitude,
+              q.data.originLatitude,
+              q.data.destinationLongitude,
+              q.data.destinationLatitude,
+              q.data.geometry?.length || 0,
+            ])
+          : "null";
+        return `${segId}:${q.status}:${dataHash}`;
+      })
       .join("|");
-  }, [routeQueries]);
+    return key;
+  }, [routeQueries, segmentIds]);
 
   // Process route queries into route sources
   const routeSources = useMemo(() => {

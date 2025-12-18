@@ -1,21 +1,21 @@
-import {useState, useMemo} from "react";
+import { useState, useMemo } from "react";
 import CargoMap from "../../components/CargoMap";
-import {MAPBOX_TOKEN} from "./constants";
-import {KPICards} from "./components/KPICards";
-import {StatusFilter} from "./components/StatusFilter";
-import {MapLegend} from "./components/MapLegend";
-import {DashboardSearch} from "./components/DashboardSearch";
-import {SegmentsDrawer} from "./components/SegmentsDrawer";
-import {UnreadMessagesModal} from "./components/UnreadMessagesModal";
-import {AwaitingRegistrationsModal} from "./components/AwaitingRegistrationsModal";
-import {SegmentsAwaitingDriverModal} from "./components/SegmentsAwaitingDriverModal";
-import {useActiveSegments} from "../../services/dashboard/hooks";
-import {ChartBarBig} from "lucide-react";
+import { MAPBOX_TOKEN } from "./constants";
+import { KPICards } from "./components/KPICards";
+import { StatusFilter } from "./components/StatusFilter";
+import { MapLegend } from "./components/MapLegend";
+import { DashboardSearch } from "./components/DashboardSearch";
+import { SegmentsDrawer } from "./components/SegmentsDrawer";
+import { UnreadMessagesModal } from "./components/UnreadMessagesModal";
+import { AwaitingRegistrationsModal } from "./components/AwaitingRegistrationsModal";
+import { SegmentsAwaitingDriverModal } from "./components/SegmentsAwaitingDriverModal";
+import { useActiveSegments } from "../../services/dashboard/hooks";
+import { ChartBarBig } from "lucide-react";
 
 type SegmentStatus = "pending" | "normal" | "alert";
 
 export function DashboardPage() {
-  const {data: activeSegments, isLoading, error} = useActiveSegments();
+  const { data: activeSegments, isLoading, error } = useActiveSegments();
   const [isSegmentsOpen, setIsSegmentsOpen] = useState(false);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(
     null
@@ -34,18 +34,33 @@ export function DashboardPage() {
     width: number;
   } | null>(null);
 
-  // Extract segment IDs from active segments
-  const segmentIds = useMemo(() => {
+  // Extract segment IDs with coordinates from active segments (memoized and deduplicated)
+  const segmentIdsWithCoords = useMemo(() => {
     if (!activeSegments) return [];
     return activeSegments
-      .map((segment) => segment.id)
-      .filter((id): id is string => !!id);
+      .map((segment) => ({
+        id: segment.id,
+        currentLatitude: segment.currentLatitude ?? 0,
+        currentLongitude: segment.currentLongitude ?? 0,
+      }))
+      .filter(
+        (segment, index, self) =>
+          index === self.findIndex((s) => s.id === segment.id)
+      );
   }, [activeSegments]);
 
   // Debug: Log active segments (only in development)
   if (import.meta.env.DEV) {
     console.log("Active Segments:", activeSegments);
-    console.log("Segment IDs:", segmentIds);
+    console.log("Segment IDs with Coords:", segmentIdsWithCoords);
+    // Check for duplicates
+    const ids = segmentIdsWithCoords.map((s) => s.id);
+    const uniqueIds = new Set(ids);
+    if (ids.length !== uniqueIds.size) {
+      console.error("DUPLICATE SEGMENT IDS DETECTED!", ids);
+      const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+      console.error("Duplicate IDs:", duplicates);
+    }
     console.log("Loading:", isLoading);
     console.log("Error:", error);
   }
@@ -68,7 +83,7 @@ export function DashboardPage() {
 
   const handleCardClick = (
     cardId: string,
-    position: {top: number; left: number; width: number}
+    position: { top: number; left: number; width: number }
   ) => {
     setCardPosition(position);
     setOpenModal(cardId);
@@ -113,14 +128,8 @@ export function DashboardPage() {
 
         <div className="absolute inset-0 p-5">
           <CargoMap
-            segmentIds={
-              activeSegments?.map((segment) => ({
-                id: segment.id,
-                currentLatitude: segment.currentLatitude ?? 0,
-                currentLongitude: segment.currentLongitude ?? 0,
-              })) ?? []
-            }
-            initialView={{longitude: 105.0, latitude: 35.0, zoom: 4}}
+            segmentIds={segmentIdsWithCoords}
+            initialView={{ longitude: 105.0, latitude: 35.0, zoom: 4 }}
             mapboxToken={MAPBOX_TOKEN}
             onSegmentClick={handleSegmentClick}
             onMapClick={handleMapClick}
