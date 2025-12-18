@@ -13,6 +13,8 @@ import {useAssignSegment} from "../../../../services/shipment/hooks";
 import {useState, useEffect} from "react";
 import {useCurrentUser} from "../../../../services/user/hooks";
 import LocationDetailsCard from "./LocationDetailsCard";
+import {formatDistance} from "../../../../shared/utils/segmentHelpers";
+import {useTranslation} from "react-i18next";
 
 type CargoAssignmentsListProps = {
   announcements: SegmentAnnouncementReadDto[];
@@ -44,15 +46,20 @@ function formatDateTime(timestamp: string | null | undefined): string {
 /**
  * Format weight to display format (e.g., "2,500 KG")
  */
-function formatWeight(weight: string | null | undefined): string {
-  if (!weight) return "N/A";
+function formatWeight(
+  weight: string | null | undefined,
+  t: (key: string) => string
+): string {
+  if (!weight) return t("shipment.segments.cargoAssignments.nA");
   // Remove any non-numeric characters except decimal point
   const numericValue = weight.replace(/[^0-9.]/g, "");
-  if (!numericValue) return "N/A";
+  if (!numericValue) return t("shipment.segments.cargoAssignments.nA");
   // Format with thousand separators
   const num = parseFloat(numericValue);
   if (isNaN(num)) return weight;
-  return `${num.toLocaleString("en-US", {maximumFractionDigits: 0})} KG`;
+  return `${num.toLocaleString("en-US", {maximumFractionDigits: 0})} ${t(
+    "shipment.segments.cargoAssignments.kg"
+  )}`;
 }
 
 export default function CargoAssignmentsList({
@@ -65,6 +72,7 @@ export default function CargoAssignmentsList({
   cargoType,
   cargoWeight,
 }: CargoAssignmentsListProps) {
+  const {t} = useTranslation();
   const assignSegmentMutation = useAssignSegment();
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [localOriginDetails, setLocalOriginDetails] = useState(originDetails);
@@ -86,7 +94,7 @@ export default function CargoAssignmentsList({
   const handleAssign = async (announcement: SegmentAnnouncementReadDto) => {
     if (!announcement.driverId) {
       // Driver ID is required for assignment
-      alert("Driver ID is required for assignment");
+      alert(t("shipment.segments.cargoAssignments.driverIdRequired"));
       return;
     }
 
@@ -101,7 +109,7 @@ export default function CargoAssignmentsList({
       });
     } catch (error) {
       console.error("Failed to assign segment:", error);
-      alert("Failed to assign segment. Please try again.");
+      alert(t("shipment.segments.cargoAssignments.assignFailed"));
     } finally {
       setAssigningId(null);
     }
@@ -111,22 +119,24 @@ export default function CargoAssignmentsList({
       {/* Origin and Destination Details Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <LocationDetailsCard
-          title="ORIGIN DETAILS"
+          title={t("shipment.segments.cargoAssignments.originDetails")}
           content={localOriginDetails || ""}
           onSave={async (newContent) => {
             setLocalOriginDetails(newContent);
           }}
           disabled={!hasSegmentsManage}
           segmentId={segmentId}
+          isOrigin={true}
         />
         <LocationDetailsCard
-          title="DESTINATION DETAILS"
+          title={t("shipment.segments.cargoAssignments.destinationDetails")}
           content={localDestinationDetails || ""}
           onSave={async (newContent) => {
             setLocalDestinationDetails(newContent);
           }}
           disabled={!hasSegmentsManage}
           segmentId={segmentId}
+          isOrigin={false}
         />
       </div>
 
@@ -137,13 +147,13 @@ export default function CargoAssignmentsList({
           <div className="flex items-center gap-2 mb-2">
             <TimerIcon className="size-4 text-slate-300" />
             <span className="text-[10px] font-medium text-slate-400 uppercase">
-              START
+              {t("shipment.segments.cargoAssignments.start")}
             </span>
           </div>
           <div className="text-xs font-bold text-[#1B54FE]">
             {estimatedStartTime
               ? formatDateTime(estimatedStartTime)
-              : "Not planned"}
+              : t("shipment.segments.cargoAssignments.notPlanned")}
           </div>
         </div>
 
@@ -152,13 +162,13 @@ export default function CargoAssignmentsList({
           <div className="flex items-center gap-2 mb-2">
             <TimerOffIcon className="size-4 text-slate-300" />
             <span className="text-[10px] font-medium text-slate-400 uppercase">
-              EST. FINISH
+              {t("shipment.segments.cargoAssignments.estFinish")}
             </span>
           </div>
           <div className="text-xs font-bold text-[#1B54FE]">
             {estimatedFinishTime
               ? formatDateTime(estimatedFinishTime)
-              : "Not planned"}
+              : t("shipment.segments.cargoAssignments.notPlanned")}
           </div>
         </div>
 
@@ -167,11 +177,11 @@ export default function CargoAssignmentsList({
           <div className="flex items-center gap-2 mb-2">
             <Package className="size-4 text-slate-300" />
             <span className="text-[10px] font-medium text-slate-400 uppercase">
-              CARGO TYPE
+              {t("shipment.segments.cargoAssignments.cargoType")}
             </span>
           </div>
           <div className="text-xs font-medium text-slate-900">
-            {cargoType || "N/A"}
+            {cargoType || t("shipment.segments.cargoAssignments.nA")}
           </div>
         </div>
 
@@ -180,11 +190,11 @@ export default function CargoAssignmentsList({
           <div className="flex items-center gap-2 mb-2">
             <Weight className="size-4 text-slate-300" />
             <span className="text-[10px] font-medium text-slate-400 uppercase">
-              CARGO WEIGHT
+              {t("shipment.segments.cargoAssignments.cargoWeight")}
             </span>
           </div>
           <div className="text-xs font-medium text-slate-900">
-            {formatWeight(cargoWeight)}
+            {formatWeight(cargoWeight, t)}
           </div>
         </div>
       </div>
@@ -224,7 +234,7 @@ export default function CargoAssignmentsList({
                   <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-slate-100">
                     <UserRound className="size-3" />
                   </span>
-                  NOT ASSIGNED
+                  {t("shipment.segments.cargoAssignments.notAssigned")}
                 </div>
               )}
             </div>
@@ -232,8 +242,16 @@ export default function CargoAssignmentsList({
             {/* Middle-right: distance */}
             {announcement.status !== "pending" ? (
               <div className="shrink-0 w-1/4">
-                <span className="text-xs font-bold text-slate-900">246 KM</span>
-                <span className="text-xs text-slate-500 ml-1">to Origin</span>
+                <span className="text-xs font-bold text-slate-900">
+                  {!announcement.driverDistance
+                    ? t("shipment.segments.cargoAssignments.noGpsData")
+                    : `~${formatDistance(announcement.driverDistance)}`}
+                </span>
+                {announcement.driverDistance && (
+                  <span className="text-xs text-slate-500 ml-1">
+                    {t("shipment.segments.cargoAssignments.toOrigin")}
+                  </span>
+                )}
               </div>
             ) : (
               <div className="shrink-0 w-1/4">{""}</div>
@@ -242,7 +260,8 @@ export default function CargoAssignmentsList({
             {/* Right: status */}
             {announcement.status === "pending" ? (
               <div className="shrink-0 text-xs font-semibold text-amber-600 inline-flex items-center gap-1">
-                Pending <Loader2 className="size-3 animate-spin" />
+                {t("shipment.segments.cargoAssignments.pending")}{" "}
+                <Loader2 className="size-3 animate-spin" />
               </div>
             ) : announcement.status === "accepted" ? (
               <div className="shrink-0 flex gap-2">
@@ -256,12 +275,14 @@ export default function CargoAssignmentsList({
                   }
                   type="button"
                 >
-                  {assigningId === announcement.id ? "Assigning..." : "Assign"}
+                  {assigningId === announcement.id
+                    ? t("shipment.segments.cargoAssignments.assigning")
+                    : t("shipment.segments.cargoAssignments.assign")}
                 </button>
               </div>
             ) : announcement.status === "rejected" ? (
               <div className="shrink-0 text-xs font-semibold text-red-600 inline-flex items-center gap-1">
-                Rejected
+                {t("shipment.segments.cargoAssignments.rejected")}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="size-3"

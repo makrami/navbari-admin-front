@@ -566,6 +566,7 @@ export interface SegmentAnnouncementReadDto {
   driverId?: string | null;
   driverName?: string | null;
   driverAvatarUrl?: string | null;
+  driverDistance?: number | null;
   rejectionComment?: string | null;
   respondedAt?: string | null;
   createdAt: string;

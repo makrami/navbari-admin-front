@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
-import { PenLine, Check, X } from "lucide-react";
-import { useUpdateSegmentDetails } from "../../../../services/shipment/hooks";
+import {useState, useEffect} from "react";
+import {PenLine, Check, X} from "lucide-react";
+import {useUpdateSegmentDetails} from "../../../../services/shipment/hooks";
 
 type LocationDetailsCardProps = {
-  title: "ORIGIN DETAILS" | "DESTINATION DETAILS";
+  title: string;
   content: string;
   onSave?: (newContent: string) => void | Promise<void>;
   disabled?: boolean;
   segmentId?: string;
+  isOrigin?: boolean; // Indicates if this is origin details (true) or destination details (false)
 };
 
 export default function LocationDetailsCard({
@@ -16,6 +17,7 @@ export default function LocationDetailsCard({
   onSave,
   disabled = false,
   segmentId,
+  isOrigin,
 }: LocationDetailsCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
@@ -42,13 +44,15 @@ export default function LocationDetailsCard({
     if (segmentId) {
       try {
         // Determine which field is being edited
-        const isOrigin = title === "ORIGIN DETAILS";
+        // Use isOrigin prop if provided, otherwise fallback to checking title (for backward compatibility)
+        const isOriginField =
+          isOrigin !== undefined ? isOrigin : title === "ORIGIN DETAILS";
 
         // Prepare the request body
         // Only send the field being edited, send undefined for the other one
         const requestBody = {
-          originDetails: isOrigin ? editedContent : undefined,
-          destinationDetails: isOrigin ? undefined : editedContent,
+          originDetails: isOriginField ? editedContent : undefined,
+          destinationDetails: isOriginField ? undefined : editedContent,
         };
 
         // Call the API

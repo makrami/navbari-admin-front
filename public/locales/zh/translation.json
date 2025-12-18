@@ -369,6 +369,26 @@
       "title": "路段",
       "addSegment": "添加路段",
       "allActivities": "所有活动",
+      "cargoAssignments": {
+        "originDetails": "起点详情",
+        "destinationDetails": "目的地详情",
+        "start": "开始",
+        "estFinish": "预计完成",
+        "cargoType": "货物类型",
+        "cargoWeight": "货物重量",
+        "notPlanned": "未计划",
+        "nA": "不适用",
+        "kg": "公斤",
+        "notAssigned": "未分配",
+        "noGpsData": "无GPS数据",
+        "toOrigin": "到起点",
+        "pending": "等待中",
+        "assigning": "分配中...",
+        "assign": "分配",
+        "rejected": "已拒绝",
+        "driverIdRequired": "分配需要司机ID",
+        "assignFailed": "分配路段失败。请重试。"
+      },
       "progress": {
         "alert": {
           "delayedStartDrivingTime": "司机尚未开始驾驶 - 出发延迟",

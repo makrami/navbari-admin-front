@@ -629,6 +629,26 @@
       "title": "بخش‌ها",
       "addSegment": "افزودن بخش",
       "allActivities": "همه فعالیت‌ها",
+      "cargoAssignments": {
+        "originDetails": "جزئیات مبدأ",
+        "destinationDetails": "جزئیات مقصد",
+        "start": "شروع",
+        "estFinish": "پایان تخمینی",
+        "cargoType": "نوع بار",
+        "cargoWeight": "وزن بار",
+        "notPlanned": "برنامه‌ریزی نشده",
+        "nA": "نامشخص",
+        "kg": "کیلوگرم",
+        "notAssigned": "اختصاص نیافته",
+        "noGpsData": "داده GPS موجود نیست",
+        "toOrigin": "به مبدأ",
+        "pending": "در انتظار",
+        "assigning": "در حال اختصاص...",
+        "assign": "اختصاص",
+        "rejected": "رد شده",
+        "driverIdRequired": "شناسه راننده برای اختصاص الزامی است",
+        "assignFailed": "اختصاص بخش ناموفق بود. لطفاً دوباره تلاش کنید."
+      },
       "progress": {
         "alert": {
           "delayedStartDrivingTime": "راننده هنوز شروع به رانندگی نکرده است - تأخیر در حرکت",

@@ -629,6 +629,26 @@
       "title": "Segments",
       "addSegment": "Add Segment",
       "allActivities": "All Activities",
+      "cargoAssignments": {
+        "originDetails": "ORIGIN DETAILS",
+        "destinationDetails": "DESTINATION DETAILS",
+        "start": "START",
+        "estFinish": "EST. FINISH",
+        "cargoType": "CARGO TYPE",
+        "cargoWeight": "CARGO WEIGHT",
+        "notPlanned": "Not planned",
+        "nA": "N/A",
+        "kg": "KG",
+        "notAssigned": "NOT ASSIGNED",
+        "noGpsData": "No GPS Data",
+        "toOrigin": "to Origin",
+        "pending": "Pending",
+        "assigning": "Assigning...",
+        "assign": "Assign",
+        "rejected": "Rejected",
+        "driverIdRequired": "Driver ID is required for assignment",
+        "assignFailed": "Failed to assign segment. Please try again."
+      },
       "progress": {
         "alert": {
           "delayedStartDrivingTime": "Driver has not started driving yet - departure delayed",

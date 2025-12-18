@@ -369,6 +369,26 @@
       "title": "الأقسام",
       "addSegment": "إضافة قسم",
       "allActivities": "جميع الأنشطة",
+      "cargoAssignments": {
+        "originDetails": "تفاصيل المنشأ",
+        "destinationDetails": "تفاصيل الوجهة",
+        "start": "البداية",
+        "estFinish": "الانتهاء المتوقع",
+        "cargoType": "نوع البضائع",
+        "cargoWeight": "وزن البضائع",
+        "notPlanned": "غير مخططة",
+        "nA": "غير متاح",
+        "kg": "كجم",
+        "notAssigned": "غير مخصص",
+        "noGpsData": "لا توجد بيانات GPS",
+        "toOrigin": "إلى المنشأ",
+        "pending": "في الانتظار",
+        "assigning": "جارٍ التعيين...",
+        "assign": "تعيين",
+        "rejected": "مرفوض",
+        "driverIdRequired": "معرف السائق مطلوب للتعيين",
+        "assignFailed": "فشل تعيين القسم. يرجى المحاولة مرة أخرى."
+      },
       "progress": {
         "alert": {
           "delayedStartDrivingTime": "لم يبدأ السائق بالقيادة بعد - تأخير في الانطلاق",

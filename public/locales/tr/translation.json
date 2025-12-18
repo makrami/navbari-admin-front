@@ -629,6 +629,26 @@
       "title": "Segmentler",
       "addSegment": "Segment Ekle",
       "allActivities": "Tüm Aktiviteler",
+      "cargoAssignments": {
+        "originDetails": "BAŞLANGIÇ DETAYLARI",
+        "destinationDetails": "VARış DETAYLARI",
+        "start": "BAŞLANGIÇ",
+        "estFinish": "TAH. BİTİŞ",
+        "cargoType": "KARGO TİPİ",
+        "cargoWeight": "KARGO AĞIRLIĞI",
+        "notPlanned": "Planlanmadı",
+        "nA": "Bilinmiyor",
+        "kg": "KG",
+        "notAssigned": "ATANMADI",
+        "noGpsData": "GPS Verisi Yok",
+        "toOrigin": "Başlangıca",
+        "pending": "Beklemede",
+        "assigning": "Atanıyor...",
+        "assign": "Ata",
+        "rejected": "Reddedildi",
+        "driverIdRequired": "Atama için sürücü kimliği gereklidir",
+        "assignFailed": "Segment ataması başarısız oldu. Lütfen tekrar deneyin."
+      },
       "progress": {
         "alert": {
           "delayedStartDrivingTime": "Sürücü henüz sürmeye başlamadı - kalkış gecikti",

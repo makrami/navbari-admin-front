@@ -369,6 +369,26 @@
       "title": "Сегменты",
       "addSegment": "Добавить сегмент",
       "allActivities": "Все активности",
+      "cargoAssignments": {
+        "originDetails": "ДЕТАЛИ ОТПРАВЛЕНИЯ",
+        "destinationDetails": "ДЕТАЛИ НАЗНАЧЕНИЯ",
+        "start": "НАЧАЛО",
+        "estFinish": "ПРЕДП. ЗАВЕРШЕНИЕ",
+        "cargoType": "ТИП ГРУЗА",
+        "cargoWeight": "ВЕС ГРУЗА",
+        "notPlanned": "Не запланировано",
+        "nA": "Н/Д",
+        "kg": "КГ",
+        "notAssigned": "НЕ НАЗНАЧЕНО",
+        "noGpsData": "Нет данных GPS",
+        "toOrigin": "к месту отправления",
+        "pending": "Ожидание",
+        "assigning": "Назначение...",
+        "assign": "Назначить",
+        "rejected": "Отклонено",
+        "driverIdRequired": "Требуется ID водителя для назначения",
+        "assignFailed": "Не удалось назначить сегмент. Пожалуйста, попробуйте снова."
+      },
       "progress": {
         "alert": {
           "delayedStartDrivingTime": "Водитель еще не начал движение - задержка отправления",
