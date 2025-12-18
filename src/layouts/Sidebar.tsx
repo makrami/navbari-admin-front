@@ -166,30 +166,32 @@ export function Sidebar() {
               }
             >
               {({isActive}) => (
-                <div className="flex items-center gap-2 relative">
+                <>
                   <ActiveIndicator isActive={isActive} />
-                  <div className="relative">
-                    <BoxesIcon
-                      className={`size-5 ${
+                  <div className="flex items-center gap-2 relative">
+                    <div className="relative">
+                      <BoxesIcon
+                        className={`size-5 ${
+                          isActive ? "text-[#1B54FE]" : "text-slate-400"
+                        }`}
+                      />
+                      {awaitingCompaniesCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                          {awaitingCompaniesCount > 99
+                            ? "99+"
+                            : awaitingCompaniesCount}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs font-medium uppercase tracking-wide ${
                         isActive ? "text-[#1B54FE]" : "text-slate-400"
                       }`}
-                    />
-                    {awaitingCompaniesCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
-                        {awaitingCompaniesCount > 99
-                          ? "99+"
-                          : awaitingCompaniesCount}
-                      </span>
-                    )}
+                    >
+                      {t("sidebar.links.localCompanies")}
+                    </span>
                   </div>
-                  <span
-                    className={`text-xs font-medium uppercase tracking-wide ${
-                      isActive ? "text-[#1B54FE]" : "text-slate-400"
-                    }`}
-                  >
-                    {t("sidebar.links.localCompanies")}
-                  </span>
-                </div>
+                </>
               )}
             </NavLink>
           )}
@@ -205,30 +207,33 @@ export function Sidebar() {
               }
             >
               {({isActive}) => (
-                <div className="flex items-center gap-2 relative">
+                <>
                   <ActiveIndicator isActive={isActive} />
-                  <div className="relative">
-                    <UsersIcon
-                      className={`size-5 ${
+
+                  <div className="flex items-center gap-2 relative">
+                    <div className="relative">
+                      <UsersIcon
+                        className={`size-5 ${
+                          isActive ? "text-[#1B54FE]" : "text-slate-400"
+                        }`}
+                      />
+                      {awaitingDriversCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                          {awaitingDriversCount > 99
+                            ? "99+"
+                            : awaitingDriversCount}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs font-medium uppercase tracking-wide ${
                         isActive ? "text-[#1B54FE]" : "text-slate-400"
                       }`}
-                    />
-                    {awaitingDriversCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
-                        {awaitingDriversCount > 99
-                          ? "99+"
-                          : awaitingDriversCount}
-                      </span>
-                    )}
+                    >
+                      {t("sidebar.links.drivers")}
+                    </span>
                   </div>
-                  <span
-                    className={`text-xs font-medium uppercase tracking-wide ${
-                      isActive ? "text-[#1B54FE]" : "text-slate-400"
-                    }`}
-                  >
-                    {t("sidebar.links.drivers")}
-                  </span>
-                </div>
+                </>
               )}
             </NavLink>
           )}
@@ -274,28 +279,30 @@ export function Sidebar() {
               }
             >
               {({isActive}) => (
-                <div className="flex items-center gap-2 relative">
+                <>
                   <ActiveIndicator isActive={isActive} />
-                  <div className="relative">
-                    <MessageSquareDot
-                      className={`size-5 ${
+                  <div className="flex items-center gap-2 relative">
+                    <div className="relative">
+                      <MessageSquareDot
+                        className={`size-5 ${
+                          isActive ? "text-[#1B54FE]" : "text-slate-400"
+                        }`}
+                      />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs font-medium uppercase tracking-wide ${
                         isActive ? "text-[#1B54FE]" : "text-slate-400"
                       }`}
-                    />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
-                    )}
+                    >
+                      {t("sidebar.links.chatAlert")}
+                    </span>
                   </div>
-                  <span
-                    className={`text-xs font-medium uppercase tracking-wide ${
-                      isActive ? "text-[#1B54FE]" : "text-slate-400"
-                    }`}
-                  >
-                    {t("sidebar.links.chatAlert")}
-                  </span>
-                </div>
+                </>
               )}
             </NavLink>
           )}

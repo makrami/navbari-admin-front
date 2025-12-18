@@ -1,6 +1,6 @@
 import {useMemo, useState, useEffect} from "react";
 import {useTranslation} from "react-i18next";
-import {useSearchParams} from "react-router-dom";
+import {useSearchParams, useLocation} from "react-router-dom";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {EntityCard} from "../../shared/components/ui/EntityCard";
 import {StatusFilterChips} from "./components/StatusFilterChips";
@@ -28,6 +28,7 @@ import {useCurrentUser} from "../../services/user/hooks";
 
 export function DriversPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
@@ -42,7 +43,13 @@ export function DriversPage() {
   } | null>(null);
   const {t} = useTranslation();
   const queryClient = useQueryClient();
-  const {data: drivers = [], isLoading, isError, error} = useDrivers();
+  const {
+    data: drivers = [],
+    isLoading,
+    isError,
+    error,
+    refetch: refetchDrivers,
+  } = useDrivers();
   const {data: user} = useCurrentUser();
 
   // Get permissions array from user data
@@ -76,6 +83,25 @@ export function DriversPage() {
     }
     return counts;
   }, [formattedDrivers]);
+
+  // Refetch drivers data on window focus and route changes
+  useEffect(() => {
+    const handleFocus = () => {
+      refetchDrivers();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refetchDrivers]);
+
+  // Refetch when navigating to this route
+  useEffect(() => {
+    if (location.pathname === "/drivers") {
+      refetchDrivers();
+    }
+  }, [location.pathname, refetchDrivers]);
 
   // Sync selectedId with URL params
   useEffect(() => {
@@ -159,6 +185,7 @@ export function DriversPage() {
 
   const handleApprove = (id: string) => {
     approveMutation.mutate(id);
+    refetchDrivers();
   };
 
   const handleReject = (id: string) => {
@@ -204,6 +231,7 @@ export function DriversPage() {
       id: selectedDriver.id,
       status: newStatus,
     });
+    refetchDrivers();
   };
 
   if (isLoading) {
@@ -247,7 +275,10 @@ export function DriversPage() {
         <div className="w-full max-w-7xl px-6">
           <StatusFilterChips
             active={activeFilter}
-            onChange={setActiveFilter}
+            onChange={(filter) => {
+              setActiveFilter(filter);
+              refetchDrivers();
+            }}
             counts={countByFilter as Record<FilterKey, number>}
             isListPanel={false}
           />
@@ -259,7 +290,10 @@ export function DriversPage() {
               <EntityCard
                 entity={d}
                 className="w-full h-full"
-                onView={(id) => setSelectedId(id)}
+                onView={(id) => {
+                  setSelectedId(id);
+                  refetchDrivers();
+                }}
                 onApprove={hasDriversManage ? handleApprove : undefined}
                 onReject={hasDriversManage ? handleReject : undefined}
                 statsLabels={{
@@ -289,7 +323,10 @@ export function DriversPage() {
       <ListPanel title={t("drivers.page.title")}>
         <StatusFilterChips
           active={activeFilter}
-          onChange={setActiveFilter}
+          onChange={(filter) => {
+            setActiveFilter(filter);
+            refetchDrivers();
+          }}
           counts={countByFilter as Record<FilterKey, number>}
           isListPanel={selectedDriver !== null}
         />
@@ -300,7 +337,10 @@ export function DriversPage() {
                 entity={d}
                 className="w-full h-full"
                 selected={selectedId === d.id}
-                onView={(id) => setSelectedId(id)}
+                onView={(id) => {
+                  setSelectedId(id);
+                  refetchDrivers();
+                }}
                 onApprove={hasDriversManage ? handleApprove : undefined}
                 onReject={hasDriversManage ? handleReject : undefined}
                 statsLabels={{

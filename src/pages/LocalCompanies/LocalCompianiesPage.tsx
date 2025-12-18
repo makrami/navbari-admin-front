@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {useSearchParams} from "react-router-dom";
+import {useSearchParams, useLocation} from "react-router-dom";
 import {StatusFilterChips} from "./components/StatusFilterChips";
 import type {FilterKey} from "./components/StatusFilterChips";
 import {ListPanel} from "../../shared/components/ui/ListPanel";
@@ -23,12 +23,18 @@ import {useCurrentUser} from "../../services/user/hooks";
 
 export function LocalCompaniesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const {t} = useTranslation();
 
   // Fetch all companies with no filters
-  const {data: companies = [], isLoading, error} = useCompanies({});
+  const {
+    data: companies = [],
+    isLoading,
+    error,
+    refetch: refetchCompanies,
+  } = useCompanies({});
   const {data: companyDetails} = useCompanyDetails(selectedId);
   const suspendMutation = useSuspendCompany();
   const unsuspendMutation = useUnsuspendCompany();
@@ -70,6 +76,25 @@ export function LocalCompaniesPage() {
     return companies.find((c) => c.id === selectedId) || null;
   }, [companies, selectedId]);
 
+  // Refetch companies data on window focus and route changes
+  useEffect(() => {
+    const handleFocus = () => {
+      refetchCompanies();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refetchCompanies]);
+
+  // Refetch when navigating to this route
+  useEffect(() => {
+    if (location.pathname === "/local-companies") {
+      refetchCompanies();
+    }
+  }, [location.pathname, refetchCompanies]);
+
   // Sync selectedId with URL params
   useEffect(() => {
     const urlSelectedId = searchParams.get("selectedId");
@@ -105,6 +130,7 @@ export function LocalCompaniesPage() {
       // Deactivate (suspend)
       await suspendMutation.mutateAsync(selectedCompany.id);
     }
+    refetchCompanies();
   };
 
   const isActive = selectedCompany
@@ -148,7 +174,10 @@ export function LocalCompaniesPage() {
 
         <StatusFilterChips
           active={activeFilter}
-          onChange={setActiveFilter}
+          onChange={(filter) => {
+            setActiveFilter(filter);
+            refetchCompanies();
+          }}
           counts={countByFilter as Record<FilterKey, number>}
           isListPanel={false}
         />
@@ -164,7 +193,10 @@ export function LocalCompaniesPage() {
                 key={c.id}
                 company={c}
                 selected={selectedId === c.id}
-                onView={(id: string) => setSelectedId(id)}
+                onView={(id: string) => {
+                  setSelectedId(id);
+                  refetchCompanies();
+                }}
               />
             ))}
           </div>
@@ -179,7 +211,10 @@ export function LocalCompaniesPage() {
       <ListPanel title={t("localCompanies.page.title")}>
         <StatusFilterChips
           active={activeFilter}
-          onChange={setActiveFilter}
+          onChange={(filter) => {
+            setActiveFilter(filter);
+            refetchCompanies();
+          }}
           counts={countByFilter as Record<FilterKey, number>}
           isListPanel={true}
         />
