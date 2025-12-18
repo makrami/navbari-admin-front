@@ -1,7 +1,7 @@
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import {useMemo, useState, useEffect, useRef, type ReactNode} from "react";
 import SegmentProgress from "./SegmentProgress";
-import { cn } from "../../../../shared/utils/cn";
-import { CITY_OPTIONS } from "../../data/cities";
+import {cn} from "../../../../shared/utils/cn";
+import {CITY_OPTIONS} from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -9,17 +9,17 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
+import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type { Segment } from "../../../../shared/types/segmentData";
-import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
-import type { Shipment } from "../../../../shared/types/shipment";
+import type {Segment} from "../../../../shared/types/segmentData";
+import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
+import type {Shipment} from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
-import { ShipmentLinkSection } from "./ShipmentLinkSection";
-import type { SegmentReadDto } from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
-import { useCompanies } from "../../../../services/company/hooks";
+import {ShipmentLinkSection} from "./ShipmentLinkSection";
+import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
+import {useCompanies} from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
@@ -32,15 +32,15 @@ import {
   computeSegmentPlace,
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
-import { getCountryCode } from "../../../../shared/utils/countryCode";
-import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
-import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
+import {getCountryCode} from "../../../../shared/utils/countryCode";
+import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
+import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {
   CHAT_RECIPIENT_TYPE,
   CHAT_ALERT_TYPE,
 } from "../../../../services/chat/chat.types";
-import { useTranslation } from "react-i18next";
-import { useCurrentUser } from "../../../../services/user/hooks";
+import {useTranslation} from "react-i18next";
+import {useCurrentUser} from "../../../../services/user/hooks";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -152,42 +152,61 @@ export function SegmentDetails({
   );
 
   const updateSegmentMutation = useUpdateSegment();
-  const { data: user } = useCurrentUser();
+  const {data: user} = useCurrentUser();
 
   // Get permissions array from user data
   const userRecord = user as Record<string, unknown> | undefined;
   const permissions = (userRecord?.permissions as string[] | undefined) || [];
   const hasSegmentsManage = permissions.includes("segments:manage");
 
-  // Sync form fields when data changes externally (e.g., after save)
+  // Track previous segment ID and key data fields to detect actual changes
+  const prevSegmentIdRef = useRef<string | undefined>(segmentId);
+  const prevDataKeyRef = useRef<string>("");
+
+  // Sync form fields when segment ID changes or when data actually changes (not just refetch)
   useEffect(() => {
-    setFromValue(place);
-    setToValue(nextPlace ?? "");
-    const startAt =
-      typeof data.estimatedStartTime === "string"
-        ? data.estimatedStartTime
-        : "";
-    const startResult = splitDateTime(startAt);
-    setStartDateValue(startResult.d);
-    setStartTimeValue(startResult.t);
-    const estFinishAt =
-      typeof data.estimatedFinishTime === "string"
-        ? data.estimatedFinishTime
-        : "";
-    const finishResult = splitDateTime(estFinishAt);
-    setEstFinishDateValue(finishResult.d);
-    setEstFinishTimeValue(finishResult.t);
-    setBaseFee(String(data.baseFee));
-    const dataRecord = data as unknown as Record<string, unknown>;
-    setOriginDetails((dataRecord.originDetails as string) || "");
-    setDestinationDetails((dataRecord.destinationDetails as string) || "");
+    // Create a key from the data fields that matter for the form
+    const dataKey = `${data.id}-${place}-${nextPlace}-${data.estimatedStartTime}-${data.estimatedFinishTime}-${data.baseFee}`;
+    const segmentChanged = prevSegmentIdRef.current !== segmentId;
+    const dataChanged = prevDataKeyRef.current !== dataKey;
+
+    // Only sync form fields if:
+    // 1. Segment ID changed (new segment selected)
+    // 2. Key data fields actually changed (not just a refetch with same data)
+    if (segmentChanged || dataChanged) {
+      setFromValue(place);
+      setToValue(nextPlace ?? "");
+      const startAt =
+        typeof data.estimatedStartTime === "string"
+          ? data.estimatedStartTime
+          : "";
+      const startResult = splitDateTime(startAt);
+      setStartDateValue(startResult.d);
+      setStartTimeValue(startResult.t);
+      const estFinishAt =
+        typeof data.estimatedFinishTime === "string"
+          ? data.estimatedFinishTime
+          : "";
+      const finishResult = splitDateTime(estFinishAt);
+      setEstFinishDateValue(finishResult.d);
+      setEstFinishTimeValue(finishResult.t);
+      setBaseFee(String(data.baseFee));
+      const dataRecord = data as unknown as Record<string, unknown>;
+      setOriginDetails((dataRecord.originDetails as string) || "");
+      setDestinationDetails((dataRecord.destinationDetails as string) || "");
+
+      // Update refs
+      prevSegmentIdRef.current = segmentId;
+      prevDataKeyRef.current = dataKey;
+    }
   }, [
+    segmentId,
     place,
     nextPlace,
     data.estimatedStartTime,
     data.estimatedFinishTime,
     data.baseFee,
-    data,
+    data.id,
   ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
@@ -196,7 +215,7 @@ export function SegmentDetails({
   );
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): { city: string; country: string } => {
+  const parsePlace = (place: string): {city: string; country: string} => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -204,11 +223,11 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return { city: place, country: "" };
+    return {city: place, country: ""};
   };
 
   // Fetch companies from API
-  const { data: companies = [] } = useCompanies();
+  const {data: companies = []} = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -218,11 +237,11 @@ export function SegmentDetails({
   }, [companies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
-  const { data: announcements = [] } = useSegmentAnnouncements(
+  const {data: announcements = []} = useSegmentAnnouncements(
     data.hasPendingAnnouncements && segmentId ? segmentId : null
   );
 
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   // Use chat hook for driver chat (for alert sending)
   const chatHook = useChatWithRecipient({

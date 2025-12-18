@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ShipmentDetailsView } from "./ShipmentDetailsView";
-import { useShipmentSelection } from "../hooks/useShipmentSelection";
-import { useSegmentHandlers } from "../hooks/useSegmentHandlers";
+import {useState, useEffect, useRef} from "react";
+import {useSearchParams} from "react-router-dom";
+import {ShipmentDetailsView} from "./ShipmentDetailsView";
+import {useShipmentSelection} from "../hooks/useShipmentSelection";
+import {useSegmentHandlers} from "../hooks/useSegmentHandlers";
 import {
   useShipmentSegments,
   useCreateSegment,
 } from "../../../services/shipment/hooks";
-import type { Segment } from "../../../shared/types/segmentData";
+import type {Segment} from "../../../shared/types/segmentData";
 
 export function ShipmentContainer() {
   const [searchParams] = useSearchParams();
@@ -25,7 +25,7 @@ export function ShipmentContainer() {
     handleUpdateShipment,
   } = useShipmentSelection();
 
-  const { handleSegmentUpdate, handleSegmentSave, timeoutsRef } =
+  const {handleSegmentUpdate, handleSegmentSave, timeoutsRef} =
     useSegmentHandlers(
       shipments ?? [],
       editedSegmentsByShipmentId,
@@ -33,7 +33,7 @@ export function ShipmentContainer() {
     );
 
   // Fetch segments when a shipment is selected
-  const { data: fetchedSegments, loading: segmentsLoading } =
+  const {data: fetchedSegments, loading: segmentsLoading} =
     useShipmentSegments(selectedId);
 
   // Create segment mutation
@@ -42,7 +42,7 @@ export function ShipmentContainer() {
   // Handle add segment - calls API
   const handleAddSegment = async (shipmentId: string) => {
     try {
-      await createSegmentMutation.mutateAsync({ shipmentId });
+      await createSegmentMutation.mutateAsync({shipmentId});
       // The mutation will automatically invalidate and refetch segments
     } catch (error) {
       console.error("Failed to create segment:", error);
@@ -50,14 +50,35 @@ export function ShipmentContainer() {
     }
   };
 
+  // Track previous segments data to prevent unnecessary updates during refetch
+  const prevSegmentsKeyRef = useRef<string>("");
+  const prevSelectedIdRef = useRef<string | null>(null);
+
   // Update editedSegmentsByShipmentId when segments are fetched
   // This ensures ShipmentItem can display segments in the list panel
+  // Only update when shipment changes or when segments data actually changes
   useEffect(() => {
     if (selectedId && fetchedSegments && !segmentsLoading) {
-      setEditedSegmentsByShipmentId((prev) => ({
-        ...prev,
-        [selectedId]: fetchedSegments,
-      }));
+      // Create a key from segment IDs and count to detect actual changes
+      const segmentsKey = fetchedSegments
+        .map((seg) => `${seg.id}-${seg.step}`)
+        .join("|");
+      const shipmentChanged = prevSelectedIdRef.current !== selectedId;
+      const segmentsChanged =
+        shipmentChanged || prevSegmentsKeyRef.current !== segmentsKey;
+
+      if (segmentsChanged) {
+        setEditedSegmentsByShipmentId((prev) => ({
+          ...prev,
+          [selectedId]: fetchedSegments,
+        }));
+        prevSegmentsKeyRef.current = segmentsKey;
+        prevSelectedIdRef.current = selectedId;
+      }
+    } else if (!selectedId) {
+      // Reset refs when no shipment is selected
+      prevSegmentsKeyRef.current = "";
+      prevSelectedIdRef.current = null;
     }
   }, [selectedId, fetchedSegments, segmentsLoading]);
 
