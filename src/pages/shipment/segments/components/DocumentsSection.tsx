@@ -1,11 +1,11 @@
-import {Paperclip, FileText as FileTextIcon, X as XIcon} from "lucide-react";
-import {useState, useRef} from "react";
+import { Paperclip, FileText as FileTextIcon, X as XIcon } from "lucide-react";
+import { useState, useRef } from "react";
 import DocumentCard from "./DocumentCard";
 import {
   useUploadFileAttachment,
   useUpdateFileAttachmentStatus,
 } from "../../../../services/file-attachment/hooks";
-import {ENV} from "../../../../lib/env";
+import { ENV } from "../../../../lib/env";
 
 export type DocumentItem = {
   id: string | number;
@@ -66,7 +66,7 @@ export function DocumentsSection({
     if (!file || !segmentId) return;
 
     try {
-      await uploadMutation.mutateAsync({segmentId, file});
+      await uploadMutation.mutateAsync({ segmentId, file });
       onDocumentsUpdate?.();
       // Reset file input
       if (fileInputRef.current) {
@@ -141,7 +141,7 @@ export function DocumentsSection({
         Documents
       </header>
       <div className="overflow-x-auto no-scrollbar">
-        <div className="flex gap-3 px-3 pb-3">
+        <div className="flex gap-3 px-3 bg-white rounded-xl py-3">
           {/* Upload card - always first */}
           {segmentId && (
             <>

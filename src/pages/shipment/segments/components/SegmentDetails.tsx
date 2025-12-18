@@ -1,7 +1,7 @@
-import {useMemo, useState, useEffect, type ReactNode} from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import SegmentProgress from "./SegmentProgress";
-import {cn} from "../../../../shared/utils/cn";
-import {CITY_OPTIONS} from "../../data/cities";
+import { cn } from "../../../../shared/utils/cn";
+import { CITY_OPTIONS } from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -9,17 +9,17 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
+import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import type {Segment} from "../../../../shared/types/segmentData";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import type {Shipment} from "../../../../shared/types/shipment";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
-import {ShipmentLinkSection} from "./ShipmentLinkSection";
-import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
-import {useCompanies} from "../../../../services/company/hooks";
+import { ShipmentLinkSection } from "./ShipmentLinkSection";
+import type { SegmentReadDto } from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
+import { useCompanies } from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
@@ -32,15 +32,15 @@ import {
   computeSegmentPlace,
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
-import {getCountryCode} from "../../../../shared/utils/countryCode";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import { getCountryCode } from "../../../../shared/utils/countryCode";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
 import {
   CHAT_RECIPIENT_TYPE,
   CHAT_ALERT_TYPE,
 } from "../../../../services/chat/chat.types";
-import {useTranslation} from "react-i18next";
-import {useCurrentUser} from "../../../../services/user/hooks";
+import { useTranslation } from "react-i18next";
+import { useCurrentUser } from "../../../../services/user/hooks";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -142,8 +142,17 @@ export function SegmentDetails({
 
   const [baseFee, setBaseFee] = useState<string>(String(data.baseFee));
 
+  // Origin and destination details state
+  const [originDetails, setOriginDetails] = useState<string>(
+    ((data as unknown as Record<string, unknown>).originDetails as string) || ""
+  );
+  const [destinationDetails, setDestinationDetails] = useState<string>(
+    ((data as unknown as Record<string, unknown>)
+      .destinationDetails as string) || ""
+  );
+
   const updateSegmentMutation = useUpdateSegment();
-  const {data: user} = useCurrentUser();
+  const { data: user } = useCurrentUser();
 
   // Get permissions array from user data
   const userRecord = user as Record<string, unknown> | undefined;
@@ -169,12 +178,16 @@ export function SegmentDetails({
     setEstFinishDateValue(finishResult.d);
     setEstFinishTimeValue(finishResult.t);
     setBaseFee(String(data.baseFee));
+    const dataRecord = data as unknown as Record<string, unknown>;
+    setOriginDetails((dataRecord.originDetails as string) || "");
+    setDestinationDetails((dataRecord.destinationDetails as string) || "");
   }, [
     place,
     nextPlace,
     data.estimatedStartTime,
     data.estimatedFinishTime,
     data.baseFee,
+    data,
   ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
@@ -183,7 +196,7 @@ export function SegmentDetails({
   );
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): {city: string; country: string} => {
+  const parsePlace = (place: string): { city: string; country: string } => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -191,11 +204,11 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return {city: place, country: ""};
+    return { city: place, country: "" };
   };
 
   // Fetch companies from API
-  const {data: companies = []} = useCompanies();
+  const { data: companies = [] } = useCompanies();
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -205,11 +218,11 @@ export function SegmentDetails({
   }, [companies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true
-  const {data: announcements = []} = useSegmentAnnouncements(
+  const { data: announcements = [] } = useSegmentAnnouncements(
     data.hasPendingAnnouncements && segmentId ? segmentId : null
   );
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   // Use chat hook for driver chat (for alert sending)
   const chatHook = useChatWithRecipient({
@@ -367,7 +380,10 @@ export function SegmentDetails({
       >
         <div className="overflow-hidden">
           <div
-            className={cn("px-3 bg-white py-2 gap-6", open && "rounded-b-xl")}
+            className={cn(
+              "px-3 bg-slate-50 py-2 gap-6",
+              open && "rounded-b-xl"
+            )}
           >
             {/* Shipment Link Section - only shown when shipmentLinkProps is provided */}
             {shipment && linkShipment && (
@@ -731,7 +747,16 @@ export function SegmentDetails({
                 />
               </div>
             ) : data.hasPendingAnnouncements ? (
-              <CargoAssignmentsList announcements={announcements ?? []} />
+              <CargoAssignmentsList
+                announcements={announcements ?? []}
+                segmentId={segmentId}
+                originDetails={originDetails}
+                destinationDetails={destinationDetails}
+                estimatedStartTime={data.estimatedStartTime || undefined}
+                estimatedFinishTime={data.estimatedFinishTime || undefined}
+                cargoType={shipment?.cargoType || undefined}
+                cargoWeight={shipment?.cargoWeight || undefined}
+              />
             ) : (
               <SegmentInfoSummary
                 driverId={data.driverId || null}
@@ -771,6 +796,8 @@ export function SegmentDetails({
                 initialEtaToOrigin={data.initialEtaToOrigin}
                 distanceToOrigin={data.distanceToOrigin}
                 durationOriginToDestination={data.durationOriginToDestination}
+                originDetails={originDetails}
+                destinationDetails={destinationDetails}
               />
             )}
           </div>

@@ -10,25 +10,29 @@ import {
   TriangleAlert,
   MessagesSquareIcon,
 } from "lucide-react";
-import {useTranslation} from "react-i18next";
-import {useEffect, useState} from "react";
-import {useQueryClient} from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import FinancialSection from "./FinancialSection";
 import DocumentsSection from "./DocumentsSection";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {useRTL} from "../../../../shared/hooks/useRTL";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
-import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
-import {cn} from "../../../../shared/utils/cn";
+import LocationDetailsCard from "./LocationDetailsCard";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { useRTL } from "../../../../shared/hooks/useRTL";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
+import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
+import type { ActionableAlertChip } from "../../../chat-alert/types/chat";
+import { cn } from "../../../../shared/utils/cn";
 import {
   useSegmentFileAttachments,
   fileAttachmentKeys,
 } from "../../../../services/file-attachment/hooks";
-import type {DocumentItem} from "./DocumentsSection";
-import {getFileSizesFromUrls} from "../utils/fileSize";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import type {SEGMENT_STATUS as SEGMENT_STATUS_TYPE} from "../../../../services/shipment/shipment.api.service";
+import type { DocumentItem } from "./DocumentsSection";
+import { getFileSizesFromUrls } from "../utils/fileSize";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import type { SEGMENT_STATUS as SEGMENT_STATUS_TYPE } from "../../../../services/shipment/shipment.api.service";
+import { useUpdateSegment } from "../../../../services/shipment/hooks";
+import type { UpdateSegmentDto } from "../../../../services/shipment/shipment.api.service";
+import { useCurrentUser } from "../../../../services/user/hooks";
 
 type SegmentInfoSummaryProps = {
   baseFee?: number;
@@ -71,6 +75,8 @@ type SegmentInfoSummaryProps = {
   initialEtaToOrigin?: string | null;
   distanceToOrigin?: number | null;
   durationOriginToDestination?: number | null;
+  originDetails?: string;
+  destinationDetails?: string;
 };
 
 /**
@@ -136,7 +142,7 @@ function formatEtaDuration(
  */
 function formatTimeAgo(
   timestamp: string | null | undefined,
-  t: (key: string, options?: {count?: number}) => string
+  t: (key: string, options?: { count?: number }) => string
 ): string {
   if (!timestamp) return "";
 
@@ -154,11 +160,11 @@ function formatTimeAgo(
     if (diffMins < 1) {
       return t("segments.eta.justNow");
     } else if (diffMins < 60) {
-      return t("segments.eta.minutesAgo", {count: diffMins});
+      return t("segments.eta.minutesAgo", { count: diffMins });
     } else if (diffHours < 24) {
-      return t("segments.eta.hoursAgo", {count: diffHours});
+      return t("segments.eta.hoursAgo", { count: diffHours });
     } else {
-      return t("segments.eta.daysAgo", {count: diffDays});
+      return t("segments.eta.daysAgo", { count: diffDays });
     }
   } catch {
     return "";
@@ -252,8 +258,8 @@ function formatTimeDifference(diffMinutes: number | null): string {
 function generateAssignedMessage(
   props: SegmentInfoSummaryProps,
   t: (key: string, options?: Record<string, unknown>) => string
-): {label: string; duration: string; difference?: string} | null {
-  const {estimatedStartTime, initialEtaToOrigin} = props;
+): { label: string; duration: string; difference?: string } | null {
+  const { estimatedStartTime, initialEtaToOrigin } = props;
   // If we have ETA to origin, show it
   if (initialEtaToOrigin) {
     const difference = new Date(initialEtaToOrigin).getTime() - Date.now();
@@ -285,8 +291,8 @@ function generateAssignedMessage(
 function generateToOriginMessage(
   props: SegmentInfoSummaryProps,
   t: (key: string, options?: Record<string, unknown>) => string
-): {label: string; duration: string; difference?: string} | null {
-  const {etaToOrigin, estimatedStartTime} = props;
+): { label: string; duration: string; difference?: string } | null {
+  const { etaToOrigin, estimatedStartTime } = props;
 
   if (!etaToOrigin) {
     return null;
@@ -320,8 +326,8 @@ function generateToOriginMessage(
 function generateAtOriginMessage(
   props: SegmentInfoSummaryProps,
   t: (key: string, options?: Record<string, unknown>) => string
-): {label: string; duration: string; difference?: string} | null {
-  const {estimatedFinishTime, durationOriginToDestination} = props;
+): { label: string; duration: string; difference?: string } | null {
+  const { estimatedFinishTime, durationOriginToDestination } = props;
 
   // If we have ETA to destination, show it
   if (durationOriginToDestination) {
@@ -402,8 +408,8 @@ function generateAtOriginMessage(
 function generateToDestinationMessage(
   props: SegmentInfoSummaryProps,
   t: (key: string, options?: Record<string, unknown>) => string
-): {label: string; duration: string; difference?: string} | null {
-  const {estimatedFinishTime, etaToDestination} = props;
+): { label: string; duration: string; difference?: string } | null {
+  const { estimatedFinishTime, etaToDestination } = props;
 
   // If we have estimated finish time but no GPS ETA, show planned time
   if (estimatedFinishTime) {
@@ -466,8 +472,8 @@ function generateToDestinationMessage(
 function generateAtDestinationMessage(
   props: SegmentInfoSummaryProps,
   t: (key: string, options?: Record<string, unknown>) => string
-): {label: string; duration: string; difference?: string} | null {
-  const {estimatedFinishTime, arrivedDestinationAt} = props;
+): { label: string; duration: string; difference?: string } | null {
+  const { estimatedFinishTime, arrivedDestinationAt } = props;
 
   // If we have estimated finish time but no GPS ETA, show planned time
   if (estimatedFinishTime) {
@@ -530,7 +536,7 @@ function generateAtDestinationMessage(
 function generateDeliveredMessage(
   props: SegmentInfoSummaryProps,
   t: (key: string, options?: Record<string, unknown>) => string
-): {label: string; duration: string; details?: string} | null {
+): { label: string; duration: string; details?: string } | null {
   const {
     estimatedStartTime,
     startedAt,
@@ -559,7 +565,7 @@ function generateDeliveredMessage(
       details.push(
         (t as (key: string, options?: Record<string, string>) => string)(
           "segments.eta.delivered.startDifference",
-          {difference: diffStr}
+          { difference: diffStr }
         )
       );
     }
@@ -572,7 +578,7 @@ function generateDeliveredMessage(
       details.push(
         (t as (key: string, options?: Record<string, string>) => string)(
           "segments.eta.delivered.originDifference",
-          {difference: diffStr}
+          { difference: diffStr }
         )
       );
     }
@@ -582,7 +588,7 @@ function generateDeliveredMessage(
     details.push(
       (t as (key: string, options?: Record<string, string>) => string)(
         "segments.eta.delivered.overallDifference",
-        {difference: overallDiffStr}
+        { difference: overallDiffStr }
       )
     );
   }
@@ -606,7 +612,7 @@ function generateStatusBasedMessage(
   difference?: string;
   details?: string;
 } | null {
-  const {status} = props;
+  const { status } = props;
 
   if (!status) {
     // Fallback to old logic if no status provided
@@ -665,10 +671,30 @@ export default function SegmentInfoSummary({
   initialEtaToOrigin,
   distanceToOrigin,
   durationOriginToDestination,
+  originDetails = "",
+  destinationDetails = "",
 }: SegmentInfoSummaryProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const isRTL = useRTL();
   const queryClient = useQueryClient();
+  const updateSegmentMutation = useUpdateSegment();
+  const { data: user } = useCurrentUser();
+
+  // Get permissions array from user data
+  const userRecord = user as Record<string, unknown> | undefined;
+  const permissions = (userRecord?.permissions as string[] | undefined) || [];
+  const hasSegmentsManage = permissions.includes("segments:manage");
+
+  // State for origin and destination details
+  const [localOriginDetails, setLocalOriginDetails] = useState(originDetails);
+  const [localDestinationDetails, setLocalDestinationDetails] =
+    useState(destinationDetails);
+
+  // Sync with props when they change
+  useEffect(() => {
+    setLocalOriginDetails(originDetails);
+    setLocalDestinationDetails(destinationDetails);
+  }, [originDetails, destinationDetails]);
   const [fetchedDocuments, setFetchedDocuments] = useState<DocumentItem[]>([]);
   const [documentsWithSizes, setDocumentsWithSizes] = useState<DocumentItem[]>(
     []
@@ -678,13 +704,23 @@ export default function SegmentInfoSummary({
   >("all");
 
   // Use the hook to fetch file attachments
-  const {data: fileAttachments} = useSegmentFileAttachments(segmentId || null);
+  const { data: fileAttachments } = useSegmentFileAttachments(
+    segmentId || null
+  );
 
   // Create actionable alerts with translations
   const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-    {id: "1", label: t("segments.summary.gpsLost"), alertType: "alert"},
-    {id: "2", label: t("segments.summary.delayExpected"), alertType: "warning"},
-    {id: "3", label: t("segments.summary.routeCleared"), alertType: "success"},
+    { id: "1", label: t("segments.summary.gpsLost"), alertType: "alert" },
+    {
+      id: "2",
+      label: t("segments.summary.delayExpected"),
+      alertType: "warning",
+    },
+    {
+      id: "3",
+      label: t("segments.summary.routeCleared"),
+      alertType: "success",
+    },
     {
       id: "4",
       label: t("segments.summary.documentationPending"),
@@ -860,11 +896,11 @@ export default function SegmentInfoSummary({
     : null;
 
   return (
-    <div dir="ltr" className="bg-white rounded-xl space-y-4 mt-4">
+    <div dir="ltr" className="bg-slate-50 rounded-xl space-y-4 mt-4">
       {/* Estimated Arrival Card */}
       <div
         dir={isRTL ? "rtl" : "ltr"}
-        className="bg-slate-50 rounded-xl p-4 flex items-center justify-between gap-2"
+        className="bg-white rounded-xl p-4 flex items-center justify-between gap-2"
       >
         {/* Left Section - Text Information */}
         <div className="flex flex-col  gap-2">
@@ -1139,6 +1175,49 @@ export default function SegmentInfoSummary({
           </div>
         </div>
       </section>
+      {/* Origin and Destination Details Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <LocationDetailsCard
+          title="ORIGIN DETAILS"
+          content={localOriginDetails}
+          onSave={async (newContent) => {
+            setLocalOriginDetails(newContent);
+            if (segmentId) {
+              try {
+                await updateSegmentMutation.mutateAsync({
+                  id: segmentId,
+                  data: {
+                    originDetails: newContent,
+                  } as UpdateSegmentDto & Record<string, unknown>,
+                });
+              } catch (error) {
+                console.error("Failed to update origin details:", error);
+              }
+            }
+          }}
+          disabled={!hasSegmentsManage}
+        />
+        <LocationDetailsCard
+          title="DESTINATION DETAILS"
+          content={localDestinationDetails}
+          onSave={async (newContent) => {
+            setLocalDestinationDetails(newContent);
+            if (segmentId) {
+              try {
+                await updateSegmentMutation.mutateAsync({
+                  id: segmentId,
+                  data: {
+                    destinationDetails: newContent,
+                  } as UpdateSegmentDto & Record<string, unknown>,
+                });
+              } catch (error) {
+                console.error("Failed to update destination details:", error);
+              }
+            }
+          }}
+          disabled={!hasSegmentsManage}
+        />
+      </div>
       <FinancialSection baseFee={parseFloat(baseFee?.toString() || "0")} />
       <div className="h-px bg-slate-100" />
       <DocumentsSection

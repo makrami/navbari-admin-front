@@ -1,15 +1,15 @@
-import {useMemo, useState} from "react";
-import {Plus, MoreVertical, CoinsIcon} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus, MoreVertical, CoinsIcon } from "lucide-react";
 
-export function FinancialSection({baseFee}: {baseFee: number}) {
+export function FinancialSection({ baseFee }: { baseFee: number }) {
   const [additionalCosts, setAdditionalCosts] = useState<
-    Array<{id: number; label: string; amount: number}>
+    Array<{ id: number; label: string; amount: number }>
   >([]);
 
   const [currentInput, setCurrentInput] = useState<{
     label: string;
     amount: number;
-  }>({label: "", amount: 0});
+  }>({ label: "", amount: 0 });
 
   const total = useMemo(() => {
     const additionalTotal = additionalCosts.reduce(
@@ -30,7 +30,7 @@ export function FinancialSection({baseFee}: {baseFee: number}) {
           amount: currentInput.amount,
         },
       ]);
-      setCurrentInput({label: "", amount: 0});
+      setCurrentInput({ label: "", amount: 0 });
     }
   };
 
@@ -38,7 +38,7 @@ export function FinancialSection({baseFee}: {baseFee: number}) {
     field: "label" | "amount",
     value: string | number
   ) => {
-    setCurrentInput((prev) => ({...prev, [field]: value}));
+    setCurrentInput((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleRemoveCost = (id: number) => {
@@ -50,7 +50,7 @@ export function FinancialSection({baseFee}: {baseFee: number}) {
       <header className="px-3 pt-3 pb-2 text-xs text-slate-900 font-bold">
         Financial
       </header>
-      <div className="px-4 py-2 bg-slate-50 rounded-xl">
+      <div className="px-4 py-2 bg-white rounded-xl">
         <div className="flex items-center gap-2">
           {/* Scrollable Costs Section */}
           <div className="flex flex-1 gap-1 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
