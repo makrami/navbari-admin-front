@@ -49,8 +49,8 @@ export type DriverDocumentReadDto = z.infer<typeof driverDocumentReadDtoSchema>;
 
 // Approve/Reject Document DTO schema
 const approveRejectDocumentDtoSchema = z.object({
-  approvalStatus: z.enum(["approved", "rejected"]),
-  rejectionReason: z.string().optional(),
+  approvalStatus: z.enum(["approved", "rejected", "expired"]),
+  rejectionReason: z.string().optional().nullable(),
 });
 
 export type ApproveRejectDocumentDto = z.infer<
@@ -117,14 +117,16 @@ export async function listDriverDocuments(
  */
 export async function approveRejectDocument(
   id: string,
-  approvalStatus: "approved" | "rejected",
+  approvalStatus: "approved" | "rejected" | "expired",
   rejectionReason?: string
 ): Promise<DriverDocumentReadDto> {
   try {
     const validatedData = approveRejectDocumentDtoSchema.parse({
       approvalStatus,
       rejectionReason:
-        approvalStatus === "rejected" ? rejectionReason : undefined,
+        approvalStatus === "rejected" || approvalStatus === "expired"
+          ? rejectionReason
+          : undefined,
     });
 
     const response = await http.put<DriverDocumentReadDto>(

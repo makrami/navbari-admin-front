@@ -65,7 +65,7 @@ export function useUpdateFileAttachmentStatus() {
       rejectionComment,
     }: {
       id: string;
-      approvalStatus: "approved" | "rejected";
+      approvalStatus: "approved" | "rejected" | "expired";
       rejectionComment?: string;
     }) => updateFileAttachmentStatus(id, approvalStatus, rejectionComment),
     onSuccess: (data) => {

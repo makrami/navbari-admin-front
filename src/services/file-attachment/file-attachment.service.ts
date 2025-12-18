@@ -98,12 +98,12 @@ export async function uploadFileAttachment(
  */
 export async function updateFileAttachmentStatus(
   id: string,
-  approvalStatus: "approved" | "rejected",
+  approvalStatus: "approved" | "rejected" | "expired",
   rejectionComment?: string
 ): Promise<FileAttachmentReadDto> {
   try {
     const body: {
-      approvalStatus: "approved" | "rejected";
+      approvalStatus: "approved" | "rejected" | "expired";
       rejectionComment?: string;
     } = {
       approvalStatus,
