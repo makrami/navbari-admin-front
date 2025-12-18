@@ -51,6 +51,7 @@ export function CargoMap({
   );
   const hasFittedBoundsRef = useRef(false);
   const mapInstanceRef = useRef<MapboxMap | null>(null);
+  const previousQueryStateRef = useRef<string>("");
 
   // Reset bounds fitting when segmentIds change
   useEffect(() => {
@@ -168,27 +169,21 @@ export function CargoMap({
     })),
   });
 
-  // Create a stable string key based on query data states to track changes
-  // This only changes when actual data changes, not on every render
-  const queryDataKey = useMemo(() => {
-    const key = routeQueries
-      .map((q, idx) => {
-        const segId = segmentIds[idx]?.id || idx;
-        // Include data hash to detect changes
-        const dataHash = q.data
-          ? JSON.stringify([
-              q.data.originLongitude,
-              q.data.originLatitude,
-              q.data.destinationLongitude,
-              q.data.destinationLatitude,
-              q.data.geometry?.length || 0,
-            ])
-          : "null";
-        return `${segId}:${q.status}:${dataHash}`;
-      })
-      .join("|");
-    return key;
-  }, [routeQueries, segmentIds]);
+  // Create a stable key that only changes when the actual query data changes
+  const currentQueryState = JSON.stringify(
+    routeQueries.map((q, idx) => ({
+      id: segmentIds[idx]?.id,
+      status: q.status,
+      dataUpdatedAt: q.dataUpdatedAt,
+    }))
+  );
+
+  // Only update if state actually changed
+  if (currentQueryState !== previousQueryStateRef.current) {
+    previousQueryStateRef.current = currentQueryState;
+  }
+
+  const queryDataKey = previousQueryStateRef.current;
 
   // Process route queries into route sources
   const routeSources = useMemo(() => {
