@@ -6,13 +6,14 @@ import {
   Info,
   Eye as EyeIcon,
   FileText as FileTextIcon,
+  Clock,
 } from "lucide-react";
 
 type DocumentCardProps = {
   authorName: string;
   fileName: string;
   sizeLabel: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "expired";
   avatarUrl?: string;
   className?: string;
   filePath?: string;
@@ -53,6 +54,11 @@ export function DocumentCard({
       icon: "text-green-600",
       Icon: Check,
     },
+    expired: {
+      circle: "bg-gray-50",
+      icon: "text-gray-600",
+      Icon: Clock,
+    },
   };
 
   const statusConfig = statusStyles[status];
@@ -64,14 +70,15 @@ export function DocumentCard({
     if (
       target.closest("button") ||
       target.tagName === "BUTTON" ||
-      status !== "pending"
+      (status !== "pending" && status !== "expired")
     ) {
       return;
     }
     onPreview?.();
   };
 
-  const showTooltip = status === "pending" && onPreview;
+  const showTooltip =
+    (status === "pending" || status === "expired") && onPreview;
 
   return (
     <div
@@ -142,6 +149,18 @@ export function DocumentCard({
             className="flex-1 rounded-lg bg-red-100 px-3 py-1 text-xs text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Reject
+          </button>
+        </div>
+      )}
+
+      {status === "expired" && (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={true}
+            className="flex-1 rounded-lg bg-red-100 px-3 py-1 text-xs text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Expired
           </button>
         </div>
       )}

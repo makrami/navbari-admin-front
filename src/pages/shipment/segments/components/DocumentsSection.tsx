@@ -1,17 +1,17 @@
-import { Paperclip, FileText as FileTextIcon, X as XIcon } from "lucide-react";
-import { useState, useRef } from "react";
+import {Paperclip, FileText as FileTextIcon, X as XIcon} from "lucide-react";
+import {useState, useRef} from "react";
 import DocumentCard from "./DocumentCard";
 import {
   useUploadFileAttachment,
   useUpdateFileAttachmentStatus,
 } from "../../../../services/file-attachment/hooks";
-import { ENV } from "../../../../lib/env";
+import {ENV} from "../../../../lib/env";
 
 export type DocumentItem = {
   id: string | number;
   name: string;
   sizeLabel: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "expired";
   author?: string;
   thumbnailUrl?: string;
   filePath?: string;
@@ -66,7 +66,7 @@ export function DocumentsSection({
     if (!file || !segmentId) return;
 
     try {
-      await uploadMutation.mutateAsync({ segmentId, file });
+      await uploadMutation.mutateAsync({segmentId, file});
       onDocumentsUpdate?.();
       // Reset file input
       if (fileInputRef.current) {

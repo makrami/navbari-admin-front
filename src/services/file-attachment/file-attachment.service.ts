@@ -1,11 +1,12 @@
-import { z } from "zod";
-import { http } from "../../lib/http";
+import {z} from "zod";
+import {http} from "../../lib/http";
 
 // Approval status enum
 export const FILE_ATTACHMENT_APPROVAL_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",
   REJECTED: "rejected",
+  EXPIRED: "expired",
 } as const;
 
 export type FILE_ATTACHMENT_APPROVAL_STATUS =
@@ -126,8 +127,9 @@ export async function updateFileAttachmentStatus(
       throw error;
     }
     throw new Error(
-      `Failed to ${approvalStatus === "approved" ? "approve" : "reject"} document. Please try again.`
+      `Failed to ${
+        approvalStatus === "approved" ? "approve" : "reject"
+      } document. Please try again.`
     );
   }
 }
-
