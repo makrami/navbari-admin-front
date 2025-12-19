@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getCities } from "./geography.service";
+import {useQuery} from "@tanstack/react-query";
+import {getCities} from "./geography.service";
 
 // Query keys
 export const geographyKeys = {
@@ -14,8 +14,7 @@ export function useCities() {
   return useQuery({
     queryKey: geographyKeys.cities(),
     queryFn: () => getCities(),
-    staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes (cities don't change often)
-    retry: 1, // Only retry once on failure
+    staleTime: Infinity, // Never refetch automatically; cities are very static
+    retry: 3, // Only retry once on failure
   });
 }
-

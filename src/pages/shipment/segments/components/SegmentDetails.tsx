@@ -1,7 +1,6 @@
 import {useMemo, useState, useEffect, useRef, type ReactNode} from "react";
 import SegmentProgress from "./SegmentProgress";
 import {cn} from "../../../../shared/utils/cn";
-import {CITY_OPTIONS} from "../../data/cities";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -43,6 +42,7 @@ import {
 } from "../../../../services/chat/chat.types";
 import {useTranslation} from "react-i18next";
 import {useCurrentUser} from "../../../../services/user/hooks";
+import {useCities} from "../../../../services/geography/hooks";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -231,6 +231,14 @@ export function SegmentDetails({
 
   // Fetch companies from API
   const {data: companies = [], refetch: refetchCompanies} = useCompanies();
+
+  // Fetch cities from API
+  const {data: cities = []} = useCities();
+
+  // Transform cities to "City, Country" format for select options
+  const cityOptions = useMemo(() => {
+    return cities.map((city) => `${city.city}, ${city.country}`);
+  }, [cities]);
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -484,14 +492,14 @@ export function SegmentDetails({
                   label="FROM"
                   value={fromValue}
                   onChange={setFromValue}
-                  options={CITY_OPTIONS}
+                  options={cityOptions}
                   disabled={!hasSegmentsManage}
                 />
                 <FieldBoxSelect
                   label="TO"
                   value={toValue}
                   onChange={setToValue}
-                  options={CITY_OPTIONS}
+                  options={cityOptions}
                   disabled={!hasSegmentsManage}
                 />
                 <DatePicker
