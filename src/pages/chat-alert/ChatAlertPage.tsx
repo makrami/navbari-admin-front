@@ -270,18 +270,12 @@ export function ChatAlertPage() {
         </ListPanel>
 
         {/* Empty Details Panel */}
-        <div className="flex-1 h-screen max-w-4xl mx-auto overflow-hidden">
-          <div className="h-full overflow-y-auto no-scrollbar">
-            <div className="p-9 flex flex-col gap-4">
-              <div className="flex items-center justify-center h-full text-center">
-                <div>
-                  <MessagesSquareIcon className="size-16 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-500 font-medium">
-                    {t("chatAlert.selectChat")}
-                  </p>
-                </div>
-              </div>
-            </div>
+        <div className="flex-1 h-screen max-w-4xl mx-auto overflow-hidden flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center w-full h-full">
+            <MessagesSquareIcon className="size-42 text-slate-300 mb-6" />
+            <p className="text-slate-500 font-medium text-center text-2xl">
+              {t("chatAlert.selectChat")}
+            </p>
           </div>
         </div>
       </div>
