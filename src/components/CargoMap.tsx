@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import Map, {
   Layer,
   NavigationControl,
@@ -8,12 +8,12 @@ import Map, {
   type MapRef,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type { FeatureCollection, LineString, Position } from "geojson";
-import { TruckIcon } from "lucide-react";
-import type { Map as MapboxMap, MapboxEvent } from "mapbox-gl";
-import { useQueries } from "@tanstack/react-query";
-import { shipmentKeys } from "../services/shipment/hooks";
-import { getSegmentRoute } from "../services/shipment/shipment.api.service";
+import type {FeatureCollection, LineString, Position} from "geojson";
+import {TruckIcon} from "lucide-react";
+import type {Map as MapboxMap, MapboxEvent} from "mapbox-gl";
+import {useQueries} from "@tanstack/react-query";
+import {shipmentKeys} from "../services/shipment/hooks";
+import {getSegmentRoute} from "../services/shipment/shipment.api.service";
 
 type Props = {
   segmentIds: {
@@ -253,7 +253,7 @@ export function CargoMap({
   // Calculate center from route data
   const center = useMemo(() => {
     if (initialView) {
-      return { ...initialView, pitch: 0, bearing: 0 };
+      return {...initialView, pitch: 0, bearing: 0};
     }
 
     const allCoords: Position[] = [];
@@ -279,7 +279,7 @@ export function CargoMap({
     const lats = allCoords.map((c) => c[1]);
     const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
     const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
-    return { longitude, latitude, zoom: 4, pitch: 0, bearing: 0 };
+    return {longitude, latitude, zoom: 4, pitch: 0, bearing: 0};
   }, [routeSources, initialView]);
 
   // Set map error if any query failed
@@ -423,9 +423,8 @@ export function CargoMap({
           );
           hasFittedBoundsRef.current = true;
         }
-      } catch (error) {
+      } catch (_) {
         // Ignore errors (e.g., if map is not ready)
-        console.warn("Failed to fit bounds:", error);
       }
     }, 100);
 
@@ -515,7 +514,7 @@ export function CargoMap({
           onLoad={handleMapLoad}
           onError={(e) => {
             const msg =
-              (e as unknown as { error?: Error }).error?.message ??
+              (e as unknown as {error?: Error}).error?.message ??
               "Map failed to load";
             setMapError(msg);
           }}
@@ -523,7 +522,7 @@ export function CargoMap({
           bearing={0}
           dragRotate={false}
           touchPitch={false}
-          touchZoomRotate={{ around: "center" }}
+          touchZoomRotate={{around: "center"}}
         >
           <NavigationControl position="top-right" showCompass={false} />
 
@@ -537,7 +536,7 @@ export function CargoMap({
                 <Layer
                   id={`${src.id}-line`}
                   type="line"
-                  layout={{ "line-cap": "round", "line-join": "round" }}
+                  layout={{"line-cap": "round", "line-join": "round"}}
                   paint={{
                     "line-color": hoverColor,
                     "line-width": lineWidth,

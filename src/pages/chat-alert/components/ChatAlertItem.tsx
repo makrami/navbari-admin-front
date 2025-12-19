@@ -10,6 +10,7 @@ type ChatAlertItemProps = {
   selected?: boolean;
   onSelect: (id: string) => void;
   onMenuClick?: () => void;
+  onConversationDeleted?: () => void;
 };
 
 export function ChatAlertItem({
@@ -17,6 +18,7 @@ export function ChatAlertItem({
   selected = false,
   onSelect,
   onMenuClick,
+  onConversationDeleted,
 }: ChatAlertItemProps) {
   const handleMenuButtonClick = (e: React.MouseEvent) => {
     handleMenuClick(e);
@@ -47,8 +49,9 @@ export function ChatAlertItem({
           messages={chatAlert.messages}
           selected={selected}
           rating={chatAlert.rating}
-          avatarUrl={chatAlert.avatarUrl}
+          conversationId={chatAlert.id}
           onMenuClick={handleMenuButtonClick}
+          onConversationDeleted={onConversationDeleted}
         />
 
         <ChatAlertFooter

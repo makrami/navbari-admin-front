@@ -291,7 +291,6 @@ export function SegmentDetails({
       });
       // The mutation will automatically invalidate and refetch segments
     } catch (error) {
-      console.error("Failed to submit rating:", error);
       throw error; // Re-throw so StarRating can handle it
     }
   };
@@ -593,28 +592,15 @@ export function SegmentDetails({
                             ),
                             baseFee: baseFeeNum ?? undefined,
                           };
-                          console.log("Calling updateSegment API with:", {
-                            segmentId,
-                            payload: updatePayload,
-                          });
                           apiResponse = await updateSegmentMutation.mutateAsync(
                             {
                               id: segmentId,
                               data: updatePayload,
                             }
                           );
-                          console.log(
-                            "Segment updated successfully",
-                            apiResponse
-                          );
                         } catch (apiError) {
-                          console.error("API update failed:", apiError);
                           throw apiError; // Re-throw to be caught by outer catch
                         }
-                      } else {
-                        console.warn(
-                          "No segmentId provided, skipping API call"
-                        );
                       }
 
                       // Use API response if available, otherwise use local update
@@ -654,7 +640,6 @@ export function SegmentDetails({
                         handleToggle();
                       }
                     } catch (error) {
-                      console.error("Failed to update segment:", error);
                       // Still call onSave for local state update even if API fails
                       const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
                       onSave?.({
@@ -725,34 +710,15 @@ export function SegmentDetails({
                             ),
                             baseFee: baseFeeNum ?? undefined,
                           };
-                          console.log(
-                            "Calling updateSegment API (Save & Declare) with:",
-                            {
-                              segmentId,
-                              payload: updatePayload,
-                            }
-                          );
                           apiResponse = await updateSegmentMutation.mutateAsync(
                             {
                               id: segmentId,
                               data: updatePayload,
                             }
                           );
-                          console.log(
-                            "Segment updated successfully (Save & Declare)",
-                            apiResponse
-                          );
                         } catch (apiError) {
-                          console.error(
-                            "API update failed (Save & Declare):",
-                            apiError
-                          );
                           throw apiError; // Re-throw to be caught by outer catch
                         }
-                      } else {
-                        console.warn(
-                          "No segmentId provided (Save & Declare), skipping API call"
-                        );
                       }
 
                       // Use API response if available, otherwise use local update
@@ -789,7 +755,6 @@ export function SegmentDetails({
                       }
                       setShowCargoModal(true);
                     } catch (error) {
-                      console.error("Failed to update segment:", error);
                       // Still proceed with cargo modal even if API fails
                       const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
                       setPendingUpdate({

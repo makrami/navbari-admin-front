@@ -7,230 +7,299 @@ import {CHAT_MESSAGE_TYPE} from "./chat.types";
 import {chatKeys, updateConversationReadStatus} from "./hooks";
 import {ENV} from "../../lib/env";
 
+// Singleton socket instance - shared across all hook calls
+let globalSocket: Socket | null = null;
+const activeConversations = new Set<string>();
+const conversationRefCounts = new Map<string, number>();
+const typingCallbacks = new Map<string, (isTyping: boolean) => void>();
+
+// Store hook instance callbacks with their active conversation IDs
+interface HookInstance {
+  queryClient: ReturnType<typeof useQueryClient>;
+  activeConversationId?: string;
+}
+
+const hookInstances = new Set<HookInstance>();
+
+/**
+ * Initialize the singleton socket connection
+ */
+function initializeSocket(): Socket {
+  if (globalSocket && globalSocket.connected) {
+    return globalSocket;
+  }
+
+  if (globalSocket && !globalSocket.connected) {
+    // Socket exists but disconnected, try to reconnect
+    globalSocket.connect();
+    return globalSocket;
+  }
+
+  const url = resolveChatSocketUrl();
+
+  // Determine if we should use a custom path
+  const useCustomPath = url.includes("/ws/chat");
+  const socketOptions: Parameters<typeof io>[1] = {
+    transports: ["websocket"],
+    withCredentials: true,
+    auth: {
+      appScope: "head_office",
+    },
+    timeout: 20000,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: 5,
+    forceNew: false,
+    autoConnect: true,
+    path: "/socket.io/",
+  };
+
+  if (!useCustomPath) {
+    socketOptions.path = "/socket.io/";
+  }
+
+  const socket = io(url, socketOptions);
+  globalSocket = socket;
+
+  // Set up global event listeners (only once)
+  setupGlobalSocketListeners(socket);
+
+  return socket;
+}
+
+/**
+ * Set up global socket event listeners that handle all conversations
+ */
+function setupGlobalSocketListeners(socket: Socket) {
+  // Connection events
+  socket.on("connect", () => {
+    // Socket connected
+  });
+
+  socket.on("disconnect", (reason) => {
+    if (reason === "io server disconnect") {
+      socket.connect();
+    }
+  });
+
+  socket.on("reconnect", () => {
+    // Rejoin all active conversations after reconnect
+    // activeConversations.forEach((conversationId) => {
+    //   if (socket.connected) {
+    //     socket.emit("join_conversation", {conversationId});
+    //   }
+    // });
+  });
+
+  socket.on("reconnect_attempt", () => {
+    // Reconnection attempt
+  });
+
+  socket.on("reconnect_error", () => {
+    // Reconnection error
+  });
+
+  // Message events - handle for all conversations
+  socket.on("message:new", (message: MessageReadDto) => {
+    handleMessageReceived(message);
+  });
+
+  socket.on("alert:new", (message: MessageReadDto) => {
+    handleMessageReceived(message);
+  });
+
+  socket.on("conversation:updated", (payload: {conversationId: string}) => {
+    handleConversationUpdated(payload.conversationId);
+  });
+
+  socket.on("conversation:read", (payload: {conversationId: string}) => {
+    handleConversationRead(payload.conversationId);
+  });
+
+  socket.on("conversation:new", () => {
+    handleConversationNew();
+  });
+
+  socket.on("typing:start", (payload: {conversationId: string}) => {
+    const callback = typingCallbacks.get(payload.conversationId);
+    callback?.(true);
+  });
+
+  socket.on("typing:stop", (payload: {conversationId: string}) => {
+    const callback = typingCallbacks.get(payload.conversationId);
+    callback?.(false);
+  });
+}
+
+function handleMessageReceived(message: MessageReadDto) {
+  // Update cache for all hook instances
+  hookInstances.forEach((instance) => {
+    appendMessageToCache(instance.queryClient, message);
+    updateConversationCache(instance.queryClient, message);
+
+    // Invalidate and refetch unread count to ensure immediate update
+    // Use refetchType: "all" to refetch both active and inactive queries
+    instance.queryClient.invalidateQueries({
+      queryKey: chatKeys.unreadCount(),
+      refetchType: "all",
+    });
+    // Also explicitly refetch all matching queries to ensure immediate update
+    instance.queryClient.refetchQueries({
+      queryKey: chatKeys.unreadCount(),
+    });
+
+    // Stop typing indicator if this is the active conversation for this instance
+    if (message.conversationId === instance.activeConversationId) {
+      const callback = typingCallbacks.get(message.conversationId);
+      callback?.(false);
+    }
+  });
+}
+
+function handleConversationUpdated(conversationId: string) {
+  hookInstances.forEach((instance) => {
+    updateCaches(instance.queryClient, conversationId);
+  });
+}
+
+function handleConversationRead(conversationId: string) {
+  hookInstances.forEach((instance) => {
+    updateConversationReadStatus(instance.queryClient, conversationId);
+    instance.queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
+  });
+}
+
+function handleConversationNew() {
+  const baseKey = chatKeys.conversations();
+  const unreadCountKey = chatKeys.unreadCount();
+
+  // Invalidate and refetch all conversation queries when a new conversation is created
+  hookInstances.forEach((instance) => {
+    // Invalidate all conversation queries with refetchType: "all" to refetch both active and inactive
+    // This marks them as stale and triggers refetch for active queries
+    instance.queryClient.invalidateQueries({
+      queryKey: baseKey,
+      exact: false,
+      refetchType: "all", // This should refetch all matching queries
+    });
+
+    // Also explicitly refetch active queries to ensure immediate update
+    instance.queryClient.refetchQueries({
+      queryKey: baseKey,
+      exact: false,
+      type: "active",
+    });
+
+    // Handle unread count - invalidate and refetch
+    instance.queryClient.invalidateQueries({
+      queryKey: unreadCountKey,
+      refetchType: "all",
+    });
+
+    instance.queryClient.refetchQueries({
+      queryKey: unreadCountKey,
+      type: "active",
+    });
+  });
+}
+
 export function useChatSocket(
   activeConversationId?: string,
   onTypingChange?: (isTyping: boolean) => void
 ) {
   const queryClient = useQueryClient();
-  const socketRef = useRef<Socket | null>(null);
-  const isConnectedRef = useRef(false);
-  const onTypingChangeRef = useRef(onTypingChange);
+  const instanceRef = useRef<HookInstance | null>(null);
 
-  // Keep the callback ref updated
+  // Initialize singleton socket
   useEffect(() => {
-    onTypingChangeRef.current = onTypingChange;
-  }, [onTypingChange]);
+    initializeSocket();
+  }, []);
 
+  // Register/unregister hook instance
   useEffect(() => {
-    const url = resolveChatSocketUrl();
-    console.log("🔌 Initializing socket connection:", url);
-
-    // Determine if we should use a custom path
-    // If URL contains /ws/chat, we might need to adjust the path
-    const useCustomPath = url.includes("/ws/chat");
-    const socketOptions: Parameters<typeof io>[1] = {
-      transports: ["websocket"],
-      withCredentials: true,
-      auth: {
-        appScope: "head_office",
-      },
-      timeout: 20000, // 20 seconds timeout
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
-      forceNew: false, // Reuse existing connection if available
-      autoConnect: true,
-      path: "/socket.io/",
+    const instance: HookInstance = {
+      queryClient,
+      activeConversationId,
     };
-
-    // Only set path if URL doesn't already include the socket.io path
-    // Socket.IO automatically appends /socket.io/ to the base URL
-    // So if URL is /ws/chat, the actual path will be /ws/chat/socket.io/
-    if (!useCustomPath) {
-      socketOptions.path = "/socket.io/";
-    }
-
-    console.log("🔌 Socket connection options:", {
-      url,
-      transports: socketOptions.transports,
-      path: socketOptions.path,
-      withCredentials: socketOptions.withCredentials,
-    });
-
-    const socket = io(url, socketOptions);
-    socketRef.current = socket;
-
-    // Log socket connection events
-    socket.on("connect", () => {
-      isConnectedRef.current = true;
-      console.log(
-        "✅ Socket connected:",
-        socket.id,
-        "Transport:",
-        socket.io.engine.transport.name
-      );
-    });
-
-    socket.on("disconnect", (reason) => {
-      isConnectedRef.current = false;
-      console.log("❌ Socket disconnected:", reason);
-      if (reason === "io server disconnect") {
-        // Server disconnected, reconnect manually
-        socket.connect();
-      }
-    });
-
-    socket.on("connect_error", (error) => {
-      isConnectedRef.current = false;
-      console.error("❌ Socket connection error:", error.message, error);
-    });
-
-    socket.on("reconnect", (attemptNumber) => {
-      console.log("✅ Socket reconnected after", attemptNumber, "attempts");
-    });
-
-    socket.on("reconnect_attempt", (attemptNumber) => {
-      console.log("🔄 Reconnection attempt:", attemptNumber);
-    });
-
-    socket.on("reconnect_error", (error) => {
-      console.error("❌ Reconnection error:", error);
-    });
-
-    socket.on("reconnect_failed", () => {
-      console.error("❌ Reconnection failed after all attempts");
-    });
-
-    const handleMessageEvent = (message: MessageReadDto) => {
-      console.log("📨 New message received from socket:", {
-        messageId: message.id,
-        conversationId: message.conversationId,
-        activeConversationId,
-        content: message.content?.substring(0, 50),
-        socketId: socket.id,
-      });
-
-      // Always add to cache regardless of active conversation
-      appendMessageToCache(queryClient, message);
-      updateConversationCache(queryClient, message, activeConversationId);
-      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
-
-      // Stop typing indicator when new message arrives (only for active conversation)
-      if (message.conversationId === activeConversationId) {
-        onTypingChangeRef.current?.(false);
-      }
-    };
-
-    const handleConversationUpdated = (payload: {conversationId: string}) => {
-      updateCaches(queryClient, payload.conversationId);
-    };
-
-    const handleConversationRead = (payload: {conversationId: string}) => {
-      // Update cache directly instead of invalidating all conversations
-      updateConversationReadStatus(queryClient, payload.conversationId);
-      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
-    };
-
-    const handleTypingStart = (payload: {conversationId: string}) => {
-      if (payload.conversationId === activeConversationId) {
-        onTypingChangeRef.current?.(true);
-      }
-    };
-
-    const handleTypingStop = (payload: {conversationId: string}) => {
-      if (payload.conversationId === activeConversationId) {
-        onTypingChangeRef.current?.(false);
-      }
-    };
-
-    socket.on("message:new", handleMessageEvent);
-    socket.on("alert:new", handleMessageEvent);
-    socket.on("conversation:updated", handleConversationUpdated);
-    socket.on("conversation:read", handleConversationRead);
-    socket.on("typing:start", handleTypingStart);
-    socket.on("typing:stop", handleTypingStop);
-
-    console.log(
-      "👂 Socket event listeners registered for conversation:",
-      activeConversationId
-    );
+    instanceRef.current = instance;
+    hookInstances.add(instance);
 
     return () => {
-      socket.off("message:new", handleMessageEvent);
-      socket.off("alert:new", handleMessageEvent);
-      socket.off("conversation:updated", handleConversationUpdated);
-      socket.off("conversation:read", handleConversationRead);
-      socket.off("typing:start", handleTypingStart);
-      socket.off("typing:stop", handleTypingStop);
-      socket.disconnect();
-      socketRef.current = null;
-      isConnectedRef.current = false;
+      hookInstances.delete(instance);
+      instanceRef.current = null;
     };
   }, [queryClient, activeConversationId]);
 
+  // Register/unregister typing callback
   useEffect(() => {
-    const socket = socketRef.current;
+    if (activeConversationId && onTypingChange) {
+      typingCallbacks.set(activeConversationId, onTypingChange);
+      return () => {
+        typingCallbacks.delete(activeConversationId);
+      };
+    }
+  }, [activeConversationId, onTypingChange]);
+
+  // Join/leave conversations
+  useEffect(() => {
+    const socket = globalSocket;
     if (!socket || !activeConversationId) {
-      if (!socket) {
-        console.log("⚠️ Socket not ready for join_conversation");
-      }
-      if (!activeConversationId) {
-        console.log("⚠️ No active conversation ID for join_conversation");
-      }
       return;
     }
 
-    // Wait for socket to be connected before joining
-    const joinConversation = () => {
-      if (!socket.connected) {
-        console.log(
-          "⏳ Waiting for socket connection before joining conversation..."
-        );
-        socket.once("connect", () => {
-          console.log(
-            "🚪 Joining conversation:",
-            activeConversationId,
-            "Socket ID:",
-            socket.id
-          );
-          socket.emit("join_conversation", {
-            conversationId: activeConversationId,
+    // Track reference count for this conversation
+    const currentCount = conversationRefCounts.get(activeConversationId) || 0;
+    conversationRefCounts.set(activeConversationId, currentCount + 1);
+
+    // Only join if this is the first instance using this conversation
+    if (currentCount === 0) {
+      activeConversations.add(activeConversationId);
+
+      // Wait for socket to be connected before joining
+      const joinConversation = () => {
+        if (!socket.connected) {
+          socket.once("connect", () => {
+            // socket.emit("join_conversation", {
+            //   conversationId: activeConversationId,
+            // });
           });
-        });
-      } else {
-        console.log(
-          "🚪 Joining conversation:",
-          activeConversationId,
-          "Socket ID:",
-          socket.id
-        );
-        socket.emit("join_conversation", {
-          conversationId: activeConversationId,
-        });
-      }
-    };
+        } else {
+          // socket.emit("join_conversation", {
+          //   conversationId: activeConversationId,
+          // });
+        }
+      };
 
-    joinConversation();
+      joinConversation();
+    }
 
-    // Listen for join confirmation (if server sends one)
-    const handleJoinSuccess = (data: unknown) => {
-      console.log("✅ Successfully joined conversation:", data);
+    // Listen for join confirmation
+    const handleJoinSuccess = () => {
+      // Successfully joined conversation
     };
     socket.on("conversation:joined", handleJoinSuccess);
 
     return () => {
-      console.log("🚪 Leaving conversation:", activeConversationId);
-      if (socket.connected) {
-        socket.emit("leave_conversation", {
-          conversationId: activeConversationId,
-        });
+      // Decrement reference count
+      const count = conversationRefCounts.get(activeConversationId) || 0;
+      const newCount = Math.max(0, count - 1);
+      conversationRefCounts.set(activeConversationId, newCount);
+
+      // Only leave if this was the last instance using this conversation
+      if (newCount === 0) {
+        activeConversations.delete(activeConversationId);
+        if (socket.connected) {
+          socket.emit("leave_conversation", {
+            conversationId: activeConversationId,
+          });
+        }
       }
       socket.off("conversation:joined", handleJoinSuccess);
     };
   }, [activeConversationId]);
 
-  return socketRef.current;
+  return globalSocket;
 }
 
 function resolveChatSocketUrl(): string {
@@ -293,10 +362,6 @@ export function appendMessageToCache(
           page.some((item) => item.id === message.id)
         );
         if (exists) {
-          console.log(
-            "⚠️ Message already exists in cache, skipping:",
-            message.id
-          );
           return oldData;
         }
 
@@ -317,10 +382,6 @@ export function appendMessageToCache(
         );
 
         if (hasTempMessage) {
-          console.log(
-            "🔄 Found temporary message, replacing with real message:",
-            message.id
-          );
           // Replace temporary message with real message
           const newPages = oldData.pages.map((page) =>
             page.map((item) => {
@@ -348,10 +409,6 @@ export function appendMessageToCache(
 
       if (!oldData) {
         // If no data exists, create initial structure with the new message
-        console.log(
-          "✅ Creating new cache structure for conversation:",
-          message.conversationId
-        );
         return {
           pageParams: [undefined],
           pages: [[message]],
@@ -389,13 +446,6 @@ export function appendMessageToCache(
       firstPage.splice(insertIndex, 0, message);
       newPages[0] = firstPage;
 
-      console.log("✅ Message added to cache:", {
-        messageId: message.id,
-        conversationId: message.conversationId,
-        insertIndex,
-        firstPageLength: firstPage.length,
-      });
-
       return {
         ...oldData,
         pages: newPages,
@@ -406,53 +456,28 @@ export function appendMessageToCache(
 
 export function updateConversationCache(
   queryClient: ReturnType<typeof useQueryClient>,
-  message: MessageReadDto,
-  activeConversationId?: string
+  message: MessageReadDto
 ) {
   // Update all conversation queries (including those with recipientType)
   // useChatConversations(recipientType) uses key: ["chat", "conversations", recipientType]
   // We need to update all queries that start with ["chat", "conversations"]
   const baseKey = chatKeys.conversations();
-  console.log("🔄 Updating conversation cache for message:", {
-    messageId: message.id,
-    conversationId: message.conversationId,
-    messageType: message.messageType,
-    activeConversationId,
-    baseKey,
-  });
 
   // Helper function to update conversation data
   const updateConversation = (
     oldConversations: ConversationReadDto[] | undefined
   ): ConversationReadDto[] | undefined => {
     if (!oldConversations) {
-      console.log("⚠️ No conversations in cache to update");
       return oldConversations;
     }
 
-    console.log("📋 Found conversations in cache:", oldConversations.length);
     const foundConversation = oldConversations.find(
       (conv) => conv.id === message.conversationId
     );
 
     if (!foundConversation) {
-      console.log(
-        "⚠️ Conversation not found in cache:",
-        message.conversationId,
-        "Available IDs:",
-        oldConversations.map((c) => c.id)
-      );
       return oldConversations;
     }
-
-    console.log("✅ Found conversation to update:", {
-      conversationId: foundConversation.id,
-      currentUnreadMessages: foundConversation.unreadMessageCount,
-      currentUnreadAlerts: foundConversation.unreadAlertCount,
-      isActive: foundConversation.id === activeConversationId,
-      lastMessageId: foundConversation.lastMessageId,
-      incomingMessageId: message.id,
-    });
 
     // Create a new array to ensure React Query detects the change
     const updatedConversations = oldConversations.map((conversation) => {
@@ -465,13 +490,6 @@ export function updateConversationCache(
       const isAlreadyProcessed = conversation.lastMessageId === message.id;
 
       if (isAlreadyProcessed) {
-        console.log(
-          "⚠️ Message already processed, skipping unread count increment:",
-          {
-            messageId: message.id,
-            lastMessageId: conversation.lastMessageId,
-          }
-        );
         // Return conversation as-is since it's already been updated
         return conversation;
       }
@@ -495,17 +513,9 @@ export function updateConversationCache(
       if (message.messageType === CHAT_MESSAGE_TYPE.ALERT) {
         updatedConversation.unreadAlertCount =
           (conversation.unreadAlertCount || 0) + 1;
-        console.log("📈 Incremented unreadAlertCount:", {
-          from: conversation.unreadAlertCount || 0,
-          to: updatedConversation.unreadAlertCount,
-        });
       } else {
         updatedConversation.unreadMessageCount =
           (conversation.unreadMessageCount || 0) + 1;
-        console.log("📈 Incremented unreadMessageCount:", {
-          from: conversation.unreadMessageCount || 0,
-          to: updatedConversation.unreadMessageCount,
-        });
       }
 
       return updatedConversation;
@@ -513,22 +523,6 @@ export function updateConversationCache(
 
     return updatedConversations;
   };
-
-  // Get all matching queries first to debug
-  const allQueries = queryClient.getQueryCache().getAll();
-  const matchingQueries = allQueries.filter((query) => {
-    const queryKey = query.queryKey;
-    const matches =
-      queryKey.length >= baseKey.length &&
-      baseKey.every((key, index) => queryKey[index] === key);
-    return matches;
-  });
-
-  console.log("🔍 Query matching results:", {
-    totalQueries: allQueries.length,
-    matchingQueries: matchingQueries.length,
-    matchingKeys: matchingQueries.map((q) => q.queryKey),
-  });
 
   // Update all queries that match the base conversations key
   // This will match: ["chat", "conversations"] and ["chat", "conversations", "driver"], etc.
@@ -540,9 +534,6 @@ export function updateConversationCache(
         const matches =
           queryKey.length >= baseKey.length &&
           baseKey.every((key, index) => queryKey[index] === key);
-        if (matches) {
-          console.log("✅ Matching query found:", queryKey);
-        }
         return matches;
       },
     },
@@ -550,11 +541,9 @@ export function updateConversationCache(
   );
 
   const updatedCount = updatedQueries.length;
-  console.log("📊 Updated queries count:", updatedCount);
 
   // If no queries were updated (conversation not in cache), invalidate to force refetch
   if (updatedCount === 0) {
-    console.log("🔄 No queries updated, invalidating to force refetch");
     queryClient.invalidateQueries({
       queryKey: baseKey,
       exact: false,

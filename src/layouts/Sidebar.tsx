@@ -23,35 +23,25 @@ import {useCurrentUser} from "../services/user/hooks";
 import {getFileUrl} from "../pages/Drivers/utils";
 import {useUnreadChatCount} from "../services/chat/hooks";
 import {useDashboardSummary} from "../services/dashboard/hooks";
+import {useChatSocket} from "../services/chat/socket";
 
 export function Sidebar() {
   const navigate = useNavigate();
   const {t} = useTranslation();
   const isRTL = useRTL();
-  const {
-    data: user,
-    isLoading: isLoadingUser,
-    error: userError,
-  } = useCurrentUser();
+  const {data: user, isLoading: isLoadingUser} = useCurrentUser();
   const {data: unreadCountData} = useUnreadChatCount();
   const unreadCount = unreadCountData?.count ?? 0;
   const {data: dashboardSummary} = useDashboardSummary();
+
+  // Initialize socket connection to receive real-time message updates
+  useChatSocket();
 
   // Get counts for awaiting registrations
   const awaitingCompaniesCount =
     dashboardSummary?.companiesWaitingForApprovalCount ?? 0;
   const awaitingDriversCount =
     dashboardSummary?.driversWaitingForApprovalCount ?? 0;
-
-  // Debug: Log user data to console
-  if (user) {
-    console.log("User data in Sidebar:", user);
-    console.log("fullName:", user.fullName);
-    console.log("email:", user.email);
-  }
-  if (userError) {
-    console.error("Error fetching user:", userError);
-  }
 
   const handleLogout = async () => {
     await logout();

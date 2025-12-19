@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import {useState, useMemo, useEffect} from "react";
+import {useTranslation} from "react-i18next";
 import dayjs from "dayjs";
 import {
   Search,
@@ -8,30 +8,30 @@ import {
   Users,
   Boxes,
 } from "lucide-react";
-import { ListPanel } from "../../shared/components/ui/ListPanel";
-import { DetailsPanel } from "../shipment/details/DetailsPanel";
-import { ChatAlertItem } from "./components/ChatAlertItem";
-import { ChatAlertDetails } from "./components/ChatAlertDetails";
+import {ListPanel} from "../../shared/components/ui/ListPanel";
+import {DetailsPanel} from "../shipment/details/DetailsPanel";
+import {ChatAlertItem} from "./components/ChatAlertItem";
+import {ChatAlertDetails} from "./components/ChatAlertDetails";
 import {
   ChatAlertPageSkeleton,
   ChatAlertGridSkeleton,
 } from "./components/ChatAlertSkeleton";
-import { useChatConversations } from "../../services/chat/hooks";
-import { useDrivers } from "../../services/driver/hooks";
-import { useCompanies } from "../../services/company/hooks";
-import { useCurrentUser } from "../../services/user/hooks";
-import type { ChatAlert } from "./data";
-import type { ConversationReadDto } from "../../services/chat/chat.types";
-import type { Driver } from "../Drivers/types";
-import type { CompanyReadDto } from "../../services/company/company.service";
-import { ENV } from "../../lib/env";
+import {useChatConversations} from "../../services/chat/hooks";
+import {useDrivers} from "../../services/driver/hooks";
+import {useCompanies} from "../../services/company/hooks";
+import {useCurrentUser} from "../../services/user/hooks";
+import type {ChatAlert} from "./data";
+import type {ConversationReadDto} from "../../services/chat/chat.types";
+import type {Driver} from "../Drivers/types";
+import type {CompanyReadDto} from "../../services/company/company.service";
+import {ENV} from "../../lib/env";
 import avatarFallback from "../../assets/images/avatar.png";
-import { cn } from "../../shared/utils/cn";
+import {cn} from "../../shared/utils/cn";
 
 type FilterType = "all" | "driver" | "company";
 
 export function ChatAlertPage() {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
@@ -43,11 +43,11 @@ export function ChatAlertPage() {
     return undefined;
   }, [activeFilter]);
 
-  const { data: conversations = [], isLoading: conversationsLoading } =
+  const {data: conversations = [], isLoading: conversationsLoading} =
     useChatConversations(recipientTypeForApi);
-  const { data: drivers = [], isLoading: driversLoading } = useDrivers();
-  const { data: companies = [], isLoading: companiesLoading } = useCompanies();
-  const { data: currentUser } = useCurrentUser();
+  const {data: drivers = [], isLoading: driversLoading} = useDrivers();
+  const {data: companies = [], isLoading: companiesLoading} = useCompanies();
+  const {data: currentUser} = useCurrentUser();
   // Socket is handled in ChatAlertDetails component
 
   const driverMap = useMemo(() => {
@@ -125,21 +125,36 @@ export function ChatAlertPage() {
   );
 
   useEffect(() => {
-    if (!selectedId && filteredAlerts.length > 0) {
-      setSelectedId(filteredAlerts[0].id);
-    } else if (selectedId && filteredAlerts.length > 0) {
-      // If selected chat is not in filtered list, select first available
+    if (selectedId && filteredAlerts.length > 0) {
+      // If selected chat is not in filtered list, clear selection
       const isSelectedInFiltered = filteredAlerts.some(
         (alert) => alert.id === selectedId
       );
       if (!isSelectedInFiltered) {
-        setSelectedId(filteredAlerts[0].id);
+        setSelectedId(null);
       }
     } else if (selectedId && filteredAlerts.length === 0) {
       // No chats available in filtered list
       setSelectedId(null);
     }
   }, [filteredAlerts, selectedId]);
+
+  // Handle Esc key to close chat
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && selectedId) {
+        setSelectedId(null);
+      }
+    };
+
+    if (selectedId) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedId]);
 
   const isLoading = conversationsLoading || driversLoading || companiesLoading;
 
@@ -242,6 +257,12 @@ export function ChatAlertPage() {
                   chatAlert={alert}
                   selected={selectedId === alert.id}
                   onSelect={setSelectedId}
+                  onConversationDeleted={() => {
+                    // Clear selection if the deleted conversation was selected
+                    if (selectedId === alert.id) {
+                      setSelectedId(null);
+                    }
+                  }}
                 />
               ))
             )}
@@ -359,6 +380,12 @@ export function ChatAlertPage() {
                 chatAlert={alert}
                 selected={selectedId === alert.id}
                 onSelect={setSelectedId}
+                onConversationDeleted={() => {
+                  // Clear selection if the deleted conversation was selected
+                  if (selectedId === alert.id) {
+                    setSelectedId(null);
+                  }
+                }}
               />
             ))
           )}

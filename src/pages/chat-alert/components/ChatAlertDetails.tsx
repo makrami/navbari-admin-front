@@ -30,6 +30,7 @@ import {useDriverDetails} from "../../../services/driver/hooks";
 import {useCompanyDetails} from "../../../services/company/hooks";
 import {DriverDetails} from "../../Drivers/components/DriverDetails";
 import {CompanyDetails} from "../../LocalCompanies/components/CompanyDetails";
+import {DEFAULT_ACTIONABLE_ALERTS} from "../../../shared/constants/actionableAlerts";
 
 type ChatAlertDetailsProps = {
   chatAlert: ChatAlert;
@@ -38,13 +39,6 @@ type ChatAlertDetailsProps = {
   onClose?: () => void;
   currentStateIndex?: number; // 0-6, where 0 is the first state and 6 is the last (optional, will be calculated from driver data if not provided)
 };
-
-const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
-];
 
 const LOCALE_MAP: Record<string, string> = {
   en: "en",
@@ -85,9 +79,7 @@ export function ChatAlertDetails({
 
   // Fetch driver or company data based on recipient type
   const selectedDriver = useDriverDetails(conversation.driverId ?? null);
-  console.log("🚚 Selected driver:", selectedDriver.data);
   const selectedCompany = useCompanyDetails(conversation.companyId ?? null);
-  console.log("🚚 Selected company:", selectedCompany.data);
   // Listen to typing events via socket
   useChatSocket(conversation.id, setIsTyping);
 
@@ -151,16 +143,6 @@ export function ChatAlertDetails({
       mapMessageDtoToUi(message, currentUserId ?? "")
     );
 
-    console.log("💬 Messages updated in ChatAlertDetails:", {
-      conversationId: conversation.id,
-      totalPages: pages.length,
-      totalMessages: flattened.length,
-      messageIds: mapped.map((m) => m.id).slice(-5), // Last 5 message IDs
-      messagesWithStatus: mapped
-        .filter((m) => m.status)
-        .map((m) => ({id: m.id, status: m.status})),
-    });
-
     return mapped;
   }, [messagesPages, currentUserId, conversation.id, currentLocale]);
 
@@ -216,7 +198,7 @@ export function ChatAlertDetails({
         <ChatSection
           key={chatAlert.driverId || chatAlert.companyId || chatAlert.id}
           messages={messages}
-          actionableAlerts={ACTIONABLE_ALERTS}
+          actionableAlerts={DEFAULT_ACTIONABLE_ALERTS}
           onSendMessage={handleSendMessage}
           onAlertChipClick={handleAlertChipClick}
           isSendingMessage={

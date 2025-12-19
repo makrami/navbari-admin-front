@@ -465,7 +465,6 @@ export async function updateSegment(
 
         // Check if date is valid
         if (isNaN(date.getTime())) {
-          console.error("Invalid date string:", trimmed);
           return undefined;
         }
 
@@ -473,33 +472,20 @@ export async function updateSegment(
         // This format is accepted by @IsDateString() validator
         return date.toISOString();
       } catch (error) {
-        console.error("Error normalizing datetime:", trimmed, error);
         return undefined;
       }
     };
 
     if (normalizedData.estimatedStartTime) {
-      const original = normalizedData.estimatedStartTime;
       normalizedData.estimatedStartTime = normalizeDateTime(
         normalizedData.estimatedStartTime
       );
-      console.log("Normalized estimatedStartTime:", {
-        original,
-        normalized: normalizedData.estimatedStartTime,
-      });
     }
     if (normalizedData.estimatedFinishTime) {
-      const original = normalizedData.estimatedFinishTime;
       normalizedData.estimatedFinishTime = normalizeDateTime(
         normalizedData.estimatedFinishTime
       );
-      console.log("Normalized estimatedFinishTime:", {
-        original,
-        normalized: normalizedData.estimatedFinishTime,
-      });
     }
-
-    console.log("Normalized data before sending:", normalizedData);
 
     const response = await http.put<Segment>(`/segments/${id}`, normalizedData);
     return mapSegmentDtoToSegmentData(response.data);

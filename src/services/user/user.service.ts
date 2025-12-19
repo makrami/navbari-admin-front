@@ -59,7 +59,6 @@ export async function getCurrentUser(): Promise<UserResponse> {
   try {
     const response = await http.get("/users/me");
     const userData = userResponseSchema.parse(response.data);
-    console.log("User data in getCurrentUser:", userData);
     return userData;
   } catch (error: unknown) {
     // Handle validation errors

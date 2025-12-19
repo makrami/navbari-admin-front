@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { X, Search, ChevronDown, Calendar, Paperclip } from "lucide-react";
+import {useState, useEffect} from "react";
+import {X, Search, ChevronDown, Calendar, Paperclip} from "lucide-react";
 
 interface AddPaymentDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function AddPaymentDrawer({ isOpen, onClose }: AddPaymentDrawerProps) {
+export function AddPaymentDrawer({isOpen, onClose}: AddPaymentDrawerProps) {
   const [formData, setFormData] = useState({
     shipment: "",
     segment: "",
@@ -42,12 +42,11 @@ export function AddPaymentDrawer({ isOpen, onClose }: AddPaymentDrawerProps) {
   }, [isOpen, onClose]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({...prev, [field]: value}));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
     onClose();
   };
 

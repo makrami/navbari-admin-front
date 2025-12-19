@@ -18,12 +18,6 @@ http.interceptors.request.use(
       delete config.headers["Content-Type"];
     }
 
-    // Request logging (optional, can be removed in production)
-    if (import.meta.env.DEV) {
-      console.log(
-        `[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`
-      );
-    }
     return config;
   },
   (error) => {

@@ -6,6 +6,7 @@ import {
   type InfiniteData,
 } from "@tanstack/react-query";
 import {
+  deleteConversation,
   getChatConversation,
   getConversationMessages,
   getTotalUnreadCount,
@@ -40,6 +41,8 @@ export function useChatConversations(recipientType?: "driver" | "company") {
     queryKey: [...chatKeys.conversations(), recipientType],
     queryFn: () => listChatConversations(recipientType),
     refetchOnWindowFocus: false,
+    refetchOnMount: "always", // Always refetch when component mounts to ensure fresh data
+    staleTime: 0, // Always consider data stale so it refetches when needed
   });
 }
 
@@ -95,7 +98,6 @@ export function useSendChatMessage() {
         (await getConversationIdFromInput(queryClient, variables));
 
       if (!conversationId) {
-        console.warn("⚠️ No conversationId found, skipping optimistic update");
         return {tempId: null, conversationId: null};
       }
 
@@ -118,12 +120,6 @@ export function useSendChatMessage() {
       };
 
       // Add temporary message to cache
-      console.log("📤 Adding temporary message to cache:", {
-        tempId,
-        conversationId,
-        content: tempMessage.content?.substring(0, 50),
-        status: tempMessage._status,
-      });
       addTemporaryMessageToCache(queryClient, tempMessage);
 
       return {tempId, conversationId};
@@ -185,7 +181,6 @@ export function useSendChatAlert() {
         (await getConversationIdFromInput(queryClient, variables));
 
       if (!conversationId) {
-        console.warn("⚠️ No conversationId found, skipping optimistic update");
         return {tempId: null, conversationId: null};
       }
 
@@ -209,12 +204,6 @@ export function useSendChatAlert() {
       };
 
       // Add temporary message to cache
-      console.log("📤 Adding temporary message to cache:", {
-        tempId,
-        conversationId,
-        content: tempMessage.content?.substring(0, 50),
-        status: tempMessage._status,
-      });
       addTemporaryMessageToCache(queryClient, tempMessage);
 
       return {tempId, conversationId};
@@ -274,6 +263,24 @@ export function useUnreadChatCount() {
     queryKey: chatKeys.unreadCount(),
     queryFn: () => getTotalUnreadCount(),
     refetchInterval: 60 * 1000,
+    refetchOnMount: "always", // Always refetch when component mounts to ensure fresh data
+    staleTime: 0, // Always consider data stale so it refetches when needed
+  });
+}
+
+export function useDeleteConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => deleteConversation(conversationId),
+    onSuccess: (_, conversationId) => {
+      // Invalidate all conversation-related queries
+      queryClient.invalidateQueries({queryKey: chatKeys.conversations()});
+      queryClient.invalidateQueries({queryKey: chatKeys.unreadCount()});
+      queryClient.removeQueries({
+        queryKey: chatKeys.conversation(conversationId),
+      });
+      queryClient.removeQueries({queryKey: chatKeys.messages(conversationId)});
+    },
   });
 }
 
@@ -399,7 +406,6 @@ function addTemporaryMessageToCache(
     queryKey,
     (oldData: InfiniteData<MessageReadDto[]> | undefined) => {
       if (!oldData) {
-        console.log("✅ Creating new cache with temp message");
         return {
           pageParams: [undefined],
           pages: [[tempMessage]],
@@ -408,7 +414,6 @@ function addTemporaryMessageToCache(
 
       const newPages = [...oldData.pages];
       if (newPages.length === 0) {
-        console.log("✅ Adding temp message to empty pages");
         return {
           ...oldData,
           pages: [[tempMessage]],
@@ -418,12 +423,6 @@ function addTemporaryMessageToCache(
       // Add to beginning of first page (most recent)
       const firstPage = [tempMessage, ...newPages[0]];
       newPages[0] = firstPage;
-
-      console.log("✅ Added temp message to cache:", {
-        tempId: tempMessage._tempId,
-        firstPageLength: firstPage.length,
-        totalPages: newPages.length,
-      });
 
       return {
         ...oldData,
@@ -471,12 +470,6 @@ function replaceTemporaryMessageInCache(
           return msg;
         })
       );
-
-      console.log("✅ Replaced temporary message with real message:", {
-        tempId,
-        realMessageId: realMessage.id,
-        conversationId,
-      });
 
       return {
         ...oldData,

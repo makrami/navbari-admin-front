@@ -1,23 +1,14 @@
-import { Paperclip, Loader2, Check, AlertTriangle } from "lucide-react";
-import type { ChatMessage, MessageStatus } from "../types/chat";
+import {Paperclip, Loader2, Check, AlertTriangle} from "lucide-react";
+import type {ChatMessage, MessageStatus} from "../types/chat";
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
 }
 
-export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
+export function ChatMessageBubble({message}: ChatMessageBubbleProps) {
   const isOutgoing = message.isOutgoing ?? true; // Default to outgoing
   const hasAttachment = Boolean(message.fileUrl);
   const status = message.status;
-
-  // Debug: log status for outgoing messages
-  if (isOutgoing && status) {
-    console.log("🔍 Message status:", {
-      id: message.id,
-      status,
-      text: message.text?.substring(0, 30),
-    });
-  }
 
   if (isOutgoing) {
     // Right-aligned blue bubble (outgoing)
@@ -70,7 +61,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   );
 }
 
-function MessageStatusIcon({ status }: { status: MessageStatus }) {
+function MessageStatusIcon({status}: {status: MessageStatus}) {
   switch (status) {
     case "sending":
       return (
@@ -104,6 +95,31 @@ function AttachmentLink({
   isOutgoing = false,
 }: AttachmentLinkProps) {
   if (!fileUrl) return null;
+
+  // Check if the file is an image
+  const isImage =
+    fileMimeType?.startsWith("image/") ||
+    /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(fileName || "");
+
+  if (isImage) {
+    // Display image with click to open in new tab
+    return (
+      <a
+        href={fileUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="block rounded-lg overflow-hidden max-w-full"
+      >
+        <img
+          src={fileUrl}
+          alt={fileName || "Attachment"}
+          className="max-w-full max-h-[300px] object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+        />
+      </a>
+    );
+  }
+
+  // For non-image files, show the link as before
   const textColor = isOutgoing ? "text-white" : "text-slate-700";
   const label = fileName || "Attachment";
   return (

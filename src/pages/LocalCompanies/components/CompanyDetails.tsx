@@ -1,4 +1,4 @@
-import type { CompanyReadDto } from "../../../services/company/company.service";
+import type {CompanyReadDto} from "../../../services/company/company.service";
 import ReactCountryFlag from "react-country-flag";
 import {
   Phone as PhoneIcon,
@@ -12,28 +12,21 @@ import {
   PencilLine,
   MessagesSquareIcon,
 } from "lucide-react";
-import { STATUS_TO_COLOR, apiStatusToUiStatus } from "../types";
-import { getLogoUrl } from "../utils";
-import { getCountryCode } from "../../../shared/utils/countryCode";
-import { useChatWithRecipient } from "../../../shared/hooks/useChatWithRecipient";
-import { ChatOverlay } from "../../../shared/components/ChatOverlay";
-import { CHAT_RECIPIENT_TYPE } from "../../../services/chat/chat.types";
-import type { ActionableAlertChip } from "../../chat-alert/types/chat";
-import { useTranslation } from "react-i18next";
+import {STATUS_TO_COLOR, apiStatusToUiStatus} from "../types";
+import {getLogoUrl} from "../utils";
+import {getCountryCode} from "../../../shared/utils/countryCode";
+import {useChatWithRecipient} from "../../../shared/hooks/useChatWithRecipient";
+import {ChatOverlay} from "../../../shared/components/ChatOverlay";
+import {CHAT_RECIPIENT_TYPE} from "../../../services/chat/chat.types";
+import {DEFAULT_ACTIONABLE_ALERTS} from "../../../shared/constants/actionableAlerts";
+import {useTranslation} from "react-i18next";
 
 type Props = {
   company: CompanyReadDto;
 };
 
-const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  { id: "1", label: "GPS Lost", alertType: "alert" },
-  { id: "2", label: "Delay Expected", alertType: "warning" },
-  { id: "3", label: "Route Cleared", alertType: "success" },
-  { id: "4", label: "Documentation Pending", alertType: "info" },
-];
-
-export function CompanyDetails({ company }: Props) {
-  const { t } = useTranslation();
+export function CompanyDetails({company}: Props) {
+  const {t} = useTranslation();
   const uiStatus = apiStatusToUiStatus(company.status);
   const colors = STATUS_TO_COLOR[uiStatus];
 
@@ -197,7 +190,7 @@ export function CompanyDetails({ company }: Props) {
         onClose={() => chatHook.setIsChatOpen(false)}
         recipientName={company.name}
         chatHook={chatHook}
-        actionableAlerts={ACTIONABLE_ALERTS}
+        actionableAlerts={DEFAULT_ACTIONABLE_ALERTS}
       />
     </section>
   );

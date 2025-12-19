@@ -64,13 +64,6 @@ export function SegmentProgress({
   const {plannedDate, estFinishAt, distance} = useMemo(() => {
     if (segment) {
       // Determine which step config to use: selected step or current step
-      console.log(
-        "selectedState",
-        PROGRESS_STEPS_CONFIG.find((step) => step.key === current),
-        PROGRESS_STEPS_CONFIG[5].key,
-        current
-      );
-
       const targetStepConfig =
         selectedIndex !== null
           ? PROGRESS_STEPS_CONFIG[selectedIndex]

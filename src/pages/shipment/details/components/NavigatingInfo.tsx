@@ -26,7 +26,7 @@ import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipien
 import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {DriverInfo} from "../../../../shared/components/DriverInfo";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
+import {DEFAULT_ACTIONABLE_ALERTS} from "../../../../shared/constants/actionableAlerts";
 import {useTranslation} from "react-i18next";
 
 type NavigatingInfoProps = PropsWithChildren<{
@@ -52,13 +52,6 @@ import avatarImg from "../../../../assets/images/avatar.png";
 import CargoMap from "../../../../components/CargoMap";
 import {getCountryCode} from "../../../../shared/utils/countryCode";
 import ReactCountryFlag from "react-country-flag";
-
-const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
-];
 
 export function NavigatingInfo({
   segments,
@@ -513,7 +506,7 @@ export function NavigatingInfo({
           onClose={() => chatHook.setIsChatOpen(false)}
           recipientName={driverName || t("shipment.navigatingInfo.driver")}
           chatHook={chatHook}
-          actionableAlerts={ACTIONABLE_ALERTS}
+          actionableAlerts={DEFAULT_ACTIONABLE_ALERTS}
         />
       )}
     </section>

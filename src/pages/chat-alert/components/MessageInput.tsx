@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
-import { Paperclip, SendHorizonal, X } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import {useEffect, useRef, useState} from "react";
+import {Paperclip, SendHorizonal, X} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 interface MessageInputProps {
-  onSend?: (payload: { content: string; file?: File | null }) => void;
+  onSend?: (payload: {content: string; file?: File | null}) => void;
   isSending?: boolean;
 }
 
@@ -16,23 +16,39 @@ const ACCEPTED_FILE_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ].join(",");
 
-export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
-  const { t } = useTranslation();
+export function MessageInput({onSend, isSending = false}: MessageInputProps) {
+  const {t} = useTranslation();
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const textInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = message.trim();
     if (!trimmed && !attachment) return;
-    onSend?.({ content: trimmed, file: attachment });
+
+    // Focus immediately before state updates
+    textInputRef.current?.focus();
+
+    onSend?.({content: trimmed, file: attachment});
     setMessage("");
     setAttachment(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  // Ensure focus is maintained after state updates
+  useEffect(() => {
+    if (
+      message === "" &&
+      !isSending &&
+      document.activeElement !== textInputRef.current
+    ) {
+      textInputRef.current?.focus();
+    }
+  }, [message, isSending]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -71,6 +87,7 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
 
       <div className="flex items-center gap-2 bg-slate-50 rounded-2xl px-4 py-3 ">
         <input
+          ref={textInputRef}
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -97,6 +114,10 @@ export function MessageInput({ onSend, isSending = false }: MessageInputProps) {
         <button
           type="submit"
           disabled={isSubmitDisabled}
+          onMouseDown={(e) => {
+            // Prevent button from taking focus when clicked
+            e.preventDefault();
+          }}
           className="flex-shrink-0 bg-[#1B54FE] text-white rounded-full p-2 hover:bg-[#1545d4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={t("chatAlert.messageInput.sendMessage")}
         >

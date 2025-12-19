@@ -1,4 +1,4 @@
-import { http } from "../../lib/http";
+import {http} from "../../lib/http";
 import type {
   ConversationReadDto,
   ConversationReadResponse,
@@ -14,10 +14,10 @@ const CHAT_BASE_PATH = "/chat";
 export async function listChatConversations(
   recipientType?: "driver" | "company"
 ): Promise<ConversationReadDto[]> {
-  const params = recipientType ? { recipientType } : {};
+  const params = recipientType ? {recipientType} : {};
   const response = await http.get<ConversationReadDto[]>(
     `${CHAT_BASE_PATH}/conversations`,
-    { params }
+    {params}
   );
   return response.data;
 }
@@ -37,7 +37,7 @@ export async function getConversationMessages(
 ): Promise<MessageReadDto[]> {
   const response = await http.get<MessageReadDto[]>(
     `${CHAT_BASE_PATH}/conversations/${conversationId}/messages`,
-    { params }
+    {params}
   );
   return response.data;
 }
@@ -79,6 +79,12 @@ export async function getTotalUnreadCount(): Promise<UnreadCountResponse> {
     `${CHAT_BASE_PATH}/unread-count`
   );
   return response.data;
+}
+
+export async function deleteConversation(
+  conversationId: string
+): Promise<void> {
+  await http.delete(`${CHAT_BASE_PATH}/conversations/${conversationId}`);
 }
 
 function buildFormData(input: SendChatMessageInput): FormData {

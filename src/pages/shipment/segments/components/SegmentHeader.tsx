@@ -17,7 +17,7 @@ import {DriverInfo} from "../../../../shared/components/DriverInfo";
 import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
 import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
 import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
-import type {ActionableAlertChip} from "../../../chat-alert/types/chat";
+import {DEFAULT_ACTIONABLE_ALERTS} from "../../../../shared/constants/actionableAlerts";
 import {useTranslation} from "react-i18next";
 import {useState, useRef, useEffect} from "react";
 import {
@@ -25,13 +25,6 @@ import {
   useCancelSegment,
 } from "../../../../services/shipment/hooks";
 import {useCurrentUser} from "../../../../services/user/hooks";
-
-const ACTIONABLE_ALERTS: ActionableAlertChip[] = [
-  {id: "1", label: "GPS Lost", alertType: "alert"},
-  {id: "2", label: "Delay Expected", alertType: "warning"},
-  {id: "3", label: "Route Cleared", alertType: "success"},
-  {id: "4", label: "Documentation Pending", alertType: "info"},
-];
 
 type SegmentHeaderProps = {
   order: number;
@@ -472,7 +465,7 @@ export default function SegmentHeader({
           onClose={() => chatHook.setIsChatOpen(false)}
           recipientName={driverName || t("segments.cardHeader.driver")}
           chatHook={chatHook}
-          actionableAlerts={ACTIONABLE_ALERTS}
+          actionableAlerts={DEFAULT_ACTIONABLE_ALERTS}
         />
       )}
     </div>
