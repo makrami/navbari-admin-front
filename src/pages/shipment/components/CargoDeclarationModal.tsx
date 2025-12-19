@@ -4,6 +4,7 @@ import ReactCountryFlag from "react-country-flag";
 import {type Driver} from "../data/drivers";
 import {getFileUrl} from "../../LocalCompanies/utils";
 import {useAnnounceSegment} from "../../../services/shipment/hooks";
+import {cn} from "../../../shared/utils/cn";
 
 export type CargoCompany = {
   id: string;
@@ -24,6 +25,7 @@ type CargoDeclarationModalProps = {
   companies?: CargoCompany[];
   defaultSelectedIds?: string[];
   segmentId?: string;
+  disabledCompanyIds?: string[];
 };
 
 export default function CargoDeclarationModal({
@@ -33,6 +35,7 @@ export default function CargoDeclarationModal({
   companies,
   defaultSelectedIds,
   segmentId,
+  disabledCompanyIds = [],
 }: CargoDeclarationModalProps) {
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
@@ -104,63 +107,78 @@ export default function CargoDeclarationModal({
         {/* List */}
         <div className="px-5 py-4">
           <div className="grid  bg-white rounded-xl p-4">
-            {filtered?.map((co) => (
-              <label
-                key={co.id}
-                className="flex items-center justify-between gap-4 b  border-b  border-slate-100 p-3 hover:bg-slate-50 cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(co.id)}
-                    onChange={(e) => {
-                      const next = new Set(selectedIds);
-                      if (e.target.checked) next.add(co.id);
-                      else next.delete(co.id);
-                      setSelectedIds(next);
-                    }}
-                    aria-label={`Select ${co.name}`}
-                    className="h-5 w-5 rounded-[6px] border border-slate-300 bg-white appearance-none cursor-pointer transition-all hover:border-blue-300 checked:bg-[#1b54fe] checked:border-[#1b54fe] [box-shadow:inset_0_0_0_2px_white] checked:[box-shadow:inset_0_0_0_2px_white]"
-                  />
-                  <img
-                    src={getFileUrl(co.logoUrl) || co.logoUrl}
-                    alt=""
-                    className="size-8 rounded-md object-contain bg-white"
-                  />
-                  <div className="min-w-0 ">
-                    <div className="text-slate-900 font-semibold text-sm truncate flex items-center gap-2">
-                      <ReactCountryFlag
-                        svg
-                        countryCode={co.countryCode}
-                        style={{width: 18, height: 12, borderRadius: 2}}
-                      />
+            {filtered?.map((co) => {
+              const isDisabled = disabledCompanyIds.includes(co.id);
+              return (
+                <label
+                  key={co.id}
+                  className={cn(
+                    "flex items-center justify-between gap-4 b  border-b  border-slate-100 p-3",
+                    isDisabled
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-slate-50 cursor-pointer"
+                  )}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(co.id)}
+                      disabled={isDisabled}
+                      onChange={(e) => {
+                        if (isDisabled) return;
+                        const next = new Set(selectedIds);
+                        if (e.target.checked) next.add(co.id);
+                        else next.delete(co.id);
+                        setSelectedIds(next);
+                      }}
+                      aria-label={`Select ${co.name}`}
+                      className={cn(
+                        "h-5 w-5 rounded-[6px] border border-slate-300 bg-white appearance-none transition-all [box-shadow:inset_0_0_0_2px_white] checked:[box-shadow:inset_0_0_0_2px_white]",
+                        isDisabled
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer hover:border-blue-300 checked:bg-[#1b54fe] checked:border-[#1b54fe]"
+                      )}
+                    />
+                    <img
+                      src={getFileUrl(co.logoUrl) || co.logoUrl}
+                      alt=""
+                      className="size-8 rounded-md object-contain bg-white"
+                    />
+                    <div className="min-w-0 ">
+                      <div className="text-slate-900 font-semibold text-sm truncate flex items-center gap-2">
+                        <ReactCountryFlag
+                          svg
+                          countryCode={co.countryCode}
+                          style={{width: 18, height: 12, borderRadius: 2}}
+                        />
 
-                      {co.name}
+                        {co.name}
+                      </div>
+
+                      <div className="text-xs text-slate-500 flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1">
+                          <UserIcon className="size-3 text-slate-400" />
+                          {co.admin}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="size-3 text-slate-400" />
+                          Register: {co.registeredAt}
+                        </span>
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="text-xs text-slate-500 flex items-center gap-3">
-                      <span className="inline-flex items-center gap-1">
-                        <UserIcon className="size-3 text-slate-400" />
-                        {co.admin}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <CalendarDays className="size-3 text-slate-400" />
-                        Register: {co.registeredAt}
-                      </span>
+                  <div className=" shrink-0">
+                    <div className="text-xs text-slate-400">
+                      Available Drivers
+                    </div>
+                    <div className="inline-flex items-center gap-1 text-[#1B54FE] text-sm font-bold">
+                      <Users className="size-4" /> {co.availableDrivers}
                     </div>
                   </div>
-                </div>
-
-                <div className=" shrink-0">
-                  <div className="text-xs text-slate-400">
-                    Available Drivers
-                  </div>
-                  <div className="inline-flex items-center gap-1 text-[#1B54FE] text-sm font-bold">
-                    <Users className="size-4" /> {co.availableDrivers}
-                  </div>
-                </div>
-              </label>
-            ))}
+                </label>
+              );
+            })}
           </div>
         </div>
 

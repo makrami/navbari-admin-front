@@ -254,10 +254,17 @@ export function SegmentDetails({
     }
   }, [showCargoModal, refetchCompanies]);
 
-  // Fetch segment announcements when hasPendingAnnouncements is true
+  // Fetch segment announcements when hasPendingAnnouncements is true or when cargo modal is open
   const {data: announcements = []} = useSegmentAnnouncements(
-    data.hasPendingAnnouncements && segmentId ? segmentId : null
+    (data.hasPendingAnnouncements || showCargoModal) && segmentId
+      ? segmentId
+      : null
   );
+
+  // Extract company IDs from announcements to disable them in the modal
+  const announcedCompanyIds = useMemo(() => {
+    return announcements.map((announcement) => announcement.companyId);
+  }, [announcements]);
 
   const {t} = useTranslation();
 
@@ -864,6 +871,7 @@ export function SegmentDetails({
         companies={cargoCompanies}
         defaultSelectedIds={data.cargoCompanies?.map((c) => c.id)}
         segmentId={segmentId}
+        disabledCompanyIds={announcedCompanyIds}
         onSelect={(companies) => {
           const update: Partial<Segment> = {
             ...(pendingUpdate ?? {}),
