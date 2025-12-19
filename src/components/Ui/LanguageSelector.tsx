@@ -14,7 +14,11 @@ const languages = [
   {code: "tr", name: "Türkçe", countryCode: "TR"},
 ];
 
-export const LanguageSelector = () => {
+interface LanguageSelectorProps {
+  openUp?: boolean;
+}
+
+export const LanguageSelector = ({openUp = false}: LanguageSelectorProps) => {
   const {i18n: i18nInstance} = useTranslation();
   const {language, setLanguage} = useProfileStore();
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +82,11 @@ export const LanguageSelector = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden">
+        <div
+          className={`absolute ${
+            openUp ? "bottom-full mb-1" : "top-full mt-1"
+          } left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden`}
+        >
           {languages.map((lang) => (
             <button
               key={lang.code}

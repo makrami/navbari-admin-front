@@ -59,7 +59,7 @@ export function DriverInfo({
 
       <div className="flex items-center gap-1">
         {showRatingBeforeName && hasRating && (
-          <>
+          <div className="flex items-center gap-1 rounded-md bg-black/10 px-1.5 py-0.5">
             <span
               className={cn(
                 "text-xs font-bold",
@@ -76,13 +76,13 @@ export function DriverInfo({
                   : "fill-yellow-400 text-yellow-400"
               )}
             />
-          </>
+          </div>
         )}
         <span className={cn("text-slate-900", nameClassName)}>
           {driverName}
         </span>
         {!showRatingBeforeName && hasRating && (
-          <>
+          <div className="flex items-center gap-1 rounded-md bg-blue-500/5 px-2 py-1">
             <span
               className={cn(
                 "text-xs font-bold",
@@ -99,7 +99,7 @@ export function DriverInfo({
                   : "fill-yellow-400 text-yellow-400"
               )}
             />
-          </>
+          </div>
         )}
       </div>
     </div>

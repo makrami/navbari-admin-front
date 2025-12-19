@@ -354,7 +354,7 @@ export function Sidebar() {
                     ? t("common.loading") || "Loading..."
                     : userDisplayName}
                 </span>
-                <LanguageSelector />
+                <LanguageSelector openUp={true} />
               </div>
             </div>
 
