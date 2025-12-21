@@ -1,9 +1,10 @@
-import {useState, useEffect, useRef, useMemo} from "react";
-import {XIcon, Search, ChevronDown, Check} from "lucide-react";
+import {useState, useEffect, useRef, useMemo, useCallback} from "react";
+import {XIcon, Search, ChevronDown, Check, MapPin} from "lucide-react";
 import {useCities} from "../../../services/geography/hooks";
 import type {City} from "../../../services/geography/geography.service";
 import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
 import {useTranslation} from "react-i18next";
+import {MapSelectionModal} from "./MapSelectionModal";
 
 type CityDropdownProps = {
   value: string;
@@ -346,7 +347,7 @@ function CargoCategoryDropdown({
 type AddShipmentModalProps = {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: CreateShipmentDto) => void;
+  onCreate: (data: CreateShipmentDto) => void | Promise<void>;
 };
 
 export default function AddShipmentModal({
@@ -364,8 +365,80 @@ export default function AddShipmentModal({
   const [segmentsAmount, setSegmentsAmount] = useState<string>("");
   const [segmentCountError, setSegmentCountError] = useState<string>("");
 
+  // Coordinate states
+  const [originLatitude, setOriginLatitude] = useState<number | undefined>();
+  const [originLongitude, setOriginLongitude] = useState<number | undefined>();
+  const [destinationLatitude, setDestinationLatitude] = useState<
+    number | undefined
+  >();
+  const [destinationLongitude, setDestinationLongitude] = useState<
+    number | undefined
+  >();
+
+  // Map selection modal state
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [mapSelectionType, setMapSelectionType] = useState<"from" | "to">(
+    "from"
+  );
+
+  // Loading and error states
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   // Fetch cities from API
   const {data: cities = [], isLoading: isLoadingCities} = useCities();
+
+  // Clear coordinates when origin field is cleared
+  useEffect(() => {
+    if (!from.trim()) {
+      setOriginLatitude(undefined);
+      setOriginLongitude(undefined);
+    }
+  }, [from]);
+
+  // Clear coordinates when destination field is cleared
+  useEffect(() => {
+    if (!to.trim()) {
+      setDestinationLatitude(undefined);
+      setDestinationLongitude(undefined);
+    }
+  }, [to]);
+
+  // Check if a value matches a city from the cities list
+  const isCityFromList = useCallback(
+    (value: string): boolean => {
+      if (!value.trim() || cities.length === 0) return false;
+      const cityOptions = cities.map((city) => `${city.city}, ${city.country}`);
+      return cityOptions.includes(value.trim());
+    },
+    [cities]
+  );
+
+  // Handle origin field change - clear coordinates if city selected from list
+  const handleFromChange = useCallback(
+    (value: string) => {
+      setFrom(value);
+      // If the value matches a city from the list, clear coordinates
+      if (value.trim() && isCityFromList(value)) {
+        setOriginLatitude(undefined);
+        setOriginLongitude(undefined);
+      }
+    },
+    [isCityFromList]
+  );
+
+  // Handle destination field change - clear coordinates if city selected from list
+  const handleToChange = useCallback(
+    (value: string) => {
+      setTo(value);
+      // If the value matches a city from the list, clear coordinates
+      if (value.trim() && isCityFromList(value)) {
+        setDestinationLatitude(undefined);
+        setDestinationLongitude(undefined);
+      }
+    },
+    [isCityFromList]
+  );
 
   if (!open) return null;
 
@@ -380,40 +453,105 @@ export default function AddShipmentModal({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleMapSelect = (
+    latitude: number,
+    longitude: number,
+    city?: string,
+    country?: string
+  ) => {
+    if (mapSelectionType === "from") {
+      setOriginLatitude(latitude);
+      setOriginLongitude(longitude);
+      // Update the "from" field if city and country are available
+      if (city && country) {
+        setFrom(`${city}, ${country}`);
+      }
+    } else {
+      setDestinationLatitude(latitude);
+      setDestinationLongitude(longitude);
+      // Update the "to" field if city and country are available
+      if (city && country) {
+        setTo(`${city}, ${country}`);
+      }
+    }
+    setMapModalOpen(false);
+  };
+
+  const handleOpenMapModal = (type: "from" | "to") => {
+    setMapSelectionType(type);
+    setMapModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || segmentCountError) return;
-    onCreate({
-      title: name,
-      originCountry: from.split(",")[1].trim(),
-      originCity: from.split(",")[0].trim(),
-      destinationCountry: to.split(",")[1].trim(),
-      destinationCity: to.split(",")[0].trim(),
-      cargoType: cargoCategory,
-      cargoWeight: cargoWeight ? parseFloat(cargoWeight) : 0,
-      segmentCount: segmentsAmount ? parseInt(segmentsAmount, 10) : 0,
-    });
-    // reset
-    setName("");
-    setFrom("");
-    setTo("");
-    setCargoCategory("");
-    setCargoWeight("");
-    setSegmentsAmount("");
-    setSegmentCountError("");
-    onClose();
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const fromParts = from.split(",");
+      const toParts = to.split(",");
+
+      await onCreate({
+        title: name,
+        originCountry: fromParts.length > 1 ? fromParts[1].trim() : "",
+        originCity: fromParts.length > 0 ? fromParts[0].trim() : "",
+        destinationCountry: toParts.length > 1 ? toParts[1].trim() : "",
+        destinationCity: toParts.length > 0 ? toParts[0].trim() : "",
+        cargoType: cargoCategory,
+        cargoWeight: cargoWeight ? parseFloat(cargoWeight) : 0,
+        segmentCount: segmentsAmount ? parseInt(segmentsAmount, 10) : 0,
+        originLongitude,
+        originLatitude,
+        destinationLongitude,
+        destinationLatitude,
+      });
+
+      // Reset form on success
+      setName("");
+      setFrom("");
+      setTo("");
+      setCargoCategory("");
+      setCargoWeight("");
+      setSegmentsAmount("");
+      setSegmentCountError("");
+      setOriginLatitude(undefined);
+      setOriginLongitude(undefined);
+      setDestinationLatitude(undefined);
+      setDestinationLongitude(undefined);
+      setSubmitError(null);
+      onClose();
+    } catch (error) {
+      // Handle error
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : t("shipment.addModal.createError");
+      setSubmitError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-slate-900/40"
+        onClick={isSubmitting ? undefined : onClose}
+      />
       <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl border border-slate-200">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-md p-2 hover:bg-slate-100"
+            className={`inline-flex items-center justify-center rounded-md p-2 ${
+              isSubmitting
+                ? "cursor-not-allowed opacity-50"
+                : "hover:bg-slate-100"
+            }`}
             aria-label={t("shipment.addModal.close")}
-            onClick={onClose}
+            onClick={isSubmitting ? undefined : onClose}
+            disabled={isSubmitting}
           >
             <XIcon className="size-5 text-slate-500" />
           </button>
@@ -436,22 +574,57 @@ export default function AddShipmentModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CityDropdown
-              label={t("shipment.addModal.from")}
-              placeholder={t("shipment.addModal.searchCities")}
-              value={from}
-              onChange={setFrom}
-              cities={cities}
-              isLoading={isLoadingCities}
-            />
-            <CityDropdown
-              label={t("shipment.addModal.to")}
-              placeholder={t("shipment.addModal.searchCities")}
-              value={to}
-              onChange={setTo}
-              cities={cities}
-              isLoading={isLoadingCities}
-            />
+            <div className="grid gap-1">
+              <CityDropdown
+                label={t("shipment.addModal.from")}
+                placeholder={t("shipment.addModal.searchCities")}
+                value={from}
+                onChange={handleFromChange}
+                cities={cities}
+                isLoading={isLoadingCities}
+              />
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 transition-colors"
+                onClick={() => handleOpenMapModal("from")}
+              >
+                <MapPin className="size-4" />
+                <span>{t("shipment.addModal.selectFromMap")}</span>
+              </button>
+              {originLatitude !== undefined &&
+                originLongitude !== undefined && (
+                  <p className="text-xs text-slate-500">
+                    {t("shipment.addModal.coordinatesSelected")}:{" "}
+                    {originLatitude.toFixed(6)}, {originLongitude.toFixed(6)}
+                  </p>
+                )}
+            </div>
+            <div className="grid gap-1">
+              <CityDropdown
+                label={t("shipment.addModal.to")}
+                placeholder={t("shipment.addModal.searchCities")}
+                value={to}
+                onChange={handleToChange}
+                cities={cities}
+                isLoading={isLoadingCities}
+              />
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 transition-colors"
+                onClick={() => handleOpenMapModal("to")}
+              >
+                <MapPin className="size-4" />
+                <span>{t("shipment.addModal.selectFromMap")}</span>
+              </button>
+              {destinationLatitude !== undefined &&
+                destinationLongitude !== undefined && (
+                  <p className="text-xs text-slate-500">
+                    {t("shipment.addModal.coordinatesSelected")}:{" "}
+                    {destinationLatitude.toFixed(6)},{" "}
+                    {destinationLongitude.toFixed(6)}
+                  </p>
+                )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -504,6 +677,12 @@ export default function AddShipmentModal({
             )}
           </div>
 
+          {submitError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm text-red-800">{submitError}</p>
+            </div>
+          )}
+
           <div className="flex items-center justify-end gap-2 pt-2">
             <button
               type="button"
@@ -514,12 +693,31 @@ export default function AddShipmentModal({
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+              disabled={isSubmitting}
+              className={`rounded-xl px-4 py-2 text-sm text-white transition-colors ${
+                isSubmitting
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              {t("shipment.addModal.create")}
+              {isSubmitting
+                ? t("shipment.addModal.creating")
+                : t("shipment.addModal.create")}
             </button>
           </div>
         </form>
+
+        <MapSelectionModal
+          open={mapModalOpen}
+          onClose={() => setMapModalOpen(false)}
+          onSelect={handleMapSelect}
+          initialLatitude={
+            mapSelectionType === "from" ? originLatitude : destinationLatitude
+          }
+          initialLongitude={
+            mapSelectionType === "from" ? originLongitude : destinationLongitude
+          }
+        />
       </div>
     </div>
   );

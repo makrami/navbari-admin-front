@@ -33,8 +33,12 @@ export interface Segment {
   shipmentWeight: string | null;
   originCountry: string | null;
   originCity: string | null;
+  originLatitude?: number | null;
+  originLongitude?: number | null;
   destinationCountry: string | null;
   destinationCity: string | null;
+  destinationLatitude?: number | null;
+  destinationLongitude?: number | null;
   status: SegmentStatusType | string;
   eta: string | null;
   currentLatitude: number | null;

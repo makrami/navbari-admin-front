@@ -70,8 +70,15 @@ export function CargoMap({
       property: PaintProperty,
       value: string
     ) => {
-      if (map.getLayer(layerId)) {
-        map.setPaintProperty(layerId, property, value);
+      try {
+        const layer = map.getLayer(layerId);
+        if (layer) {
+          map.setPaintProperty(layerId, property, value);
+        }
+      } catch (error) {
+        // Layer doesn't exist or doesn't support this paint property, skip silently
+        // This is expected for some layers that may not exist in all map styles
+        // or don't support the specific paint property being set
       }
     };
 

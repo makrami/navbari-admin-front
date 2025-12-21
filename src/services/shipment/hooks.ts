@@ -302,11 +302,14 @@ export function useAssignSegment() {
 /**
  * Query hook for segment route
  */
-export function useSegmentRoute(segmentId: string | null) {
+export function useSegmentRoute(
+  segmentId: string | null,
+  options?: {enabled?: boolean}
+) {
   return useQuery({
     queryKey: shipmentKeys.segmentRoute(segmentId!),
     queryFn: () => getSegmentRoute(segmentId!),
-    enabled: !!segmentId,
+    enabled: options?.enabled !== undefined ? options.enabled : !!segmentId,
   });
 }
 

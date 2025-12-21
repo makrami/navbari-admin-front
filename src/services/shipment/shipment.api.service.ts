@@ -107,6 +107,10 @@ export interface CreateShipmentDto {
   cargoWeight: number;
   cargoDescription?: string;
   segmentCount: number;
+  originLongitude?: number;
+  originLatitude?: number;
+  destinationLongitude?: number;
+  destinationLatitude?: number;
 }
 
 // Update Shipment DTO type
@@ -424,6 +428,10 @@ export interface UpdateSegmentDto {
   estimatedFinishTime?: string;
   baseFee?: number;
   rating?: number;
+  originLongitude?: number;
+  originLatitude?: number;
+  destinationLongitude?: number;
+  destinationLatitude?: number;
 }
 
 /**

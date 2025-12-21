@@ -74,20 +74,14 @@ export function useShipmentSelection() {
   const handleCreateShipment = useCallback(
     async (data: CreateShipmentDto) => {
       // Create shipment via API
-      try {
-        // Create via API using mutation hook
-        const createdShipment = await createShipmentMutation.mutateAsync(data);
+      // Create via API using mutation hook
+      const createdShipment = await createShipmentMutation.mutateAsync(data);
 
-        // Update selected ID to the new shipment ID from API (UUID) immediately
-        setSelectedId(createdShipment.id);
-        selectedIdRef.current = createdShipment.id;
+      // Update selected ID to the new shipment ID from API (UUID) immediately
+      setSelectedId(createdShipment.id);
+      selectedIdRef.current = createdShipment.id;
 
-        // Query invalidation is handled automatically by the mutation hook
-      } catch (error) {
-        // Error creating shipment - will be handled by UI
-        console.error("Error creating shipment", error);
-        return;
-      }
+      // Query invalidation is handled automatically by the mutation hook
     },
     [createShipmentMutation]
   );

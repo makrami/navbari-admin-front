@@ -1,4 +1,11 @@
-import {useMemo, useState, useEffect, useRef, type ReactNode} from "react";
+import {
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ReactNode,
+} from "react";
 import SegmentProgress from "./SegmentProgress";
 import {cn} from "../../../../shared/utils/cn";
 import CargoDeclarationModal, {
@@ -24,6 +31,7 @@ import {
   useUpdateSegment,
   useSegmentAnnouncements,
   useRateSegment,
+  useSegmentRoute,
 } from "../../../../services/shipment/hooks";
 import {
   COMPANY_STATUS,
@@ -43,6 +51,8 @@ import {
 import {useTranslation} from "react-i18next";
 import {useCurrentUser} from "../../../../services/user/hooks";
 import {useCities} from "../../../../services/geography/hooks";
+import {MapPin} from "lucide-react";
+import {MapSelectionModal} from "../../components/MapSelectionModal";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -107,6 +117,30 @@ export function SegmentDetails({
 
   const [toValue, setToValue] = useState<string>(nextPlace ?? "");
   const [fromValue, setFromValue] = useState<string>(place);
+
+  // Coordinate states
+  const [originLatitude, setOriginLatitude] = useState<number | undefined>();
+  const [originLongitude, setOriginLongitude] = useState<number | undefined>();
+  const [destinationLatitude, setDestinationLatitude] = useState<
+    number | undefined
+  >();
+  const [destinationLongitude, setDestinationLongitude] = useState<
+    number | undefined
+  >();
+
+  // Map selection modal state
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [mapSelectionType, setMapSelectionType] = useState<"from" | "to">(
+    "from"
+  );
+
+  // Fetch segment route to get existing coordinates
+  // Only fetch when segmentId exists AND both origin and destination are available
+  const hasOrigin = place.trim().length > 0;
+  const hasDestination = nextPlace !== undefined && nextPlace.trim().length > 0;
+  const {data: segmentRoute} = useSegmentRoute(segmentId || null, {
+    enabled: !!segmentId && hasOrigin && hasDestination,
+  });
 
   // Split date-time values into separate date and time states
   const [startDateValue, setStartDateValue] = useState<string>(() => {
@@ -239,6 +273,118 @@ export function SegmentDetails({
   const cityOptions = useMemo(() => {
     return cities.map((city) => `${city.city}, ${city.country}`);
   }, [cities]);
+
+  // Initialize coordinates from segment data first, then fall back to segment route if available
+  useEffect(() => {
+    // First, try to read from segment data (from server)
+    if (data.originLatitude != null && data.originLongitude != null) {
+      setOriginLatitude(Number(data.originLatitude));
+      setOriginLongitude(Number(data.originLongitude));
+    } else if (segmentRoute?.originLatitude && segmentRoute?.originLongitude) {
+      // Fall back to segment route if not in segment data
+      setOriginLatitude(Number(segmentRoute.originLatitude));
+      setOriginLongitude(Number(segmentRoute.originLongitude));
+    }
+
+    if (data.destinationLatitude != null && data.destinationLongitude != null) {
+      setDestinationLatitude(Number(data.destinationLatitude));
+      setDestinationLongitude(Number(data.destinationLongitude));
+    } else if (
+      segmentRoute?.destinationLatitude &&
+      segmentRoute?.destinationLongitude
+    ) {
+      // Fall back to segment route if not in segment data
+      setDestinationLatitude(Number(segmentRoute.destinationLatitude));
+      setDestinationLongitude(Number(segmentRoute.destinationLongitude));
+    }
+  }, [
+    data.originLatitude,
+    data.originLongitude,
+    data.destinationLatitude,
+    data.destinationLongitude,
+    segmentRoute,
+  ]);
+
+  // Clear coordinates when origin field is cleared
+  useEffect(() => {
+    if (!fromValue.trim()) {
+      setOriginLatitude(undefined);
+      setOriginLongitude(undefined);
+    }
+  }, [fromValue]);
+
+  // Clear coordinates when destination field is cleared
+  useEffect(() => {
+    if (!toValue.trim()) {
+      setDestinationLatitude(undefined);
+      setDestinationLongitude(undefined);
+    }
+  }, [toValue]);
+
+  // Check if a value matches a city from the cities list
+  const isCityFromList = useCallback(
+    (value: string): boolean => {
+      if (!value.trim() || cities.length === 0) return false;
+      const cityOptions = cities.map((city) => `${city.city}, ${city.country}`);
+      return cityOptions.includes(value.trim());
+    },
+    [cities]
+  );
+
+  // Handle origin field change - clear coordinates if city selected from list
+  const handleFromChange = useCallback(
+    (value: string) => {
+      setFromValue(value);
+      // If the value matches a city from the list, clear coordinates
+      if (value.trim() && isCityFromList(value)) {
+        setOriginLatitude(undefined);
+        setOriginLongitude(undefined);
+      }
+    },
+    [isCityFromList]
+  );
+
+  // Handle destination field change - clear coordinates if city selected from list
+  const handleToChange = useCallback(
+    (value: string) => {
+      setToValue(value);
+      // If the value matches a city from the list, clear coordinates
+      if (value.trim() && isCityFromList(value)) {
+        setDestinationLatitude(undefined);
+        setDestinationLongitude(undefined);
+      }
+    },
+    [isCityFromList]
+  );
+
+  const handleMapSelect = (
+    latitude: number,
+    longitude: number,
+    city?: string,
+    country?: string
+  ) => {
+    if (mapSelectionType === "from") {
+      setOriginLatitude(latitude);
+      setOriginLongitude(longitude);
+      // Update the "from" field if city and country are available
+      if (city && country) {
+        setFromValue(`${city}, ${country}`);
+      }
+    } else {
+      setDestinationLatitude(latitude);
+      setDestinationLongitude(longitude);
+      // Update the "to" field if city and country are available
+      if (city && country) {
+        setToValue(`${city}, ${country}`);
+      }
+    }
+    setMapModalOpen(false);
+  };
+
+  const handleOpenMapModal = (type: "from" | "to") => {
+    setMapSelectionType(type);
+    setMapModalOpen(true);
+  };
 
   // Transform companies to CargoCompany format
   const cargoCompanies = useMemo(() => {
@@ -495,20 +641,58 @@ export function SegmentDetails({
             {/* Show form only when editable AND segment is pending assignment */}
             {editable && data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT ? (
               <div className=" rounded-xl  grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FieldBoxSelect
-                  label="FROM"
-                  value={fromValue}
-                  onChange={setFromValue}
-                  options={cityOptions}
-                  disabled={!hasSegmentsManage}
-                />
-                <FieldBoxSelect
-                  label="TO"
-                  value={toValue}
-                  onChange={setToValue}
-                  options={cityOptions}
-                  disabled={!hasSegmentsManage}
-                />
+                <div className="grid gap-1">
+                  <FieldBoxSelect
+                    label="FROM"
+                    value={fromValue}
+                    onChange={handleFromChange}
+                    options={cityOptions}
+                    disabled={!hasSegmentsManage}
+                  />
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handleOpenMapModal("from")}
+                    disabled={!hasSegmentsManage}
+                  >
+                    <MapPin className="size-4" />
+                    <span>{t("shipment.addModal.selectFromMap")}</span>
+                  </button>
+                  {originLatitude !== undefined &&
+                    originLongitude !== undefined && (
+                      <p className="text-xs text-slate-500">
+                        {t("shipment.addModal.coordinatesSelected")}:{" "}
+                        {(+originLatitude).toFixed(6)},{" "}
+                        {(+originLongitude).toFixed(6)}
+                      </p>
+                    )}
+                </div>
+                <div className="grid gap-1">
+                  <FieldBoxSelect
+                    label="TO"
+                    value={toValue}
+                    onChange={handleToChange}
+                    options={cityOptions}
+                    disabled={!hasSegmentsManage}
+                  />
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handleOpenMapModal("to")}
+                    disabled={!hasSegmentsManage}
+                  >
+                    <MapPin className="size-4" />
+                    <span>{t("shipment.addModal.selectFromMap")}</span>
+                  </button>
+                  {destinationLatitude !== undefined &&
+                    destinationLongitude !== undefined && (
+                      <p className="text-xs text-slate-500">
+                        {t("shipment.addModal.coordinatesSelected")}:{" "}
+                        {(+destinationLatitude).toFixed(6)},{" "}
+                        {(+destinationLongitude).toFixed(6)}
+                      </p>
+                    )}
+                </div>
                 <DatePicker
                   label="START DATE"
                   value={startDateValue}
@@ -606,6 +790,10 @@ export function SegmentDetails({
                               estFinishTimeValue.trim()
                             ),
                             baseFee: baseFeeNum ?? undefined,
+                            originLongitude,
+                            originLatitude,
+                            destinationLongitude,
+                            destinationLatitude,
                           };
                           apiResponse = await updateSegmentMutation.mutateAsync(
                             {
@@ -724,6 +912,10 @@ export function SegmentDetails({
                               estFinishTimeValue.trim()
                             ),
                             baseFee: baseFeeNum ?? undefined,
+                            originLongitude: Number(originLongitude),
+                            originLatitude: Number(originLatitude),
+                            destinationLongitude: Number(destinationLongitude),
+                            destinationLatitude: Number(destinationLatitude),
                           };
                           apiResponse = await updateSegmentMutation.mutateAsync(
                             {
@@ -898,6 +1090,30 @@ export function SegmentDetails({
           actionableAlerts={[]}
         />
       )}
+
+      <MapSelectionModal
+        open={mapModalOpen}
+        onClose={() => setMapModalOpen(false)}
+        onSelect={handleMapSelect}
+        initialLatitude={
+          mapSelectionType === "from"
+            ? originLatitude !== undefined
+              ? Number(originLatitude)
+              : undefined
+            : destinationLatitude !== undefined
+            ? Number(destinationLatitude)
+            : undefined
+        }
+        initialLongitude={
+          mapSelectionType === "from"
+            ? originLongitude !== undefined
+              ? Number(originLongitude)
+              : undefined
+            : destinationLongitude !== undefined
+            ? Number(destinationLongitude)
+            : undefined
+        }
+      />
     </div>
   );
 }
