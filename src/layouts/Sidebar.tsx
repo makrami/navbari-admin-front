@@ -3,7 +3,7 @@ import {useTranslation} from "react-i18next";
 import {useRTL} from "../shared/hooks/useRTL";
 
 // Figma-exported assets (from the currently selected node)
-import imgLogo from "../assets/images/truck.svg";
+import imgLogo from "../assets/wintime-logo.png";
 
 import {
   LayoutGridIcon,
@@ -78,10 +78,10 @@ export function Sidebar() {
           : "left-0 border-r border-slate-200"
       }`}
     >
-      <div className="flex h-full flex-col items-center gap-4 px-0 py-7">
+      <div className="flex h-full flex-col items-center gap-4 px-0 py-12">
         {/* Brand icon */}
-        <div className="grid size-16 place-items-center rounded-2xl bg-[#1b54fe]">
-          <img src={imgLogo} alt={t("sidebar.brandAlt")} className="h-9 w-9" />
+        <div className="grid  size-42 place-items-center rounded-2xl mt-10">
+          <img src={imgLogo} alt={t("sidebar.brandAlt")} className="w-32" />
         </div>
 
         {/* Nav items */}

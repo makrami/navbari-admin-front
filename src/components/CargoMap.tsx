@@ -58,113 +58,12 @@ export function CargoMap({
     hasFittedBoundsRef.current = false;
   }, [segmentIds]);
 
-  const applyGreenPalette = useCallback((map: MapboxMap) => {
-    type PaintProperty =
-      | "background-color"
-      | "fill-color"
-      | "line-color"
-      | "icon-color";
-
-    const setPaint = (
-      layerId: string,
-      property: PaintProperty,
-      value: string
-    ) => {
-      try {
-        const layer = map.getLayer(layerId);
-        if (layer) {
-          map.setPaintProperty(layerId, property, value);
-        }
-      } catch (error) {
-        // Layer doesn't exist or doesn't support this paint property, skip silently
-        // This is expected for some layers that may not exist in all map styles
-        // or don't support the specific paint property being set
-      }
-    };
-
-    const setPaintBulk = (
-      layerIds: string[],
-      property: PaintProperty,
-      value: string
-    ) => {
-      layerIds.forEach((id) => setPaint(id, property, value));
-    };
-
-    setPaint("background", "background-color", "#e6f8eb");
-    setPaintBulk(
-      ["land", "landcover", "national-park", "landuse"],
-      "fill-color",
-      "#effcf3"
-    );
-    setPaintBulk(
-      [
-        "landcover_grass",
-        "landcover_scrub",
-        "landcover_crop",
-        "landcover_wood",
-      ],
-      "fill-color",
-      "#daf5e0"
-    );
-    setPaintBulk(
-      ["water", "water-shadow", "waterway", "waterway-shadow"],
-      "fill-color",
-      "#c7f1d7"
-    );
-
-    setPaintBulk(
-      [
-        "road-primary",
-        "road-primary-casing",
-        "road-secondary",
-        "road-secondary-casing",
-        "road-tertiary",
-        "road-tertiary-casing",
-      ],
-      "line-color",
-      "#5aa469"
-    );
-
-    setPaintBulk(
-      [
-        "road-street",
-        "road-street-casing",
-        "road-pedestrian",
-        "road-pedestrian-casing",
-      ],
-      "line-color",
-      "#7fcf8a"
-    );
-
-    setPaintBulk(
-      ["building", "building-outline", "structure-polygon"],
-      "fill-color",
-      "#d6f5de"
-    );
-
-    setPaintBulk(
-      ["poi", "poi-scalerank1", "poi-parks", "poi-land"],
-      "icon-color",
-      "#2c6e49"
-    );
+  const handleMapLoad = useCallback((event: MapboxEvent) => {
+    const map = event.target as MapboxMap;
+    mapRef.current = map as unknown as MapRef;
+    // Store the actual mapbox map instance for fitBounds
+    mapInstanceRef.current = map;
   }, []);
-
-  const handleMapLoad = useCallback(
-    (event: MapboxEvent) => {
-      const map = event.target as MapboxMap;
-      mapRef.current = map as unknown as MapRef;
-      // Store the actual mapbox map instance for fitBounds
-      mapInstanceRef.current = map;
-      const applyPalette = () => applyGreenPalette(map);
-      applyPalette();
-      map.on("styledata", applyPalette);
-      map.once("remove", () => {
-        map.off("styledata", applyPalette);
-        mapInstanceRef.current = null;
-      });
-    },
-    [applyGreenPalette]
-  );
 
   // Fetch routes using TanStack Query
   const routeQueries = useQueries({

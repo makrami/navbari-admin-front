@@ -1,17 +1,17 @@
-import type { FormEvent } from "react";
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { login } from "../../services/auth.service";
-import { LanguageSelector } from "../../components/Ui/LanguageSelector";
+import type {FormEvent} from "react";
+import {useState} from "react";
+import {useNavigate, useLocation} from "react-router-dom";
+import {Eye, EyeOff} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {login} from "../../services/auth.service";
+import {LanguageSelector} from "../../components/Ui/LanguageSelector";
 import loginbg from "../../assets/images/loginBg.png";
-import imgLogo from "../../assets/images/truck.svg";
+import imgLogo from "../../assets/wintime-logo.png";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, i18n } = useTranslation();
+  const {t, i18n} = useTranslation();
   const isRTL = i18n.language === "fa";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,9 +49,9 @@ export function LoginPage() {
       // Login accepts emailOrPhone, so we can pass email directly
       await login(email, password);
       const from =
-        (location.state as { from?: { pathname: string } })?.from?.pathname ||
+        (location.state as {from?: {pathname: string}})?.from?.pathname ||
         "/dashboard";
-      navigate(from, { replace: true });
+      navigate(from, {replace: true});
     } catch (err: unknown) {
       // Extract error message - handle both Error objects and normalized API errors
       let errorMessage = t("common.error.unknown");
@@ -78,11 +78,11 @@ export function LoginPage() {
       }}
     >
       <div
-        className={`fixed top-6 z-10 grid size-16 place-items-center rounded-2xl bg-[#1b54fe] ${
+        className={`fixed top-6 z-10 grid size-16 place-items-center rounded-2xl  ${
           isRTL ? "right-12" : "left-12"
         }`}
       >
-        <img src={imgLogo} alt={t("sidebar.brandAlt")} className="h-9 w-9" />
+        <img src={imgLogo} alt={t("sidebar.brandAlt")} className="w-32" />
       </div>
       <div className={`fixed top-6 z-10 ${isRTL ? "left-6" : "right-6"}`}>
         <LanguageSelector />
