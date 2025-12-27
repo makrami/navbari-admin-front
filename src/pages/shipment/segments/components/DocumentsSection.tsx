@@ -1,11 +1,17 @@
-import {Paperclip, FileText as FileTextIcon, X as XIcon} from "lucide-react";
-import {useState, useRef} from "react";
+import {
+  Paperclip,
+  FileText as FileTextIcon,
+  X as XIcon,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import DocumentCard from "./DocumentCard";
 import {
   useUploadFileAttachment,
   useUpdateFileAttachmentStatus,
 } from "../../../../services/file-attachment/hooks";
-import {ENV} from "../../../../lib/env";
+import { ENV } from "../../../../lib/env";
 
 export type DocumentItem = {
   id: string | number;
@@ -21,7 +27,7 @@ export type DocumentItem = {
 type DocumentsSectionProps = {
   documents?: DocumentItem[];
   segmentId?: string;
-  onDocumentsUpdate?: () => void;
+  onDocumentsUpdate?: () => Promise<void>;
 };
 
 export function DocumentsSection({
@@ -30,6 +36,8 @@ export function DocumentsSection({
   onDocumentsUpdate,
 }: DocumentsSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectionComment, setRejectionComment] = useState("");
   const [selectedDocumentId, setSelectedDocumentId] = useState<
@@ -38,13 +46,125 @@ export function DocumentsSection({
   const [previewDocument, setPreviewDocument] = useState<DocumentItem | null>(
     null
   );
+  const [showLeftButton, setShowLeftButton] = useState(false);
+  const [showRightButton, setShowRightButton] = useState(false);
 
   // Use mutation hooks
   const uploadMutation = useUploadFileAttachment();
   const updateStatusMutation = useUpdateFileAttachmentStatus();
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // Use provided documents only
   const displayDocuments = documents;
+
+  // Check scroll position and update button visibility
+  const checkScrollPosition = () => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      setShowLeftButton(false);
+      setShowRightButton(false);
+      return;
+    }
+
+    // Force reflow to get accurate measurements
+    void container.offsetHeight;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const maxScrollLeft = scrollWidth - clientWidth;
+    const hasScroll = maxScrollLeft > 2; // Can scroll if maxScrollLeft > 2px
+
+    if (!hasScroll) {
+      setShowLeftButton(false);
+      setShowRightButton(false);
+      return;
+    }
+
+    // Show left button if we can scroll and not at start
+    setShowLeftButton(scrollLeft > 5);
+
+    // Show right button if we can scroll and not at end
+    setShowRightButton(scrollLeft < maxScrollLeft - 5);
+  };
+
+  // Use useLayoutEffect for immediate check after DOM updates
+  useLayoutEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      checkScrollPosition();
+    }
+  }, [documents]);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    const content = contentRef.current;
+    if (!container) return;
+
+    // Check function with requestAnimationFrame for accurate measurements
+    const checkWithRAF = () => {
+      requestAnimationFrame(() => {
+        checkScrollPosition();
+      });
+    };
+
+    // Check immediately
+    checkScrollPosition();
+
+    // Use ResizeObserver to detect container and content size changes
+    const resizeObserver = new ResizeObserver(() => {
+      checkWithRAF();
+    });
+    resizeObserver.observe(container);
+    if (content) {
+      resizeObserver.observe(content);
+    }
+
+    // Use MutationObserver to detect DOM changes
+    const mutationObserver = new MutationObserver(() => {
+      checkWithRAF();
+    });
+    if (content) {
+      mutationObserver.observe(content, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+    }
+
+    // Also check after delays to ensure DOM is fully rendered
+    const timer1 = setTimeout(checkWithRAF, 100);
+    const timer2 = setTimeout(checkWithRAF, 300);
+    const timer3 = setTimeout(checkWithRAF, 500);
+    const timer4 = setTimeout(checkWithRAF, 1000);
+
+    container.addEventListener("scroll", checkScrollPosition);
+    window.addEventListener("resize", checkScrollPosition);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      clearTimeout(timer4);
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      container.removeEventListener("scroll", checkScrollPosition);
+      window.removeEventListener("resize", checkScrollPosition);
+    };
+  }, [documents]);
+
+  const scrollLeft = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  };
 
   const getFileUrl = (filePath?: string): string | undefined => {
     if (!filePath) return undefined;
@@ -66,8 +186,9 @@ export function DocumentsSection({
     if (!file || !segmentId) return;
 
     try {
-      await uploadMutation.mutateAsync({segmentId, file});
-      onDocumentsUpdate?.();
+      setIsDisabled(true);
+      await uploadMutation.mutateAsync({ segmentId, file });
+      await onDocumentsUpdate?.();
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -75,6 +196,8 @@ export function DocumentsSection({
     } catch (error) {
       console.error("Failed to upload document:", error);
       alert("Failed to upload document. Please try again.");
+    } finally {
+      setIsDisabled(false);
     }
   };
 
@@ -82,14 +205,17 @@ export function DocumentsSection({
     if (!segmentId) return;
 
     try {
+      setIsDisabled(true);
       await updateStatusMutation.mutateAsync({
         id: docId.toString(),
         approvalStatus: "approved",
       });
-      onDocumentsUpdate?.();
+      await onDocumentsUpdate?.();
     } catch (error) {
       console.error("Failed to approve document:", error);
       alert("Failed to approve document. Please try again.");
+    } finally {
+      setIsDisabled(false);
     }
   };
 
@@ -136,56 +262,89 @@ export function DocumentsSection({
   };
 
   return (
-    <section>
+    <section className="relative">
       <header className="px-3 pt-3 pb-2 text-xs text-slate-900 font-bold">
         Documents
       </header>
-      <div className="overflow-x-auto no-scrollbar">
-        <div className="flex gap-3 px-3 bg-white rounded-xl py-3">
-          {/* Upload card - always first */}
-          {segmentId && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                onChange={handleFileSelect}
-                className="hidden"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
-              />
-              <button
-                type="button"
-                aria-label="Upload document"
-                onClick={handleUploadClick}
-                disabled={uploadMutation.isPending}
-                className="flex flex-col w-18 items-center justify-center rounded-xl border border-dashed border-slate-300 px-3 py-6 hover:bg-slate-50 transition-colors bg-white shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Paperclip className="size-5 text-slate-400" />
-                <span className="mt-2 font-medium text-xs text-slate-400">
-                  {uploadMutation.isPending ? "Uploading..." : "Upload"}
-                </span>
-              </button>
-            </>
-          )}
+      <div className="relative">
+        <div
+          ref={scrollContainerRef}
+          className="overflow-x-auto no-scrollbar relative"
+          style={{ scrollBehavior: "smooth" }}
+        >
+          <div
+            ref={contentRef}
+            className="flex gap-3 px-3 bg-white rounded-xl py-3"
+          >
+            {/* Upload card - always first */}
+            {segmentId && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
+                />
+                <button
+                  type="button"
+                  aria-label="Upload document"
+                  onClick={handleUploadClick}
+                  disabled={uploadMutation.isPending}
+                  className="flex flex-col w-18 items-center justify-center rounded-xl border border-dashed border-slate-300 px-3 py-6 hover:bg-slate-50 transition-colors bg-white shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Paperclip className="size-5 text-slate-400" />
+                  <span className="mt-2 font-medium text-xs text-slate-400">
+                    {uploadMutation.isPending ? "Uploading..." : "Upload"}
+                  </span>
+                </button>
+              </>
+            )}
 
-          {/* Document cards */}
-          {displayDocuments.map((doc) => (
-            <DocumentCard
-              key={doc.id}
-              authorName={doc.author ?? ""}
-              fileName={doc.name}
-              sizeLabel={doc.sizeLabel}
-              status={doc.status}
-              avatarUrl={doc.thumbnailUrl}
-              filePath={doc.filePath}
-              onApprove={() => handleApprove(doc.id)}
-              onReject={() => handleReject(doc.id)}
-              onReasons={() => handleReasons(doc)}
-              onPreview={() => handlePreview(doc)}
-              onView={() => handleView(doc)}
-              disabled={updateStatusMutation.isPending}
-            />
-          ))}
+            {/* Document cards */}
+            {displayDocuments.map((doc) => (
+              <DocumentCard
+                key={doc.id}
+                authorName={doc.author ?? ""}
+                fileName={doc.name}
+                sizeLabel={doc.sizeLabel}
+                status={doc.status}
+                avatarUrl={doc.thumbnailUrl}
+                filePath={doc.filePath}
+                onApprove={() => handleApprove(doc.id)}
+                onReject={() => handleReject(doc.id)}
+                onReasons={() => handleReasons(doc)}
+                onPreview={() => handlePreview(doc)}
+                onView={() => handleView(doc)}
+                disabled={isDisabled}
+              />
+            ))}
+          </div>
         </div>
+
+        {/* Left scroll button */}
+        {showLeftButton && (
+          <button
+            type="button"
+            onClick={scrollLeft}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white hover:bg-slate-50 border border-slate-300 rounded-full p-2 shadow-lg transition-all hover:shadow-xl flex items-center justify-center"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="size-5 text-slate-700" />
+          </button>
+        )}
+
+        {/* Right scroll button */}
+        {showRightButton && (
+          <button
+            type="button"
+            onClick={scrollRight}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white hover:bg-slate-50 border border-slate-300 rounded-full p-2 shadow-lg transition-all hover:shadow-xl flex items-center justify-center"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="size-5 text-slate-700" />
+          </button>
+        )}
       </div>
 
       {/* Reject Dialog */}

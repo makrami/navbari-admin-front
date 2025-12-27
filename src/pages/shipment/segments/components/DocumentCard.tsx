@@ -8,6 +8,8 @@ import {
   FileText as FileTextIcon,
   Clock,
 } from "lucide-react";
+import { createPortal } from "react-dom";
+import { useState, useRef, useEffect } from "react";
 
 type DocumentCardProps = {
   authorName: string;
@@ -38,6 +40,13 @@ export function DocumentCard({
   onView,
   disabled = false,
 }: DocumentCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const statusStyles = {
     pending: {
       circle: "bg-orange-50",
@@ -64,6 +73,34 @@ export function DocumentCard({
   const statusConfig = statusStyles[status];
   const IconComp = statusConfig.Icon;
 
+  const shouldShowTooltip =
+    (status === "pending" || status === "expired") && onPreview;
+
+  // Calculate tooltip position
+  useEffect(() => {
+    if (!showTooltip || !cardRef.current) return;
+
+    const updatePosition = () => {
+      const card = cardRef.current;
+      if (!card) return;
+
+      const rect = card.getBoundingClientRect();
+      setTooltipPosition({
+        top: rect.top - 8, // 8px above the card (mb-2 = 8px)
+        left: rect.left + rect.width / 2, // Center of the card
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [showTooltip]);
+
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Don't trigger preview if clicking on action buttons
     const target = e.target as HTMLElement;
@@ -77,28 +114,40 @@ export function DocumentCard({
     onPreview?.();
   };
 
-  const showTooltip =
-    (status === "pending" || status === "expired") && onPreview;
-
   return (
     <div
+      ref={cardRef}
       className={`relative group flex flex-col w-52 border justify-between border-slate-200 rounded-xl p-3 shrink-0 ${
-        showTooltip
+        shouldShowTooltip
           ? "cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
           : ""
       } ${className ?? ""}`}
       onClick={handleCardClick}
+      onMouseEnter={() => shouldShowTooltip && setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
     >
-      {/* Tooltip */}
-      {showTooltip && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-          <div className="bg-slate-900 text-white text-xs rounded-md px-3 py-1.5 shadow-lg whitespace-nowrap">
-            Click to preview
-            {/* Arrow pointing down */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-slate-900" />
-          </div>
-        </div>
-      )}
+      {/* Tooltip Portal */}
+      {shouldShowTooltip &&
+        showTooltip &&
+        tooltipPosition &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed z-[9999] pointer-events-none"
+            style={{
+              top: `${tooltipPosition.top}px`,
+              left: `${tooltipPosition.left}px`,
+              transform: "translate(-50%, -100%)",
+            }}
+          >
+            <div className="bg-slate-900 text-white text-xs rounded-md px-3 py-1.5 shadow-lg whitespace-nowrap mb-2 relative">
+              Click to preview
+              {/* Arrow pointing down */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-slate-900" />
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Top section: Status icon, file info, and uploader */}
       <div className="flex items-start justify-between gap-2">
