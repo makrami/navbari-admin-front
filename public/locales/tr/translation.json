@@ -4,6 +4,7 @@
     "loading": "Yükleniyor...",
     "language": "Dil",
     "cancel": "İptal",
+    "close": "Kapat",
     "error": {
       "unknown": "Bilinmeyen bir hata oluştu"
     }
@@ -377,7 +378,23 @@
         "phone": "Telefon",
         "email": "E-posta",
         "add": "Ekle",
-        "edit": "Düzenle"
+        "edit": "Düzenle",
+        "approveModal": {
+          "title": "Şirketi Onayla",
+          "subtitle": "Onay işlemini onaylayın",
+          "message": "\"{{companyName}}\" şirketini onaylamak istediğinizden emin misiniz? Bu işlem şirket hesabını etkinleştirecektir.",
+          "confirm": "Onayı Onayla",
+          "approving": "Onaylanıyor..."
+        },
+        "rejectModal": {
+          "title": "Şirketi Reddet",
+          "subtitle": "Red işlemini onaylayın",
+          "message": "\"{{companyName}}\" şirketini reddetmek istediğinizden emin misiniz? Lütfen red nedeni belirtin:",
+          "placeholder": "Red nedeni girin (gerekli)...",
+          "reasonRequired": "Red nedeni gereklidir",
+          "confirm": "Reddi Onayla",
+          "rejecting": "Reddediliyor..."
+        }
       },
       "documents": {
         "title": "Belgeler",
@@ -607,6 +624,8 @@
       "searchCategories": "Kategori ara...",
       "cargoWeight": "Kargo Ağırlığı",
       "weightUnit": "KG",
+      "cargoNetVolume": "Kargo Net Hacmi",
+      "lwh": "U×G×Y (İsteğe Bağlı)",
       "segmentCount": "Segment Sayısı",
       "segmentCountPlaceholder": "0",
       "segmentCountMaxError": "Maksimum Başlangıç Segment Sayısı 20'dir",
@@ -622,6 +641,18 @@
       "select": "Seç",
       "coordinatesSelected": "Seçilen koordinatlar",
       "loadingLocation": "Konum yükleniyor...",
+      "startDate": "BAŞLANGIÇ TARİHİ",
+      "finishDate": "TAHMİNİ BİTİŞ TARİHİ",
+      "startTime": "BAŞLANGIÇ SAATİ",
+      "finishTime": "TAHMİNİ BİTİŞ SAATİ",
+      "quickActions": {
+        "daysFromNow": "{{days}}G Bugünden",
+        "daysLater": "{{days}}G Sonra",
+        "time6PM": "18:00",
+        "time12PM": "12:00",
+        "time6AM": "6:00",
+        "time12AM": "0:00"
+      },
       "categories": {
         "electronics": "Elektronik",
         "textiles": "Tekstil",

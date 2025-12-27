@@ -4,6 +4,7 @@
     "loading": "Loading...",
     "language": "Language",
     "cancel": "Cancel",
+    "close": "Close",
     "error": {
       "unknown": "An unknown error occurred"
     }
@@ -377,7 +378,23 @@
         "phone": "Phone",
         "email": "Email",
         "add": "Add",
-        "edit": "Edit"
+        "edit": "Edit",
+        "approveModal": {
+          "title": "Approve Company",
+          "subtitle": "Confirm approval action",
+          "message": "Are you sure you want to approve \"{{companyName}}\"? This action will activate the company account.",
+          "confirm": "Confirm Approve",
+          "approving": "Approving..."
+        },
+        "rejectModal": {
+          "title": "Reject Company",
+          "subtitle": "Confirm rejection action",
+          "message": "Are you sure you want to reject \"{{companyName}}\"? Please provide a reason for rejection:",
+          "placeholder": "Enter rejection reason (required)...",
+          "reasonRequired": "Rejection reason is required",
+          "confirm": "Confirm Reject",
+          "rejecting": "Rejecting..."
+        }
       },
       "documents": {
         "title": "Documents",
@@ -607,6 +624,8 @@
       "searchCategories": "Search categories...",
       "cargoWeight": "Cargo Weight",
       "weightUnit": "KG",
+      "cargoNetVolume": "Cargo Net Volume",
+      "lwh": "LWH (Optional)",
       "segmentCount": "Segment Count",
       "segmentCountPlaceholder": "0",
       "segmentCountMaxError": "Max Initial Segment Count is 20",
@@ -622,6 +641,18 @@
       "select": "Select",
       "coordinatesSelected": "Coordinates selected",
       "loadingLocation": "Loading location...",
+      "startDate": "START DATE",
+      "finishDate": "EST. FINISH DATE",
+      "startTime": "START TIME",
+      "finishTime": "EST. FINISH TIME",
+      "quickActions": {
+        "daysFromNow": "{{days}}D From now",
+        "daysLater": "{{days}}D Later",
+        "time6PM": "6 PM",
+        "time12PM": "12 PM",
+        "time6AM": "6 AM",
+        "time12AM": "12 AM"
+      },
       "categories": {
         "electronics": "Electronics",
         "textiles": "Textiles",

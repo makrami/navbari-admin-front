@@ -4,6 +4,7 @@
     "loading": "در حال بارگذاری...",
     "language": "زبان",
     "cancel": "لغو",
+    "close": "بستن",
     "error": {
       "unknown": "خطای ناشناخته رخ داد"
     }
@@ -377,7 +378,23 @@
         "phone": "تلفن",
         "email": "ایمیل",
         "add": "افزودن",
-        "edit": "ویرایش"
+        "edit": "ویرایش",
+        "approveModal": {
+          "title": "تأیید شرکت",
+          "subtitle": "تأیید عملیات تأیید",
+          "message": "آیا مطمئن هستید که می‌خواهید \"{{companyName}}\" را تأیید کنید؟ این عمل حساب شرکت را فعال می‌کند.",
+          "confirm": "تأیید",
+          "approving": "در حال تأیید..."
+        },
+        "rejectModal": {
+          "title": "رد شرکت",
+          "subtitle": "تأیید عملیات رد",
+          "message": "آیا مطمئن هستید که می‌خواهید \"{{companyName}}\" را رد کنید؟ لطفاً دلیل رد را ارائه دهید:",
+          "placeholder": "دلیل رد را وارد کنید (الزامی)...",
+          "reasonRequired": "دلیل رد الزامی است",
+          "confirm": "تأیید رد",
+          "rejecting": "در حال رد..."
+        }
       },
       "documents": {
         "title": "اسناد",
@@ -607,6 +624,8 @@
       "searchCategories": "جستجوی دسته‌بندی‌ها...",
       "cargoWeight": "وزن بار",
       "weightUnit": "کیلوگرم",
+      "cargoNetVolume": "حجم خالص بار",
+      "lwh": "طول، عرض، ارتفاع (اختیاری)",
       "segmentCount": "تعداد بخش",
       "segmentCountPlaceholder": "0",
       "segmentCountMaxError": "حداکثر تعداد بخش اولیه 20 است",
@@ -622,6 +641,18 @@
       "select": "انتخاب",
       "coordinatesSelected": "مختصات انتخاب شده",
       "loadingLocation": "در حال بارگذاری موقعیت...",
+      "startDate": "تاریخ شروع",
+      "finishDate": "تاریخ پایان تخمینی",
+      "startTime": "زمان شروع",
+      "finishTime": "زمان پایان تخمینی",
+      "quickActions": {
+        "daysFromNow": "{{days}} روز دیگر",
+        "daysLater": "{{days}} روز بعد",
+        "time6PM": "۱۸:۰۰",
+        "time12PM": "۱۲:۰۰",
+        "time6AM": "۰۶:۰۰",
+        "time12AM": "۰۰:۰۰"
+      },
       "categories": {
         "electronics": "الکترونیک",
         "textiles": "منسوجات",

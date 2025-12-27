@@ -4,6 +4,7 @@
     "loading": "加载中...",
     "language": "语言",
     "cancel": "取消",
+    "close": "关闭",
     "error": {
       "unknown": "发生未知错误"
     }
@@ -347,6 +348,8 @@
       "searchCategories": "搜索类别...",
       "cargoWeight": "货物重量",
       "weightUnit": "公斤",
+      "cargoNetVolume": "货物净体积",
+      "lwh": "长×宽×高（可选）",
       "segmentCount": "路段数量",
       "segmentCountPlaceholder": "0",
       "segmentCountMaxError": "最大初始段数为 20",
@@ -362,6 +365,18 @@
       "select": "选择",
       "coordinatesSelected": "已选择坐标",
       "loadingLocation": "正在加载位置...",
+      "startDate": "开始日期",
+      "finishDate": "预计完成日期",
+      "startTime": "开始时间",
+      "finishTime": "预计完成时间",
+      "quickActions": {
+        "daysFromNow": "{{days}}天后",
+        "daysLater": "{{days}}天后",
+        "time6PM": "18:00",
+        "time12PM": "12:00",
+        "time6AM": "6:00",
+        "time12AM": "0:00"
+      },
       "categories": {
         "electronics": "电子产品",
         "textiles": "纺织品",
@@ -523,7 +538,23 @@
         "phone": "电话",
         "email": "电子邮件",
         "add": "添加",
-        "edit": "编辑"
+        "edit": "编辑",
+        "approveModal": {
+          "title": "批准公司",
+          "subtitle": "确认批准操作",
+          "message": "您确定要批准 \"{{companyName}}\" 吗？此操作将激活公司账户。",
+          "confirm": "确认批准",
+          "approving": "批准中..."
+        },
+        "rejectModal": {
+          "title": "拒绝公司",
+          "subtitle": "确认拒绝操作",
+          "message": "您确定要拒绝 \"{{companyName}}\" 吗？请提供拒绝原因：",
+          "placeholder": "输入拒绝原因（必填）...",
+          "reasonRequired": "拒绝原因是必填项",
+          "confirm": "确认拒绝",
+          "rejecting": "拒绝中..."
+        }
       },
       "documents": {
         "title": "文件",

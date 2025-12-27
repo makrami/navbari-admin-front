@@ -34,9 +34,11 @@ type SegmentItemProps = {
 
 export function SegmentItem({
   segment,
+  index,
   shipment,
   isReadOnly,
   segmentStep,
+  renderSegments,
   onSegmentSave,
   onToggle,
 }: SegmentItemProps) {
@@ -55,12 +57,16 @@ export function SegmentItem({
     }
   };
 
+  // Get previous segment
+  const previousSegment = index > 0 ? renderSegments[index - 1] : undefined;
+
   return (
     <SegmentDetails
       key={segment.step}
       shipment={shipment}
       segmentId={segment.id}
       data={segment}
+      previousSegment={previousSegment}
       defaultOpen={segmentStep === segment.step}
       onToggle={onToggle}
       editable={

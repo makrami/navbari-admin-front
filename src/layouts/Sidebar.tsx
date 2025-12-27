@@ -1,6 +1,6 @@
-import {NavLink, useNavigate} from "react-router-dom";
-import {useTranslation} from "react-i18next";
-import {useRTL} from "../shared/hooks/useRTL";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useRTL } from "../shared/hooks/useRTL";
 
 // Figma-exported assets (from the currently selected node)
 import imgLogo from "../assets/wintime-logo.png";
@@ -16,23 +16,23 @@ import {
   LogOutIcon,
   UserIcon,
 } from "lucide-react";
-import {ActiveIndicator} from "../shared/components";
-import {logout} from "../services/auth.service";
-import {LanguageSelector} from "../components/Ui/LanguageSelector";
-import {useCurrentUser} from "../services/user/hooks";
-import {getFileUrl} from "../pages/Drivers/utils";
-import {useUnreadChatCount} from "../services/chat/hooks";
-import {useDashboardSummary} from "../services/dashboard/hooks";
-import {useChatSocket} from "../services/chat/socket";
+import { ActiveIndicator } from "../shared/components";
+import { logout } from "../services/auth.service";
+import { LanguageSelector } from "../components/Ui/LanguageSelector";
+import { useCurrentUser } from "../services/user/hooks";
+import { getFileUrl } from "../pages/Drivers/utils";
+import { useUnreadChatCount } from "../services/chat/hooks";
+import { useDashboardSummary } from "../services/dashboard/hooks";
+import { useChatSocket } from "../services/chat/socket";
 
 export function Sidebar() {
   const navigate = useNavigate();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const isRTL = useRTL();
-  const {data: user, isLoading: isLoadingUser} = useCurrentUser();
-  const {data: unreadCountData} = useUnreadChatCount();
+  const { data: user, isLoading: isLoadingUser } = useCurrentUser();
+  const { data: unreadCountData } = useUnreadChatCount();
   const unreadCount = unreadCountData?.count ?? 0;
-  const {data: dashboardSummary} = useDashboardSummary();
+  const { data: dashboardSummary } = useDashboardSummary();
 
   // Initialize socket connection to receive real-time message updates
   useChatSocket();
@@ -78,24 +78,24 @@ export function Sidebar() {
           : "left-0 border-r border-slate-200"
       }`}
     >
-      <div className="flex h-full flex-col items-center gap-4 px-0 py-12">
+      <div className="flex h-full flex-col items-center ">
         {/* Brand icon */}
-        <div className="grid  size-42 place-items-center rounded-2xl mt-10">
+        <div className="grid  size-42 place-items-center rounded-2xl ">
           <img src={imgLogo} alt={t("sidebar.brandAlt")} className="w-32" />
         </div>
 
         {/* Nav items */}
-        <nav className="flex w-full flex-1 flex-col items-center  gap-1 pt-12">
+        <nav className="flex w-full flex-1 flex-col items-center  gap-1 pt-2">
           {/* Overview */}
           <NavLink
             to="/dashboard"
-            className={({isActive}) =>
+            className={({ isActive }) =>
               `relative flex h-12 w-full items-center px-5 ${
                 isActive ? "" : ""
               }`
             }
           >
-            {({isActive}) => (
+            {({ isActive }) => (
               <div className="flex items-center gap-2">
                 <ActiveIndicator isActive={isActive} />
                 <LayoutGridIcon
@@ -119,13 +119,13 @@ export function Sidebar() {
             hasPermission("segments:read")) && (
             <NavLink
               to={hasPermission("shipments:read") ? "/shipments" : "/segments"}
-              className={({isActive}) =>
+              className={({ isActive }) =>
                 `relative flex h-12 w-full items-center px-5 ${
                   isActive ? "" : ""
                 }`
               }
             >
-              {({isActive}) => (
+              {({ isActive }) => (
                 <div className="flex items-center gap-2">
                   <ActiveIndicator isActive={isActive} />
                   <TruckIcon
@@ -149,13 +149,13 @@ export function Sidebar() {
           {hasPermission("companies:read") && (
             <NavLink
               to="/local-companies"
-              className={({isActive}) =>
+              className={({ isActive }) =>
                 `relative flex h-12 w-full items-center px-5 ${
                   isActive ? "" : ""
                 }`
               }
             >
-              {({isActive}) => (
+              {({ isActive }) => (
                 <>
                   <ActiveIndicator isActive={isActive} />
                   <div className="flex items-center gap-2 relative">
@@ -190,13 +190,13 @@ export function Sidebar() {
           {hasPermission("drivers:read") && (
             <NavLink
               to="/drivers"
-              className={({isActive}) =>
+              className={({ isActive }) =>
                 `relative flex h-12 w-full items-center px-5 ${
                   isActive ? "" : ""
                 }`
               }
             >
-              {({isActive}) => (
+              {({ isActive }) => (
                 <>
                   <ActiveIndicator isActive={isActive} />
 
@@ -232,13 +232,13 @@ export function Sidebar() {
           {hasPermission("finance:read") && (
             <NavLink
               to="/finance"
-              className={({isActive}) =>
+              className={({ isActive }) =>
                 `relative flex h-12 w-full items-center px-5 ${
                   isActive ? "" : ""
                 }`
               }
             >
-              {({isActive}) => (
+              {({ isActive }) => (
                 <div className="flex items-center gap-2">
                   <ActiveIndicator isActive={isActive} />
                   <DollarSignIcon
@@ -262,13 +262,13 @@ export function Sidebar() {
           {hasPermission("chats:read") && (
             <NavLink
               to="/chat-alert"
-              className={({isActive}) =>
+              className={({ isActive }) =>
                 `relative flex h-12 w-full items-center px-5 ${
                   isActive ? "" : ""
                 }`
               }
             >
-              {({isActive}) => (
+              {({ isActive }) => (
                 <>
                   <ActiveIndicator isActive={isActive} />
                   <div className="flex items-center gap-2 relative">
@@ -301,13 +301,13 @@ export function Sidebar() {
           {hasPermission("settings:read") && (
             <NavLink
               to="/settings"
-              className={({isActive}) =>
+              className={({ isActive }) =>
                 `relative flex h-12 w-full items-center px-5 ${
                   isActive ? "" : ""
                 }`
               }
             >
-              {({isActive}) => (
+              {({ isActive }) => (
                 <div className="flex items-center gap-2">
                   <ActiveIndicator isActive={isActive} />
                   <SettingsIcon

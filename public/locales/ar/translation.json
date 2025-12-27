@@ -4,6 +4,7 @@
     "loading": "جارٍ التحميل...",
     "language": "اللغة",
     "cancel": "إلغاء",
+    "close": "إغلاق",
     "error": {
       "unknown": "حدث خطأ غير معروف"
     }
@@ -347,6 +348,8 @@
       "searchCategories": "البحث عن الفئات...",
       "cargoWeight": "وزن البضائع",
       "weightUnit": "كجم",
+      "cargoNetVolume": "حجم البضائع الصافي",
+      "lwh": "الطول والعرض والارتفاع (اختياري)",
       "segmentCount": "عدد الأقسام",
       "segmentCountPlaceholder": "0",
       "segmentCountMaxError": "الحد الأقصى لعدد الأقسام الأولية هو 20",
@@ -362,6 +365,18 @@
       "select": "اختر",
       "coordinatesSelected": "الإحداثيات المحددة",
       "loadingLocation": "جارٍ تحميل الموقع...",
+      "startDate": "تاريخ البدء",
+      "finishDate": "تاريخ الانتهاء المتوقع",
+      "startTime": "وقت البدء",
+      "finishTime": "وقت الانتهاء المتوقع",
+      "quickActions": {
+        "daysFromNow": "{{days}} يوم من الآن",
+        "daysLater": "{{days}} يوم لاحق",
+        "time6PM": "6 مساءً",
+        "time12PM": "12 ظهراً",
+        "time6AM": "6 صباحاً",
+        "time12AM": "12 منتصف الليل"
+      },
       "categories": {
         "electronics": "إلكترونيات",
         "textiles": "منسوجات",
@@ -523,7 +538,23 @@
         "phone": "الهاتف",
         "email": "البريد الإلكتروني",
         "add": "إضافة",
-        "edit": "تعديل"
+        "edit": "تعديل",
+        "approveModal": {
+          "title": "الموافقة على الشركة",
+          "subtitle": "تأكيد إجراء الموافقة",
+          "message": "هل أنت متأكد من أنك تريد الموافقة على \"{{companyName}}\"؟ سيؤدي هذا الإجراء إلى تفعيل حساب الشركة.",
+          "confirm": "تأكيد الموافقة",
+          "approving": "جارٍ الموافقة..."
+        },
+        "rejectModal": {
+          "title": "رفض الشركة",
+          "subtitle": "تأكيد إجراء الرفض",
+          "message": "هل أنت متأكد من أنك تريد رفض \"{{companyName}}\"؟ يرجى تقديم سبب الرفض:",
+          "placeholder": "أدخل سبب الرفض (مطلوب)...",
+          "reasonRequired": "سبب الرفض مطلوب",
+          "confirm": "تأكيد الرفض",
+          "rejecting": "جارٍ الرفض..."
+        }
       },
       "documents": {
         "title": "الوثائق",

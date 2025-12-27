@@ -6,15 +6,15 @@ import {
   Loader2,
   UserRound,
 } from "lucide-react";
-import type {SegmentAnnouncementReadDto} from "../../../../services/shipment/shipment.api.service";
-import {getFileUrl} from "../../../LocalCompanies/utils";
-import {DriverInfo} from "../../../../shared/components/DriverInfo";
-import {useAssignSegment} from "../../../../services/shipment/hooks";
-import {useState, useEffect} from "react";
-import {useCurrentUser} from "../../../../services/user/hooks";
+import type { SegmentAnnouncementReadDto } from "../../../../services/shipment/shipment.api.service";
+import { getFileUrl } from "../../../LocalCompanies/utils";
+import { DriverInfo } from "../../../../shared/components/DriverInfo";
+import { useAssignSegment } from "../../../../services/shipment/hooks";
+import { useState, useEffect } from "react";
+import { useCurrentUser } from "../../../../services/user/hooks";
 import LocationDetailsCard from "./LocationDetailsCard";
-import {formatDistance} from "../../../../shared/utils/segmentHelpers";
-import {useTranslation} from "react-i18next";
+import { formatDistance } from "../../../../shared/utils/segmentHelpers";
+import { useTranslation } from "react-i18next";
 
 type CargoAssignmentsListProps = {
   announcements: SegmentAnnouncementReadDto[];
@@ -57,7 +57,7 @@ function formatWeight(
   // Format with thousand separators
   const num = parseFloat(numericValue);
   if (isNaN(num)) return weight;
-  return `${num.toLocaleString("en-US", {maximumFractionDigits: 0})} ${t(
+  return `${num.toLocaleString("en-US", { maximumFractionDigits: 0 })} ${t(
     "shipment.segments.cargoAssignments.kg"
   )}`;
 }
@@ -72,13 +72,13 @@ export default function CargoAssignmentsList({
   cargoType,
   cargoWeight,
 }: CargoAssignmentsListProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const assignSegmentMutation = useAssignSegment();
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [localOriginDetails, setLocalOriginDetails] = useState(originDetails);
   const [localDestinationDetails, setLocalDestinationDetails] =
     useState(destinationDetails);
-  const {data: user} = useCurrentUser();
+  const { data: user } = useCurrentUser();
 
   // Get permissions array from user data
   const userRecord = user as Record<string, unknown> | undefined;

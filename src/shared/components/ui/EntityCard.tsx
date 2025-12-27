@@ -6,6 +6,7 @@ import {
   Check as CheckIcon,
   ScanLine as ScanLineIcon,
   Calendar as CalendarIcon,
+  User as UserIcon,
 } from "lucide-react";
 import {STATUS_TO_COLOR} from "./entity-card-constants";
 import type {EntityStatus} from "./entity-card-constants";
@@ -123,7 +124,9 @@ export function EntityCard({
                 className={cn("size-8 rounded-full object-cover flex-shrink-0")}
               />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-slate-200 grid place-items-center text-xs font-semibold flex-shrink-0"></div>
+              <div className={cn("h-8 w-8 rounded-full bg-slate-200 grid place-items-center flex-shrink-0", selected ? "bg-white/20" : "bg-slate-200")}>
+                <UserIcon className={cn("size-4", selected ? "text-white" : "text-slate-500")} />
+              </div>
             )}
             <div className="flex flex-col gap-1 min-w-0">
               <DriverInfo

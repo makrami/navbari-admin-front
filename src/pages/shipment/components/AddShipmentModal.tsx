@@ -1,10 +1,18 @@
-import {useState, useEffect, useRef, useMemo, useCallback} from "react";
-import {XIcon, Search, ChevronDown, Check, MapPin} from "lucide-react";
-import {useCities} from "../../../services/geography/hooks";
-import type {City} from "../../../services/geography/geography.service";
-import type {CreateShipmentDto} from "../../../services/shipment/shipment.api.service";
-import {useTranslation} from "react-i18next";
-import {MapSelectionModal} from "./MapSelectionModal";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  XIcon,
+  Search,
+  ChevronDown,
+  Check,
+  MapPin,
+  Calendar,
+  Clock,
+} from "lucide-react";
+import { useCities } from "../../../services/geography/hooks";
+import type { City } from "../../../services/geography/geography.service";
+import type { CreateShipmentDto } from "../../../services/shipment/shipment.api.service";
+import { useTranslation } from "react-i18next";
+import { MapSelectionModal } from "./MapSelectionModal";
 
 type CityDropdownProps = {
   value: string;
@@ -23,7 +31,7 @@ function CityDropdown({
   cities,
   isLoading = false,
 }: CityDropdownProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -186,7 +194,7 @@ function CargoCategoryDropdown({
   placeholder,
   label,
 }: CargoCategoryDropdownProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -199,9 +207,9 @@ function CargoCategoryDropdown({
         value: "electronics",
         label: t("shipment.addModal.categories.electronics"),
       },
-      {value: "textiles", label: t("shipment.addModal.categories.textiles")},
-      {value: "food", label: t("shipment.addModal.categories.food")},
-      {value: "medical", label: t("shipment.addModal.categories.medical")},
+      { value: "textiles", label: t("shipment.addModal.categories.textiles") },
+      { value: "food", label: t("shipment.addModal.categories.food") },
+      { value: "medical", label: t("shipment.addModal.categories.medical") },
       {
         value: "machinery",
         label: t("shipment.addModal.categories.machinery"),
@@ -355,15 +363,25 @@ export default function AddShipmentModal({
   onClose,
   onCreate,
 }: AddShipmentModalProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   // Fields per reference design
   const [name, setName] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [cargoCategory, setCargoCategory] = useState("");
   const [cargoWeight, setCargoWeight] = useState<string>("");
+  const [cargoNetVolume, setCargoNetVolume] = useState<string>("");
+  const [cargoLength, setCargoLength] = useState<string>("");
+  const [cargoWidth, setCargoWidth] = useState<string>("");
+  const [cargoHeight, setCargoHeight] = useState<string>("");
   const [segmentsAmount, setSegmentsAmount] = useState<string>("");
   const [segmentCountError, setSegmentCountError] = useState<string>("");
+
+  // Date and time states
+  const [startDate, setStartDate] = useState<string>("");
+  const [finishDate, setFinishDate] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [finishTime, setFinishTime] = useState<string>("");
 
   // Coordinate states
   const [originLatitude, setOriginLatitude] = useState<number | undefined>();
@@ -386,7 +404,7 @@ export default function AddShipmentModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Fetch cities from API
-  const {data: cities = [], isLoading: isLoadingCities} = useCities();
+  const { data: cities = [], isLoading: isLoadingCities } = useCities();
 
   // Clear coordinates when origin field is cleared
   useEffect(() => {
@@ -453,6 +471,43 @@ export default function AddShipmentModal({
     }
   };
 
+  // Format date to YYYY-MM-DD for input type="date"
+  const formatDateForInput = (date: Date): string => {
+    return date.toISOString().split("T")[0];
+  };
+
+  // Format time to HH:MM for input type="time"
+  const formatTimeForInput = (hours: number, minutes: number = 0): string => {
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}`;
+  };
+
+  // Handle quick date actions for start date
+  const handleStartDateQuickAction = (days: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    setStartDate(formatDateForInput(date));
+  };
+
+  // Handle quick date actions for finish date (relative to start date or current date)
+  const handleFinishDateQuickAction = (days: number) => {
+    const baseDate = startDate ? new Date(startDate) : new Date();
+    const date = new Date(baseDate);
+    date.setDate(date.getDate() + days);
+    setFinishDate(formatDateForInput(date));
+  };
+
+  // Handle quick time actions
+  const handleStartTimeQuickAction = (hours: number) => {
+    setStartTime(formatTimeForInput(hours));
+  };
+
+  const handleFinishTimeQuickAction = (hours: number) => {
+    setFinishTime(formatTimeForInput(hours));
+  };
+
   const handleMapSelect = (
     latitude: number,
     longitude: number,
@@ -514,8 +569,16 @@ export default function AddShipmentModal({
       setTo("");
       setCargoCategory("");
       setCargoWeight("");
+      setCargoNetVolume("");
+      setCargoLength("");
+      setCargoWidth("");
+      setCargoHeight("");
       setSegmentsAmount("");
       setSegmentCountError("");
+      setStartDate("");
+      setFinishDate("");
+      setStartTime("");
+      setFinishTime("");
       setOriginLatitude(undefined);
       setOriginLongitude(undefined);
       setDestinationLatitude(undefined);
@@ -651,6 +714,250 @@ export default function AddShipmentModal({
                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
                   {t("shipment.addModal.weightUnit")}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-1">
+              <label className="text-xs text-slate-600">
+                {t("shipment.addModal.cargoNetVolume")}
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  className="w-full rounded-xl border border-slate-200 pr-12 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  placeholder="0.0"
+                  value={cargoNetVolume}
+                  onChange={(e) => setCargoNetVolume(e.target.value)}
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                  M³
+                </span>
+              </div>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs text-slate-600">
+                {t("shipment.addModal.lwh")}
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    className="w-full rounded-xl border border-slate-200 pr-8 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                    placeholder="0.0"
+                    value={cargoLength}
+                    onChange={(e) => setCargoLength(e.target.value)}
+                  />
+                  <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                    L
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    className="w-full rounded-xl border border-slate-200 pr-8 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                    placeholder="0.0"
+                    value={cargoWidth}
+                    onChange={(e) => setCargoWidth(e.target.value)}
+                  />
+                  <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                    W
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    className="w-full rounded-xl border border-slate-200 pr-8 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                    placeholder="0.0"
+                    value={cargoHeight}
+                    onChange={(e) => setCargoHeight(e.target.value)}
+                  />
+                  <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                    H
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-1">
+              <label className="text-xs text-slate-600 flex items-center gap-1">
+                <Calendar className="size-3.5 text-slate-400" />
+                {t("shipment.addModal.startDate")}
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+                <input
+                  type="date"
+                  className="w-full rounded-xl border border-blue-200 bg-blue-50 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+              </div>
+              <div className="flex gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => handleStartDateQuickAction(3)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.daysFromNow", { days: 3 })}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartDateQuickAction(5)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.daysFromNow", { days: 5 })}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartDateQuickAction(7)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.daysFromNow", { days: 7 })}
+                </button>
+              </div>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs text-slate-600 flex items-center gap-1">
+                <Calendar className="size-3.5 text-slate-400" />
+                {t("shipment.addModal.finishDate")}
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+                <input
+                  type="date"
+                  className="w-full rounded-xl border border-blue-200 bg-blue-50 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  value={finishDate}
+                  onChange={(e) => setFinishDate(e.target.value)}
+                />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+              </div>
+              <div className="flex gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => handleFinishDateQuickAction(3)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.daysLater", { days: 3 })}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFinishDateQuickAction(5)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.daysLater", { days: 5 })}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFinishDateQuickAction(7)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.daysLater", { days: 7 })}
+                </button>
+              </div>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs text-slate-600 flex items-center gap-1">
+                <Clock className="size-3.5 text-slate-400" />
+                {t("shipment.addModal.startTime")}
+              </label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+                <input
+                  type="time"
+                  className="w-full rounded-xl border border-blue-200 bg-blue-50 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+              </div>
+              <div className="flex gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => handleStartTimeQuickAction(18)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time6PM")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartTimeQuickAction(12)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time12PM")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartTimeQuickAction(6)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time6AM")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartTimeQuickAction(0)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time12AM")}
+                </button>
+              </div>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs text-slate-600 flex items-center gap-1">
+                <Clock className="size-3.5 text-slate-400" />
+                {t("shipment.addModal.finishTime")}
+              </label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+                <input
+                  type="time"
+                  className="w-full rounded-xl border border-blue-200 bg-blue-50 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200"
+                  value={finishTime}
+                  onChange={(e) => setFinishTime(e.target.value)}
+                />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-blue-600 pointer-events-none" />
+              </div>
+              <div className="flex gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => handleFinishTimeQuickAction(18)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time6PM")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFinishTimeQuickAction(12)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time12PM")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFinishTimeQuickAction(6)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time6AM")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFinishTimeQuickAction(0)}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  {t("shipment.addModal.quickActions.time12AM")}
+                </button>
               </div>
             </div>
           </div>

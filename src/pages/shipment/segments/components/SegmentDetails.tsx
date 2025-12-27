@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import SegmentProgress from "./SegmentProgress";
-import {cn} from "../../../../shared/utils/cn";
+import { cn } from "../../../../shared/utils/cn";
 import CargoDeclarationModal, {
   type CargoCompany,
 } from "../../components/CargoDeclarationModal";
@@ -15,18 +15,18 @@ import FieldBoxSelect from "./fields/FieldBoxSelect";
 import DatePicker from "./fields/DatePicker";
 import TimePicker from "./fields/TimePicker";
 import BaseFeeField from "./fields/BaseFeeField";
-import {combineDateTime, splitDateTime} from "./utils/segmentDateTime";
+import { combineDateTime, splitDateTime } from "./utils/segmentDateTime";
 import SegmentActions from "./SegmentActions";
 import SegmentHeader from "./SegmentHeader";
 import SegmentInfoSummary from "./SegmentInfoSummary";
-import {StarRating} from "./StarRating";
-import type {Segment} from "../../../../shared/types/segmentData";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import type {Shipment} from "../../../../shared/types/shipment";
+import { StarRating } from "./StarRating";
+import type { Segment } from "../../../../shared/types/segmentData";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import type { Shipment } from "../../../../shared/types/shipment";
 import CargoAssignmentsList from "./CargoAssignmentsList";
-import {ShipmentLinkSection} from "./ShipmentLinkSection";
-import type {SegmentReadDto} from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
-import {useCompanies} from "../../../../services/company/hooks";
+import { ShipmentLinkSection } from "./ShipmentLinkSection";
+import type { SegmentReadDto } from "../../../../services/shipment/shipment.api.service"; // SegmentReadDto is now an alias for Segment
+import { useCompanies } from "../../../../services/company/hooks";
 import {
   useUpdateSegment,
   useSegmentAnnouncements,
@@ -41,18 +41,18 @@ import {
   computeSegmentPlace,
   computeSegmentNextPlace,
 } from "../../../../shared/utils/segmentHelpers";
-import {getCountryCode} from "../../../../shared/utils/countryCode";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
+import { getCountryCode } from "../../../../shared/utils/countryCode";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
 import {
   CHAT_RECIPIENT_TYPE,
   CHAT_ALERT_TYPE,
 } from "../../../../services/chat/chat.types";
-import {useTranslation} from "react-i18next";
-import {useCurrentUser} from "../../../../services/user/hooks";
-import {useCities} from "../../../../services/geography/hooks";
-import {MapPin} from "lucide-react";
-import {MapSelectionModal} from "../../components/MapSelectionModal";
+import { useTranslation } from "react-i18next";
+import { useCurrentUser } from "../../../../services/user/hooks";
+import { useCities } from "../../../../services/geography/hooks";
+import { MapPin } from "lucide-react";
+import { MapSelectionModal } from "../../components/MapSelectionModal";
 
 type DocumentItem = NonNullable<Segment["documents"]>[number];
 
@@ -87,6 +87,7 @@ type SegmentDetailsProps = {
   locked?: boolean;
   segmentId?: string;
   linkShipment?: boolean;
+  previousSegment?: Segment;
 };
 
 export function SegmentDetails({
@@ -101,6 +102,7 @@ export function SegmentDetails({
   locked = false,
   segmentId,
   linkShipment = false,
+  previousSegment,
 }: SegmentDetailsProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   // Use controlled state if provided, otherwise use internal state
@@ -115,8 +117,28 @@ export function SegmentDetails({
   const place = computeSegmentPlace(data);
   const nextPlace = computeSegmentNextPlace(data);
 
+  // Check if previous segment has destination and is in progress
+  const previousSegmentDestination = previousSegment
+    ? computeSegmentNextPlace(previousSegment)
+    : undefined;
+  const isPreviousSegmentInProgress =
+    previousSegment &&
+    previousSegment.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+    previousSegment.status !== SEGMENT_STATUS.CANCELLED &&
+    previousSegment.status !== SEGMENT_STATUS.DELIVERED &&
+    previousSegment.status !== undefined;
+  const shouldLockOrigin =
+    !!previousSegmentDestination &&
+    isPreviousSegmentInProgress &&
+    editable &&
+    data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT;
+
   const [toValue, setToValue] = useState<string>(nextPlace ?? "");
-  const [fromValue, setFromValue] = useState<string>(place);
+  const [fromValue, setFromValue] = useState<string>(
+    shouldLockOrigin && previousSegmentDestination
+      ? previousSegmentDestination
+      : place
+  );
 
   // Coordinate states
   const [originLatitude, setOriginLatitude] = useState<number | undefined>();
@@ -138,7 +160,7 @@ export function SegmentDetails({
   // Only fetch when segmentId exists AND both origin and destination are available
   const hasOrigin = place.trim().length > 0;
   const hasDestination = nextPlace !== undefined && nextPlace.trim().length > 0;
-  const {data: segmentRoute} = useSegmentRoute(segmentId || null, {
+  const { data: segmentRoute } = useSegmentRoute(segmentId || null, {
     enabled: !!segmentId && hasOrigin && hasDestination,
   });
 
@@ -189,7 +211,7 @@ export function SegmentDetails({
 
   const updateSegmentMutation = useUpdateSegment();
   const rateSegmentMutation = useRateSegment();
-  const {data: user} = useCurrentUser();
+  const { data: user } = useCurrentUser();
 
   // Get permissions array from user data
   const userRecord = user as Record<string, unknown> | undefined;
@@ -211,7 +233,23 @@ export function SegmentDetails({
     // 1. Segment ID changed (new segment selected)
     // 2. Key data fields actually changed (not just a refetch with same data)
     if (segmentChanged || dataChanged) {
-      setFromValue(place);
+      // Check if origin should be locked from previous segment
+      const prevSegmentDest = previousSegment
+        ? computeSegmentNextPlace(previousSegment)
+        : undefined;
+      const isPrevInProgress =
+        previousSegment &&
+        previousSegment.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
+        previousSegment.status !== SEGMENT_STATUS.CANCELLED &&
+        previousSegment.status !== SEGMENT_STATUS.DELIVERED &&
+        previousSegment.status !== undefined;
+      const shouldLock =
+        !!prevSegmentDest &&
+        isPrevInProgress &&
+        editable &&
+        data.status === SEGMENT_STATUS.PENDING_ASSIGNMENT;
+
+      setFromValue(shouldLock && prevSegmentDest ? prevSegmentDest : place);
       setToValue(nextPlace ?? "");
       const startAt =
         typeof data.estimatedStartTime === "string"
@@ -240,10 +278,14 @@ export function SegmentDetails({
     segmentId,
     place,
     nextPlace,
+    data,
     data.estimatedStartTime,
     data.estimatedFinishTime,
     data.baseFee,
     data.id,
+    data.status,
+    editable,
+    previousSegment,
   ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showCargoModal, setShowCargoModal] = useState(false);
@@ -252,7 +294,7 @@ export function SegmentDetails({
   );
 
   // Utility function to parse city and country from place string (format: "City, Country")
-  const parsePlace = (place: string): {city: string; country: string} => {
+  const parsePlace = (place: string): { city: string; country: string } => {
     const parts = place.split(",").map((p) => p.trim());
     if (parts.length >= 2) {
       return {
@@ -260,14 +302,14 @@ export function SegmentDetails({
         country: parts.slice(1).join(", ") || "",
       };
     }
-    return {city: place, country: ""};
+    return { city: place, country: "" };
   };
 
   // Fetch companies from API
-  const {data: companies = [], refetch: refetchCompanies} = useCompanies();
+  const { data: companies = [], refetch: refetchCompanies } = useCompanies();
 
   // Fetch cities from API
-  const {data: cities = []} = useCities();
+  const { data: cities = [] } = useCities();
 
   // Transform cities to "City, Country" format for select options
   const cityOptions = useMemo(() => {
@@ -276,14 +318,28 @@ export function SegmentDetails({
 
   // Initialize coordinates from segment data first, then fall back to segment route if available
   useEffect(() => {
-    // First, try to read from segment data (from server)
-    if (data.originLatitude != null && data.originLongitude != null) {
-      setOriginLatitude(Number(data.originLatitude));
-      setOriginLongitude(Number(data.originLongitude));
-    } else if (segmentRoute?.originLatitude && segmentRoute?.originLongitude) {
-      // Fall back to segment route if not in segment data
-      setOriginLatitude(Number(segmentRoute.originLatitude));
-      setOriginLongitude(Number(segmentRoute.originLongitude));
+    // If origin is locked from previous segment, use previous segment's destination coordinates
+    if (shouldLockOrigin && previousSegment) {
+      if (
+        previousSegment.destinationLatitude != null &&
+        previousSegment.destinationLongitude != null
+      ) {
+        setOriginLatitude(Number(previousSegment.destinationLatitude));
+        setOriginLongitude(Number(previousSegment.destinationLongitude));
+      }
+    } else {
+      // First, try to read from segment data (from server)
+      if (data.originLatitude != null && data.originLongitude != null) {
+        setOriginLatitude(Number(data.originLatitude));
+        setOriginLongitude(Number(data.originLongitude));
+      } else if (
+        segmentRoute?.originLatitude &&
+        segmentRoute?.originLongitude
+      ) {
+        // Fall back to segment route if not in segment data
+        setOriginLatitude(Number(segmentRoute.originLatitude));
+        setOriginLongitude(Number(segmentRoute.originLongitude));
+      }
     }
 
     if (data.destinationLatitude != null && data.destinationLongitude != null) {
@@ -303,6 +359,8 @@ export function SegmentDetails({
     data.destinationLatitude,
     data.destinationLongitude,
     segmentRoute,
+    shouldLockOrigin,
+    previousSegment,
   ]);
 
   // Clear coordinates when origin field is cleared
@@ -334,6 +392,10 @@ export function SegmentDetails({
   // Handle origin field change - clear coordinates if city selected from list
   const handleFromChange = useCallback(
     (value: string) => {
+      // Don't allow changes if origin is locked from previous segment
+      if (shouldLockOrigin) {
+        return;
+      }
       setFromValue(value);
       // If the value matches a city from the list, clear coordinates
       if (value.trim() && isCityFromList(value)) {
@@ -341,7 +403,7 @@ export function SegmentDetails({
         setOriginLongitude(undefined);
       }
     },
-    [isCityFromList]
+    [isCityFromList, shouldLockOrigin]
   );
 
   // Handle destination field change - clear coordinates if city selected from list
@@ -401,7 +463,7 @@ export function SegmentDetails({
   }, [showCargoModal, refetchCompanies]);
 
   // Fetch segment announcements when hasPendingAnnouncements is true or when cargo modal is open
-  const {data: announcements = []} = useSegmentAnnouncements(
+  const { data: announcements = [] } = useSegmentAnnouncements(
     (data.hasPendingAnnouncements || showCargoModal) && segmentId
       ? segmentId
       : null
@@ -412,7 +474,7 @@ export function SegmentDetails({
     return announcements.map((announcement) => announcement.companyId);
   }, [announcements]);
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   // Use chat hook for driver chat (for alert sending)
   const chatHook = useChatWithRecipient({
@@ -445,15 +507,10 @@ export function SegmentDetails({
   const handleRatingSubmit = async (rating: number) => {
     if (!segmentId) return;
 
-    try {
-      await rateSegmentMutation.mutateAsync({
-        id: segmentId,
-        rating,
-      });
-      // The mutation will automatically invalidate and refetch segments
-    } catch (error) {
-      throw error; // Re-throw so StarRating can handle it
-    }
+    await rateSegmentMutation.mutateAsync({
+      id: segmentId,
+      rating,
+    });
   };
 
   // Track if the segment form has been saved (to show "Cargo Declaration" button)
@@ -555,6 +612,7 @@ export function SegmentDetails({
           }
         }}
         isAssigned={isAssigned}
+        previousSegmentDestination={previousSegmentDestination}
       />
 
       {data.status !== SEGMENT_STATUS.PENDING_ASSIGNMENT &&
@@ -647,13 +705,13 @@ export function SegmentDetails({
                     value={fromValue}
                     onChange={handleFromChange}
                     options={cityOptions}
-                    disabled={!hasSegmentsManage}
+                    disabled={!hasSegmentsManage || shouldLockOrigin}
                   />
                   <button
                     type="button"
                     className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => handleOpenMapModal("from")}
-                    disabled={!hasSegmentsManage}
+                    disabled={!hasSegmentsManage || shouldLockOrigin}
                   >
                     <MapPin className="size-4" />
                     <span>{t("shipment.addModal.selectFromMap")}</span>
@@ -731,6 +789,10 @@ export function SegmentDetails({
                 <SegmentActions
                   readOnly={locked || !editable || !hasSegmentsManage}
                   onReset={() => {
+                    // Don't reset origin if it's locked from previous segment
+                    if (!shouldLockOrigin) {
+                      setFromValue(place);
+                    }
                     setToValue("");
                     setStartDateValue("");
                     setStartTimeValue("");
@@ -773,37 +835,31 @@ export function SegmentDetails({
                       // Call API if segmentId is provided
                       let apiResponse: SegmentReadDto | null = null;
                       if (segmentId) {
-                        try {
-                          const fromPlace = parsePlace(fromValue.trim());
-                          const toPlace = parsePlace(toValue.trim());
-                          const updatePayload = {
-                            originCity: fromPlace.city,
-                            originCountry: fromPlace.country,
-                            destinationCity: toPlace.city,
-                            destinationCountry: toPlace.country,
-                            estimatedStartTime: combineDateTime(
-                              startDateValue.trim(),
-                              startTimeValue.trim()
-                            ),
-                            estimatedFinishTime: combineDateTime(
-                              estFinishDateValue.trim(),
-                              estFinishTimeValue.trim()
-                            ),
-                            baseFee: baseFeeNum ?? undefined,
-                            originLongitude,
-                            originLatitude,
-                            destinationLongitude,
-                            destinationLatitude,
-                          };
-                          apiResponse = await updateSegmentMutation.mutateAsync(
-                            {
-                              id: segmentId,
-                              data: updatePayload,
-                            }
-                          );
-                        } catch (apiError) {
-                          throw apiError; // Re-throw to be caught by outer catch
-                        }
+                        const fromPlace = parsePlace(fromValue.trim());
+                        const toPlace = parsePlace(toValue.trim());
+                        const updatePayload = {
+                          originCity: fromPlace.city,
+                          originCountry: fromPlace.country,
+                          destinationCity: toPlace.city,
+                          destinationCountry: toPlace.country,
+                          estimatedStartTime: combineDateTime(
+                            startDateValue.trim(),
+                            startTimeValue.trim()
+                          ),
+                          estimatedFinishTime: combineDateTime(
+                            estFinishDateValue.trim(),
+                            estFinishTimeValue.trim()
+                          ),
+                          baseFee: baseFeeNum ?? undefined,
+                          originLongitude,
+                          originLatitude,
+                          destinationLongitude,
+                          destinationLatitude,
+                        };
+                        apiResponse = await updateSegmentMutation.mutateAsync({
+                          id: segmentId,
+                          data: updatePayload,
+                        });
                       }
 
                       // Use API response if available, otherwise use local update
@@ -842,7 +898,7 @@ export function SegmentDetails({
                       if (open) {
                         handleToggle();
                       }
-                    } catch (error) {
+                    } catch {
                       // Still call onSave for local state update even if API fails
                       const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
                       onSave?.({
@@ -895,37 +951,31 @@ export function SegmentDetails({
                       // Call API if segmentId is provided
                       let apiResponse: SegmentReadDto | null = null;
                       if (segmentId) {
-                        try {
-                          const fromPlace = parsePlace(fromValue.trim());
-                          const toPlace = parsePlace(toValue.trim());
-                          const updatePayload = {
-                            originCity: fromPlace.city,
-                            originCountry: fromPlace.country,
-                            destinationCity: toPlace.city,
-                            destinationCountry: toPlace.country,
-                            estimatedStartTime: combineDateTime(
-                              startDateValue.trim(),
-                              startTimeValue.trim()
-                            ),
-                            estimatedFinishTime: combineDateTime(
-                              estFinishDateValue.trim(),
-                              estFinishTimeValue.trim()
-                            ),
-                            baseFee: baseFeeNum ?? undefined,
-                            originLongitude: Number(originLongitude),
-                            originLatitude: Number(originLatitude),
-                            destinationLongitude: Number(destinationLongitude),
-                            destinationLatitude: Number(destinationLatitude),
-                          };
-                          apiResponse = await updateSegmentMutation.mutateAsync(
-                            {
-                              id: segmentId,
-                              data: updatePayload,
-                            }
-                          );
-                        } catch (apiError) {
-                          throw apiError; // Re-throw to be caught by outer catch
-                        }
+                        const fromPlace = parsePlace(fromValue.trim());
+                        const toPlace = parsePlace(toValue.trim());
+                        const updatePayload = {
+                          originCity: fromPlace.city,
+                          originCountry: fromPlace.country,
+                          destinationCity: toPlace.city,
+                          destinationCountry: toPlace.country,
+                          estimatedStartTime: combineDateTime(
+                            startDateValue.trim(),
+                            startTimeValue.trim()
+                          ),
+                          estimatedFinishTime: combineDateTime(
+                            estFinishDateValue.trim(),
+                            estFinishTimeValue.trim()
+                          ),
+                          baseFee: baseFeeNum ?? undefined,
+                          originLongitude: Number(originLongitude),
+                          originLatitude: Number(originLatitude),
+                          destinationLongitude: Number(destinationLongitude),
+                          destinationLatitude: Number(destinationLatitude),
+                        };
+                        apiResponse = await updateSegmentMutation.mutateAsync({
+                          id: segmentId,
+                          data: updatePayload,
+                        });
                       }
 
                       // Use API response if available, otherwise use local update
@@ -961,7 +1011,7 @@ export function SegmentDetails({
                         setPendingUpdate(update);
                       }
                       setShowCargoModal(true);
-                    } catch (error) {
+                    } catch {
                       // Still proceed with cargo modal even if API fails
                       const baseFeeNum = baseFee ? parseFloat(baseFee) : null;
                       setPendingUpdate({

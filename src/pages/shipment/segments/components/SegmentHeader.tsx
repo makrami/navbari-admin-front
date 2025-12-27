@@ -10,21 +10,21 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
-import {cn} from "../../../../shared/utils/cn";
-import {formatDistance} from "../../../../shared/utils/segmentHelpers";
-import {SEGMENT_STATUS} from "../../../../services/shipment/shipment.api.service";
-import {DriverInfo} from "../../../../shared/components/DriverInfo";
-import {useChatWithRecipient} from "../../../../shared/hooks/useChatWithRecipient";
-import {ChatOverlay} from "../../../../shared/components/ChatOverlay";
-import {CHAT_RECIPIENT_TYPE} from "../../../../services/chat/chat.types";
-import {DEFAULT_ACTIONABLE_ALERTS} from "../../../../shared/constants/actionableAlerts";
-import {useTranslation} from "react-i18next";
-import {useState, useRef, useEffect} from "react";
+import { cn } from "../../../../shared/utils/cn";
+import { formatDistance } from "../../../../shared/utils/segmentHelpers";
+import { SEGMENT_STATUS } from "../../../../services/shipment/shipment.api.service";
+import { DriverInfo } from "../../../../shared/components/DriverInfo";
+import { useChatWithRecipient } from "../../../../shared/hooks/useChatWithRecipient";
+import { ChatOverlay } from "../../../../shared/components/ChatOverlay";
+import { CHAT_RECIPIENT_TYPE } from "../../../../services/chat/chat.types";
+import { DEFAULT_ACTIONABLE_ALERTS } from "../../../../shared/constants/actionableAlerts";
+import { useTranslation } from "react-i18next";
+import { useState, useRef, useEffect } from "react";
 import {
   useDeleteSegment,
   useCancelSegment,
 } from "../../../../services/shipment/hooks";
-import {useCurrentUser} from "../../../../services/user/hooks";
+import { useCurrentUser } from "../../../../services/user/hooks";
 
 type SegmentHeaderProps = {
   order: number;
@@ -50,6 +50,7 @@ type SegmentHeaderProps = {
   showCargoButton: boolean;
   onCargoClick: (e: React.MouseEvent) => void;
   isAssigned?: boolean;
+  previousSegmentDestination?: string;
 };
 
 export default function SegmentHeader({
@@ -75,15 +76,16 @@ export default function SegmentHeader({
   showCargoButton,
   onCargoClick,
   isAssigned = false,
+  previousSegmentDestination,
 }: SegmentHeaderProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const deleteSegmentMutation = useDeleteSegment();
   const cancelSegmentMutation = useCancelSegment();
-  const {data: user} = useCurrentUser();
+  const { data: user } = useCurrentUser();
 
   // Get permissions array from user data
   const userRecord = user as Record<string, unknown> | undefined;
@@ -223,6 +225,8 @@ export default function SegmentHeader({
         <span className="text-sm font-bold text-slate-900 ">
           {originCity && originCity.trim()
             ? originCity + ", " + originCountry
+            : previousSegmentDestination
+            ? previousSegmentDestination
             : t("segments.cardHeader.notAssigned")}
         </span>
         <ArrowRight className="size-3.5 text-slate-400" />
