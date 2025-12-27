@@ -1,5 +1,5 @@
-import {Button} from "./Button";
-import {cn} from "../../utils/cn";
+import { Button } from "./Button";
+import { cn } from "../../utils/cn";
 import {
   Truck as TruckIcon,
   X as XIcon,
@@ -8,10 +8,10 @@ import {
   Calendar as CalendarIcon,
   User as UserIcon,
 } from "lucide-react";
-import {STATUS_TO_COLOR} from "./entity-card-constants";
-import type {EntityStatus} from "./entity-card-constants";
-import {useTranslation} from "react-i18next";
-import {DriverInfo} from "../DriverInfo";
+import { STATUS_TO_COLOR } from "./entity-card-constants";
+import type { EntityStatus } from "./entity-card-constants";
+import { useTranslation } from "react-i18next";
+import { DriverInfo } from "../DriverInfo";
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -81,7 +81,7 @@ export function EntityCard({
   onView,
   actionLabels,
 }: Props) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const colors = STATUS_TO_COLOR[entity.status];
 
   const defaultActionLabels = {
@@ -91,7 +91,7 @@ export function EntityCard({
     viewDetailsLabel: t("entityCard.actions.viewDetails"),
   };
 
-  const finalActionLabels = {...defaultActionLabels, ...actionLabels};
+  const finalActionLabels = { ...defaultActionLabels, ...actionLabels };
 
   return (
     <div
@@ -124,8 +124,18 @@ export function EntityCard({
                 className={cn("size-8 rounded-full object-cover flex-shrink-0")}
               />
             ) : (
-              <div className={cn("h-8 w-8 rounded-full bg-slate-200 grid place-items-center flex-shrink-0", selected ? "bg-white/20" : "bg-slate-200")}>
-                <UserIcon className={cn("size-4", selected ? "text-white" : "text-slate-500")} />
+              <div
+                className={cn(
+                  "h-8 w-8 rounded-full bg-slate-200 grid place-items-center flex-shrink-0",
+                  selected ? "bg-white/20" : "bg-slate-200"
+                )}
+              >
+                <UserIcon
+                  className={cn(
+                    "size-4",
+                    selected ? "text-white" : "text-slate-500"
+                  )}
+                />
               </div>
             )}
             <div className="flex flex-col gap-1 min-w-0">
